@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.react-flow__minimap {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.react-flow__edge-path {
+  stroke: #334155;
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: #64748b;
+  border: 2px solid white;
+}
+
+.noodle-node.selected .react-flow__handle {
+  opacity: 1;
+}
+
+.react-flow__handle {
+  opacity: 0;
+}
+
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle {
+  opacity: 1;
+}
