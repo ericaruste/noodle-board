@@ -1,0 +1,41 @@
+{
+  "project": "Noodle Board",
+  "projectDescription": "Whiteboard MVP (sticky notes, images, noodles) on @xyflow/react. Local tickets in /tickets are the source of truth for title, description, labels, priority, and parent; sync with npm run tickets:push.",
+  "labels": [
+    {
+      "name": "Epic",
+      "color": "#5E6AD2",
+      "description": "Parent issue that groups child tickets"
+    },
+    {
+      "name": "Bug",
+      "color": "#EB5757",
+      "description": "Broken or missing interaction in the current MVP"
+    },
+    {
+      "name": "Feature",
+      "color": "#4CB782",
+      "description": "New capability"
+    },
+    {
+      "name": "UX",
+      "color": "#BB87FC",
+      "description": "Visual and interaction chrome"
+    },
+    {
+      "name": "Canvas",
+      "color": "#F2C94C",
+      "description": "Nodes, edges, handles, guides"
+    },
+    {
+      "name": "Toolbar",
+      "color": "#56CCF2",
+      "description": "Primary action bar and tools"
+    },
+    {
+      "name": "Persistence",
+      "color": "#F2994A",
+      "description": "Local files, import/export, recents"
+    }
+  ]
+}

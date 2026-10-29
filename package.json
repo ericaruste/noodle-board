@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tickets:dry-run": "node scripts/linear-sync.mjs dry-run",
+    "tickets:push": "node scripts/linear-sync.mjs push",
+    "tickets:pull-status": "node scripts/linear-sync.mjs pull-status"
   },
   "dependencies": {
     "@xyflow/react": "^12.6.0",
@@ -14,6 +17,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@linear/sdk": "^96.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
