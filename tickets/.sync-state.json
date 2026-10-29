@@ -1,0 +1,95 @@
+{
+  "teamId": "40b0ee33-ac8d-424a-9f03-42a88914509a",
+  "projectId": "501fb1a8-3853-48a7-9e7c-72a0afae5dea",
+  "labels": {
+    "Epic": "8568501d-ebe1-4795-9907-4f755cac9247",
+    "Bug": "a8471029-a761-40ea-8274-c77473bba812",
+    "Feature": "e816a2e6-0016-4dc2-83ce-b144783f22fe",
+    "UX": "4edcbbfa-3b11-455a-9d01-ceff11f1f059",
+    "Canvas": "e2ab3662-65be-467e-8ed4-3f55c30d668c",
+    "Toolbar": "e6406a27-2722-46ec-9337-c9ec7307e903",
+    "Persistence": "5b5b268f-f9bc-4ea9-86cd-cae0d69e90c4"
+  },
+  "issues": {
+    "NB-E1": {
+      "id": "2b7ab5ab-d19b-4ca7-bbdc-12650baad001",
+      "identifier": "ERI-5",
+      "url": "https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality"
+    },
+    "NB-E2": {
+      "id": "d5a80ee4-000b-4266-8a0d-2dba8b7bf8ae",
+      "identifier": "ERI-6",
+      "url": "https://linear.app/ericar/issue/ERI-6/local-project-files"
+    },
+    "NB-E3": {
+      "id": "ff3173f1-c3c9-40eb-a81e-f2560fecbb5c",
+      "identifier": "ERI-7",
+      "url": "https://linear.app/ericar/issue/ERI-7/new-canvas-objects"
+    },
+    "NB-E4": {
+      "id": "047e44bf-2fb3-496a-99d8-51999925d2e0",
+      "identifier": "ERI-8",
+      "url": "https://linear.app/ericar/issue/ERI-8/uiux-chrome"
+    },
+    "NB-01": {
+      "id": "d219a120-54c2-4367-8dbf-546b1e207471",
+      "identifier": "ERI-9",
+      "url": "https://linear.app/ericar/issue/ERI-9/keep-noodles-visible-above-image-nodes"
+    },
+    "NB-02": {
+      "id": "53fadbb7-3da3-44ba-b758-a6c225cf8ddd",
+      "identifier": "ERI-10",
+      "url": "https://linear.app/ericar/issue/ERI-10/make-sticky-and-image-resize-targets-usable"
+    },
+    "NB-03": {
+      "id": "29dafc6d-809e-4ec3-b78f-4c719fc17c70",
+      "identifier": "ERI-11",
+      "url": "https://linear.app/ericar/issue/ERI-11/detach-and-reconnect-noodles-by-dragging-endpoints"
+    },
+    "NB-04": {
+      "id": "deaf7f07-9c92-4d87-acc5-183332d67d5a",
+      "identifier": "ERI-12",
+      "url": "https://linear.app/ericar/issue/ERI-12/define-noodlejson-and-exportsave-project"
+    },
+    "NB-05": {
+      "id": "81f253f4-e859-40d9-947b-44f7817c30b3",
+      "identifier": "ERI-13",
+      "url": "https://linear.app/ericar/issue/ERI-13/importopen-a-local-project-file"
+    },
+    "NB-06": {
+      "id": "4a51337b-38a9-40fa-842e-7a4ba0bc43a8",
+      "identifier": "ERI-14",
+      "url": "https://linear.app/ericar/issue/ERI-14/recent-projects-list-and-reopen"
+    },
+    "NB-07": {
+      "id": "652db3c5-3b13-4cbe-a574-7aabec2946cf",
+      "identifier": "ERI-15",
+      "url": "https://linear.app/ericar/issue/ERI-15/add-text-objects"
+    },
+    "NB-08": {
+      "id": "1de82faa-1238-4967-9adc-2bef0aa6424b",
+      "identifier": "ERI-16",
+      "url": "https://linear.app/ericar/issue/ERI-16/add-shape-objects"
+    },
+    "NB-09": {
+      "id": "6b0a4277-3d44-4ebe-bdc4-9f4bbed7575f",
+      "identifier": "ERI-17",
+      "url": "https://linear.app/ericar/issue/ERI-17/add-arrowconnector-tool"
+    },
+    "NB-10": {
+      "id": "6222756f-733f-4464-88cd-bbda1e25f62e",
+      "identifier": "ERI-18",
+      "url": "https://linear.app/ericar/issue/ERI-18/frosted-glass-navigation-containers"
+    },
+    "NB-11": {
+      "id": "58dc4903-8d77-4747-9fd4-4dc98f2ac0cb",
+      "identifier": "ERI-19",
+      "url": "https://linear.app/ericar/issue/ERI-19/bottom-center-icon-toolbar"
+    },
+    "NB-12": {
+      "id": "94f381d4-f0a0-4352-82f7-b494dbea2f10",
+      "identifier": "ERI-20",
+      "url": "https://linear.app/ericar/issue/ERI-20/smart-alignment-guides-while-dragging"
+    }
+  }
+}

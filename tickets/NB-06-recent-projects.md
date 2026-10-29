@@ -7,8 +7,8 @@ labels: [Feature, Persistence]
 parent: NB-E2
 blockedBy: [NB-04]
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-14
+linear_url: https://linear.app/ericar/issue/ERI-14/recent-projects-list-and-reopen
 ---
 
 ## Context

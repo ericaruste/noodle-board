@@ -7,8 +7,8 @@ labels: [Feature, Canvas, Toolbar]
 parent: NB-E3
 blockedBy: [NB-01]
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-17
+linear_url: https://linear.app/ericar/issue/ERI-17/add-arrowconnector-tool
 ---
 
 ## Context

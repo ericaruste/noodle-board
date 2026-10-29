@@ -6,8 +6,8 @@ priority: 3
 labels: [UX, Canvas]
 parent: NB-E4
 estimate: 5
-linear_id:
-linear_url:
+linear_id: ERI-20
+linear_url: https://linear.app/ericar/issue/ERI-20/smart-alignment-guides-while-dragging
 ---
 
 ## Context

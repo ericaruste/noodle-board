@@ -6,8 +6,8 @@ priority: 2
 labels: [Feature, Persistence]
 parent: NB-E2
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-12
+linear_url: https://linear.app/ericar/issue/ERI-12/define-noodlejson-and-exportsave-project
 ---
 
 ## Context

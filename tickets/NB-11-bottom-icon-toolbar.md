@@ -6,8 +6,8 @@ priority: 2
 labels: [UX, Toolbar]
 parent: NB-E4
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-19
+linear_url: https://linear.app/ericar/issue/ERI-19/bottom-center-icon-toolbar
 ---
 
 ## Context

@@ -5,8 +5,8 @@ status: Todo
 priority: 3
 labels: [Epic, Canvas, Feature]
 estimate: 13
-linear_id:
-linear_url:
+linear_id: ERI-7
+linear_url: https://linear.app/ericar/issue/ERI-7/new-canvas-objects
 ---
 
 ## Context

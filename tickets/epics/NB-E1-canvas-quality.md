@@ -5,8 +5,8 @@ status: Todo
 priority: 2
 labels: [Epic, Canvas]
 estimate: 8
-linear_id:
-linear_url:
+linear_id: ERI-5
+linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 ---
 
 ## Context

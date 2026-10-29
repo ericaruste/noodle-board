@@ -6,8 +6,8 @@ priority: 3
 labels: [Feature, Canvas]
 parent: NB-E3
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-15
+linear_url: https://linear.app/ericar/issue/ERI-15/add-text-objects
 ---
 
 ## Context

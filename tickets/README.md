@@ -100,8 +100,19 @@ From the repo root (Node 18+):
 
 ```bash
 npm run tickets:dry-run      # parse + validate, no API calls
+npm run tickets:status       # list every ticket (add -- --json for JSON)
+npm run tickets:next         # recommend the next unblocked ticket
 npm run tickets:push         # bootstrap project/labels, create or update issues
 npm run tickets:pull-status  # copy Linear workflow state into local status
+npm run tickets:sync         # pull remote statuses if already synced, then push
+```
+
+Other CLI (used by `/ticket`):
+
+```bash
+node scripts/linear-sync.mjs get NB-01
+node scripts/linear-sync.mjs set-status NB-01 "In Progress" --push
+node scripts/linear-sync.mjs status --json
 ```
 
 **Push** (idempotent):

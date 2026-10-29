@@ -6,8 +6,8 @@ priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-9
+linear_url: https://linear.app/ericar/issue/ERI-9/keep-noodles-visible-above-image-nodes
 ---
 
 ## Context

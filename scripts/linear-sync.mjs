@@ -2,7 +2,7 @@
 /**
  * Sync tickets/*.md to a Linear workspace.
  *
- * Commands: dry-run | push | pull-status
+ * Commands: dry-run | status | next | get | set-status | push | pull-status | sync
  * Auth: LINEAR_API_KEY in .env (no Bearer prefix; @linear/sdk handles the header).
  */
 import fs from "node:fs";
@@ -19,18 +19,33 @@ const PRIORITY_LABELS = { 0: "none", 1: "urgent", 2: "high", 3: "medium", 4: "lo
 
 loadEnv(path.join(ROOT, ".env"));
 
-const command = process.argv[2] ?? "help";
+const argv = process.argv.slice(2);
+const command = argv[0] ?? "help";
+const flags = new Set(argv.filter((arg) => arg.startsWith("--")));
+const positional = argv.filter((arg) => !arg.startsWith("--"));
+const wantJson = flags.has("--json");
 
 try {
   if (command === "dry-run") await dryRun();
-  else if (command === "push") await push();
+  else if (command === "status") await statusCommand();
+  else if (command === "next") await nextCommand();
+  else if (command === "get") await getCommand(positional[1]);
+  else if (command === "set-status") {
+    await setStatusCommand(positional[1], positional.slice(2).join(" "), flags.has("--push"));
+  } else if (command === "push") await push();
   else if (command === "pull-status") await pullStatus();
+  else if (command === "sync") await syncCommand();
   else {
-    console.log(`Usage: node scripts/linear-sync.mjs <dry-run|push|pull-status>
+    console.log(`Usage: node scripts/linear-sync.mjs <command> [args] [--json] [--push]
 
-  dry-run       Parse and validate local tickets (no API calls)
-  push          Bootstrap project/labels, create or update issues, write IDs back
-  pull-status   Copy Linear workflow state into local frontmatter status
+  dry-run                 Parse and validate local tickets (no API calls)
+  status                  List every ticket
+  next                    Recommend the next unblocked ticket
+  get <id>                Print one ticket (file, frontmatter, body)
+  set-status <id> <name>  Write local status; add --push to update Linear
+  push                    Bootstrap project/labels, create or update issues
+  pull-status             Copy Linear workflow state into local status
+  sync                    Pull remote statuses (if already synced), then push
 `);
     process.exit(command === "help" || command === "--help" ? 0 : 1);
   }
@@ -232,6 +247,89 @@ function sortForPush(tickets) {
   });
 }
 
+function normalizeId(raw) {
+  if (raw == null || String(raw).trim() === "") return "";
+  const value = String(raw).trim().toUpperCase();
+  const epic = value.match(/^(?:NB-)?E(\d+)$/);
+  if (epic) return `NB-E${epic[1]}`;
+  const issue = value.match(/^(?:NB-)?(\d+)$/);
+  if (issue) return `NB-${issue[1].padStart(2, "0")}`;
+  return value;
+}
+
+function isClosed(status) {
+  return /^(done|canceled|cancelled)$/i.test(String(status).trim());
+}
+
+function isInProgress(status) {
+  return /^in progress$/i.test(String(status).trim());
+}
+
+function unfinishedBlockers(ticket, byId) {
+  return ticket.blockedBy.filter((id) => {
+    const blocker = byId.get(id);
+    return !blocker || !isClosed(blocker.status);
+  });
+}
+
+function summarizeTicket(ticket, byId) {
+  const blockers = unfinishedBlockers(ticket, byId);
+  return {
+    id: ticket.id,
+    title: ticket.title,
+    status: ticket.status,
+    priority: ticket.priority,
+    labels: ticket.labels,
+    parent: ticket.parent,
+    blockedBy: ticket.blockedBy,
+    blocked: blockers.length > 0,
+    unfinishedBlockers: blockers,
+    linear_id: ticket.linearId,
+    linear_url: ticket.linearUrl,
+    file: rel(ticket.filePath),
+    isEpic: ticket.isEpic,
+  };
+}
+
+function pickNext(tickets, byId, config) {
+  const order = Array.isArray(config.buildOrder) ? config.buildOrder : [];
+  const inProgress = tickets.filter(
+    (ticket) => !ticket.isEpic && isInProgress(ticket.status) && unfinishedBlockers(ticket, byId).length === 0,
+  );
+  if (inProgress.length) {
+    for (const id of order) {
+      const match = inProgress.find((ticket) => ticket.id === id);
+      if (match) return { ticket: match, reason: "already In Progress" };
+    }
+    return { ticket: inProgress[0], reason: "already In Progress" };
+  }
+
+  for (const id of order) {
+    const ticket = byId.get(id);
+    if (!ticket || ticket.isEpic) continue;
+    if (isClosed(ticket.status)) continue;
+    if (unfinishedBlockers(ticket, byId).length) continue;
+    return { ticket, reason: "first unblocked in buildOrder" };
+  }
+
+  const rest = tickets
+    .filter((ticket) => !ticket.isEpic && !isClosed(ticket.status) && unfinishedBlockers(ticket, byId).length === 0)
+    .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+  if (rest[0]) return { ticket: rest[0], reason: "first unblocked remaining ticket" };
+  return { ticket: null, reason: "no unblocked tickets remaining" };
+}
+
+function findTicket(byId, rawId) {
+  const id = normalizeId(rawId);
+  if (!id) throw new Error("Missing ticket id (example: NB-01)");
+  const ticket = byId.get(id);
+  if (!ticket) {
+    const known = [...byId.keys()].join(", ");
+    throw new Error(`Unknown ticket "${rawId}" (normalized ${id}). Known: ${known}`);
+  }
+  return ticket;
+}
+
 async function dryRun() {
   const { tickets } = loadTickets();
   const epics = tickets.filter((ticket) => ticket.isEpic);
@@ -334,9 +432,11 @@ async function resolveLabels(client, config) {
       description: spec.description ?? "",
     });
     if (!payload.success) throw new Error(`Failed to create label "${spec.name}"`);
-    const label = await payload.label;
-    resolved[spec.name] = label.id;
-    byName.set(spec.name, label);
+    const label = await payload.issueLabel;
+    const labelId = payload.issueLabelId ?? label?.id;
+    if (!labelId) throw new Error(`Failed to create label "${spec.name}": Linear returned no id`);
+    resolved[spec.name] = labelId;
+    if (label) byName.set(spec.name, label);
     console.log(`Created label: ${spec.name}`);
   }
   return resolved;
@@ -439,6 +539,9 @@ async function push() {
       const payload = await client.createIssue(input);
       if (!payload.success) throw new Error(`Failed to create ${ticket.id}`);
       issue = await payload.issue;
+      if (!issue?.id && payload.issueId) {
+        issue = await client.issue(payload.issueId);
+      }
       if (!issue?.id || !issue.identifier) {
         throw new Error(`Failed to create ${ticket.id}: Linear returned no issue`);
       }
@@ -526,4 +629,162 @@ async function pullStatus() {
   }
 
   console.log(`\nPull-status complete. Updated ${updated}, skipped ${skipped}.`);
+  return { updated, skipped };
+}
+
+function emit(value) {
+  if (wantJson) console.log(JSON.stringify(value, null, 2));
+}
+
+async function statusCommand() {
+  const { tickets, byId, config } = loadTickets();
+  const rows = sortForPush(tickets).map((ticket) => summarizeTicket(ticket, byId));
+  const next = pickNext(tickets, byId, config);
+  if (wantJson) {
+    emit({ tickets: rows, next: next.ticket ? next.ticket.id : null, nextReason: next.reason });
+    return;
+  }
+  const idW = Math.max(6, ...rows.map((row) => row.id.length));
+  const stW = Math.max(6, ...rows.map((row) => row.status.length));
+  console.log(
+    `${"ID".padEnd(idW)}  ${"STATUS".padEnd(stW)}  P  BLOCKED  LINEAR     TITLE`,
+  );
+  for (const row of rows) {
+    const blocked = row.isEpic ? "-" : row.blocked ? "yes" : "no";
+    const linear = row.linear_id ?? "-";
+    console.log(
+      `${row.id.padEnd(idW)}  ${row.status.padEnd(stW)}  ${row.priority}  ${blocked.padEnd(7)}  ${linear.padEnd(9)}  ${row.title}`,
+    );
+  }
+  const nextLine = next.ticket
+    ? `${next.ticket.id} — ${next.ticket.title} (${next.reason})`
+    : next.reason;
+  console.log(`\nNext: ${nextLine}`);
+}
+
+async function nextCommand() {
+  const { tickets, byId, config } = loadTickets();
+  const next = pickNext(tickets, byId, config);
+  if (!next.ticket) {
+    if (wantJson) {
+      emit({ id: null, reason: next.reason });
+      return;
+    }
+    console.log(next.reason);
+    return;
+  }
+  const summary = summarizeTicket(next.ticket, byId);
+  if (wantJson) {
+    emit({ ...summary, reason: next.reason });
+    return;
+  }
+  console.log(`${summary.id}  ${summary.title}`);
+  console.log(`status: ${summary.status}  priority: ${summary.priority}  file: ${summary.file}`);
+  console.log(`reason: ${next.reason}`);
+  if (summary.blockedBy.length) console.log(`blockedBy: ${summary.blockedBy.join(", ")}`);
+  if (summary.linear_url) console.log(summary.linear_url);
+}
+
+async function getCommand(rawId) {
+  const { byId } = loadTickets();
+  const ticket = findTicket(byId, rawId);
+  const summary = summarizeTicket(ticket, byId);
+  if (wantJson) {
+    emit({ ...summary, body: ticket.body });
+    return;
+  }
+  console.log(`file: ${summary.file}`);
+  console.log(`id: ${summary.id}`);
+  console.log(`title: ${summary.title}`);
+  console.log(`status: ${summary.status}`);
+  console.log(`priority: ${summary.priority}`);
+  console.log(`labels: ${summary.labels.join(", ")}`);
+  if (summary.parent) console.log(`parent: ${summary.parent}`);
+  if (summary.blockedBy.length) {
+    console.log(
+      `blockedBy: ${summary.blockedBy.join(", ")}${summary.blocked ? ` (unfinished: ${summary.unfinishedBlockers.join(", ")})` : ""}`,
+    );
+  }
+  if (summary.linear_id) console.log(`linear_id: ${summary.linear_id}`);
+  if (summary.linear_url) console.log(`linear_url: ${summary.linear_url}`);
+  console.log("");
+  process.stdout.write(ticket.body);
+}
+
+function writeTicketStatus(ticket, status) {
+  const nextRaw = setFrontmatterFields(ticket.raw, { status });
+  fs.writeFileSync(ticket.filePath, nextRaw, "utf8");
+  ticket.raw = nextRaw;
+  ticket.status = status;
+}
+
+async function pushOneStatus(ticket, status) {
+  const client = await linearClient();
+  const state = readState();
+  const record = state.issues[ticket.id];
+  const identifier = ticket.linearId || record?.identifier;
+  if (!identifier && !record?.id) {
+    console.log(`No Linear id for ${ticket.id} yet; running full push.`);
+    await push();
+    return;
+  }
+  const team = await resolveTeam(client);
+  const statesByName = await workflowStatesByName(team);
+  const workflow = matchState(statesByName, status);
+  if (!workflow) {
+    throw new Error(
+      `No workflow state named "${status}" on team ${team.key}. Local file was still updated.`,
+    );
+  }
+  const payload = await client.updateIssue(record?.id || identifier, { stateId: workflow.id });
+  if (!payload.success) throw new Error(`Failed to update Linear status for ${ticket.id}`);
+  const issue = (await payload.issue) ?? (await client.issue(record?.id || identifier));
+  console.log(`Linear ${issue.identifier ?? identifier}: ${status}`);
+}
+
+async function setStatusCommand(rawId, status, shouldPush) {
+  const name = String(status ?? "").trim();
+  if (!name) throw new Error('Missing status (example: set-status NB-01 "In Progress")');
+  const { byId } = loadTickets();
+  const ticket = findTicket(byId, rawId);
+  const previous = ticket.status;
+  writeTicketStatus(ticket, name);
+  const payload = {
+    id: ticket.id,
+    previous,
+    status: name,
+    file: rel(ticket.filePath),
+    pushed: false,
+  };
+  if (!shouldPush) {
+    if (wantJson) emit(payload);
+    else console.log(`${ticket.id}: ${previous} → ${name} (${rel(ticket.filePath)})`);
+    return;
+  }
+  if (!process.env.LINEAR_API_KEY?.trim()) {
+    payload.warning = "LINEAR_API_KEY missing; local status updated only";
+    if (wantJson) emit(payload);
+    else {
+      console.log(`${ticket.id}: ${previous} → ${name} (${rel(ticket.filePath)})`);
+      console.warn(payload.warning);
+    }
+    return;
+  }
+  await pushOneStatus(ticket, name);
+  payload.pushed = true;
+  payload.linear_id = ticket.linearId;
+  if (wantJson) emit(payload);
+  else console.log(`${ticket.id}: ${previous} → ${name} (local + Linear)`);
+}
+
+async function syncCommand() {
+  const { tickets } = loadTickets();
+  const alreadySynced = tickets.some((ticket) => ticket.linearId);
+  if (alreadySynced) {
+    console.log("Pulling Linear statuses…");
+    await pullStatus();
+  } else {
+    console.log("No linear_id values yet; skipping pull.");
+  }
+  await push();
 }

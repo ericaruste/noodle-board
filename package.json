@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "tickets:dry-run": "node scripts/linear-sync.mjs dry-run",
     "tickets:push": "node scripts/linear-sync.mjs push",
-    "tickets:pull-status": "node scripts/linear-sync.mjs pull-status"
+    "tickets:pull-status": "node scripts/linear-sync.mjs pull-status",
+    "tickets:status": "node scripts/linear-sync.mjs status",
+    "tickets:next": "node scripts/linear-sync.mjs next",
+    "tickets:sync": "node scripts/linear-sync.mjs sync"
   },
   "dependencies": {
     "@xyflow/react": "^12.6.0",

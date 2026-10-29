@@ -6,8 +6,8 @@ priority: 3
 labels: [UX, Toolbar]
 parent: NB-E4
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-18
+linear_url: https://linear.app/ericar/issue/ERI-18/frosted-glass-navigation-containers
 ---
 
 ## Context

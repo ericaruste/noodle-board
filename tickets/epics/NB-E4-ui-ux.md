@@ -5,8 +5,8 @@ status: Todo
 priority: 2
 labels: [Epic, UX, Toolbar]
 estimate: 8
-linear_id:
-linear_url:
+linear_id: ERI-8
+linear_url: https://linear.app/ericar/issue/ERI-8/uiux-chrome
 ---
 
 ## Context

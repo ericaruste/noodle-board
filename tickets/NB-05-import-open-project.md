@@ -7,8 +7,8 @@ labels: [Feature, Persistence]
 parent: NB-E2
 blockedBy: [NB-04]
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-13
+linear_url: https://linear.app/ericar/issue/ERI-13/importopen-a-local-project-file
 ---
 
 ## Context

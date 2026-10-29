@@ -6,8 +6,8 @@ priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-11
+linear_url: https://linear.app/ericar/issue/ERI-11/detach-and-reconnect-noodles-by-dragging-endpoints
 ---
 
 ## Context
