@@ -1,7 +1,7 @@
 ---
 id: NB-01
 title: Keep noodles visible above image nodes
-status: Todo
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1

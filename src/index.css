@@ -16,8 +16,22 @@ body,
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
-.react-flow__edge-path {
+.react-flow {
+  --xy-edge-stroke: #334155;
+  --xy-edge-stroke-width: 2;
+  --xy-edge-stroke-selected: #0f172a;
+  --xy-connectionline-stroke: #334155;
+  --xy-connectionline-stroke-width: 2;
+}
+
+.react-flow__edge-path,
+.react-flow__connection-path {
   stroke: #334155;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #0f172a;
 }
 
 .react-flow__handle {

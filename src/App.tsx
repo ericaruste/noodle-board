@@ -28,10 +28,14 @@ const MAX_HISTORY = 50;
 
 const nodeTypes = { sticky: StickyNode, image: ImageNode };
 
+/** Above React Flow's selected-node z-index (1000), so noodles paint over images. */
+const NOODLE_Z_INDEX = 1001;
+
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "smoothstep",
+  zIndex: NOODLE_Z_INDEX,
   markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: "#334155" },
-  style: { stroke: "#334155", strokeWidth: 2 },
+  style: { strokeWidth: 2 },
 };
 
 type Snapshot = { nodes: Node[]; edges: Edge[] };
@@ -309,6 +313,8 @@ function Board() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           defaultEdgeOptions={defaultEdgeOptions}
+          elevateEdgesOnSelect
+          connectionLineContainerStyle={{ zIndex: NOODLE_Z_INDEX }}
           connectionMode={ConnectionMode.Loose}
           fitView={stored.nodes.length > 0}
           minZoom={0.15}
