@@ -29,11 +29,11 @@ Noodles disappear under images, so users cannot see or easily select the connect
 
 ## Acceptance criteria
 
-- [ ] A noodle whose path crosses an image remains fully visible (stroke + arrowhead)
-- [ ] A noodle from a node stacked on an image to a node outside the image remains visible
-- [ ] Connection handles on image nodes are not clipped by `overflow-hidden`
-- [ ] The in-progress connection line while dragging a noodle is also drawn above images
-- [ ] Selecting a noodle that crosses an image still highlights and can be deleted
+- [x] A noodle whose path crosses an image remains fully visible (stroke + arrowhead)
+- [x] A noodle from a node stacked on an image to a node outside the image remains visible
+- [x] Connection handles on image nodes are not clipped by `overflow-hidden`
+- [x] The in-progress connection line while dragging a noodle is also drawn above images
+- [x] Selecting a noodle that crosses an image still highlights and can be deleted
 
 ## Technical notes
 
