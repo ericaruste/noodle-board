@@ -16,7 +16,7 @@ Nodes are only `sticky` and `image`. FigJam-style boards need geometric frames. 
 
 ## Problem
 
-There is no rectangle, ellipse, or rounded rectangle to group or decorate the board.
+There is no geometric shape to group or decorate the board, and no way to set a shape’s fill or stroke.
 
 ## Repro
 
@@ -25,17 +25,20 @@ There is no rectangle, ellipse, or rounded rectangle to group or decorate the bo
 
 ## Acceptance criteria
 
-- [ ] A Shape action (toolbar button or flyout) can add at least **rectangle**, **ellipse**, and **rounded rectangle**
-- [ ] New shapes appear at the canvas center with a default size, fill, and stroke
-- [ ] Selected shapes show a small color/stroke control (reuse the sticky color-bar pattern or a minimal equivalent)
-- [ ] Shapes move, resize, select, delete, undo, connect via handles, and persist in snapshots / localStorage / `.noodle.json`
-- [ ] Ellipse and rounded rect hit-testing should follow the visible shape closely enough that empty corners of an ellipse are not a huge dead zone (best-effort CSS `border-radius` / `ellipse` is acceptable)
+- [ ] A Shape action (toolbar button or flyout) can add **rectangle**, **ellipse**, **rounded rectangle**, **triangle**, and **diamond**
+- [ ] New shapes appear at the canvas center with a default size, a visible fill, and a visible stroke
+- [ ] A selected shape can change **fill color**, **stroke color**, **no fill**, and **no stroke** (small control on the shape, same idea as the sticky color bar)
+- [ ] No fill leaves the interior transparent. No stroke leaves no outline. Fill and stroke can be cleared independently
+- [ ] A shape with no fill and no stroke stays selectable, movable, and resizable
+- [ ] Fill, stroke, and “none” persist in snapshots / localStorage / `.noodle.json`
+- [ ] Shapes move, resize, select, delete, undo, and connect via handles
+- [ ] Hit-testing follows the visible shape closely enough that empty corners (ellipse, rounded rectangle, triangle, diamond) are not a huge dead zone
 - [ ] If NB-11 exists, Shape is an icon with a flyout; otherwise a control on the current toolbar is enough
 
 ## Technical notes
 
-`type: "shape"` with `data: { kind: "rect" | "ellipse" | "round-rect", fill, stroke }`. One component switching on `kind` is fine. Connection handles on four sides, same as sticky/image. Default z-order: do not cover noodles (respect NB-01).
+`type: "shape"` with `data: { kind: "rect" | "ellipse" | "round-rect" | "triangle" | "diamond", fill, stroke }`. Use a color string or `null` for no fill / no stroke. One component switching on `kind` is fine. Connection handles on four sides, same as sticky/image. Default z-order: do not cover noodles (respect NB-01). Keep the control on the selected shape; do not build a separate inspector panel.
 
 ## Out of scope
 
-Polygons, stars, arrows-as-shapes (the Arrow tool is NB-09), boolean operations, and a full fill/stroke inspector.
+A general polygon tool, stars, arrows-as-shapes (the Arrow tool is NB-09), boolean operations, gradients, opacity, stroke width, and dashed strokes.
