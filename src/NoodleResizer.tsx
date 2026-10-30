@@ -30,6 +30,15 @@ export function useNoodleResizeStyle(): CSSProperties {
 
 type Box = { x: number; y: number; width: number; height: number };
 
+function readLength(value: unknown): number {
+  if (typeof value === "number" && value > 0) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    if (parsed > 0) return parsed;
+  }
+  return 0;
+}
+
 function sameBox(a: Box | null, b: Box | null) {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -55,9 +64,10 @@ export function NoodleResizer({
   const nodeId = useNodeId();
   const box = useStore((state) => {
     const node = nodeId ? state.nodeLookup.get(nodeId) : undefined;
-    const width = node?.measured.width;
-    const height = node?.measured.height;
-    if (!node || !width || !height) return null;
+    if (!node) return null;
+    const width = readLength(node.measured?.width) || readLength(node.width) || readLength(node.style?.width);
+    const height = readLength(node.measured?.height) || readLength(node.height) || readLength(node.style?.height);
+    if (!width || !height) return null;
     return {
       x: node.internals.positionAbsolute.x,
       y: node.internals.positionAbsolute.y,
