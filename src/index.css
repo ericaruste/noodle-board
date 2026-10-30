@@ -41,6 +41,80 @@ body,
   border: 2px solid white;
 }
 
+/* Wide invisible edge strips with a thin visible stroke. Thickness tracks zoom
+   via --noodle-resize-* so the grab target stays about 16px on screen. */
+.noodle-node .react-flow__resize-control.line {
+  border-width: 0;
+  z-index: 1;
+}
+
+.noodle-node .react-flow__resize-control.line.left,
+.noodle-node .react-flow__resize-control.line.right {
+  width: var(--noodle-resize-thickness, 16px);
+  border-left-width: 0;
+  border-right-width: 0;
+  background: linear-gradient(
+    to right,
+    transparent calc(50% - var(--noodle-resize-stroke, 2px) / 2),
+    #64748b calc(50% - var(--noodle-resize-stroke, 2px) / 2),
+    #64748b calc(50% + var(--noodle-resize-stroke, 2px) / 2),
+    transparent calc(50% + var(--noodle-resize-stroke, 2px) / 2)
+  );
+}
+
+.noodle-node .react-flow__resize-control.line.top,
+.noodle-node .react-flow__resize-control.line.bottom {
+  height: var(--noodle-resize-thickness, 16px);
+  border-top-width: 0;
+  border-bottom-width: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent calc(50% - var(--noodle-resize-stroke, 2px) / 2),
+    #64748b calc(50% - var(--noodle-resize-stroke, 2px) / 2),
+    #64748b calc(50% + var(--noodle-resize-stroke, 2px) / 2),
+    transparent calc(50% + var(--noodle-resize-stroke, 2px) / 2)
+  );
+}
+
+.noodle-node .react-flow__resize-control.handle {
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #475569;
+  border-radius: 2px;
+  background: #fff;
+}
+
+/* Ports sit outside the resize strip so they do not cover the border. */
+.noodle-node .react-flow__handle {
+  z-index: 3;
+  width: var(--noodle-port-size, 10px);
+  height: var(--noodle-port-size, 10px);
+  min-width: 0;
+  min-height: 0;
+}
+
+.noodle-node .react-flow__handle-top {
+  transform: translate(-50%, calc(-50% - var(--noodle-handle-outset, 14px)));
+}
+
+.noodle-node .react-flow__handle-bottom {
+  transform: translate(-50%, calc(50% + var(--noodle-handle-outset, 14px)));
+}
+
+.noodle-node .react-flow__handle-left {
+  transform: translate(calc(-50% - var(--noodle-handle-outset, 14px)), -50%);
+}
+
+.noodle-node .react-flow__handle-right {
+  transform: translate(calc(50% + var(--noodle-handle-outset, 14px)), -50%);
+}
+
+.noodle-node .noodle-sticky-colors {
+  top: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
+  bottom: auto;
+}
+
 .noodle-node.selected .react-flow__handle {
   opacity: 1;
 }

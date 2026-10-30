@@ -1,11 +1,6 @@
 import { memo, useEffect, useRef, useState } from "react";
-import {
-  Handle,
-  NodeResizer,
-  Position,
-  type Node,
-  type NodeProps,
-} from "@xyflow/react";
+import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 
 function snapshot() {
   window.dispatchEvent(new Event("noodle-snapshot"));
@@ -31,6 +26,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(data.text);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const resizeStyle = useNoodleResizeStyle();
 
   useEffect(() => {
     setDraft(data.text);
@@ -58,19 +54,17 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
     <div
       role="group"
       aria-label="Sticky note"
-      className="relative h-full w-full rounded-sm shadow-[2px_4px_12px_rgba(15,23,42,0.18)]"
-      style={{ background: STICKY_COLORS[data.color] }}
+      className="noodle-node relative h-full w-full rounded-sm shadow-[2px_4px_12px_rgba(15,23,42,0.18)]"
+      style={{ ...resizeStyle, background: STICKY_COLORS[data.color] }}
       onDoubleClick={(event) => {
         event.stopPropagation();
         setEditing(true);
       }}
     >
-      <NodeResizer
-        isVisible={selected}
+      <NoodleResizer
+        selected={selected}
         minWidth={140}
         minHeight={140}
-        lineClassName="border-slate-400"
-        handleClassName="h-2 w-2 rounded-sm border border-slate-500 bg-white"
         onResizeStart={snapshot}
       />
       {(["Top", "Right", "Bottom", "Left"] as const).map((side) => (
@@ -102,7 +96,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         </div>
       )}
       {selected && (
-        <div className="nodrag nopan absolute -bottom-8 left-1/2 flex -translate-x-1/2 gap-1 rounded-full bg-white p-1 shadow">
+        <div className="noodle-sticky-colors nodrag nopan absolute left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-full bg-white p-1 shadow">
           {(Object.keys(STICKY_COLORS) as StickyColor[]).map((color) => (
             <button
               key={color}

@@ -1,7 +1,7 @@
 ---
 id: NB-02
 title: Make sticky and image resize targets usable
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
@@ -31,11 +31,11 @@ Resizing stickies and images is difficult. The pointer over the edge does not sh
 
 ## Acceptance criteria
 
-- [ ] After a sticky or image is selected, hovering a resize edge or corner shows the matching cursor (`ew-resize`, `ns-resize`, `nwse-resize` / `nesw-resize`)
-- [ ] Resize hit strips are large enough to grab at default zoom and remain usable when zoomed out (do not leave 8px-only corners)
-- [ ] Connection handles remain usable but do not steal the entire border
-- [ ] Images keep aspect ratio while resizing (current `keepAspectRatio`); stickies can resize freely with existing min size
-- [ ] Resize still takes an undo snapshot (`noodle-snapshot` / `onResizeStart`)
+- [x] After a sticky or image is selected, hovering a resize edge or corner shows the matching cursor (`ew-resize`, `ns-resize`, `nwse-resize` / `nesw-resize`)
+- [x] Resize hit strips are large enough to grab at default zoom and remain usable when zoomed out (do not leave 8px-only corners)
+- [x] Connection handles remain usable but do not steal the entire border
+- [x] Images keep aspect ratio while resizing (current `keepAspectRatio`); stickies can resize freely with existing min size
+- [x] Resize still takes an undo snapshot (`noodle-snapshot` / `onResizeStart`)
 
 ## Technical notes
 

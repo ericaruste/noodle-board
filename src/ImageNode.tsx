@@ -1,11 +1,6 @@
 import { memo } from "react";
-import {
-  Handle,
-  NodeResizer,
-  Position,
-  type Node,
-  type NodeProps,
-} from "@xyflow/react";
+import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 
 export type ImageData = {
   src: string;
@@ -14,16 +9,20 @@ export type ImageData = {
 export type ImageNodeType = Node<ImageData, "image">;
 
 function ImageNode({ data, selected }: NodeProps<ImageNodeType>) {
+  const resizeStyle = useNoodleResizeStyle();
 
   return (
-    <div role="img" aria-label="Image" className="relative h-full w-full">
-      <NodeResizer
-        isVisible={selected}
+    <div
+      role="img"
+      aria-label="Image"
+      className="noodle-node relative h-full w-full"
+      style={resizeStyle}
+    >
+      <NoodleResizer
+        selected={selected}
         keepAspectRatio
         minWidth={80}
         minHeight={80}
-        lineClassName="border-slate-400"
-        handleClassName="h-2 w-2 rounded-sm border border-slate-500 bg-white"
         onResizeStart={() => window.dispatchEvent(new Event("noodle-snapshot"))}
       />
       <div className="h-full w-full overflow-hidden rounded-md bg-white shadow-[2px_4px_12px_rgba(15,23,42,0.18)]">
