@@ -20,7 +20,9 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 1. Follow **build order** below unless a ticket is blocked.
 2. Open the markdown file. Treat **Acceptance criteria** as the definition of done.
 3. Keep work inside that ticket’s **Out of scope**.
-4. When Linear is connected, set `status: In Progress` (or `Done`) in frontmatter and run `npm run tickets:push`.
+4. Start from an up-to-date `main` and use a branch named with the ticket id (`NB-08`, `NB-02`). Set `status: In Progress` and, when Linear is connected, push that status.
+5. Check an acceptance box (`- [x]`) only after that criterion is verified. Then run `npm run tickets:push-one -- NB-08` so that box shows on the Linear issue. Leave unverified boxes open. Do not set `Done` while any acceptance box is still open.
+6. Commit on the ticket branch, open a pull request into `main`, review it, and squash-merge. Then set `status: Done`.
 
 ### Build order
 
@@ -103,6 +105,7 @@ npm run tickets:dry-run      # parse + validate, no API calls
 npm run tickets:status       # list every ticket (add -- --json for JSON)
 npm run tickets:next         # recommend the next unblocked ticket
 npm run tickets:push         # bootstrap project/labels, create or update issues
+npm run tickets:push-one -- NB-01   # update one issue description (acceptance checkboxes)
 npm run tickets:pull-status  # copy Linear workflow state into local status
 npm run tickets:sync         # pull remote statuses if already synced, then push
 ```
@@ -112,6 +115,7 @@ Other CLI (used by `/ticket`):
 ```bash
 node scripts/linear-sync.mjs get NB-01
 node scripts/linear-sync.mjs set-status NB-01 "In Progress" --push
+node scripts/linear-sync.mjs push-one NB-01
 node scripts/linear-sync.mjs status --json
 ```
 
@@ -125,6 +129,8 @@ node scripts/linear-sync.mjs status --json
 6. Write `linear_id` / `linear_url` into each markdown file and refresh `tickets/.sync-state.json` (UUIDs only, safe to commit).
 
 If `linear_id` is already set, push updates that issue instead of creating a duplicate.
+
+`tickets:push-one` updates only that issue’s description. Use it when an acceptance checkbox changes. The issue must already exist on Linear.
 
 **Source of truth**
 

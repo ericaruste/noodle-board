@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "tickets:dry-run": "node scripts/linear-sync.mjs dry-run",
     "tickets:push": "node scripts/linear-sync.mjs push",
+    "tickets:push-one": "node scripts/linear-sync.mjs push-one",
     "tickets:pull-status": "node scripts/linear-sync.mjs pull-status",
     "tickets:status": "node scripts/linear-sync.mjs status",
     "tickets:next": "node scripts/linear-sync.mjs next",

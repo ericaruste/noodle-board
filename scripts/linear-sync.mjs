@@ -2,7 +2,7 @@
 /**
  * Sync tickets/*.md to a Linear workspace.
  *
- * Commands: dry-run | status | next | get | set-status | push | pull-status | sync
+ * Commands: dry-run | status | next | get | set-status | push | push-one | pull-status | sync
  * Auth: LINEAR_API_KEY in .env (no Bearer prefix; @linear/sdk handles the header).
  */
 import fs from "node:fs";
@@ -33,6 +33,7 @@ try {
   else if (command === "set-status") {
     await setStatusCommand(positional[1], positional.slice(2).join(" "), flags.has("--push"));
   } else if (command === "push") await push();
+  else if (command === "push-one") await pushOne(positional[1]);
   else if (command === "pull-status") await pullStatus();
   else if (command === "sync") await syncCommand();
   else {
@@ -44,6 +45,7 @@ try {
   get <id>                Print one ticket (file, frontmatter, body)
   set-status <id> <name>  Write local status; add --push to update Linear
   push                    Bootstrap project/labels, create or update issues
+  push-one <id>           Update one issue's Linear description from local markdown
   pull-status             Copy Linear workflow state into local status
   sync                    Pull remote statuses (if already synced), then push
 `);
@@ -596,6 +598,33 @@ async function push() {
 
   writeState(state);
   console.log(`\nPush complete. ${tickets.length} issues in project "${project.name}".`);
+}
+
+async function pushOne(rawId) {
+  const { byId } = loadTickets();
+  const ticket = findTicket(byId, rawId);
+  const client = await linearClient();
+  const state = readState();
+  if (!state.issues) state.issues = {};
+  const existing = await issueRecord(client, ticket, state);
+  if (!existing) {
+    throw new Error(`${ticket.id} is not on Linear yet. Run npm run tickets:push first.`);
+  }
+  const payload = await client.updateIssue(existing.id, { description: ticket.body });
+  if (!payload.success) throw new Error(`Failed to update ${ticket.id}`);
+  const issue = (await payload.issue) ?? existing;
+  const result = {
+    id: ticket.id,
+    linear_id: issue.identifier ?? ticket.linearId,
+    linear_url: issue.url ?? ticket.linearUrl,
+    updated: "description",
+  };
+  if (wantJson) {
+    emit(result);
+    return;
+  }
+  console.log(`Updated ${result.id} description → ${result.linear_id}`);
+  if (result.linear_url) console.log(result.linear_url);
 }
 
 async function pullStatus() {
