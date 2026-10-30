@@ -115,10 +115,18 @@ body,
   bottom: auto;
 }
 
-/* Noodles paint above nodes. Their 20px invisible hit path would cover the
-   resize strip, so while a node is selected only the visible stroke stays clickable. */
-.react-flow:has(.react-flow__node.selected) .react-flow__edge-interaction {
+/* Above elevated noodles. The layer itself ignores hits so a noodle over the
+   node body stays clickable; only the strips and corners grab. */
+.noodle-resize-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
   pointer-events: none;
+}
+
+.noodle-resize-layer .react-flow__resize-control {
+  pointer-events: auto;
 }
 
 .noodle-node.selected .react-flow__handle {
