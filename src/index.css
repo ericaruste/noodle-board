@@ -115,6 +115,12 @@ body,
   bottom: auto;
 }
 
+/* Noodles paint above nodes. Their 20px invisible hit path would cover the
+   resize strip, so while a node is selected only the visible stroke stays clickable. */
+.react-flow:has(.react-flow__node.selected) .react-flow__edge-interaction {
+  pointer-events: none;
+}
+
 .noodle-node.selected .react-flow__handle {
   opacity: 1;
 }
