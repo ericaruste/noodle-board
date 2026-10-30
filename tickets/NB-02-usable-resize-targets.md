@@ -1,7 +1,7 @@
 ---
 id: NB-02
 title: Make sticky and image resize targets usable
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
