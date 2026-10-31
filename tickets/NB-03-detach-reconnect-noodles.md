@@ -28,14 +28,14 @@ You cannot reposition a connected noodle by dragging it. There is no handle on t
 
 ## Acceptance criteria
 
-- [x] Each noodle shows a small node at each end so it is obvious where the line can be dragged or repositioned
-- [x] Those nodes stay draggable after the noodle is connected to an element
-- [x] Dragging an end onto empty canvas leaves the noodle there, unattached to any element. It is not deleted and it does not have to connect to something else
-- [x] While an end is dragged near a sticky, image, or other object, the nearest compatible port highlights on its own (Miro-style), before the pointer is on the port
-- [x] Dropping the end on that highlighted port connects the noodle there
-- [x] Moving an end onto empty canvas and rewiring it to a port each take an undo snapshot
-- [x] Selected noodles can still be removed with Delete/Backspace and the toolbar Delete button
-- [x] An invalid drop (both ends on the same handle, if that is disallowed) does not leave a broken edge
+- [ ] Each noodle shows a small node at each end so it is obvious where the line can be dragged or repositioned
+- [ ] Those nodes stay draggable after the noodle is connected to an element
+- [ ] Dragging an end onto empty canvas leaves the noodle there, unattached to any element. It is not deleted and it does not have to connect to something else
+- [ ] While an end is dragged near a sticky, image, or other object, the nearest compatible port highlights on its own (Miro-style), before the pointer is on the port
+- [ ] Dropping the end on that highlighted port connects the noodle there
+- [ ] Moving an end onto empty canvas and rewiring it to a port each take an undo snapshot
+- [ ] Selected noodles can still be removed with Delete/Backspace and the toolbar Delete button
+- [ ] An invalid drop (both ends on the same handle, if that is disallowed) does not leave a broken edge
 
 ## Technical notes
 
