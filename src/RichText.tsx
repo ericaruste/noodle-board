@@ -377,6 +377,7 @@ export function RichText({
       }
       if (!structureAttempt.current) {
         structureAttempt.current = true;
+        if (!restoreRef.current) restoreRef.current = rangeRef.current;
         setStructureEpoch((epoch) => epoch + 1);
       }
       return;
@@ -414,6 +415,7 @@ export function RichText({
     const next = bodyFromEditor(root, draftRef.current);
     if (sameBody(next, draftRef.current)) return draftRef.current;
     const domParagraphs = root.querySelectorAll("[data-paragraph]").length;
+    if (domParagraphs === 0 && draftRef.current.length > 1) return draftRef.current;
     if (domParagraphs !== 0 && domParagraphs < draftRef.current.length) return draftRef.current;
     draftRef.current = next;
     return next;
@@ -823,6 +825,12 @@ export function RichText({
                 editing
                   ? () => {
                       if (composing.current || busy.current || modelEdit.current || !editorRef.current) return;
+                      if (
+                        editorRef.current.querySelectorAll("[data-paragraph]").length === 0 &&
+                        draftRef.current.length > 1
+                      ) {
+                        return;
+                      }
                       const next = bodyFromEditor(editorRef.current, draftRef.current);
                       if (sameBody(next, draftRef.current)) return;
                       const caret = readRange(editorRef.current, next)?.end ?? {
