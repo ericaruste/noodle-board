@@ -50,10 +50,10 @@ export default function NoodleEdge(props: EdgeProps) {
   return (
     <>
       <SmoothStepEdge {...props} sourcePosition={sourcePosition} targetPosition={targetPosition} />
-      {sourceType !== ENDPOINT_TYPE && (
+      {props.selected && sourceType !== ENDPOINT_TYPE && (
         <EndKnob edgeId={props.id} x={props.sourceX} y={props.sourceY} position={props.sourcePosition} end="source" />
       )}
-      {targetType !== ENDPOINT_TYPE && (
+      {props.selected && targetType !== ENDPOINT_TYPE && (
         <EndKnob edgeId={props.id} x={props.targetX} y={props.targetY} position={props.targetPosition} end="target" />
       )}
     </>
