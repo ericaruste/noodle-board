@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
+import ObjectPorts from "./ObjectPorts";
 
 function snapshot() {
   window.dispatchEvent(new Event("noodle-snapshot"));
@@ -67,14 +68,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         minHeight={140}
         onResizeStart={snapshot}
       />
-      {(["Top", "Right", "Bottom", "Left"] as const).map((side) => (
-        <Handle
-          key={side}
-          id={side.toLowerCase()}
-          type="source"
-          position={Position[side]}
-        />
-      ))}
+      <ObjectPorts nodeId={id} />
       {editing ? (
         <textarea
           ref={textareaRef}
