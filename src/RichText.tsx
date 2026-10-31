@@ -15,7 +15,9 @@ import { placeRange, readRange } from "./textDom";
 import {
   ALIGN_LABELS,
   FONT_STYLE_LABELS,
+  FONT_STYLES,
   emptyParagraph,
+  normalizeRuns,
   alignsInRange,
   applyAlign,
   applyHref,
@@ -121,6 +123,31 @@ function paragraphFromDom(paragraph: TextParagraph, text: string): TextParagraph
   return edit.body[0] ?? paragraph;
 }
 
+function paragraphFromElement(element: HTMLElement, current: TextParagraph): TextParagraph {
+  const runsRoot = element.querySelector("[data-runs]");
+  const spans = runsRoot
+    ? [...runsRoot.querySelectorAll<HTMLElement>(":scope > span, :scope > a")]
+    : [];
+  if (spans.length === 0) {
+    const text = ((runsRoot ?? element).textContent ?? "").replace(/\u200b/g, "");
+    return paragraphFromDom(current, text);
+  }
+  const runs = normalizeRuns(
+    spans.map((span) => {
+      const styleAttr = span.getAttribute("data-style");
+      const style = FONT_STYLES.includes(styleAttr as FontStyle) ? (styleAttr as FontStyle) : "regular";
+      const href = span.getAttribute("data-href")?.trim();
+      const run: { text: string; style: FontStyle; href?: string } = {
+        text: (span.textContent ?? "").replace(/\u200b/g, ""),
+        style,
+      };
+      if (href) run.href = href;
+      return run;
+    }),
+  );
+  return { align: current.align, list: current.list, runs };
+}
+
 function bodyFromEditor(root: HTMLElement, model: TextBody): TextBody {
   const paragraphs = [...root.querySelectorAll<HTMLElement>("[data-paragraph]")];
   if (paragraphs.length === 0) {
@@ -129,12 +156,7 @@ function bodyFromEditor(root: HTMLElement, model: TextBody): TextBody {
     if (model.length === 1 && paragraphText(current).replace(/\u200b/g, "") === text) return model;
     return [paragraphFromDom(current, text)];
   }
-  return paragraphs.map((element, index) => {
-    const current = model[index] ?? emptyParagraph();
-    const runs = element.querySelector("[data-runs]");
-    const text = (runs?.textContent ?? "").replace(/\u200b/g, "");
-    return paragraphFromDom(current, text);
-  });
+  return paragraphs.map((element, index) => paragraphFromElement(element, model[index] ?? emptyParagraph()));
 }
 
 function sameRange(a: TextRange | null, b: TextRange | null): boolean {
@@ -338,8 +360,12 @@ export function RichText({
     const root = editorRef.current;
     const paragraphs = root.querySelectorAll<HTMLElement>("[data-paragraph]");
     if (paragraphs.length !== draftRef.current.length) {
-      if (structureEpoch > 8) return;
-      setStructureEpoch((epoch) => epoch + 1);
+      const adopted = bodyFromEditor(root, draftRef.current);
+      if (!sameBody(adopted, draftRef.current)) {
+        const last = adopted[adopted.length - 1] ?? emptyParagraph();
+        remember(adopted, collapsedAt({ paragraph: Math.max(0, adopted.length - 1), offset: paragraphText(last).length }));
+      }
+      if (structureEpoch < 1) setStructureEpoch(1);
       return;
     }
     draftRef.current.forEach((paragraph, index) => {
@@ -373,6 +399,7 @@ export function RichText({
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target;
       if (target instanceof Node && rootRef.current?.contains(target)) return;
+      if (target instanceof Element && target.closest("[data-sticky-colors]")) return;
       onCommitRef.current(draftRef.current);
     };
     const onSelection = () => {
