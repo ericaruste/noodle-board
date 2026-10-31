@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import {
   Background,
   BackgroundVariant,
+  ConnectionLineType,
   ConnectionMode,
   MarkerType,
   MiniMap,
@@ -10,10 +12,14 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  reconnectEdge,
   useReactFlow,
+  useStoreApi,
   type Connection,
   type DefaultEdgeOptions,
   type Edge,
+  type FinalConnectionState,
+  type HandleType,
   type Node,
   type OnEdgesChange,
   type OnNodesChange,
@@ -22,11 +28,30 @@ import "@xyflow/react/dist/style.css";
 import Toolbar from "./Toolbar";
 import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
 import ImageNode from "./ImageNode";
+import EndpointNode from "./EndpointNode";
+import NoodleEdge from "./NoodleEdge";
+import PortMagnet from "./PortMagnet";
+import { getHotPort } from "./portHot";
+import {
+  END_RADIUS,
+  ENDPOINT_SIZE,
+  ENDPOINT_TYPE,
+  PORT_SCREEN_RADIUS,
+  allowsPort,
+  connectionForDrop,
+  connectionForPark,
+  draggedEnd,
+  makeEndpoint,
+  pointFromEvent,
+  pruneEndpoints,
+  sameEnds,
+} from "./noodleEnds";
 
 const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
 
-const nodeTypes = { sticky: StickyNode, image: ImageNode };
+const nodeTypes = { sticky: StickyNode, image: ImageNode, endpoint: EndpointNode };
+const edgeTypes = { smoothstep: NoodleEdge };
 
 /** Above React Flow's selected-node z-index (1000), so noodles paint over images. */
 const NOODLE_Z_INDEX = 1001;
@@ -52,10 +77,9 @@ function loadCanvas(): Snapshot {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { nodes: [], edges: [] };
     const parsed = JSON.parse(raw) as Snapshot;
-    return {
-      nodes: Array.isArray(parsed.nodes) ? parsed.nodes : [],
-      edges: Array.isArray(parsed.edges) ? parsed.edges : [],
-    };
+    const nodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
+    const edges = Array.isArray(parsed.edges) ? parsed.edges : [];
+    return { nodes: pruneEndpoints(nodes, edges), edges };
   } catch {
     return { nodes: [], edges: [] };
   }
@@ -91,12 +115,15 @@ function Board() {
   const [nodes, setNodes] = useState<Node[]>(stored.nodes);
   const [edges, setEdges] = useState<Edge[]>(stored.edges);
   const { screenToFlowPosition, getViewport } = useReactFlow();
+  const store = useStoreApi();
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
   const pastRef = useRef<Snapshot[]>([]);
   const futureRef = useRef<Snapshot[]>([]);
   const applyingHistory = useRef(false);
   const dragSnapshotTaken = useRef(false);
+  const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
+  const rfConnectionRef = useRef<Connection | null>(null);
 
   useEffect(() => {
     nodesRef.current = nodes;
@@ -143,8 +170,12 @@ function Board() {
 
   const onEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
-      if (changes.some((change) => change.type === "remove")) takeSnapshot();
-      setEdges((current) => applyEdgeChanges(changes, current));
+      const removed = changes.some((change) => change.type === "remove");
+      if (removed) takeSnapshot();
+      const next = applyEdgeChanges(changes, edgesRef.current);
+      edgesRef.current = next;
+      setEdges(next);
+      if (removed) setNodes((current) => pruneEndpoints(current, next));
     },
     [takeSnapshot],
   );
@@ -155,6 +186,129 @@ function Board() {
       setEdges((current) => addEdge(connection, current));
     },
     [takeSnapshot],
+  );
+
+  const isValidConnection = useCallback((connection: Connection | Edge) => {
+    if (!connection.source || !connection.target) return false;
+    if (
+      connection.source === connection.target &&
+      (connection.sourceHandle ?? null) === (connection.targetHandle ?? null)
+    ) {
+      return false;
+    }
+    const active = reconnectRef.current;
+    if (!active) {
+      return !nodesRef.current.some(
+        (node) =>
+          (node.id === connection.source || node.id === connection.target) &&
+          node.type === ENDPOINT_TYPE,
+      );
+    }
+    return allowsPort(nodesRef.current, active.dragged, connection);
+  }, []);
+
+  const applyReconnect = useCallback(
+    (edge: Edge, connection: Connection) => {
+      if (sameEnds(edge, connection)) return;
+      takeSnapshot();
+      const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
+        shouldReplaceId: false,
+      });
+      edgesRef.current = nextEdges;
+      setEdges(nextEdges);
+      setNodes((current) => pruneEndpoints(current, nextEdges));
+    },
+    [takeSnapshot],
+  );
+
+  const parkEnd = useCallback(
+    (edge: Edge, dragged: HandleType, point: { x: number; y: number }) => {
+      const flow = screenToFlowPosition(point);
+      const position = {
+        x: flow.x - ENDPOINT_SIZE / 2,
+        y: flow.y - ENDPOINT_SIZE / 2,
+      };
+      const currentId = dragged === "source" ? edge.source : edge.target;
+      const existing = nodesRef.current.find(
+        (node) => node.id === currentId && node.type === ENDPOINT_TYPE,
+      );
+      takeSnapshot();
+      if (existing) {
+        setNodes((current) =>
+          current.map((node) => (node.id === existing.id ? { ...node, position } : node)),
+        );
+        return;
+      }
+      const id = `end-${crypto.randomUUID()}`;
+      const connection = connectionForPark(edge, dragged, id);
+      const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
+        shouldReplaceId: false,
+      });
+      edgesRef.current = nextEdges;
+      setNodes((current) => [...current, makeEndpoint(id, position)]);
+      setEdges(nextEdges);
+    },
+    [screenToFlowPosition, takeSnapshot],
+  );
+
+  const onReconnectStart = useCallback(
+    (event: ReactMouseEvent, edge: Edge, handleType: HandleType) => {
+      void event;
+      reconnectRef.current = { edge, dragged: draggedEnd(handleType) };
+      rfConnectionRef.current = null;
+    },
+    [],
+  );
+
+  const onReconnect = useCallback((edge: Edge, connection: Connection) => {
+    void edge;
+    rfConnectionRef.current = connection;
+  }, []);
+
+  const onReconnectEnd = useCallback(
+    (
+      event: MouseEvent | TouchEvent,
+      edge: Edge,
+      handleType: HandleType,
+      connectionState: FinalConnectionState,
+    ) => {
+      const dragged = reconnectRef.current?.dragged ?? draggedEnd(handleType);
+      const rf = rfConnectionRef.current;
+      reconnectRef.current = null;
+      rfConnectionRef.current = null;
+
+      const hot = getHotPort();
+      const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
+      if (hotConnection && allowsPort(nodesRef.current, dragged, hotConnection)) {
+        applyReconnect(edge, hotConnection);
+        return;
+      }
+      if (hotConnection) return;
+
+      if (rf && allowsPort(nodesRef.current, dragged, rf)) {
+        applyReconnect(edge, rf);
+        return;
+      }
+
+      if (connectionState.isValid === false) {
+        const toId = connectionState.toHandle?.nodeId;
+        const blockedByEndpoint = nodesRef.current.some(
+          (node) => node.id === toId && node.type === ENDPOINT_TYPE,
+        );
+        if (!blockedByEndpoint) return;
+      }
+
+      if (connectionState.from && connectionState.pointer) {
+        const [tx, ty, zoom] = store.getState().transform;
+        const px = (connectionState.pointer.x - tx) / zoom;
+        const py = (connectionState.pointer.y - ty) / zoom;
+        const distance = Math.hypot(px - connectionState.from.x, py - connectionState.from.y);
+        if (zoom > 0 && distance <= PORT_SCREEN_RADIUS / zoom) return;
+      }
+
+      parkEnd(edge, dragged, pointFromEvent(event));
+    },
+    [applyReconnect, parkEnd, store],
   );
 
   const canvasCenter = useCallback(() => {
@@ -207,13 +361,12 @@ function Board() {
     if (!selectedNodes.length && !selectedEdges.length) return;
     takeSnapshot();
     const removed = new Set(selectedNodes.map((node) => node.id));
-    setNodes((current) => current.filter((node) => !node.selected));
-    setEdges((current) =>
-      current.filter(
-        (edge) =>
-          !edge.selected && !removed.has(edge.source) && !removed.has(edge.target),
-      ),
+    const nextEdges = edgesRef.current.filter(
+      (edge) => !edge.selected && !removed.has(edge.source) && !removed.has(edge.target),
     );
+    edgesRef.current = nextEdges;
+    setEdges(nextEdges);
+    setNodes((current) => pruneEndpoints(current.filter((node) => !node.selected), nextEdges));
   }, [takeSnapshot]);
 
   const undo = useCallback(() => {
@@ -305,15 +458,24 @@ function Board() {
           onDelete={deleteSelected}
           canDelete={canDelete}
         />
+        <PortMagnet />
         <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
+          onReconnectEnd={onReconnectEnd}
+          isValidConnection={isValidConnection}
           defaultEdgeOptions={defaultEdgeOptions}
           elevateEdgesOnSelect
+          reconnectRadius={END_RADIUS}
+          connectionRadius={PORT_SCREEN_RADIUS}
+          connectionLineType={ConnectionLineType.SmoothStep}
           connectionLineContainerStyle={{ zIndex: NOODLE_Z_INDEX }}
           connectionMode={ConnectionMode.Loose}
           fitView={stored.nodes.length > 0}

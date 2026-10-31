@@ -1,6 +1,7 @@
 import { memo } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
+import ObjectPorts from "./ObjectPorts";
 
 export type ImageData = {
   src: string;
@@ -8,7 +9,7 @@ export type ImageData = {
 
 export type ImageNodeType = Node<ImageData, "image">;
 
-function ImageNode({ data, selected }: NodeProps<ImageNodeType>) {
+function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
 
   return (
@@ -33,14 +34,7 @@ function ImageNode({ data, selected }: NodeProps<ImageNodeType>) {
           className="h-full w-full object-cover"
         />
       </div>
-      {(["Top", "Right", "Bottom", "Left"] as const).map((side) => (
-        <Handle
-          key={side}
-          id={side.toLowerCase()}
-          type="source"
-          position={Position[side]}
-        />
-      ))}
+      <ObjectPorts nodeId={id} />
     </div>
   );
 }
