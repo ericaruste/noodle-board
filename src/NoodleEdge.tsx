@@ -1,12 +1,14 @@
 import { SmoothStepEdge, useStore, type EdgeProps, type Position } from "@xyflow/react";
-import { ENDPOINT_TYPE, knobCenter, outward } from "./noodleEnds";
+import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobCenter, outward } from "./noodleEnds";
 
 function EndKnob({
+  edgeId,
   x,
   y,
   position,
   end,
 }: {
+  edgeId: string;
   x: number;
   y: number;
   position: Position;
@@ -20,24 +22,13 @@ function EndKnob({
         role="button"
         aria-label={`Drag ${end} end`}
         className="noodle-end-dot nodrag nopan"
-        onMouseDown={(event) => {
+        onPointerDown={(event) => {
           if (event.button !== 0) return;
-          const edge = event.currentTarget.closest(".react-flow__edge");
-          const anchor = edge?.querySelector(`.react-flow__edgeupdater-${end}`);
+          const anchor = edgeAnchor(edgeId, end);
           if (!(anchor instanceof Element)) return;
           event.preventDefault();
           event.stopPropagation();
-          anchor.dispatchEvent(
-            new MouseEvent("mousedown", {
-              bubbles: true,
-              cancelable: true,
-              clientX: event.clientX,
-              clientY: event.clientY,
-              button: 0,
-              buttons: 1,
-              view: window,
-            }),
-          );
+          forwardEndDrag(anchor, event);
         }}
       />
     </foreignObject>
@@ -60,10 +51,10 @@ export default function NoodleEdge(props: EdgeProps) {
     <>
       <SmoothStepEdge {...props} sourcePosition={sourcePosition} targetPosition={targetPosition} />
       {sourceType !== ENDPOINT_TYPE && (
-        <EndKnob x={props.sourceX} y={props.sourceY} position={props.sourcePosition} end="source" />
+        <EndKnob edgeId={props.id} x={props.sourceX} y={props.sourceY} position={props.sourcePosition} end="source" />
       )}
       {targetType !== ENDPOINT_TYPE && (
-        <EndKnob x={props.targetX} y={props.targetY} position={props.targetPosition} end="target" />
+        <EndKnob edgeId={props.id} x={props.targetX} y={props.targetY} position={props.targetPosition} end="target" />
       )}
     </>
   );

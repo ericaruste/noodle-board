@@ -364,9 +364,14 @@ function Board() {
     const nextEdges = edgesRef.current.filter(
       (edge) => !edge.selected && !removed.has(edge.source) && !removed.has(edge.target),
     );
+    const nextNodes = pruneEndpoints(
+      nodesRef.current.filter((node) => !node.selected),
+      nextEdges,
+    );
+    nodesRef.current = nextNodes;
     edgesRef.current = nextEdges;
+    setNodes(nextNodes);
     setEdges(nextEdges);
-    setNodes((current) => pruneEndpoints(current.filter((node) => !node.selected), nextEdges));
   }, [takeSnapshot]);
 
   const undo = useCallback(() => {
@@ -374,6 +379,8 @@ function Board() {
     if (!previous) return;
     futureRef.current.push(cloneSnapshot(nodesRef.current, edgesRef.current));
     applyingHistory.current = true;
+    nodesRef.current = previous.nodes;
+    edgesRef.current = previous.edges;
     setNodes(previous.nodes);
     setEdges(previous.edges);
     queueMicrotask(() => {
@@ -386,6 +393,8 @@ function Board() {
     if (!next) return;
     pastRef.current.push(cloneSnapshot(nodesRef.current, edgesRef.current));
     applyingHistory.current = true;
+    nodesRef.current = next.nodes;
+    edgesRef.current = next.edges;
     setNodes(next.nodes);
     setEdges(next.edges);
     queueMicrotask(() => {

@@ -122,6 +122,26 @@ export function pruneEndpoints(nodes: Node[], edges: Edge[]) {
   return nodes.filter((node) => node.type !== ENDPOINT_TYPE || used.has(node.id));
 }
 
+export function edgeAnchor(edgeId: string, end: "source" | "target") {
+  return document.querySelector(
+    `[data-testid="rf__edge-${CSS.escape(edgeId)}"] .react-flow__edgeupdater-${end}`,
+  );
+}
+
+export function forwardEndDrag(anchor: Element, point: { clientX: number; clientY: number }) {
+  anchor.dispatchEvent(
+    new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      clientX: point.clientX,
+      clientY: point.clientY,
+      button: 0,
+      buttons: 1,
+      view: window,
+    }),
+  );
+}
+
 export function pointFromEvent(event: MouseEvent | TouchEvent) {
   if ("changedTouches" in event && event.changedTouches.length > 0) {
     const touch = event.changedTouches[0];
