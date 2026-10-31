@@ -1,7 +1,7 @@
 ---
 id: NB-07
 title: Add Text objects
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Canvas]
 parent: NB-E3
