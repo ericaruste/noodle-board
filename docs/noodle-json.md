@@ -44,11 +44,13 @@ Image nodes keep the picture inline as a data URL on `data.src`. Files can be la
 - Chromium (and other browsers with the File System Access API): `showSaveFilePicker`, then `FileSystemFileHandle.createWritable()`. **Save** overwrites the handle chosen earlier in this session. **Save As** always opens the picker. The `name` field is the file name without `.noodle.json`.
 - Browsers without that API: the same JSON is downloaded with `<a download>`. **Save As** asks for a name first. The suggested file name is `{name}.noodle.json`.
 
-The handle is kept for the current session only. Autosave of the on-screen board still writes `{ nodes, edges }` to `localStorage` key `noodle-board`. Save does not clear that draft. Binding later edits to the file is NB-06.
+A successful **Save**, **Save As**, or **Open** records the board in IndexedDB (`noodle-board` / `recents`): `{ id, name, lastOpened, fileHandle? }`. The list is capped at 8. Handles stay in IndexedDB, not `localStorage`. **Recent** shows the name and a relative time. Choosing one reopens the stored handle in Chromium (prompting for readwrite permission when it is not already granted). Browsers that cannot store a handle still list the name; choosing it opens the file picker. A handle whose file was moved or deleted is marked unavailable and does not crash the board.
+
+While a file handle is bound and readwrite permission is already granted, canvas changes debounce-write to that file. The `localStorage` key `noodle-board` stays the Untitled draft and is only updated while no file is bound.
 
 ## How a file is opened
 
-**Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name. Opening records one undo snapshot first, so undo restores the previous board, its viewport, and its name.
+**Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name, and the file is added to **Recent**. Opening records one undo snapshot first, so undo restores the previous board, its viewport, its name, and its file binding.
 
 Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without text and a known color, an image without `data.src`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
 

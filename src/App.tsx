@@ -28,14 +28,18 @@ import "@xyflow/react/dist/style.css";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import {
+  ensureReadWritePermission,
+  isMissingFileError,
   isNoodleProjectFile,
   pickNoodleProjectFile,
   projectNameFromFileName,
   readNoodleProjectFile,
   saveNoodleProject,
   visibleOpenError,
+  writeBoundNoodleFile,
   type NoodleViewport,
 } from "./noodleFile";
+import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./recents";
 import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
@@ -59,6 +63,7 @@ import {
 
 const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
+const AUTOSAVE_MS = 700;
 
 const nodeTypes = { sticky: StickyNode, image: ImageNode, endpoint: EndpointNode };
 const edgeTypes = { smoothstep: NoodleEdge };
@@ -79,6 +84,7 @@ type Snapshot = {
   viewport?: NoodleViewport;
   documentName?: string;
   fileHandle?: FileSystemFileHandle | null;
+  recentId?: string | null;
 };
 
 function cloneSnapshot(nodes: Node[], edges: Edge[]): Snapshot {
@@ -144,19 +150,38 @@ function Board() {
   const fileHandleRef = useRef<FileSystemFileHandle | null>(null);
   const savingRef = useRef(false);
   const openingRef = useRef(false);
+  const recentsRef = useRef<RecentProject[]>([]);
+  const autosaveTimerRef = useRef<number | null>(null);
+  const suppressAutosaveRef = useRef(false);
+  const blockMoveAutosaveRef = useRef(false);
+  const boundRecentIdRef = useRef<string | null>(null);
+  const autosaveErrorRef = useRef<string | null>(null);
+  const fileErrorRef = useRef<string | null>(null);
+  const flushAutosaveRef = useRef<() => void>(() => {});
   const [documentName, setDocumentName] = useState("Untitled");
   const [fileError, setFileError] = useState<string | null>(null);
+  const [boundHandle, setBoundHandle] = useState<FileSystemFileHandle | null>(null);
+  const [recents, setRecents] = useState<RecentProject[]>([]);
 
   useEffect(() => {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
 
+  useEffect(() => {
+    fileErrorRef.current = fileError;
+  }, [fileError]);
+
+  useEffect(() => {
+    recentsRef.current = recents;
+  }, [recents]);
+
   const rememberBoard = useCallback(
     (view?: {
       viewport: NoodleViewport;
       documentName: string;
       fileHandle: FileSystemFileHandle | null;
+      recentId: string | null;
     }) => {
       if (applyingHistory.current) return;
       const snapshot = cloneSnapshot(nodesRef.current, edgesRef.current);
@@ -164,6 +189,7 @@ function Board() {
         snapshot.viewport = view.viewport;
         snapshot.documentName = view.documentName;
         snapshot.fileHandle = view.fileHandle;
+        snapshot.recentId = view.recentId;
       }
       pastRef.current.push(snapshot);
       if (pastRef.current.length > MAX_HISTORY) pastRef.current.shift();
@@ -194,12 +220,13 @@ function Board() {
   }, [takeSnapshot]);
 
   useEffect(() => {
-    // Untitled draft. Saving a .noodle.json must not clear this; NB-06 binds autosave to a file.
+    // Untitled draft. A bound file is debounce-written instead, so this copy stays put.
+    if (boundHandle) return;
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ nodes, edges }),
     );
-  }, [nodes, edges]);
+  }, [nodes, edges, boundHandle]);
 
   useEffect(() => {
     const onUpdate = (event: Event) => {
@@ -439,7 +466,11 @@ function Board() {
         documentNameRef.current = snapshot.documentName;
         setDocumentName(snapshot.documentName);
       }
-      if (snapshot.fileHandle !== undefined) fileHandleRef.current = snapshot.fileHandle;
+      if (snapshot.fileHandle !== undefined) {
+        fileHandleRef.current = snapshot.fileHandle;
+        setBoundHandle(snapshot.fileHandle);
+      }
+      if (snapshot.recentId !== undefined) boundRecentIdRef.current = snapshot.recentId;
       queueMicrotask(() => {
         applyingHistory.current = false;
       });
@@ -455,6 +486,7 @@ function Board() {
       current.viewport = getViewport();
       current.documentName = documentNameRef.current;
       current.fileHandle = fileHandleRef.current;
+      current.recentId = boundRecentIdRef.current;
     }
     futureRef.current.push(current);
     applyHistory(previous);
@@ -468,13 +500,109 @@ function Board() {
       current.viewport = getViewport();
       current.documentName = documentNameRef.current;
       current.fileHandle = fileHandleRef.current;
+      current.recentId = boundRecentIdRef.current;
     }
     pastRef.current.push(current);
     applyHistory(next);
   }, [applyHistory, getViewport]);
 
+  const clearAutosaveTimer = useCallback(() => {
+    if (autosaveTimerRef.current != null) {
+      window.clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleAutosave = useCallback(() => {
+    clearAutosaveTimer();
+    autosaveTimerRef.current = window.setTimeout(() => {
+      autosaveTimerRef.current = null;
+      flushAutosaveRef.current();
+    }, AUTOSAVE_MS);
+  }, [clearAutosaveTimer]);
+
+  const recordRecent = useCallback(async (name: string, handle: FileSystemFileHandle | null, id?: string) => {
+    try {
+      boundRecentIdRef.current = await rememberRecent({ name, fileHandle: handle, id });
+      autosaveErrorRef.current = null;
+      setRecents(await listRecents());
+    } catch {
+      // The board still opens and saves when recents storage is unavailable.
+    }
+  }, []);
+
+  const releaseMissingFile = useCallback(async (handle: FileSystemFileHandle, message: string) => {
+    if (fileHandleRef.current === handle) {
+      fileHandleRef.current = null;
+      setBoundHandle(null);
+    }
+    const id = boundRecentIdRef.current;
+    if (id) {
+      try {
+        await markRecentUnavailable(id);
+        setRecents(await listRecents());
+      } catch {
+        // The banner still reports the missing file.
+      }
+    }
+    autosaveErrorRef.current = message;
+    setFileError(message);
+  }, []);
+
+  const flushAutosave = useCallback(async () => {
+    const handle = fileHandleRef.current;
+    if (!handle) return;
+    if (savingRef.current || openingRef.current) {
+      scheduleAutosave();
+      return;
+    }
+    const result = await writeBoundNoodleFile({
+      handle,
+      name: documentNameRef.current,
+      viewport: getViewport(),
+      nodes: nodesRef.current,
+      edges: edgesRef.current,
+    });
+    if (fileHandleRef.current !== handle) return;
+    if (result.ok) {
+      if (fileErrorRef.current && fileErrorRef.current === autosaveErrorRef.current) setFileError(null);
+      autosaveErrorRef.current = null;
+      return;
+    }
+    if (result.missing) {
+      await releaseMissingFile(handle, result.message);
+      return;
+    }
+    if (autosaveErrorRef.current !== result.message) {
+      autosaveErrorRef.current = result.message;
+      setFileError(result.message);
+    }
+  }, [getViewport, releaseMissingFile, scheduleAutosave]);
+
+  useEffect(() => {
+    flushAutosaveRef.current = () => {
+      void flushAutosave();
+    };
+  }, [flushAutosave]);
+
+  useEffect(() => {
+    void listRecents()
+      .then(setRecents)
+      .catch(() => setRecents([]));
+  }, []);
+
+  useEffect(() => {
+    if (suppressAutosaveRef.current) {
+      suppressAutosaveRef.current = false;
+      return;
+    }
+    if (!boundHandle) return;
+    scheduleAutosave();
+    return () => clearAutosaveTimer();
+  }, [nodes, edges, boundHandle, scheduleAutosave, clearAutosaveTimer]);
+
   const openProjectFile = useCallback(
-    async (file: File, handle: FileSystemFileHandle | null) => {
+    async (file: File, handle: FileSystemFileHandle | null, recentId?: string) => {
       try {
         const snapshot = await readNoodleProjectFile(file);
         if (savingRef.current) {
@@ -498,12 +626,18 @@ function Board() {
           viewport: getViewport(),
           documentName: documentNameRef.current,
           fileHandle: fileHandleRef.current,
+          recentId: boundRecentIdRef.current,
         });
         const nextNodes = pruneEndpoints(snapshot.nodes, snapshot.edges);
         const nextEdges = snapshot.edges.map((edge) =>
           edge.zIndex == null ? { ...edge, zIndex: NOODLE_Z_INDEX } : edge,
         );
         const name = projectNameFromFileName(file.name);
+        suppressAutosaveRef.current = true;
+        blockMoveAutosaveRef.current = true;
+        window.setTimeout(() => {
+          blockMoveAutosaveRef.current = false;
+        }, 400);
         nodesRef.current = nextNodes;
         edgesRef.current = nextEdges;
         documentNameRef.current = name;
@@ -511,13 +645,15 @@ function Board() {
         setNodes(nextNodes);
         setEdges(nextEdges);
         setDocumentName(name);
+        setBoundHandle(handle);
         setFileError(null);
         placeViewport(snapshot.viewport);
+        await recordRecent(name, handle, recentId);
       } catch (error) {
         setFileError(visibleOpenError(error));
       }
     },
-    [getViewport, placeViewport, rememberBoard],
+    [getViewport, placeViewport, recordRecent, rememberBoard],
   );
 
   const openProject = useCallback(async () => {
@@ -554,14 +690,66 @@ function Board() {
           documentNameRef.current = result.name;
           fileHandleRef.current = result.handle;
           setDocumentName(result.name);
+          setBoundHandle(result.handle);
+          await recordRecent(result.name, result.handle);
           return;
         }
-        if (!result.aborted) setFileError(result.message);
+        if (result.aborted) return;
+        if (result.missing && fileHandleRef.current) {
+          await releaseMissingFile(fileHandleRef.current, result.message);
+          return;
+        }
+        setFileError(result.message);
       } finally {
         savingRef.current = false;
       }
     },
-    [getViewport],
+    [getViewport, recordRecent, releaseMissingFile],
+  );
+
+  const reopenRecent = useCallback(
+    async (id: string) => {
+      if (savingRef.current || openingRef.current) return;
+      const recent = recentsRef.current.find((item) => item.id === id);
+      if (!recent) return;
+      openingRef.current = true;
+      setFileError(null);
+      try {
+        if (recent.fileHandle) {
+          try {
+            const allowed = await ensureReadWritePermission(recent.fileHandle);
+            if (!allowed) {
+              setFileError("Could not open this file. File permission was not granted.");
+              return;
+            }
+            const file = await recent.fileHandle.getFile();
+            await openProjectFile(file, recent.fileHandle, recent.id);
+          } catch (error) {
+            if (isMissingFileError(error)) {
+              try {
+                await markRecentUnavailable(recent.id);
+                setRecents(await listRecents());
+              } catch {
+                // The banner still reports the missing file.
+              }
+              setFileError("Could not open this file. It was moved or deleted.");
+              return;
+            }
+            setFileError(visibleOpenError(error));
+          }
+          return;
+        }
+        const picked = await pickNoodleProjectFile();
+        if (!picked.ok) {
+          if (!picked.aborted) setFileError(picked.message);
+          return;
+        }
+        await openProjectFile(picked.file, picked.handle, recent.id);
+      } finally {
+        openingRef.current = false;
+      }
+    },
+    [openProjectFile],
   );
 
   useEffect(() => {
@@ -646,7 +834,9 @@ function Board() {
           <div className="min-w-0 self-start min-[800px]:justify-self-start">
             <SaveToolbar
               documentName={documentName}
+              recents={recents}
               onOpen={() => void openProject()}
+              onOpenRecent={(id) => void reopenRecent(id)}
               onSave={() => void saveProject("save")}
               onSaveAs={() => void saveProject("save-as")}
             />
@@ -713,6 +903,10 @@ function Board() {
           }}
           onNodeDragStop={() => {
             dragSnapshotTaken.current = false;
+          }}
+          onMoveEnd={() => {
+            if (blockMoveAutosaveRef.current || !fileHandleRef.current) return;
+            scheduleAutosave();
           }}
           proOptions={{ hideAttribution: true }}
         >

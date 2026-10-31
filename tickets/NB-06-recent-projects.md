@@ -1,7 +1,7 @@
 ---
 id: NB-06
 title: Recent projects list and reopen
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, Persistence]
 parent: NB-E2
@@ -29,14 +29,14 @@ Users cannot see recently opened boards or jump back to a file without hunting i
 
 ## Acceptance criteria
 
-- [ ] IndexedDB (or equivalent) stores recents: `{ id, name, lastOpened, fileHandle? }`
-- [ ] UI lists recent projects (name + relative time). Choosing one reopens it
-- [ ] Chrome/Edge: stored `FileSystemFileHandle` is used; if permission is not granted, prompt and then read
-- [ ] Firefox/Safari: recents still show names; activating one opens a file picker (or loads an IDB-backed copy if you stored the JSON)
-- [ ] Successful Save As / Open from NB-04/NB-05 inserts or updates the recents row
-- [ ] Untitled localStorage draft remains the fallback when no file is bound
-- [ ] When a file is bound and permission is granted, canvas changes debounce-write to that file
-- [ ] Broken handles (file moved/deleted) are removed or marked unavailable without crashing
+- [x] IndexedDB (or equivalent) stores recents: `{ id, name, lastOpened, fileHandle? }`
+- [x] UI lists recent projects (name + relative time). Choosing one reopens it
+- [x] Chrome/Edge: stored `FileSystemFileHandle` is used; if permission is not granted, prompt and then read
+- [x] Firefox/Safari: recents still show names; activating one opens a file picker (or loads an IDB-backed copy if you stored the JSON)
+- [x] Successful Save As / Open from NB-04/NB-05 inserts or updates the recents row
+- [x] Untitled localStorage draft remains the fallback when no file is bound
+- [x] When a file is bound and permission is granted, canvas changes debounce-write to that file
+- [x] Broken handles (file moved/deleted) are removed or marked unavailable without crashing
 
 ## Technical notes
 

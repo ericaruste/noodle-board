@@ -24,7 +24,16 @@ export type NoodleSaveMode = "save" | "save-as";
 export type NoodleSaveResult =
   | { ok: true; name: string; handle: FileSystemFileHandle | null }
   | { ok: false; aborted: true }
-  | { ok: false; aborted: false; message: string };
+  | { ok: false; aborted: false; message: string; missing?: boolean };
+
+export type NoodleWriteResult =
+  | { ok: true }
+  | { ok: false; missing: boolean; denied: boolean; message: string };
+
+type HandleWithPermission = FileSystemFileHandle & {
+  queryPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
+  requestPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
+};
 
 type SaveFilePickerOptions = {
   suggestedName?: string;
@@ -279,22 +288,27 @@ function pickWithInput(): Promise<File | null> {
   });
 }
 
-async function writableOpenHandle(handle: FileSystemFileHandle): Promise<FileSystemFileHandle | null> {
-  const withPermission = handle as FileSystemFileHandle & {
-    queryPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
-    requestPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
-  };
-  if (!withPermission.requestPermission) return handle;
-  try {
-    const current = withPermission.queryPermission
-      ? await withPermission.queryPermission({ mode: "readwrite" })
-      : "prompt";
-    if (current === "granted") return handle;
-    const next = await withPermission.requestPermission({ mode: "readwrite" });
-    return next === "granted" ? handle : null;
-  } catch {
-    return null;
-  }
+export function isMissingFileError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "NotFoundError";
+}
+
+/** Read the current readwrite grant. Does not prompt. Missing permission APIs count as granted. */
+export async function queryReadWritePermission(handle: FileSystemFileHandle): Promise<PermissionState> {
+  const withPermission = handle as HandleWithPermission;
+  if (!withPermission.queryPermission) return "granted";
+  return withPermission.queryPermission({ mode: "readwrite" });
+}
+
+/** Prompt when readwrite is not already granted. Call this from a click, before `getFile` or `createWritable`. */
+export async function ensureReadWritePermission(handle: FileSystemFileHandle): Promise<boolean> {
+  const withPermission = handle as HandleWithPermission;
+  if (!withPermission.requestPermission) return true;
+  const current = withPermission.queryPermission
+    ? await withPermission.queryPermission({ mode: "readwrite" })
+    : "prompt";
+  if (current === "granted") return true;
+  const next = await withPermission.requestPermission({ mode: "readwrite" });
+  return next === "granted";
 }
 
 export async function pickNoodleProjectFile(): Promise<NoodleOpenPick> {
@@ -307,13 +321,23 @@ export async function pickNoodleProjectFile(): Promise<NoodleOpenPick> {
       const [handle] = await showOpenFilePicker({ multiple: false, types: PROJECT_FILE_TYPES });
       if (!handle) return { ok: false, aborted: true };
       const file = await handle.getFile();
-      return { ok: true, file, handle: await writableOpenHandle(handle) };
+      try {
+        await ensureReadWritePermission(handle);
+      } catch (error) {
+        if (isMissingFileError(error)) {
+          return { ok: false, aborted: false, message: "Could not open this file. It was moved or deleted." };
+        }
+      }
+      return { ok: true, file, handle };
     }
     const file = await pickWithInput();
     if (!file) return { ok: false, aborted: true };
     return { ok: true, file, handle: null };
   } catch (error) {
     if (isAbortError(error)) return { ok: false, aborted: true };
+    if (isMissingFileError(error)) {
+      return { ok: false, aborted: false, message: "Could not open this file. It was moved or deleted." };
+    }
     return { ok: false, aborted: false, message: visibleOpenError(error) };
   }
 }
@@ -327,6 +351,45 @@ export function visibleSaveError(error: unknown): string {
     return `Could not save this board. ${error.message}`;
   }
   return "Could not save this board.";
+}
+
+const FILE_MISSING_MESSAGE = "Could not save this board. The file was moved or deleted.";
+const FILE_DENIED_MESSAGE = "Could not save this board. File permission was not granted.";
+
+/** Write the current board to a bound handle when readwrite is already granted. Does not prompt. */
+export async function writeBoundNoodleFile(input: {
+  handle: FileSystemFileHandle;
+  name: string;
+  viewport: NoodleViewport;
+  nodes: Node[];
+  edges: Edge[];
+}): Promise<NoodleWriteResult> {
+  let json: string;
+  try {
+    json = stringifyNoodleDocument(
+      buildNoodleDocument({
+        name: input.name,
+        viewport: input.viewport,
+        nodes: input.nodes,
+        edges: input.edges,
+      }),
+    );
+  } catch (error) {
+    return { ok: false, missing: false, denied: false, message: visibleSaveError(error) };
+  }
+  try {
+    const permission = await queryReadWritePermission(input.handle);
+    if (permission !== "granted") {
+      return { ok: false, missing: false, denied: true, message: FILE_DENIED_MESSAGE };
+    }
+    await writeToHandle(input.handle, json);
+    return { ok: true };
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      return { ok: false, missing: true, denied: false, message: FILE_MISSING_MESSAGE };
+    }
+    return { ok: false, missing: false, denied: false, message: visibleSaveError(error) };
+  }
 }
 
 async function writeToHandle(handle: FileSystemFileHandle, json: string): Promise<void> {
@@ -387,6 +450,10 @@ export async function saveNoodleProject(input: {
   try {
     const picker = canUseSaveFilePicker();
     if (input.mode === "save" && input.handle && picker) {
+      const allowed = await ensureReadWritePermission(input.handle);
+      if (!allowed) {
+        return { ok: false, aborted: false, message: FILE_DENIED_MESSAGE };
+      }
       await writeToHandle(input.handle, json);
       return { ok: true, name: input.name, handle: input.handle };
     }
@@ -422,6 +489,9 @@ export async function saveNoodleProject(input: {
     return { ok: true, name, handle: null };
   } catch (error) {
     if (isAbortError(error)) return { ok: false, aborted: true };
+    if (isMissingFileError(error)) {
+      return { ok: false, aborted: false, missing: true, message: FILE_MISSING_MESSAGE };
+    }
     return { ok: false, aborted: false, message: visibleSaveError(error) };
   }
 }
