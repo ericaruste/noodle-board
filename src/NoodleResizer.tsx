@@ -10,9 +10,9 @@ const HANDLE_PX = 12;
 const STROKE_PX = 1;
 const DASH_PX = 6;
 const DASH_GAP_PX = 5;
-const GAP_PX = 2;
+export const GAP_PX = 2;
 
-function zoomCompensate(zoom: number) {
+export function zoomCompensate(zoom: number) {
   const inverse = Math.max(1 / zoom, 1);
   return inverse ** 0.65;
 }

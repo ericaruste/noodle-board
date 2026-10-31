@@ -25,11 +25,12 @@ export function outward(fromX: number, fromY: number, toX: number, toY: number):
   return dy >= 0 ? Side.Bottom : Side.Top;
 }
 
-export function knobCenter(x: number, y: number, position: Position) {
-  if (position === Side.Left) return { cx: x - END_RADIUS, cy: y };
-  if (position === Side.Right) return { cx: x + END_RADIUS, cy: y };
-  if (position === Side.Top) return { cx: x, cy: y - END_RADIUS };
-  return { cx: x, cy: y + END_RADIUS };
+/** Center a knob so its rim, not its middle, sits on the noodle tip. */
+export function knobOnRim(x: number, y: number, position: Position, radius: number) {
+  if (position === Side.Left) return { cx: x + radius, cy: y };
+  if (position === Side.Right) return { cx: x - radius, cy: y };
+  if (position === Side.Top) return { cx: x, cy: y + radius };
+  return { cx: x, cy: y - radius };
 }
 
 export function makeEndpoint(id: string, position: { x: number; y: number }): Node {
