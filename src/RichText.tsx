@@ -408,6 +408,17 @@ export function RichText({
     }
   }, [editing]);
 
+  const commitDraft = (): TextBody => {
+    const root = editorRef.current;
+    if (!root || modelEdit.current) return draftRef.current;
+    const next = bodyFromEditor(root, draftRef.current);
+    if (sameBody(next, draftRef.current)) return draftRef.current;
+    const domParagraphs = root.querySelectorAll("[data-paragraph]").length;
+    if (domParagraphs !== 0 && domParagraphs < draftRef.current.length) return draftRef.current;
+    draftRef.current = next;
+    return next;
+  };
+
   useEffect(() => {
     if (!editing) return;
     const onPointerDown = (event: PointerEvent) => {
@@ -415,7 +426,7 @@ export function RichText({
       if (!(target instanceof Node)) return;
       const host = rootRef.current?.closest(".noodle-node");
       if (rootRef.current?.contains(target) || host?.contains(target)) return;
-      onCommitRef.current(draftRef.current);
+      onCommitRef.current(commitDraft());
     };
     const onSelection = () => {
       if (!editorRef.current) return;
@@ -569,6 +580,22 @@ export function RichText({
     }
   };
 
+  const toggleMark = (kind: "bold" | "italic") => {
+    const source = draftRef.current;
+    const current = normalizeRange(source, liveRange());
+    const marks =
+      isCollapsed(current) && pendingRef.current
+        ? [pendingRef.current]
+        : stylesInRange(source, current);
+    const allBold = marks.every((style) => style === "bold" || style === "bold-italic");
+    const allItalic = marks.every((style) => style === "italic" || style === "bold-italic");
+    const bold = kind === "bold" ? !allBold : allBold;
+    const italic = kind === "italic" ? !allItalic : allItalic;
+    const style: FontStyle =
+      bold && italic ? "bold-italic" : bold ? "bold" : italic ? "italic" : "regular";
+    changeStyle(style);
+  };
+
   const onBeforeInput = (event: FormEvent<HTMLDivElement>) => {
     const native = event.nativeEvent as InputEvent;
     if (native.isComposing || composing.current || native.inputType === "insertCompositionText") return;
@@ -589,6 +616,19 @@ export function RichText({
       "historyUndo",
       "historyRedo",
     ];
+    if (native.inputType === "formatBold" || native.inputType === "formatItalic") {
+      event.preventDefault();
+      if (skipNative.current === native.inputType) {
+        skipNative.current = null;
+        return;
+      }
+      toggleMark(native.inputType === "formatBold" ? "bold" : "italic");
+      return;
+    }
+    if (native.inputType.startsWith("format")) {
+      event.preventDefault();
+      return;
+    }
     if (!handled.includes(native.inputType)) return;
     event.preventDefault();
     if (native.inputType === "insertText") applyTyped(native.data ?? "");
@@ -618,6 +658,13 @@ export function RichText({
       setDraft(restored);
       setLinkOpen(false);
       onCancelRef.current();
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && (event.key.toLowerCase() === "b" || event.key.toLowerCase() === "i")) {
+      event.preventDefault();
+      const kind = event.key.toLowerCase() === "b" ? "bold" : "italic";
+      armSkip(kind === "bold" ? "formatBold" : "formatItalic");
+      toggleMark(kind);
       return;
     }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
@@ -763,7 +810,7 @@ export function RichText({
                         if (!editingRef.current) return;
                         const active = document.activeElement;
                         if (active instanceof Node && rootRef.current?.contains(active)) return;
-                        onCommitRef.current(draftRef.current);
+                        onCommitRef.current(commitDraft());
                       }, 0);
                     }
                   : undefined
