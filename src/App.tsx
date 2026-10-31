@@ -30,8 +30,7 @@ import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
-import PortMagnet from "./PortMagnet";
-import { getHotPort } from "./portHot";
+import PortMagnet, { nearestPort } from "./PortMagnet";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -278,7 +277,7 @@ function Board() {
       reconnectRef.current = null;
       rfConnectionRef.current = null;
 
-      const hot = getHotPort();
+      const hot = nearestPort(store.getState(), connectionState.pointer);
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
       if (hotConnection && allowsPort(nodesRef.current, dragged, hotConnection)) {
         applyReconnect(edge, hotConnection);

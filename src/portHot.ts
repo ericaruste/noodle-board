@@ -8,10 +8,6 @@ function same(a: HotPort | null, b: HotPort | null) {
   return a?.nodeId === b?.nodeId && (a?.handleId ?? null) === (b?.handleId ?? null);
 }
 
-export function getHotPort() {
-  return current;
-}
-
 export function setHotPort(next: HotPort | null) {
   if (same(current, next)) return;
   current = next;

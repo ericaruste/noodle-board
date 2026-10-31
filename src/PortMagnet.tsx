@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import { useStoreApi, type ReactFlowState } from "@xyflow/react";
+import { useStoreApi, type ReactFlowState, type XYPosition } from "@xyflow/react";
 import { ENDPOINT_TYPE, PORT_SCREEN_RADIUS, type HotPort } from "./noodleEnds";
 import { setHotPort } from "./portHot";
 
-function nearestPort(state: ReactFlowState): HotPort | null {
-  if (!state.connection.inProgress) return null;
-  const { pointer, fromHandle } = state.connection;
+export function nearestPort(state: ReactFlowState, pointer?: XYPosition | null): HotPort | null {
+  const fromHandle = state.connection.fromHandle;
+  const point = pointer === undefined ? (state.connection.inProgress ? state.connection.pointer : null) : pointer;
   const [tx, ty, zoom] = state.transform;
-  if (!pointer || zoom === 0) return null;
-  const x = (pointer.x - tx) / zoom;
-  const y = (pointer.y - ty) / zoom;
+  if (!point || zoom === 0) return null;
+  const x = (point.x - tx) / zoom;
+  const y = (point.y - ty) / zoom;
   const radius = PORT_SCREEN_RADIUS / zoom;
   let best: { port: HotPort; distance: number } | null = null;
 
