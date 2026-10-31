@@ -1,7 +1,7 @@
 ---
 id: NB-04
 title: Define .noodle.json and export/save project
-status: Todo
+status: Done
 priority: 2
 labels: [Feature, Persistence]
 parent: NB-E2
@@ -26,12 +26,12 @@ There is no way to save a named board to disk or share a file. Refresh restores 
 
 ## Acceptance criteria
 
-- [ ] Documented `.noodle.json` schema: `version` (1), `name`, `updatedAt` (ISO), `viewport` `{ x, y, zoom }`, `nodes`, `edges`
-- [ ] **Save** / **Save As** writes that JSON. Prefer File System Access API (`showSaveFilePicker` + `createWritable`) in Chromium
-- [ ] Browsers without File System Access fall back to a download (`<a download>`) of the same JSON
-- [ ] Saving does not clear the localStorage Untitled draft until a later ticket binds autosave to the file (NB-06 may own bind-on-save; this ticket must at least produce a valid file)
-- [ ] Export includes current viewport and all nodes/edges (images as data URLs)
-- [ ] Invalid or huge files: if `JSON.stringify` fails, show a visible error instead of failing silently
+- [x] Documented `.noodle.json` schema: `version` (1), `name`, `updatedAt` (ISO), `viewport` `{ x, y, zoom }`, `nodes`, `edges`
+- [x] **Save** / **Save As** writes that JSON. Prefer File System Access API (`showSaveFilePicker` + `createWritable`) in Chromium
+- [x] Browsers without File System Access fall back to a download (`<a download>`) of the same JSON
+- [x] Saving does not clear the localStorage Untitled draft until a later ticket binds autosave to the file (NB-06 may own bind-on-save; this ticket must at least produce a valid file)
+- [x] Export includes current viewport and all nodes/edges (images as data URLs)
+- [x] Invalid or huge files: if `JSON.stringify` fails, show a visible error instead of failing silently
 
 ## Technical notes
 
