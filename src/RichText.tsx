@@ -199,6 +199,7 @@ export function RichText({
   const modelEdit = useRef(false);
   const ignoreBlur = useRef(false);
   const blurTimer = useRef<number | null>(null);
+  const structureAttempt = useRef(false);
   const skipNative = useRef<string | null>(null);
   const linkTargetRef = useRef<TextRange>(fullRange(body));
   const linkUrlRef = useRef("");
@@ -243,6 +244,8 @@ export function RichText({
       rangeRef.current = all;
       setRange(all);
       restoreRef.current = all;
+      setLinkOpen(false);
+    } else {
       setLinkOpen(false);
     }
   } else if (editing) {
@@ -360,14 +363,25 @@ export function RichText({
     const root = editorRef.current;
     const paragraphs = root.querySelectorAll<HTMLElement>("[data-paragraph]");
     if (paragraphs.length !== draftRef.current.length) {
-      const adopted = bodyFromEditor(root, draftRef.current);
-      if (!sameBody(adopted, draftRef.current)) {
-        const last = adopted[adopted.length - 1] ?? emptyParagraph();
-        remember(adopted, collapsedAt({ paragraph: Math.max(0, adopted.length - 1), offset: paragraphText(last).length }));
+      const modelText = draftRef.current.map((paragraph) => paragraphText(paragraph)).join("");
+      const domText = (root.textContent ?? "").replace(/\u200b/g, "");
+      if (paragraphs.length === 0 && domText.length > modelText.length && !structureAttempt.current) {
+        const adopted = bodyFromEditor(root, draftRef.current);
+        if (!sameBody(adopted, draftRef.current)) {
+          const last = adopted[adopted.length - 1] ?? emptyParagraph();
+          remember(
+            adopted,
+            collapsedAt({ paragraph: Math.max(0, adopted.length - 1), offset: paragraphText(last).length }),
+          );
+        }
       }
-      if (structureEpoch < 1) setStructureEpoch(1);
+      if (!structureAttempt.current) {
+        structureAttempt.current = true;
+        setStructureEpoch((epoch) => epoch + 1);
+      }
       return;
     }
+    structureAttempt.current = false;
     draftRef.current.forEach((paragraph, index) => {
       const runsRoot = paragraphs[index]?.querySelector("[data-runs]");
       if (!runsRoot) return;
@@ -601,6 +615,7 @@ export function RichText({
       const restored = structuredClone(bodyRef.current);
       draftRef.current = restored;
       setDraft(restored);
+      setLinkOpen(false);
       onCancelRef.current();
       return;
     }
