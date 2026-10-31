@@ -1,7 +1,7 @@
 ---
 id: NB-05
 title: Import/open a local project file
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Persistence]
 parent: NB-E2
@@ -27,12 +27,12 @@ A saved board cannot be opened. There is no validation path for project files.
 
 ## Acceptance criteria
 
-- [ ] **Open** / **Import** reads a `.noodle.json` (File System Access `showOpenFilePicker` and/or `<input type="file" accept=".json,.noodle.json">`)
-- [ ] Valid `version: 1` files replace the on-screen nodes, edges, and viewport
-- [ ] Restored stickies, images, and noodles match the file (text, colors, data URLs, connections)
-- [ ] Invalid JSON, missing `nodes`/`edges`, or unsupported `version` shows an error and leaves the current board unchanged
-- [ ] Opening takes a single undo snapshot (undo returns to the previous board)
-- [ ] Dropping a `.noodle.json` on the canvas may open it or be ignored; dropping an image still adds an image node
+- [x] **Open** / **Import** reads a `.noodle.json` (File System Access `showOpenFilePicker` and/or `<input type="file" accept=".json,.noodle.json">`)
+- [x] Valid `version: 1` files replace the on-screen nodes, edges, and viewport
+- [x] Restored stickies, images, and noodles match the file (text, colors, data URLs, connections)
+- [x] Invalid JSON, missing `nodes`/`edges`, or unsupported `version` shows an error and leaves the current board unchanged
+- [x] Opening takes a single undo snapshot (undo returns to the previous board)
+- [x] Dropping a `.noodle.json` on the canvas may open it or be ignored; dropping an image still adds an image node
 
 ## Technical notes
 
