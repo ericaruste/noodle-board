@@ -112,6 +112,62 @@ body,
   transform: translate(calc(50% + var(--noodle-handle-outset, 14px)), -50%);
 }
 
+.noodle-text-toolbar {
+  bottom: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
+}
+
+.noodle-text-editor {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  outline: none;
+}
+
+.noodle-text-editor[contenteditable="true"] {
+  user-select: text;
+  cursor: text;
+}
+
+.noodle-text-paragraph {
+  display: flex;
+  align-items: flex-start;
+}
+
+.noodle-text-marker {
+  user-select: none;
+  flex: 0 0 auto;
+  min-width: 1.5em;
+  padding-right: 0.4em;
+  text-align: right;
+  color: #334155;
+}
+
+.noodle-text-runs {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.noodle-align-left {
+  text-align: left;
+  text-align-last: auto;
+}
+
+.noodle-align-center {
+  text-align: center;
+  text-align-last: auto;
+}
+
+.noodle-align-right {
+  text-align: right;
+  text-align-last: auto;
+}
+
+.noodle-align-justify {
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-word;
+}
+
 .noodle-node .noodle-sticky-colors {
   top: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
   bottom: auto;

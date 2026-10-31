@@ -1,5 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import { STICKY_COLORS } from "./StickyNode";
+import { isTextBody } from "./textBody";
 
 /** On-disk project format. See docs/noodle-json.md. */
 export const NOODLE_FILE_VERSION = 1;
@@ -68,7 +69,7 @@ const OPEN_NOT_PROJECT = "Could not open this file. It is not a Noodle Board pro
 const OPEN_MISSING = "Could not open this file. It is missing nodes or edges.";
 const OPEN_INVALID_CONTENTS = "Could not open this file. It has invalid nodes or edges.";
 const OPEN_INVALID_VIEWPORT = "Could not open this file. It has an invalid viewport.";
-const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "endpoint"]);
+const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "text", "endpoint"]);
 
 /** Board restored from a version-1 `.noodle.json` file. */
 export type NoodleSnapshot = {
@@ -171,16 +172,28 @@ function unsupportedVersionMessage(version: number): string {
   return `Could not open this file. Version ${version} is not supported. Only version ${NOODLE_FILE_VERSION} can be opened.`;
 }
 
+function isStickyData(data: unknown): boolean {
+  if (!isRecord(data)) return false;
+  if (typeof data.color !== "string" || !(data.color in STICKY_COLORS)) return false;
+  const hasText = typeof data.text === "string";
+  const hasParagraphs = isTextBody(data.paragraphs);
+  if (data.paragraphs !== undefined && !hasParagraphs && !hasText) return false;
+  return hasText || hasParagraphs;
+}
+
+function isTextNodeData(data: unknown): boolean {
+  if (!isRecord(data) || !isTextBody(data.paragraphs)) return false;
+  if (data.fontSize === undefined) return true;
+  return finiteNumber(data.fontSize) && data.fontSize > 0;
+}
+
 function isNodeRecord(value: unknown): value is Node {
   if (!isRecord(value) || typeof value.id !== "string" || value.id.length === 0) return false;
   if (!isRecord(value.position)) return false;
   if (!finiteNumber(value.position.x) || !finiteNumber(value.position.y)) return false;
   if (typeof value.type !== "string" || !RENDERABLE_NODE_TYPES.has(value.type)) return false;
-  if (value.type === "sticky") {
-    if (!isRecord(value.data)) return false;
-    if (typeof value.data.text !== "string") return false;
-    if (typeof value.data.color !== "string" || !(value.data.color in STICKY_COLORS)) return false;
-  }
+  if (value.type === "sticky" && !isStickyData(value.data)) return false;
+  if (value.type === "text" && !isTextNodeData(value.data)) return false;
   if (value.type === "image") {
     if (!isRecord(value.data) || typeof value.data.src !== "string") return false;
   }
