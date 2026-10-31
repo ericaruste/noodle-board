@@ -26,7 +26,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 
 ### Build order
 
-1. **E1 bugs** — NB-01, NB-02, NB-03 (noodles, resize, detach)
+1. **E1 bugs** — NB-01, NB-02, NB-03, NB-13 (noodles, resize, detach, image shape)
 2. **Chrome** — NB-11, NB-10 (bottom icon toolbar, frosted glass)
 3. **Persistence** — NB-04, then NB-05 and NB-06 (file format, import, recents)
 4. **New objects** — NB-07, NB-08, NB-09 (text, shapes, arrows). NB-09 should follow NB-01 so new connectors are not hidden under images.
