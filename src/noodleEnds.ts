@@ -101,14 +101,17 @@ type EndConnection = {
   targetHandle?: string | null;
 };
 
-export function allowsPort(nodes: Node[], dragged: HandleType, connection: EndConnection) {
-  if (!connection.source || !connection.target) return false;
-  if (
+export function sameHandle(connection: EndConnection) {
+  return (
+    !!connection.source &&
     connection.source === connection.target &&
     (connection.sourceHandle ?? null) === (connection.targetHandle ?? null)
-  ) {
-    return false;
-  }
+  );
+}
+
+export function allowsPort(nodes: Node[], dragged: HandleType, connection: EndConnection) {
+  if (!connection.source || !connection.target) return false;
+  if (sameHandle(connection)) return false;
   const nextId = dragged === "source" ? connection.source : connection.target;
   return !nodes.some((node) => node.id === nextId && node.type === ENDPOINT_TYPE);
 }

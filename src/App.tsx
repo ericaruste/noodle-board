@@ -39,6 +39,7 @@ import {
   PORT_SCREEN_RADIUS,
   allowsPort,
   connectionForDrop,
+  sameHandle,
   connectionForPark,
   draggedEnd,
   makeEndpoint,
@@ -283,20 +284,20 @@ function Board() {
         applyReconnect(edge, hotConnection);
         return;
       }
-      if (hotConnection) return;
+      if (hotConnection && sameHandle(hotConnection)) return;
 
       if (rf && allowsPort(nodesRef.current, dragged, rf)) {
         applyReconnect(edge, rf);
         return;
       }
 
-      if (connectionState.isValid === false) {
-        const toId = connectionState.toHandle?.nodeId;
-        const blockedByEndpoint = nodesRef.current.some(
-          (node) => node.id === toId && node.type === ENDPOINT_TYPE,
-        );
-        if (!blockedByEndpoint) return;
-      }
+      const stationaryId = dragged === "source" ? edge.target : edge.source;
+      const stationaryHandle =
+        dragged === "source" ? (edge.targetHandle ?? null) : (edge.sourceHandle ?? null);
+      const droppedOnStationary =
+        connectionState.toHandle?.nodeId === stationaryId &&
+        (connectionState.toHandle.id ?? null) === stationaryHandle;
+      if (connectionState.isValid === false && droppedOnStationary) return;
 
       if (connectionState.from && connectionState.pointer) {
         const [tx, ty, zoom] = store.getState().transform;
