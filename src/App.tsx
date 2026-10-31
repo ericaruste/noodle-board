@@ -183,7 +183,9 @@ function Board() {
   const onConnect = useCallback(
     (connection: Connection) => {
       takeSnapshot();
-      setEdges((current) => addEdge(connection, current));
+      const next = addEdge(connection, edgesRef.current);
+      edgesRef.current = next;
+      setEdges(next);
     },
     [takeSnapshot],
   );
@@ -283,12 +285,11 @@ function Board() {
         applyReconnect(edge, hotConnection);
         return;
       }
-      if (hotConnection && sameHandle(hotConnection)) return;
-
       if (rf && allowsPort(nodesRef.current, dragged, rf)) {
         applyReconnect(edge, rf);
         return;
       }
+      if (hotConnection && sameHandle(hotConnection)) return;
 
       const stationaryId = dragged === "source" ? edge.target : edge.source;
       const stationaryHandle =
