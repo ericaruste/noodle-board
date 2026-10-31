@@ -1,7 +1,7 @@
 ---
 id: NB-04
 title: Define .noodle.json and export/save project
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Persistence]
 parent: NB-E2
