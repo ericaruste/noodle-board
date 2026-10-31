@@ -26,6 +26,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import Toolbar from "./Toolbar";
+import { saveNoodleProject } from "./noodleFile";
 import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
@@ -124,6 +125,11 @@ function Board() {
   const dragSnapshotTaken = useRef(false);
   const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
   const rfConnectionRef = useRef<Connection | null>(null);
+  const documentNameRef = useRef("Untitled");
+  const fileHandleRef = useRef<FileSystemFileHandle | null>(null);
+  const savingRef = useRef(false);
+  const [documentName, setDocumentName] = useState("Untitled");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     nodesRef.current = nodes;
@@ -143,6 +149,7 @@ function Board() {
   }, [takeSnapshot]);
 
   useEffect(() => {
+    // Untitled draft. Saving a .noodle.json must not clear this; NB-06 binds autosave to a file.
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ nodes, edges }),
@@ -403,13 +410,46 @@ function Board() {
     });
   }, []);
 
+  const saveProject = useCallback(
+    async (mode: "save" | "save-as") => {
+      if (savingRef.current) return;
+      savingRef.current = true;
+      setSaveError(null);
+      try {
+        const result = await saveNoodleProject({
+          mode,
+          name: documentNameRef.current,
+          handle: fileHandleRef.current,
+          viewport: getViewport(),
+          nodes: nodesRef.current,
+          edges: edgesRef.current,
+        });
+        if (result.ok) {
+          documentNameRef.current = result.name;
+          fileHandleRef.current = result.handle;
+          setDocumentName(result.name);
+          return;
+        }
+        if (!result.aborted) setSaveError(result.message);
+      } finally {
+        savingRef.current = false;
+      }
+    },
+    [getViewport],
+  );
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && key === "s") {
+        event.preventDefault();
+        void saveProject(event.shiftKey ? "save-as" : "save");
+        return;
+      }
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return;
       }
-      const key = event.key.toLowerCase();
       if ((event.ctrlKey || event.metaKey) && key === "z") {
         event.preventDefault();
         if (event.shiftKey) redo();
@@ -418,7 +458,7 @@ function Board() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [redo, undo]);
+  }, [redo, saveProject, undo]);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -467,7 +507,25 @@ function Board() {
           onAddImage={(file) => void addImageAt(file)}
           onDelete={deleteSelected}
           canDelete={canDelete}
+          onSave={() => void saveProject("save")}
+          onSaveAs={() => void saveProject("save-as")}
+          documentName={documentName}
         />
+        {saveError ? (
+          <div
+            role="alert"
+            className="absolute bottom-4 left-4 z-30 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
+          >
+            <span>{saveError}</span>
+            <button
+              type="button"
+              onClick={() => setSaveError(null)}
+              className="shrink-0 font-medium text-rose-800 hover:text-rose-950"
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
         <PortMagnet />
         <ReactFlow
           nodes={nodes}
@@ -521,7 +579,7 @@ function Board() {
             className="!bg-white"
           />
         </ReactFlow>
-        <div className="pointer-events-none absolute left-4 top-4 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow">
+        <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow">
           Noodle Board
         </div>
       </div>
