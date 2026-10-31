@@ -33,6 +33,20 @@ Image nodes keep the picture inline as a data URL on `data.src`. Files can be la
       "type": "image",
       "position": { "x": 300, "y": 80 },
       "data": { "src": "data:image/png;base64,..." }
+    },
+    {
+      "id": "text-1",
+      "type": "text",
+      "position": { "x": 80, "y": 300 },
+      "data": {
+        "paragraphs": [
+          {
+            "align": "left",
+            "list": "none",
+            "runs": [{ "text": "Heading", "style": "bold" }]
+          }
+        ]
+      }
     }
   ],
   "edges": []
@@ -52,7 +66,9 @@ While a file handle is bound and readwrite permission is already granted, canvas
 
 **Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name, and the file is added to **Recent**. Opening records one undo snapshot first, so undo restores the previous board, its viewport, its name, and its file binding.
 
-Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without text and a known color, an image without `data.src`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
+Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without a known color and without either a text string or paragraphs, a text node without paragraphs, an image without `data.src`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
+
+Text nodes store `data.paragraphs`. Each paragraph has `align` (`left`, `center`, `right`, or `justify`), `list` (`none`, `bullet`, or `numbered`), and `runs` of `{ text, style, href? }`. `style` is `regular`, `bold`, `italic`, or `bold-italic`. Sticky notes keep that same paragraph shape after they are edited. A sticky that only has the older `data.text` string still opens.
 
 Dropping a `.noodle.json` on the canvas opens it the same way. Dropping an image still adds an image node. If the current board is a non-empty Untitled draft, Open asks before replacing it.
 

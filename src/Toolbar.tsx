@@ -1,5 +1,6 @@
 type ToolbarProps = {
   onAddSticky: () => void;
+  onAddText: () => void;
   onAddImage: (file: File) => void;
   onDelete: () => void;
   canDelete: boolean;
@@ -7,18 +8,26 @@ type ToolbarProps = {
 
 export default function Toolbar({
   onAddSticky,
+  onAddText,
   onAddImage,
   onDelete,
   canDelete,
 }: ToolbarProps) {
   return (
-    <div className="pointer-events-auto flex items-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
+    <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
       <button
         type="button"
         onClick={onAddSticky}
         className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-amber-50"
       >
         Add Sticky Note
+      </button>
+      <button
+        type="button"
+        onClick={onAddText}
+        className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-violet-50"
+      >
+        Add Text
       </button>
       <label className="cursor-pointer whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-sky-50">
         Add Image

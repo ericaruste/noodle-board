@@ -40,7 +40,9 @@ import {
   type NoodleViewport,
 } from "./noodleFile";
 import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./recents";
-import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
+import StickyNode, { type StickyColor } from "./StickyNode";
+import TextNode from "./TextNode";
+import { emptyBody } from "./textBody";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
@@ -65,7 +67,7 @@ const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
 const AUTOSAVE_MS = 700;
 
-const nodeTypes = { sticky: StickyNode, image: ImageNode, endpoint: EndpointNode };
+const nodeTypes = { sticky: StickyNode, image: ImageNode, text: TextNode, endpoint: EndpointNode };
 const edgeTypes = { smoothstep: NoodleEdge };
 
 /** Above React Flow's selected-node z-index (1000), so noodles paint over images. */
@@ -105,6 +107,13 @@ function loadCanvas(): Snapshot {
   } catch {
     return { nodes: [], edges: [] };
   }
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  return target.isContentEditable;
 }
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -230,7 +239,7 @@ function Board() {
 
   useEffect(() => {
     const onUpdate = (event: Event) => {
-      const { id, data } = (event as CustomEvent<{ id: string; data: StickyData }>).detail;
+      const { id, data } = (event as CustomEvent<{ id: string; data: Node["data"] }>).detail;
       setNodes((current) =>
         current.map((node) => (node.id === id ? { ...node, data } : node)),
       );
@@ -411,6 +420,20 @@ function Board() {
         position: canvasCenter(),
         style: { width: 180, height: 180 },
         data: { text: "", color },
+      },
+    ]);
+  }, [canvasCenter, takeSnapshot]);
+
+  const addText = useCallback(() => {
+    takeSnapshot();
+    setNodes((current) => [
+      ...current,
+      {
+        id: crypto.randomUUID(),
+        type: "text",
+        position: canvasCenter(),
+        style: { width: 220 },
+        data: { paragraphs: emptyBody() },
       },
     ]);
   }, [canvasCenter, takeSnapshot]);
@@ -765,10 +788,7 @@ function Board() {
         void openProject();
         return;
       }
-      const target = event.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-        return;
-      }
+      if (isTypingTarget(event.target)) return;
       if ((event.ctrlKey || event.metaKey) && key === "z") {
         event.preventDefault();
         if (event.shiftKey) redo();
@@ -781,10 +801,7 @@ function Board() {
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-        return;
-      }
+      if (isTypingTarget(event.target)) return;
       const items = event.clipboardData?.items;
       if (!items) return;
       for (const item of items) {
@@ -830,7 +847,7 @@ function Board() {
           void addImageAt(file, position);
         }}
       >
-        <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] min-[800px]:items-center min-[800px]:gap-3">
+        <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[800px]:items-center min-[800px]:gap-3">
           <div className="min-w-0 self-start min-[800px]:justify-self-start">
             <SaveToolbar
               documentName={documentName}
@@ -841,9 +858,10 @@ function Board() {
               onSaveAs={() => void saveProject("save-as")}
             />
           </div>
-          <div className="flex justify-center">
+          <div className="flex min-w-0 justify-center">
             <Toolbar
               onAddSticky={addSticky}
+              onAddText={addText}
               onAddImage={(file) => void addImageAt(file)}
               onDelete={deleteSelected}
               canDelete={canDelete}
