@@ -29,7 +29,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 
 - [ ] A noodle that crosses or leaves an image is still visible and selectable
 - [ ] Selected stickies and images show a Figma-like resize cursor on the edges
-- [ ] A noodle can be reattached to another handle or deleted by dragging an end onto empty canvas
+- [ ] A noodle end can be dragged onto empty canvas, or reattached when a nearby port highlights
 - [ ] Keyboard Delete/Backspace still removes the selected noodle or node
 
 ## Out of scope
