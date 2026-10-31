@@ -25,6 +25,7 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import { saveNoodleProject } from "./noodleFile";
 import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
@@ -502,15 +503,26 @@ function Board() {
           void addImageAt(file, position);
         }}
       >
-        <Toolbar
-          onAddSticky={addSticky}
-          onAddImage={(file) => void addImageAt(file)}
-          onDelete={deleteSelected}
-          canDelete={canDelete}
-          onSave={() => void saveProject("save")}
-          onSaveAs={() => void saveProject("save-as")}
-          documentName={documentName}
-        />
+        <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] min-[800px]:items-center min-[800px]:gap-3">
+          <div className="min-w-0 self-start min-[800px]:justify-self-start">
+            <SaveToolbar
+              documentName={documentName}
+              onSave={() => void saveProject("save")}
+              onSaveAs={() => void saveProject("save-as")}
+            />
+          </div>
+          <div className="flex justify-center">
+            <Toolbar
+              onAddSticky={addSticky}
+              onAddImage={(file) => void addImageAt(file)}
+              onDelete={deleteSelected}
+              canDelete={canDelete}
+            />
+          </div>
+          <div className="absolute right-0 top-0 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow min-[800px]:static min-[800px]:justify-self-end">
+            Noodle Board
+          </div>
+        </div>
         {saveError ? (
           <div
             role="alert"
@@ -579,9 +591,6 @@ function Board() {
             className="!bg-white"
           />
         </ReactFlow>
-        <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow">
-          Noodle Board
-        </div>
       </div>
   );
 }
