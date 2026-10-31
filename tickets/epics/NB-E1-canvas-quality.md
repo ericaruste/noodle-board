@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 
 The MVP canvas in [`src/App.tsx`](../../src/App.tsx) is a controlled React Flow board with sticky and image nodes. Noodles are smoothstep edges with arrow markers. Selection, keyboard delete, and a top-nav Delete button exist; resize and edge editing are incomplete.
 
-Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md).
+Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md).
 
 ## Goal
 
@@ -24,6 +24,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-01 Keep noodles visible above image nodes
 - NB-02 Make sticky and image resize targets usable
 - NB-03 Detach and reconnect noodles by dragging endpoints
+- NB-13 Import images at their real shape and keep PNG transparency
 
 ## Success looks like
 
