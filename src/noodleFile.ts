@@ -176,8 +176,8 @@ function isStickyData(data: unknown): boolean {
   if (!isRecord(data)) return false;
   if (typeof data.color !== "string" || !(data.color in STICKY_COLORS)) return false;
   const hasText = typeof data.text === "string";
-  const hasParagraphs = data.paragraphs !== undefined;
-  if (hasParagraphs && !isTextBody(data.paragraphs)) return false;
+  const hasParagraphs = isTextBody(data.paragraphs);
+  if (data.paragraphs !== undefined && !hasParagraphs && !hasText) return false;
   return hasText || hasParagraphs;
 }
 

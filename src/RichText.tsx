@@ -412,8 +412,9 @@ export function RichText({
     if (!editing) return;
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target;
-      if (target instanceof Node && rootRef.current?.contains(target)) return;
-      if (target instanceof Element && target.closest("[data-sticky-colors]")) return;
+      if (!(target instanceof Node)) return;
+      const host = rootRef.current?.closest(".noodle-node");
+      if (rootRef.current?.contains(target) || host?.contains(target)) return;
       onCommitRef.current(draftRef.current);
     };
     const onSelection = () => {
