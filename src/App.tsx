@@ -477,6 +477,10 @@ function Board() {
     async (file: File, handle: FileSystemFileHandle | null) => {
       try {
         const snapshot = await readNoodleProjectFile(file);
+        if (savingRef.current) {
+          setFileError("Could not open this file while the board is saving. Try again in a moment.");
+          return;
+        }
         const dirtyUntitled =
           documentNameRef.current === "Untitled" &&
           (nodesRef.current.length > 0 || edgesRef.current.length > 0);
@@ -486,19 +490,26 @@ function Board() {
         ) {
           return;
         }
+        if (savingRef.current) {
+          setFileError("Could not open this file while the board is saving. Try again in a moment.");
+          return;
+        }
         rememberBoard({
           viewport: getViewport(),
           documentName: documentNameRef.current,
           fileHandle: fileHandleRef.current,
         });
         const nextNodes = pruneEndpoints(snapshot.nodes, snapshot.edges);
+        const nextEdges = snapshot.edges.map((edge) =>
+          edge.zIndex == null ? { ...edge, zIndex: NOODLE_Z_INDEX } : edge,
+        );
         const name = projectNameFromFileName(file.name);
         nodesRef.current = nextNodes;
-        edgesRef.current = snapshot.edges;
+        edgesRef.current = nextEdges;
         documentNameRef.current = name;
         fileHandleRef.current = handle;
         setNodes(nextNodes);
-        setEdges(snapshot.edges);
+        setEdges(nextEdges);
         setDocumentName(name);
         setFileError(null);
         placeViewport(snapshot.viewport);
@@ -616,6 +627,7 @@ function Board() {
           const file = event.dataTransfer.files[0];
           if (!file || openingRef.current) return;
           if (isNoodleProjectFile(file)) {
+            if (savingRef.current) return;
             openingRef.current = true;
             void openProjectFile(file, null).finally(() => {
               openingRef.current = false;

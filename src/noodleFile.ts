@@ -163,7 +163,16 @@ function unsupportedVersionMessage(version: number): string {
 function isNodeRecord(value: unknown): value is Node {
   if (!isRecord(value) || typeof value.id !== "string" || value.id.length === 0) return false;
   if (!isRecord(value.position)) return false;
-  return finiteNumber(value.position.x) && finiteNumber(value.position.y);
+  if (!finiteNumber(value.position.x) || !finiteNumber(value.position.y)) return false;
+  if (value.type === "sticky") {
+    if (!isRecord(value.data)) return false;
+    if ("text" in value.data && typeof value.data.text !== "string") return false;
+    if ("color" in value.data && typeof value.data.color !== "string") return false;
+  }
+  if (value.type === "image") {
+    if (!isRecord(value.data) || typeof value.data.src !== "string") return false;
+  }
+  return true;
 }
 
 function isEdgeRecord(value: unknown): value is Edge {
@@ -187,8 +196,19 @@ export function parseNoodleFile(input: unknown): NoodleSnapshot {
   if (!Array.isArray(input.nodes) || !Array.isArray(input.edges)) {
     throw new NoodleParseError(OPEN_MISSING);
   }
-  if (!input.nodes.every(isNodeRecord) || !input.edges.every(isEdgeRecord)) {
-    throw new NoodleParseError(OPEN_INVALID_CONTENTS);
+  const nodeIds = new Set<string>();
+  for (const node of input.nodes) {
+    if (!isNodeRecord(node) || nodeIds.has(node.id)) {
+      throw new NoodleParseError(OPEN_INVALID_CONTENTS);
+    }
+    nodeIds.add(node.id);
+  }
+  const edgeIds = new Set<string>();
+  for (const edge of input.edges) {
+    if (!isEdgeRecord(edge) || edgeIds.has(edge.id)) {
+      throw new NoodleParseError(OPEN_INVALID_CONTENTS);
+    }
+    edgeIds.add(edge.id);
   }
   if (!isRecord(input.viewport)) throw new NoodleParseError(OPEN_INVALID_VIEWPORT);
   const { x, y, zoom } = input.viewport;
