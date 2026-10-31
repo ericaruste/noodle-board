@@ -50,7 +50,7 @@ The handle is kept for the current session only. Autosave of the on-screen board
 
 **Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name. Opening records one undo snapshot first, so undo restores the previous board, its viewport, and its name.
 
-Invalid JSON, a missing `nodes` or `edges` array, nodes or edges that are not objects with the required ids and positions, a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
+Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without text and a known color, an image without `data.src`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
 
 Dropping a `.noodle.json` on the canvas opens it the same way. Dropping an image still adds an image node. If the current board is a non-empty Untitled draft, Open asks before replacing it.
 

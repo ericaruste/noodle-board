@@ -1,4 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
+import { STICKY_COLORS } from "./StickyNode";
 
 /** On-disk project format. See docs/noodle-json.md. */
 export const NOODLE_FILE_VERSION = 1;
@@ -58,6 +59,7 @@ const OPEN_NOT_PROJECT = "Could not open this file. It is not a Noodle Board pro
 const OPEN_MISSING = "Could not open this file. It is missing nodes or edges.";
 const OPEN_INVALID_CONTENTS = "Could not open this file. It has invalid nodes or edges.";
 const OPEN_INVALID_VIEWPORT = "Could not open this file. It has an invalid viewport.";
+const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "endpoint"]);
 
 /** Board restored from a version-1 `.noodle.json` file. */
 export type NoodleSnapshot = {
@@ -164,10 +166,11 @@ function isNodeRecord(value: unknown): value is Node {
   if (!isRecord(value) || typeof value.id !== "string" || value.id.length === 0) return false;
   if (!isRecord(value.position)) return false;
   if (!finiteNumber(value.position.x) || !finiteNumber(value.position.y)) return false;
+  if (typeof value.type !== "string" || !RENDERABLE_NODE_TYPES.has(value.type)) return false;
   if (value.type === "sticky") {
     if (!isRecord(value.data)) return false;
-    if ("text" in value.data && typeof value.data.text !== "string") return false;
-    if ("color" in value.data && typeof value.data.color !== "string") return false;
+    if (typeof value.data.text !== "string") return false;
+    if (typeof value.data.color !== "string" || !(value.data.color in STICKY_COLORS)) return false;
   }
   if (value.type === "image") {
     if (!isRecord(value.data) || typeof value.data.src !== "string") return false;
@@ -205,7 +208,7 @@ export function parseNoodleFile(input: unknown): NoodleSnapshot {
   }
   const edgeIds = new Set<string>();
   for (const edge of input.edges) {
-    if (!isEdgeRecord(edge) || edgeIds.has(edge.id)) {
+    if (!isEdgeRecord(edge) || edgeIds.has(edge.id) || !nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {
       throw new NoodleParseError(OPEN_INVALID_CONTENTS);
     }
     edgeIds.add(edge.id);
