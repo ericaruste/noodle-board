@@ -1,4 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
+import { STICKY_COLORS } from "./StickyNode";
 
 /** On-disk project format. See docs/noodle-json.md. */
 export const NOODLE_FILE_VERSION = 1;
@@ -33,9 +34,52 @@ type SaveFilePickerOptions = {
   }>;
 };
 
+type OpenFilePickerOptions = {
+  multiple?: boolean;
+  types?: Array<{
+    description?: string;
+    accept: Record<string, string[]>;
+  }>;
+};
+
 type PickerWindow = Window & {
   showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
+  showOpenFilePicker?: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[]>;
 };
+
+const PROJECT_FILE_TYPES = [
+  {
+    description: "Noodle Board project",
+    accept: { "application/json": [".noodle.json", ".json"] },
+  },
+];
+
+const OPEN_INVALID_JSON = "Could not open this file. It is not valid JSON.";
+const OPEN_NOT_PROJECT = "Could not open this file. It is not a Noodle Board project.";
+const OPEN_MISSING = "Could not open this file. It is missing nodes or edges.";
+const OPEN_INVALID_CONTENTS = "Could not open this file. It has invalid nodes or edges.";
+const OPEN_INVALID_VIEWPORT = "Could not open this file. It has an invalid viewport.";
+const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "endpoint"]);
+
+/** Board restored from a version-1 `.noodle.json` file. */
+export type NoodleSnapshot = {
+  name: string;
+  viewport: NoodleViewport;
+  nodes: Node[];
+  edges: Edge[];
+};
+
+export type NoodleOpenPick =
+  | { ok: true; file: File; handle: FileSystemFileHandle | null }
+  | { ok: false; aborted: true }
+  | { ok: false; aborted: false; message: string };
+
+export class NoodleParseError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoodleParseError";
+  }
+}
 
 const SERIALIZE_MESSAGE =
   "Could not save this board. The file is too large or contains data that cannot be written as JSON.";
@@ -49,6 +93,14 @@ export class NoodleSerializeError extends Error {
 
 export function canUseSaveFilePicker(): boolean {
   return typeof (window as PickerWindow).showSaveFilePicker === "function";
+}
+
+export function canUseOpenFilePicker(): boolean {
+  return typeof (window as PickerWindow).showOpenFilePicker === "function";
+}
+
+export function isNoodleProjectFile(file: File): boolean {
+  return /\.noodle\.json$/i.test(file.name);
 }
 
 export function projectNameFromFileName(fileName: string): string {
@@ -96,6 +148,174 @@ export function stringifyNoodleDocument(document: NoodleDocument): string {
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function finiteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function unsupportedVersionMessage(version: number): string {
+  return `Could not open this file. Version ${version} is not supported. Only version ${NOODLE_FILE_VERSION} can be opened.`;
+}
+
+function isNodeRecord(value: unknown): value is Node {
+  if (!isRecord(value) || typeof value.id !== "string" || value.id.length === 0) return false;
+  if (!isRecord(value.position)) return false;
+  if (!finiteNumber(value.position.x) || !finiteNumber(value.position.y)) return false;
+  if (typeof value.type !== "string" || !RENDERABLE_NODE_TYPES.has(value.type)) return false;
+  if (value.type === "sticky") {
+    if (!isRecord(value.data)) return false;
+    if (typeof value.data.text !== "string") return false;
+    if (typeof value.data.color !== "string" || !(value.data.color in STICKY_COLORS)) return false;
+  }
+  if (value.type === "image") {
+    if (!isRecord(value.data) || typeof value.data.src !== "string") return false;
+  }
+  return true;
+}
+
+function isEdgeRecord(value: unknown): value is Edge {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    typeof value.source === "string" &&
+    typeof value.target === "string"
+  );
+}
+
+/** Validate a parsed `.noodle.json` value. Throws `NoodleParseError` when the file cannot be opened. */
+export function parseNoodleFile(input: unknown): NoodleSnapshot {
+  if (!isRecord(input) || typeof input.version !== "number") {
+    throw new NoodleParseError(OPEN_NOT_PROJECT);
+  }
+  if (input.version !== NOODLE_FILE_VERSION) {
+    throw new NoodleParseError(unsupportedVersionMessage(input.version));
+  }
+  if (!Array.isArray(input.nodes) || !Array.isArray(input.edges)) {
+    throw new NoodleParseError(OPEN_MISSING);
+  }
+  const nodeIds = new Set<string>();
+  for (const node of input.nodes) {
+    if (!isNodeRecord(node) || nodeIds.has(node.id)) {
+      throw new NoodleParseError(OPEN_INVALID_CONTENTS);
+    }
+    nodeIds.add(node.id);
+  }
+  const edgeIds = new Set<string>();
+  for (const edge of input.edges) {
+    if (!isEdgeRecord(edge) || edgeIds.has(edge.id) || !nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {
+      throw new NoodleParseError(OPEN_INVALID_CONTENTS);
+    }
+    edgeIds.add(edge.id);
+  }
+  if (!isRecord(input.viewport)) throw new NoodleParseError(OPEN_INVALID_VIEWPORT);
+  const { x, y, zoom } = input.viewport;
+  if (!finiteNumber(x) || !finiteNumber(y) || !finiteNumber(zoom) || zoom <= 0) {
+    throw new NoodleParseError(OPEN_INVALID_VIEWPORT);
+  }
+  const name = typeof input.name === "string" ? input.name.trim() : "";
+  return {
+    name: name || "Untitled",
+    viewport: { x, y, zoom },
+    nodes: input.nodes,
+    edges: input.edges,
+  };
+}
+
+export async function readNoodleProjectFile(file: File): Promise<NoodleSnapshot> {
+  let text: string;
+  try {
+    text = await file.text();
+  } catch {
+    throw new NoodleParseError("Could not open this file.");
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new NoodleParseError(OPEN_INVALID_JSON);
+  }
+  return parseNoodleFile(parsed);
+}
+
+export function visibleOpenError(error: unknown): string {
+  if (error instanceof NoodleParseError) return error.message;
+  if (error instanceof DOMException && error.name === "NotAllowedError") {
+    return "Could not open this file. The browser blocked the file dialog.";
+  }
+  if (error instanceof Error && error.message) return `Could not open this file. ${error.message}`;
+  return "Could not open this file.";
+}
+
+function pickWithInput(): Promise<File | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,.noodle.json";
+    input.hidden = true;
+    document.body.appendChild(input);
+    let settled = false;
+    const finish = (file: File | null) => {
+      if (settled) return;
+      settled = true;
+      input.remove();
+      resolve(file);
+    };
+    input.addEventListener("change", () => finish(input.files?.[0] ?? null));
+    input.addEventListener("cancel", () => finish(null));
+    window.addEventListener(
+      "focus",
+      () => {
+        window.setTimeout(() => finish(input.files?.[0] ?? null), 400);
+      },
+      { once: true },
+    );
+    input.click();
+  });
+}
+
+async function writableOpenHandle(handle: FileSystemFileHandle): Promise<FileSystemFileHandle | null> {
+  const withPermission = handle as FileSystemFileHandle & {
+    queryPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
+    requestPermission?: (descriptor: { mode: "readwrite" }) => Promise<PermissionState>;
+  };
+  if (!withPermission.requestPermission) return handle;
+  try {
+    const current = withPermission.queryPermission
+      ? await withPermission.queryPermission({ mode: "readwrite" })
+      : "prompt";
+    if (current === "granted") return handle;
+    const next = await withPermission.requestPermission({ mode: "readwrite" });
+    return next === "granted" ? handle : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function pickNoodleProjectFile(): Promise<NoodleOpenPick> {
+  try {
+    if (canUseOpenFilePicker()) {
+      const showOpenFilePicker = (window as PickerWindow).showOpenFilePicker;
+      if (!showOpenFilePicker) {
+        return { ok: false, aborted: false, message: "Could not open this file." };
+      }
+      const [handle] = await showOpenFilePicker({ multiple: false, types: PROJECT_FILE_TYPES });
+      if (!handle) return { ok: false, aborted: true };
+      const file = await handle.getFile();
+      return { ok: true, file, handle: await writableOpenHandle(handle) };
+    }
+    const file = await pickWithInput();
+    if (!file) return { ok: false, aborted: true };
+    return { ok: true, file, handle: null };
+  } catch (error) {
+    if (isAbortError(error)) return { ok: false, aborted: true };
+    return { ok: false, aborted: false, message: visibleOpenError(error) };
+  }
 }
 
 export function visibleSaveError(error: unknown): string {

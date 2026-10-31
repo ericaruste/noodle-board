@@ -1,8 +1,6 @@
 # `.noodle.json`
 
-Version 1 project file written by **Save** and **Save As**. Types live in [`src/noodleFile.ts`](../src/noodleFile.ts) (`NoodleDocument`, `NOODLE_FILE_VERSION`).
-
-Open and import are NB-05. This document is the format they should accept.
+Version 1 project file written by **Save** and **Save As**, and read by **Open**. Types live in [`src/noodleFile.ts`](../src/noodleFile.ts) (`NoodleDocument`, `NoodleSnapshot`, `NOODLE_FILE_VERSION`). `parseNoodleFile` accepts this shape and rejects anything else.
 
 ## Schema
 
@@ -46,6 +44,14 @@ Image nodes keep the picture inline as a data URL on `data.src`. Files can be la
 - Chromium (and other browsers with the File System Access API): `showSaveFilePicker`, then `FileSystemFileHandle.createWritable()`. **Save** overwrites the handle chosen earlier in this session. **Save As** always opens the picker. The `name` field is the file name without `.noodle.json`.
 - Browsers without that API: the same JSON is downloaded with `<a download>`. **Save As** asks for a name first. The suggested file name is `{name}.noodle.json`.
 
-The handle is not stored yet. Autosave of the Untitled draft still writes `{ nodes, edges }` to `localStorage` key `noodle-board` and is not cleared by Save. Binding later edits to the file is NB-06.
+The handle is kept for the current session only. Autosave of the on-screen board still writes `{ nodes, edges }` to `localStorage` key `noodle-board`. Save does not clear that draft. Binding later edits to the file is NB-06.
+
+## How a file is opened
+
+**Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name. Opening records one undo snapshot first, so undo restores the previous board, its viewport, and its name.
+
+Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without text and a known color, an image without `data.src`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
+
+Dropping a `.noodle.json` on the canvas opens it the same way. Dropping an image still adds an image node. If the current board is a non-empty Untitled draft, Open asks before replacing it.
 
 If `JSON.stringify` throws (for example the board is too large to serialize), Save shows an error and does not write a file.

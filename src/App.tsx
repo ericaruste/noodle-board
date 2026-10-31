@@ -27,7 +27,15 @@ import {
 import "@xyflow/react/dist/style.css";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
-import { saveNoodleProject } from "./noodleFile";
+import {
+  isNoodleProjectFile,
+  pickNoodleProjectFile,
+  projectNameFromFileName,
+  readNoodleProjectFile,
+  saveNoodleProject,
+  visibleOpenError,
+  type NoodleViewport,
+} from "./noodleFile";
 import StickyNode, { type StickyColor, type StickyData } from "./StickyNode";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
@@ -65,7 +73,13 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
   style: { strokeWidth: 2 },
 };
 
-type Snapshot = { nodes: Node[]; edges: Edge[] };
+type Snapshot = {
+  nodes: Node[];
+  edges: Edge[];
+  viewport?: NoodleViewport;
+  documentName?: string;
+  fileHandle?: FileSystemFileHandle | null;
+};
 
 function cloneSnapshot(nodes: Node[], edges: Edge[]): Snapshot {
   return {
@@ -116,7 +130,7 @@ function Board() {
   const stored = useMemo(() => loadCanvas(), []);
   const [nodes, setNodes] = useState<Node[]>(stored.nodes);
   const [edges, setEdges] = useState<Edge[]>(stored.edges);
-  const { screenToFlowPosition, getViewport } = useReactFlow();
+  const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
   const store = useStoreApi();
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
@@ -129,20 +143,50 @@ function Board() {
   const documentNameRef = useRef("Untitled");
   const fileHandleRef = useRef<FileSystemFileHandle | null>(null);
   const savingRef = useRef(false);
+  const openingRef = useRef(false);
   const [documentName, setDocumentName] = useState("Untitled");
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
 
+  const rememberBoard = useCallback(
+    (view?: {
+      viewport: NoodleViewport;
+      documentName: string;
+      fileHandle: FileSystemFileHandle | null;
+    }) => {
+      if (applyingHistory.current) return;
+      const snapshot = cloneSnapshot(nodesRef.current, edgesRef.current);
+      if (view) {
+        snapshot.viewport = view.viewport;
+        snapshot.documentName = view.documentName;
+        snapshot.fileHandle = view.fileHandle;
+      }
+      pastRef.current.push(snapshot);
+      if (pastRef.current.length > MAX_HISTORY) pastRef.current.shift();
+      futureRef.current = [];
+    },
+    [],
+  );
+
   const takeSnapshot = useCallback(() => {
-    if (applyingHistory.current) return;
-    pastRef.current.push(cloneSnapshot(nodesRef.current, edgesRef.current));
-    if (pastRef.current.length > MAX_HISTORY) pastRef.current.shift();
-    futureRef.current = [];
-  }, []);
+    rememberBoard();
+  }, [rememberBoard]);
+
+  const placeViewport = useCallback(
+    (viewport: NoodleViewport) => {
+      store.setState({ fitViewQueued: false });
+      void setViewport(viewport);
+      requestAnimationFrame(() => {
+        store.setState({ fitViewQueued: false });
+        void setViewport(viewport);
+      });
+    },
+    [setViewport, store],
+  );
 
   useEffect(() => {
     window.addEventListener("noodle-snapshot", takeSnapshot);
@@ -383,39 +427,120 @@ function Board() {
     setEdges(nextEdges);
   }, [takeSnapshot]);
 
+  const applyHistory = useCallback(
+    (snapshot: Snapshot) => {
+      applyingHistory.current = true;
+      nodesRef.current = snapshot.nodes;
+      edgesRef.current = snapshot.edges;
+      setNodes(snapshot.nodes);
+      setEdges(snapshot.edges);
+      if (snapshot.viewport) placeViewport(snapshot.viewport);
+      if (snapshot.documentName !== undefined) {
+        documentNameRef.current = snapshot.documentName;
+        setDocumentName(snapshot.documentName);
+      }
+      if (snapshot.fileHandle !== undefined) fileHandleRef.current = snapshot.fileHandle;
+      queueMicrotask(() => {
+        applyingHistory.current = false;
+      });
+    },
+    [placeViewport],
+  );
+
   const undo = useCallback(() => {
     const previous = pastRef.current.pop();
     if (!previous) return;
-    futureRef.current.push(cloneSnapshot(nodesRef.current, edgesRef.current));
-    applyingHistory.current = true;
-    nodesRef.current = previous.nodes;
-    edgesRef.current = previous.edges;
-    setNodes(previous.nodes);
-    setEdges(previous.edges);
-    queueMicrotask(() => {
-      applyingHistory.current = false;
-    });
-  }, []);
+    const current = cloneSnapshot(nodesRef.current, edgesRef.current);
+    if (previous.viewport) {
+      current.viewport = getViewport();
+      current.documentName = documentNameRef.current;
+      current.fileHandle = fileHandleRef.current;
+    }
+    futureRef.current.push(current);
+    applyHistory(previous);
+  }, [applyHistory, getViewport]);
 
   const redo = useCallback(() => {
     const next = futureRef.current.pop();
     if (!next) return;
-    pastRef.current.push(cloneSnapshot(nodesRef.current, edgesRef.current));
-    applyingHistory.current = true;
-    nodesRef.current = next.nodes;
-    edgesRef.current = next.edges;
-    setNodes(next.nodes);
-    setEdges(next.edges);
-    queueMicrotask(() => {
-      applyingHistory.current = false;
-    });
-  }, []);
+    const current = cloneSnapshot(nodesRef.current, edgesRef.current);
+    if (next.viewport) {
+      current.viewport = getViewport();
+      current.documentName = documentNameRef.current;
+      current.fileHandle = fileHandleRef.current;
+    }
+    pastRef.current.push(current);
+    applyHistory(next);
+  }, [applyHistory, getViewport]);
+
+  const openProjectFile = useCallback(
+    async (file: File, handle: FileSystemFileHandle | null) => {
+      try {
+        const snapshot = await readNoodleProjectFile(file);
+        if (savingRef.current) {
+          setFileError("Could not open this file while the board is saving. Try again in a moment.");
+          return;
+        }
+        const dirtyUntitled =
+          documentNameRef.current === "Untitled" &&
+          (nodesRef.current.length > 0 || edgesRef.current.length > 0);
+        if (
+          dirtyUntitled &&
+          !window.confirm("Replace the current Untitled board? Undo will bring this board back.")
+        ) {
+          return;
+        }
+        if (savingRef.current) {
+          setFileError("Could not open this file while the board is saving. Try again in a moment.");
+          return;
+        }
+        rememberBoard({
+          viewport: getViewport(),
+          documentName: documentNameRef.current,
+          fileHandle: fileHandleRef.current,
+        });
+        const nextNodes = pruneEndpoints(snapshot.nodes, snapshot.edges);
+        const nextEdges = snapshot.edges.map((edge) =>
+          edge.zIndex == null ? { ...edge, zIndex: NOODLE_Z_INDEX } : edge,
+        );
+        const name = projectNameFromFileName(file.name);
+        nodesRef.current = nextNodes;
+        edgesRef.current = nextEdges;
+        documentNameRef.current = name;
+        fileHandleRef.current = handle;
+        setNodes(nextNodes);
+        setEdges(nextEdges);
+        setDocumentName(name);
+        setFileError(null);
+        placeViewport(snapshot.viewport);
+      } catch (error) {
+        setFileError(visibleOpenError(error));
+      }
+    },
+    [getViewport, placeViewport, rememberBoard],
+  );
+
+  const openProject = useCallback(async () => {
+    if (savingRef.current || openingRef.current) return;
+    openingRef.current = true;
+    setFileError(null);
+    try {
+      const picked = await pickNoodleProjectFile();
+      if (!picked.ok) {
+        if (!picked.aborted) setFileError(picked.message);
+        return;
+      }
+      await openProjectFile(picked.file, picked.handle);
+    } finally {
+      openingRef.current = false;
+    }
+  }, [openProjectFile]);
 
   const saveProject = useCallback(
     async (mode: "save" | "save-as") => {
-      if (savingRef.current) return;
+      if (savingRef.current || openingRef.current) return;
       savingRef.current = true;
-      setSaveError(null);
+      setFileError(null);
       try {
         const result = await saveNoodleProject({
           mode,
@@ -431,7 +556,7 @@ function Board() {
           setDocumentName(result.name);
           return;
         }
-        if (!result.aborted) setSaveError(result.message);
+        if (!result.aborted) setFileError(result.message);
       } finally {
         savingRef.current = false;
       }
@@ -447,6 +572,11 @@ function Board() {
         void saveProject(event.shiftKey ? "save-as" : "save");
         return;
       }
+      if ((event.ctrlKey || event.metaKey) && key === "o" && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        void openProject();
+        return;
+      }
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return;
@@ -459,7 +589,7 @@ function Board() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [redo, saveProject, undo]);
+  }, [openProject, redo, saveProject, undo]);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -495,7 +625,16 @@ function Board() {
         onDrop={(event) => {
           event.preventDefault();
           const file = event.dataTransfer.files[0];
-          if (!file) return;
+          if (!file || openingRef.current) return;
+          if (isNoodleProjectFile(file)) {
+            if (savingRef.current) return;
+            openingRef.current = true;
+            void openProjectFile(file, null).finally(() => {
+              openingRef.current = false;
+            });
+            return;
+          }
+          if (!file.type.startsWith("image/")) return;
           const position = screenToFlowPosition({
             x: event.clientX,
             y: event.clientY,
@@ -507,6 +646,7 @@ function Board() {
           <div className="min-w-0 self-start min-[800px]:justify-self-start">
             <SaveToolbar
               documentName={documentName}
+              onOpen={() => void openProject()}
               onSave={() => void saveProject("save")}
               onSaveAs={() => void saveProject("save-as")}
             />
@@ -523,15 +663,15 @@ function Board() {
             Noodle Board
           </div>
         </div>
-        {saveError ? (
+        {fileError ? (
           <div
             role="alert"
             className="absolute bottom-4 left-4 z-30 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
           >
-            <span>{saveError}</span>
+            <span>{fileError}</span>
             <button
               type="button"
-              onClick={() => setSaveError(null)}
+              onClick={() => setFileError(null)}
               className="shrink-0 font-medium text-rose-800 hover:text-rose-950"
             >
               Dismiss
