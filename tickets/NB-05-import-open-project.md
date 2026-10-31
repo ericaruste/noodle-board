@@ -1,7 +1,7 @@
 ---
 id: NB-05
 title: Import/open a local project file
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Persistence]
 parent: NB-E2
