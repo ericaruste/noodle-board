@@ -1,7 +1,7 @@
 ---
 id: NB-14
 title: Keep selection chrome a fixed screen size
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E4
