@@ -1,7 +1,7 @@
 ---
 id: NB-08
 title: Add Shape objects
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Canvas]
 parent: NB-E3
