@@ -1,7 +1,7 @@
 ---
 id: NB-12
 title: Smart alignment guides while dragging
-status: In Progress
+status: Done
 priority: 3
 labels: [UX, Canvas]
 parent: NB-E4
