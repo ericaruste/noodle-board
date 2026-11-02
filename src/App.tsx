@@ -492,14 +492,24 @@ function Board() {
       const stationaryId = dragged === "source" ? edge.target : edge.source;
       const stationaryHandle =
         dragged === "source" ? (edge.targetHandle ?? null) : (edge.sourceHandle ?? null);
+      const currentId = dragged === "source" ? edge.source : edge.target;
+      const currentHandle =
+        dragged === "source" ? (edge.sourceHandle ?? null) : (edge.targetHandle ?? null);
       const point = pointFromEvent(event);
-      const under = document.elementFromPoint(point.x, point.y);
-      const onStationaryHandle =
-        under instanceof Element &&
-        under.classList.contains("react-flow__handle") &&
-        under.getAttribute("data-nodeid") === stationaryId &&
-        (under.getAttribute("data-handleid") ?? null) === stationaryHandle;
-      if (onStationaryHandle) return;
+      const onHandle = (nodeId: string, handleId: string | null) => {
+        const handle = document.querySelector(
+          `.react-flow__handle[data-nodeid="${CSS.escape(nodeId)}"][data-handleid="${CSS.escape(handleId ?? "")}"]`,
+        );
+        if (!(handle instanceof HTMLElement)) return false;
+        const box = handle.getBoundingClientRect();
+        return (
+          point.x >= box.left &&
+          point.x <= box.right &&
+          point.y >= box.top &&
+          point.y <= box.bottom
+        );
+      };
+      if (onHandle(stationaryId, stationaryHandle) || onHandle(currentId, currentHandle)) return;
 
       parkEnd(edge, dragged, point);
     },
