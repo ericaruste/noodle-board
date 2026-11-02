@@ -1,7 +1,7 @@
 ---
 id: NB-13
 title: Import images at their real shape and keep PNG transparency
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
