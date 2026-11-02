@@ -3,6 +3,7 @@ import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
+import SelectionChrome from "./SelectionChrome";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -99,33 +100,35 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         onFormat={format}
       />
       {selected ? (
-        <div
-          data-sticky-colors
-          className="noodle-sticky-colors nodrag nopan absolute left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-full bg-white p-1 shadow"
-          onMouseDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
-          onDoubleClick={(event) => event.stopPropagation()}
-        >
-          {(Object.keys(STICKY_COLORS) as StickyColor[]).map((color) => (
-            <button
-              key={color}
-              type="button"
-              aria-label={color}
-              className="h-5 w-5 rounded-full border border-black/10"
-              style={{ background: STICKY_COLORS[color] }}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={(event) => {
-                event.stopPropagation();
-                const current = dataRef.current;
-                if (color === current.color) return;
-                const nextData: StickyData = { ...current, color };
-                dataRef.current = nextData;
-                snapshot();
-                publish(id, nextData);
-              }}
-            />
-          ))}
-        </div>
+        <SelectionChrome side="below">
+          <div
+            data-sticky-colors
+            className="noodle-sticky-colors nodrag nopan nowheel flex gap-1 rounded-full bg-white p-1 shadow"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            onDoubleClick={(event) => event.stopPropagation()}
+          >
+            {(Object.keys(STICKY_COLORS) as StickyColor[]).map((color) => (
+              <button
+                key={color}
+                type="button"
+                aria-label={color}
+                className="h-5 w-5 rounded-full border border-black/10"
+                style={{ background: STICKY_COLORS[color] }}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  const current = dataRef.current;
+                  if (color === current.color) return;
+                  const nextData: StickyData = { ...current, color };
+                  dataRef.current = nextData;
+                  snapshot();
+                  publish(id, nextData);
+                }}
+              />
+            ))}
+          </div>
+        </SelectionChrome>
       ) : null}
     </div>
   );

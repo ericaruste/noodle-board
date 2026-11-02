@@ -24,7 +24,6 @@ type TextToolbarProps = {
   onNumbered: () => void;
   onLink: () => void;
   linkActive: boolean;
-  zoom: number;
 };
 
 function Menu({
@@ -32,17 +31,16 @@ function Menu({
   menuLabel,
   open,
   onToggle,
-  zoom,
   children,
 }: {
   label: string;
   menuLabel: string;
   open: boolean;
   onToggle: () => void;
-  zoom: number;
   children: ReactNode;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<{ top: number; left: number; minWidth: number } | null>(null);
 
   useLayoutEffect(() => {
@@ -52,11 +50,18 @@ function Menu({
       const button = buttonRef.current;
       if (button) {
         const rect = button.getBoundingClientRect();
-        const next = {
-          top: rect.bottom + 4,
-          left: rect.left,
-          minWidth: rect.width * (zoom > 0 ? zoom : 1),
-        };
+        const menu = menuRef.current;
+        const width = Math.max(rect.width, menu?.offsetWidth ?? 0);
+        const height = menu?.offsetHeight ?? 0;
+        let top = rect.bottom + 4;
+        if (height > 0 && top + height > window.innerHeight - 8) {
+          const above = rect.top - 4 - height;
+          if (above >= 8) top = above;
+        }
+        let left = rect.left;
+        if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - width);
+        if (left < 8) left = 8;
+        const next = { top, left, minWidth: rect.width };
         setBox((prev) =>
           prev &&
           Math.abs(prev.top - next.top) < 0.5 &&
@@ -70,7 +75,7 @@ function Menu({
     };
     place();
     return () => cancelAnimationFrame(frame);
-  }, [open, zoom]);
+  }, [open]);
 
   return (
     <div className="relative">
@@ -91,18 +96,17 @@ function Menu({
       {open && box
         ? createPortal(
             <div
+              ref={menuRef}
               role="menu"
               aria-label={menuLabel}
               data-text-toolbar
-              className="nodrag nopan rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+              className="nodrag nopan nowheel rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
               style={{
                 position: "fixed",
                 top: box.top,
                 left: box.left,
                 minWidth: box.minWidth,
                 zIndex: 10001,
-                transform: `scale(${zoom > 0 ? 1 / zoom : 1})`,
-                transformOrigin: "top left",
               }}
               onMouseDown={(event) => {
                 event.preventDefault();
@@ -185,7 +189,6 @@ export default function TextToolbar({
   onNumbered,
   onLink,
   linkActive,
-  zoom,
 }: TextToolbarProps) {
   const [menu, setMenu] = useState<"style" | "align" | null>(null);
 
@@ -196,8 +199,7 @@ export default function TextToolbar({
   return (
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan absolute left-1/2 z-10 flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
-      style={{ transform: `translateX(-50%) scale(${1 / zoom})`, transformOrigin: "center bottom" }}
+      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();
@@ -211,7 +213,6 @@ export default function TextToolbar({
         menuLabel="Font style"
         open={menu === "style"}
         onToggle={() => toggle("style")}
-        zoom={zoom}
       >
         {FONT_STYLES.map((style) => (
           <MenuItem
@@ -230,7 +231,6 @@ export default function TextToolbar({
         menuLabel="Alignment"
         open={menu === "align"}
         onToggle={() => toggle("align")}
-        zoom={zoom}
       >
         {TEXT_ALIGNS.map((align) => (
           <MenuItem
