@@ -32,6 +32,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 4. **New objects** — NB-07, NB-08, NB-09 (text, shapes, arrows). NB-09 should follow NB-01 so new connectors are not hidden under images.
 5. **Guides** — NB-12, then NB-15 (equal spacing, after alignment)
 6. **Selection chrome** — NB-14 (fixed screen size for the selection toolbar and color controls)
+7. **Duplicate** — NB-16 (Alt-drag copy, Ctrl+D repeat)
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

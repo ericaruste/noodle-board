@@ -105,6 +105,11 @@
       "id": "845da805-3370-4bb0-a461-6c21ee3932e9",
       "identifier": "ERI-23",
       "url": "https://linear.app/ericar/issue/ERI-23/equal-spacing-guides-while-dragging"
+    },
+    "NB-16": {
+      "id": "cd62fdda-9b3f-4bd7-b8c3-eb8a373af581",
+      "identifier": "ERI-24",
+      "url": "https://linear.app/ericar/issue/ERI-24/copy-and-duplicate-with-alt-drag-and-ctrld"
     }
   }
 }
