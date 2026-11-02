@@ -147,7 +147,6 @@ function slotFraction(data: unknown, end: "source" | "target") {
  * none was stored). Two or more edges share the side evenly, inset from the corners.
  */
 export function resolveAttachments(edges: readonly Edge[]) {
-  if (edges === cacheEdges && cacheMap) return cacheMap;
   const groups = new Map<string, Slot[]>();
   for (const edge of edges) {
     if (isSide(edge.sourceHandle)) {
@@ -181,17 +180,11 @@ export function resolveAttachments(edges: readonly Edge[]) {
       resolved.set(slot.edgeId, entry);
     });
   }
-  cacheEdges = edges;
-  cacheMap = resolved;
   return resolved;
 }
 
-let cacheEdges: readonly Edge[] | null = null;
-let cacheMap: Map<string, { source?: number; target?: number }> | null = null;
-
 /** Write resolved fractions onto `edge.data`. Returns the same array when nothing changed. */
 export function reflowAttachments(edges: Edge[]): Edge[] {
-  cacheEdges = null;
   const resolved = resolveAttachments(edges);
   let changed = false;
   const next = edges.map((edge) => {
