@@ -425,13 +425,18 @@ function Board() {
       const existing = nodesRef.current.find(
         (node) => node.id === currentId && node.type === ENDPOINT_TYPE,
       );
-      takeSnapshot();
       if (existing) {
+        const samePlace =
+          Math.abs(existing.position.x - position.x) < 0.5 &&
+          Math.abs(existing.position.y - position.y) < 0.5;
+        if (samePlace) return;
+        takeSnapshot();
         setNodes((current) =>
           current.map((node) => (node.id === existing.id ? { ...node, position } : node)),
         );
         return;
       }
+      takeSnapshot();
       const id = `end-${crypto.randomUUID()}`;
       const connection = connectionForPark(edge, dragged, id);
       const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
@@ -472,11 +477,15 @@ function Board() {
 
       const hot = nearestPort(store.getState(), connectionState.pointer);
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
-      if (hotConnection && allowsPort(nodesRef.current, dragged, hotConnection)) {
+      if (
+        hotConnection &&
+        !sameEnds(edge, hotConnection) &&
+        allowsPort(nodesRef.current, dragged, hotConnection)
+      ) {
         applyReconnect(edge, hotConnection);
         return;
       }
-      if (rf && allowsPort(nodesRef.current, dragged, rf)) {
+      if (rf && !sameEnds(edge, rf) && allowsPort(nodesRef.current, dragged, rf)) {
         applyReconnect(edge, rf);
         return;
       }
