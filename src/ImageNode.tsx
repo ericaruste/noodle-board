@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { type Node, type NodeProps } from "@xyflow/react";
+import { useStore, type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 
@@ -9,19 +9,33 @@ export type ImageData = {
 
 export type ImageNodeType = Node<ImageData, "image">;
 
-/** Smallest grab size. The short side of a thin image may already be under 80px,
- *  and the other minimum stays proportional so a resize cannot crop it back. */
-function imageResizeBounds(width?: number | null, height?: number | null) {
-  const w = typeof width === "number" && width > 0 ? width : 1;
-  const h = typeof height === "number" && height > 0 ? height : 1;
-  const floor = Math.min(8, w, h);
-  if (w <= h) return { minWidth: floor, minHeight: (floor * h) / w };
-  return { minWidth: (floor * w) / h, minHeight: floor };
+type Size = { width: number; height: number };
+
+function sameSize(a: Size | null, b: Size | null) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.width === b.width && a.height === b.height;
 }
 
-function ImageNode({ id, data, selected, width, height }: NodeProps<ImageNodeType>) {
+/** Short side may stay under 80. The other minimum stays proportional so a resize cannot crop the picture. */
+function imageResizeBounds(width: number, height: number) {
+  const floor = Math.min(8, width, height);
+  if (width <= height) return { minWidth: floor, minHeight: (floor * height) / width };
+  return { minWidth: (floor * width) / height, minHeight: floor };
+}
+
+function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
-  const bounds = imageResizeBounds(width, height);
+  const measured = useStore((state) => {
+    const node = state.nodeLookup.get(id);
+    const width = node?.measured.width;
+    const height = node?.measured.height;
+    if (!width || !height) return null;
+    return { width, height };
+  }, sameSize);
+  const bounds = measured
+    ? imageResizeBounds(measured.width, measured.height)
+    : { minWidth: 8, minHeight: 8 };
 
   return (
     <div
@@ -41,7 +55,7 @@ function ImageNode({ id, data, selected, width, height }: NodeProps<ImageNodeTyp
         src={data.src}
         alt=""
         draggable={false}
-        className="block h-full w-full"
+        className="block h-full w-full object-contain"
         style={{ filter: "drop-shadow(2px 4px 12px rgba(15, 23, 42, 0.18))" }}
       />
       <ObjectPorts nodeId={id} />
