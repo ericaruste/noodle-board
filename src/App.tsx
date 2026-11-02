@@ -491,14 +491,6 @@ function Board() {
         (connectionState.toHandle.id ?? null) === stationaryHandle;
       if (connectionState.isValid === false && droppedOnStationary) return;
 
-      if (connectionState.from && connectionState.pointer) {
-        const [tx, ty, zoom] = store.getState().transform;
-        const px = (connectionState.pointer.x - tx) / zoom;
-        const py = (connectionState.pointer.y - ty) / zoom;
-        const distance = Math.hypot(px - connectionState.from.x, py - connectionState.from.y);
-        if (zoom > 0 && distance <= PORT_SCREEN_RADIUS / zoom) return;
-      }
-
       parkEnd(edge, dragged, pointFromEvent(event));
     },
     [applyReconnect, parkEnd, store],

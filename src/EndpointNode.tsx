@@ -26,6 +26,7 @@ export default function EndpointNode({ id }: NodeProps<EndpointNodeType>) {
       }}
     >
       <Handle id={ENDPOINT_HANDLE} type="source" position={Position.Left} isConnectable={false} />
+      <Handle id={ENDPOINT_HANDLE} type="target" position={Position.Left} isConnectable={false} />
     </div>
   );
 }
