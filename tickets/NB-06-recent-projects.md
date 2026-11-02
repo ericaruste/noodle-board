@@ -1,7 +1,7 @@
 ---
 id: NB-06
 title: Recent projects list and reopen
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Persistence]
 parent: NB-E2
