@@ -425,7 +425,7 @@ export function RichText({
       const target = event.target;
       if (!(target instanceof Node)) return;
       const host = rootRef.current?.closest(".noodle-node");
-      if (target instanceof Element && target.closest("[data-text-toolbar]")) return;
+      if (target instanceof Element && target.closest("[data-text-toolbar], [data-selection-chrome]")) return;
       if (rootRef.current?.contains(target) || host?.contains(target)) return;
       onCommitRef.current(commitDraft());
     };
@@ -777,12 +777,14 @@ export function RichText({
                         return;
                       }
                       const next = event.relatedTarget;
+                      if (next instanceof Element && next.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                       if (next instanceof Node && rootRef.current?.contains(next)) return;
                       if (blurTimer.current !== null) window.clearTimeout(blurTimer.current);
                       blurTimer.current = window.setTimeout(() => {
                         blurTimer.current = null;
                         if (!editingRef.current) return;
                         const active = document.activeElement;
+                        if (active instanceof Element && active.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                         if (active instanceof Node && rootRef.current?.contains(active)) return;
                         onCommitRef.current(commitDraft());
                       }, 0);

@@ -198,7 +198,7 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
     const width = node?.measured.width;
     const height = node?.measured.height;
     const zoom = state.transform[2];
-    if (!node || !width || !height || !(zoom > 0)) return null;
+    if (!node || width == null || height == null || !(zoom > 0)) return null;
     const [panX, panY] = state.transform;
     return {
       left: node.internals.positionAbsolute.x * zoom + panX,

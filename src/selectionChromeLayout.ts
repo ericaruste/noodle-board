@@ -117,7 +117,20 @@ function avoidObstacles(
       top = next.top;
       placed.set(slot.id, { left, top });
     }
+    placed.set(slot.id, clampIntoView({ left, top }, slot, viewport));
   }
+}
+
+function clampIntoView(
+  pos: { left: number; top: number },
+  slot: ChromeSlot,
+  viewport: ChromeViewport,
+) {
+  const roomW = viewport.right - viewport.left;
+  const roomH = viewport.bottom - viewport.top;
+  const left = slot.width >= roomW ? viewport.left : Math.min(Math.max(pos.left, viewport.left), viewport.right - slot.width);
+  const top = slot.height >= roomH ? viewport.top : Math.min(Math.max(pos.top, viewport.top), viewport.bottom - slot.height);
+  return { left, top };
 }
 
 /** Screen-space stack above or below a node. Preferred sides win when they fit. */
