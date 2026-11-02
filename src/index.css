@@ -183,6 +183,11 @@ body,
   text-justify: inter-word;
 }
 
+.react-flow__node-image {
+  overflow: visible;
+  background: transparent;
+}
+
 /* The node box is a rectangle. Only the painted geometry and ports should
    receive hits, so empty corners of an ellipse or diamond miss. */
 .react-flow__node-shape {

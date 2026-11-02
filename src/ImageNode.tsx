@@ -22,18 +22,17 @@ function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
       <NoodleResizer
         selected={selected}
         keepAspectRatio
-        minWidth={80}
-        minHeight={80}
+        minWidth={1}
+        minHeight={1}
         onResizeStart={() => window.dispatchEvent(new Event("noodle-snapshot"))}
       />
-      <div className="h-full w-full overflow-hidden rounded-md bg-white shadow-[2px_4px_12px_rgba(15,23,42,0.18)]">
-        <img
-          src={data.src}
-          alt=""
-          draggable={false}
-          className="h-full w-full object-cover"
-        />
-      </div>
+      <img
+        src={data.src}
+        alt=""
+        draggable={false}
+        className="block h-full w-full object-contain"
+        style={{ filter: "drop-shadow(2px 4px 12px rgba(15, 23, 42, 0.18))" }}
+      />
       <ObjectPorts nodeId={id} />
     </div>
   );
