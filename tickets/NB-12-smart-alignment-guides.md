@@ -1,7 +1,7 @@
 ---
 id: NB-12
 title: Smart alignment guides while dragging
-status: Todo
+status: In Progress
 priority: 3
 labels: [UX, Canvas]
 parent: NB-E4
@@ -27,13 +27,13 @@ Nodes cannot be aligned except by eye. There is no snap and no guide line.
 
 ## Acceptance criteria
 
-- [ ] While dragging a node, when an edge or center is within a small threshold (~5px in flow coordinates), the node snaps to that alignment
-- [ ] A horizontal and/or vertical guide line is drawn through the matching anchors, aligned to the current viewport zoom/pan
-- [ ] Guides clear on drop (`onNodeDragStop`)
-- [ ] Works for mixed sizes (sticky vs image) using bounding boxes, not equal-width assumptions
-- [ ] Multi-select drag: guides relative to other non-dragged nodes (best-effort: at least the primary dragged node)
-- [ ] Snap does not fight pan/zoom; lines are overlay, not nodes in the graph
-- [ ] Optional but desired: same guides while resizing with NodeResizer
+- [x] While dragging a node, when an edge or center is within a small threshold (~5px in flow coordinates), the node snaps to that alignment
+- [x] A horizontal and/or vertical guide line is drawn through the matching anchors, aligned to the current viewport zoom/pan
+- [x] Guides clear on drop (`onNodeDragStop`)
+- [x] Works for mixed sizes (sticky vs image) using bounding boxes, not equal-width assumptions
+- [x] Multi-select drag: guides relative to other non-dragged nodes (best-effort: at least the primary dragged node)
+- [x] Snap does not fight pan/zoom; lines are overlay, not nodes in the graph
+- [x] Optional but desired: same guides while resizing with NodeResizer
 
 ## Technical notes
 

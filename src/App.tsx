@@ -25,6 +25,8 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import AlignmentGuides from "./AlignmentGuides";
+import { alignNodeChanges, sameGuides, type FlowBox, type GuideLine } from "./alignSnap";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import {
@@ -169,6 +171,11 @@ function Board() {
   const futureRef = useRef<Snapshot[]>([]);
   const applyingHistory = useRef(false);
   const dragSnapshotTaken = useRef(false);
+  const dragNodeIdRef = useRef<string | null>(null);
+  const resizeOriginRef = useRef(new Map<string, FlowBox>());
+  const snappedSizeRef = useRef(new Map<string, { width: number; height: number }>());
+  const guidesRef = useRef<GuideLine[]>([]);
+  const [guideEpoch, setGuideEpoch] = useState(0);
   const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
   const rfConnectionRef = useRef<Connection | null>(null);
   const documentNameRef = useRef("Untitled");
@@ -319,7 +326,21 @@ function Board() {
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       if (changes.some((change) => change.type === "remove")) takeSnapshot();
-      setNodes((current) => applyNodeChanges(changes, current));
+      setNodes((current) => {
+        const aligned = alignNodeChanges(
+          current,
+          changes,
+          dragNodeIdRef.current,
+          resizeOriginRef.current,
+          snappedSizeRef.current,
+        );
+        if (aligned.guides && !sameGuides(guidesRef.current, aligned.guides)) {
+          guidesRef.current = aligned.guides;
+        }
+        const next = applyNodeChanges(aligned.changes, current);
+        nodesRef.current = next;
+        return next;
+      });
     },
     [takeSnapshot],
   );
@@ -1083,13 +1104,19 @@ function Board() {
           selectionKeyCode="Shift"
           multiSelectionKeyCode="Shift"
           deleteKeyCode={["Delete", "Backspace"]}
-          onNodeDragStart={() => {
+          onNodeDragStart={(_event, node) => {
+            dragNodeIdRef.current = node.id;
             if (dragSnapshotTaken.current) return;
             dragSnapshotTaken.current = true;
             takeSnapshot();
           }}
           onNodeDragStop={() => {
             dragSnapshotTaken.current = false;
+            dragNodeIdRef.current = null;
+            if (guidesRef.current.length > 0) {
+              guidesRef.current = [];
+              setGuideEpoch((epoch) => epoch + 1);
+            }
           }}
           onMoveEnd={() => {
             if (blockMoveAutosaveRef.current || !fileHandleRef.current) return;
@@ -1097,6 +1124,7 @@ function Board() {
           }}
           proOptions={{ hideAttribution: true }}
         >
+          <AlignmentGuides key={guideEpoch} lines={guidesRef.current} />
           <Background
             id="dots"
             variant={BackgroundVariant.Dots}
