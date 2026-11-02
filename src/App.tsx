@@ -175,7 +175,7 @@ function Board() {
   const resizeOriginRef = useRef(new Map<string, FlowBox>());
   const snappedSizeRef = useRef(new Map<string, { width: number; height: number }>());
   const guidesRef = useRef<GuideLine[]>([]);
-  const [guideEpoch, setGuideEpoch] = useState(0);
+  const [guides, setGuides] = useState<GuideLine[]>([]);
   const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
   const rfConnectionRef = useRef<Connection | null>(null);
   const documentNameRef = useRef("Untitled");
@@ -1003,6 +1003,10 @@ function Board() {
   const canDelete =
     nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
 
+  if (!sameGuides(guides, guidesRef.current)) {
+    setGuides(guidesRef.current);
+  }
+
   return (
     <div
         className="h-full w-full bg-stone-100"
@@ -1115,7 +1119,7 @@ function Board() {
             dragNodeIdRef.current = null;
             if (guidesRef.current.length > 0) {
               guidesRef.current = [];
-              setGuideEpoch((epoch) => epoch + 1);
+              setGuides([]);
             }
           }}
           onMoveEnd={() => {
@@ -1124,7 +1128,7 @@ function Board() {
           }}
           proOptions={{ hideAttribution: true }}
         >
-          <AlignmentGuides key={guideEpoch} lines={guidesRef.current} />
+          <AlignmentGuides lines={guides} />
           <Background
             id="dots"
             variant={BackgroundVariant.Dots}

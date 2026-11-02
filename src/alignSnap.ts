@@ -322,7 +322,7 @@ function snapResize(
         guides.push(...guidesFor("x", box, xSnap.matches));
       }
     }
-    const ySnap = yAnchors.length ? bestSnap(next, others, "y", yAnchors, false) : null;
+    const ySnap = yAnchors.length ? bestSnap(box, others, "y", yAnchors, false) : null;
     if (ySnap) {
       const snapped = applyResizeSnap(box, "y", ySnap.anchor, ySnap.delta, sides);
       if (snapped) {
@@ -346,6 +346,8 @@ function finishResize(
     if (change.type !== "dimensions" || change.resizing !== false) return change;
     resizeOrigins.delete(change.id);
     const snapped = snappedSizes.get(change.id);
+    // Keep the snapped size for this id. A second pass of this update still needs it,
+    // and the next resize of the node overwrites the entry.
     if (!snapped) return change;
     // The resizer's pointer size is unsnapped. Keep the size already on screen.
     return {
