@@ -1,7 +1,7 @@
 ---
 id: NB-17
 title: Attach noodles anywhere along a side
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
