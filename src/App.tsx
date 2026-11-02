@@ -64,7 +64,6 @@ import {
   PORT_SCREEN_RADIUS,
   allowsPort,
   connectionForDrop,
-  sameHandle,
   connectionForPark,
   draggedEnd,
   makeEndpoint,
@@ -481,17 +480,19 @@ function Board() {
         applyReconnect(edge, rf);
         return;
       }
-      if (hotConnection && sameHandle(hotConnection)) return;
-
       const stationaryId = dragged === "source" ? edge.target : edge.source;
       const stationaryHandle =
         dragged === "source" ? (edge.targetHandle ?? null) : (edge.sourceHandle ?? null);
-      const droppedOnStationary =
-        connectionState.toHandle?.nodeId === stationaryId &&
-        (connectionState.toHandle.id ?? null) === stationaryHandle;
-      if (connectionState.isValid === false && droppedOnStationary) return;
+      const point = pointFromEvent(event);
+      const under = document.elementFromPoint(point.x, point.y);
+      const onStationaryHandle =
+        under instanceof Element &&
+        under.classList.contains("react-flow__handle") &&
+        under.getAttribute("data-nodeid") === stationaryId &&
+        (under.getAttribute("data-handleid") ?? null) === stationaryHandle;
+      if (onStationaryHandle) return;
 
-      parkEnd(edge, dragged, pointFromEvent(event));
+      parkEnd(edge, dragged, point);
     },
     [applyReconnect, parkEnd, store],
   );
