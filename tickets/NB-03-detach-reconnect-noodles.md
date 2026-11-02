@@ -1,7 +1,7 @@
 ---
 id: NB-03
 title: Detach and reconnect noodles by dragging endpoints
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
