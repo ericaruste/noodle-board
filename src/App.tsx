@@ -64,7 +64,6 @@ import {
   PORT_SCREEN_RADIUS,
   allowsPort,
   connectionForDrop,
-  sameHandle,
   connectionForPark,
   draggedEnd,
   makeEndpoint,
@@ -426,13 +425,18 @@ function Board() {
       const existing = nodesRef.current.find(
         (node) => node.id === currentId && node.type === ENDPOINT_TYPE,
       );
-      takeSnapshot();
       if (existing) {
+        const samePlace =
+          Math.abs(existing.position.x - position.x) < 0.5 &&
+          Math.abs(existing.position.y - position.y) < 0.5;
+        if (samePlace) return;
+        takeSnapshot();
         setNodes((current) =>
           current.map((node) => (node.id === existing.id ? { ...node, position } : node)),
         );
         return;
       }
+      takeSnapshot();
       const id = `end-${crypto.randomUUID()}`;
       const connection = connectionForPark(edge, dragged, id);
       const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
@@ -473,33 +477,41 @@ function Board() {
 
       const hot = nearestPort(store.getState(), connectionState.pointer);
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
-      if (hotConnection && allowsPort(nodesRef.current, dragged, hotConnection)) {
+      if (
+        hotConnection &&
+        !sameEnds(edge, hotConnection) &&
+        allowsPort(nodesRef.current, dragged, hotConnection)
+      ) {
         applyReconnect(edge, hotConnection);
         return;
       }
-      if (rf && allowsPort(nodesRef.current, dragged, rf)) {
+      if (rf && !sameEnds(edge, rf) && allowsPort(nodesRef.current, dragged, rf)) {
         applyReconnect(edge, rf);
         return;
       }
-      if (hotConnection && sameHandle(hotConnection)) return;
-
       const stationaryId = dragged === "source" ? edge.target : edge.source;
       const stationaryHandle =
         dragged === "source" ? (edge.targetHandle ?? null) : (edge.sourceHandle ?? null);
-      const droppedOnStationary =
-        connectionState.toHandle?.nodeId === stationaryId &&
-        (connectionState.toHandle.id ?? null) === stationaryHandle;
-      if (connectionState.isValid === false && droppedOnStationary) return;
+      const currentId = dragged === "source" ? edge.source : edge.target;
+      const currentHandle =
+        dragged === "source" ? (edge.sourceHandle ?? null) : (edge.targetHandle ?? null);
+      const point = pointFromEvent(event);
+      const onHandle = (nodeId: string, handleId: string | null) => {
+        const handle = document.querySelector(
+          `.react-flow__handle[data-nodeid="${CSS.escape(nodeId)}"][data-handleid="${CSS.escape(handleId ?? "")}"]`,
+        );
+        if (!(handle instanceof HTMLElement)) return false;
+        const box = handle.getBoundingClientRect();
+        return (
+          point.x >= box.left &&
+          point.x <= box.right &&
+          point.y >= box.top &&
+          point.y <= box.bottom
+        );
+      };
+      if (onHandle(stationaryId, stationaryHandle) || onHandle(currentId, currentHandle)) return;
 
-      if (connectionState.from && connectionState.pointer) {
-        const [tx, ty, zoom] = store.getState().transform;
-        const px = (connectionState.pointer.x - tx) / zoom;
-        const py = (connectionState.pointer.y - ty) / zoom;
-        const distance = Math.hypot(px - connectionState.from.x, py - connectionState.from.y);
-        if (zoom > 0 && distance <= PORT_SCREEN_RADIUS / zoom) return;
-      }
-
-      parkEnd(edge, dragged, pointFromEvent(event));
+      parkEnd(edge, dragged, point);
     },
     [applyReconnect, parkEnd, store],
   );
