@@ -9,7 +9,9 @@ import {
   type ReactFlowState,
 } from "@xyflow/react";
 import { forwardEndDrag } from "./noodleEnds";
-import { clientToFlow, nearestHandleOnNode, portGeometry } from "./PortMagnet";
+import { clientToFlow, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { isSide, sameAttachmentPoint } from "./attachment";
+import { getConnectionOrigin, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -26,10 +28,10 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
   return dy >= 0 ? Position.Top : Position.Bottom;
 }
 
-function ignoredTarget(target: Element) {
+function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__handle, .react-flow__edge, .react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor]",
+      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .noodle-end, .react-flow__resize-control, .react-flow__node-endpoint",
     ),
   );
 }
@@ -47,12 +49,13 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
   useEffect(() => {
     if (!active) {
       store.setState({ connectionClickStartHandle: null });
+      clearConnectionOrigin();
       return;
     }
     const root = store.getState().domNode;
     if (!root) return;
 
-    let gesture: { nodeId: string; handleId: string; x: number; y: number; dragged: boolean } | null = null;
+    let gesture: { nodeId: string; handleId: string; fraction: number; x: number; y: number; dragged: boolean } | null = null;
 
     const finishGesture = () => {
       window.removeEventListener("pointermove", onMove);
@@ -63,10 +66,14 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     const onMove = (event: PointerEvent) => {
       if (!gesture || gesture.dragged) return;
       if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) < DRAG_START) return;
-      const handle = document.querySelector(
-        `.react-flow__handle[data-nodeid="${CSS.escape(gesture.nodeId)}"][data-handleid="${CSS.escape(gesture.handleId)}"]`,
-      );
-      if (!(handle instanceof Element)) return;
+      if (!isSide(gesture.handleId)) return;
+      const state = store.getState();
+      const port = { nodeId: gesture.nodeId, handleId: gesture.handleId, fraction: gesture.fraction };
+      setConnectionOrigin(port);
+      setHotPort(port);
+      syncPlacedHandles(state);
+      const handle = placeHandle(state, gesture.nodeId, gesture.handleId, gesture.fraction);
+      if (!handle) return;
       gesture.dragged = true;
       store.setState({ connectionClickStartHandle: null });
       forwardEndDrag(handle, event);
@@ -82,19 +89,20 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       const port = flow ? nearestHandleOnNode(state, current.nodeId, flow) : null;
       const nodeId = current.nodeId;
       const handleId = port?.handleId ?? current.handleId;
-      if (!handleId) return;
+      const fraction = port?.fraction ?? current.fraction;
+      if (!handleId || !isSide(handleId)) return;
       const armed = state.connectionClickStartHandle;
-      if (!armed) {
+      const pin = { nodeId, handleId, fraction };
+      if (!armed || armed.nodeId === nodeId) {
+        setConnectionOrigin(pin);
+        setHotPort(pin);
+        syncPlacedHandles(state);
         store.setState({ connectionClickStartHandle: { nodeId, id: handleId, type: "source" } });
         setPointer({ x: event.clientX, y: event.clientY });
         return;
       }
-      if (armed.nodeId === nodeId) {
-        if ((armed.id ?? null) !== handleId) {
-          store.setState({ connectionClickStartHandle: { nodeId, id: handleId, type: "source" } });
-        }
-        return;
-      }
+      setHotPort(pin);
+      syncPlacedHandles(state);
       const connection: Connection = {
         source: armed.nodeId,
         sourceHandle: armed.id ?? null,
@@ -102,27 +110,45 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         targetHandle: handleId,
       };
       store.setState({ connectionClickStartHandle: null });
-      if (isValidRef.current(connection)) onConnectRef.current(connection);
+      if (
+        !sameAttachmentPoint(
+          connection.source,
+          connection.sourceHandle,
+          getConnectionOrigin()?.fraction,
+          connection.target,
+          connection.targetHandle,
+          fraction,
+        ) &&
+        isValidRef.current(connection)
+      ) {
+        onConnectRef.current(connection);
+        clearConnectionOrigin();
+      }
     };
 
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
       const target = event.target;
-      if (!(target instanceof Element) || ignoredTarget(target)) return;
-      const nodeEl = target.closest(".react-flow__node");
-      if (!(nodeEl instanceof HTMLElement) || nodeEl.classList.contains("react-flow__node-endpoint")) {
-        if (store.getState().connectionClickStartHandle) store.setState({ connectionClickStartHandle: null });
+      if (!(target instanceof Element) || blockedTarget(target)) return;
+      const state = store.getState();
+      const port = portAtClient(state, event.clientX, event.clientY);
+      if (!port?.handleId || !isSide(port.handleId)) {
+        if (state.connectionClickStartHandle) {
+          store.setState({ connectionClickStartHandle: null });
+          clearConnectionOrigin();
+        }
         return;
       }
-      const nodeId = nodeEl.dataset.id;
-      if (!nodeId) return;
-      const state = store.getState();
-      const flow = clientToFlow(state, event.clientX, event.clientY);
-      const port = flow ? nearestHandleOnNode(state, nodeId, flow) : null;
-      if (!port?.handleId) return;
       event.stopPropagation();
       event.preventDefault();
-      gesture = { nodeId, handleId: port.handleId, x: event.clientX, y: event.clientY, dragged: false };
+      gesture = {
+        nodeId: port.nodeId,
+        handleId: port.handleId,
+        fraction: port.fraction ?? 0.5,
+        x: event.clientX,
+        y: event.clientY,
+        dragged: false,
+      };
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
@@ -130,9 +156,8 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
 
     const onClick = (event: MouseEvent) => {
       const target = event.target;
-      if (!(target instanceof Element) || ignoredTarget(target)) return;
-      const nodeEl = target.closest(".react-flow__node");
-      if (!(nodeEl instanceof HTMLElement) || nodeEl.classList.contains("react-flow__node-endpoint")) return;
+      if (!(target instanceof Element) || blockedTarget(target)) return;
+      if (!portAtClient(store.getState(), event.clientX, event.clientY)) return;
       event.stopPropagation();
       event.preventDefault();
     };
@@ -145,6 +170,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       root.removeEventListener("pointerdown", onDown, true);
       root.removeEventListener("click", onClick, true);
       store.setState({ connectionClickStartHandle: null });
+      clearConnectionOrigin();
     };
   }, [active, store]);
 
@@ -168,7 +194,10 @@ function ConnectPreview({
 }) {
   const store = useStoreApi();
   const state = store.getState();
-  const from = portGeometry(state, start.nodeId, start.id ?? null);
+  const origin = getConnectionOrigin();
+  const fraction =
+    origin && origin.nodeId === start.nodeId && origin.handleId === (start.id ?? "") ? origin.fraction : undefined;
+  const from = portGeometry(state, start.nodeId, start.id ?? null, fraction);
   if (!from) return null;
   const bounds = state.domNode?.getBoundingClientRect();
   if (!bounds || state.transform[2] === 0) return null;

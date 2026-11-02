@@ -12,7 +12,7 @@ export const ENDPOINT_HANDLE = "end";
 export const ENDPOINT_SIZE = 14;
 export const ENDPOINT_Z = 2100;
 
-export type HotPort = { nodeId: string; handleId: string | null };
+export type HotPort = { nodeId: string; handleId: string | null; fraction?: number };
 
 export function draggedEnd(stationary: HandleType): HandleType {
   return stationary === "source" ? "target" : "source";
@@ -112,7 +112,9 @@ export function sameHandle(connection: EndConnection) {
 
 export function allowsPort(nodes: Node[], dragged: HandleType, connection: EndConnection) {
   if (!connection.source || !connection.target) return false;
-  if (sameHandle(connection)) return false;
+  const side = connection.sourceHandle;
+  const sideHandle = side === "top" || side === "right" || side === "bottom" || side === "left";
+  if (sameHandle(connection) && !sideHandle) return false;
   const nextId = dragged === "source" ? connection.source : connection.target;
   return !nodes.some((node) => node.id === nextId && node.type === ENDPOINT_TYPE);
 }

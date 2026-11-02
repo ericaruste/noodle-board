@@ -58,7 +58,9 @@ import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
 import ConnectMode from "./ConnectMode";
 import PortMagnet, { nearestPort, portAtClient } from "./PortMagnet";
+import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
+import { clearConnectionOrigin, getConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort } from "./portHot";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -122,6 +124,21 @@ function cloneSnapshot(nodes: Node[], edges: Edge[]): Snapshot {
     nodes: structuredClone(nodes),
     edges: structuredClone(edges),
   };
+}
+
+function fractionFor(end: "source" | "target", connection: Connection | Edge) {
+  const nodeId = end === "source" ? connection.source : connection.target;
+  const handleId = end === "source" ? connection.sourceHandle : connection.targetHandle;
+  if (!isSide(handleId)) return 0.5;
+  if (end === "source") {
+    const from = getConnectionOrigin();
+    if (from && from.nodeId === nodeId && from.handleId === handleId) return from.fraction;
+  }
+  const hot = getHotPort();
+  if (hot && hot.nodeId === nodeId && (hot.handleId ?? null) === (handleId ?? null) && hot.fraction != null) {
+    return hot.fraction;
+  }
+  return 0.5;
 }
 
 function loadCanvas(): Snapshot {
@@ -436,7 +453,8 @@ function Board() {
       if (removed) takeSnapshot();
       const parkedEdges = parkedCopiesRef.current?.edges;
       const base = appendMissing(edgesRef.current, parkedEdges);
-      const next = applyEdgeChanges(changes, base);
+      const changed = applyEdgeChanges(changes, base);
+      const next = removed ? reflowAttachments(changed) : changed;
       edgesRef.current = next;
       setEdges(next);
       if (removed) setNodes((current) => pruneEndpoints(current, next));
@@ -448,7 +466,23 @@ function Board() {
     (connection: Connection) => {
       if (suppressConnectRef.current) return;
       if (!connection.source || !connection.target) return;
+      const sourceFraction = fractionFor("source", connection);
+      const targetFraction = fractionFor("target", connection);
+      if (
+        sameAttachmentPoint(
+          connection.source,
+          connection.sourceHandle,
+          sourceFraction,
+          connection.target,
+          connection.targetHandle,
+          targetFraction,
+        )
+      ) {
+        return;
+      }
       const data = defaultNoodleData();
+      if (isSide(connection.sourceHandle)) data.sourceFraction = sourceFraction;
+      if (isSide(connection.targetHandle)) data.targetFraction = targetFraction;
       const created = {
         ...defaultEdgeOptions,
         ...connection,
@@ -460,8 +494,13 @@ function Board() {
         markerStart: undefined,
         markerEnd: undefined,
       };
-      const next = addEdge(created, edgesRef.current);
-      if (next === edgesRef.current) return;
+      const added = addEdge(created, edgesRef.current);
+      // addEdge drops a second noodle that reuses the same side ids. Each noodle is its own edge.
+      const withNew =
+        added === edgesRef.current
+          ? edgesRef.current.concat({ ...created, id: `noodle-${crypto.randomUUID()}` })
+          : added;
+      const next = reflowAttachments(withNew);
       takeSnapshot();
       edgesRef.current = next;
       setEdges(next);
@@ -471,31 +510,58 @@ function Board() {
 
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
-      if (suppressConnectRef.current || reconnectRef.current || !connectModeRef.current) return;
-      if (connectionState.isValid && connectionState.toHandle) return;
+      if (suppressConnectRef.current || reconnectRef.current) return;
+      if (connectionState.isValid && connectionState.toHandle) {
+        clearConnectionOrigin();
+        return;
+      }
       const from = connectionState.fromHandle;
-      if (!from?.nodeId) return;
+      if (!from?.nodeId) {
+        clearConnectionOrigin();
+        return;
+      }
       const point = pointFromEvent(event);
-      const port = portAtClient(store.getState(), point.x, point.y);
-      if (!port?.handleId) return;
-      if (from.nodeId === port.nodeId && (from.id ?? null) === port.handleId) return;
+      const state = store.getState();
+      const port =
+        (connectModeRef.current ? portAtClient(state, point.x, point.y) : null) ??
+        nearestPort(state, connectionState.pointer);
+      if (!port?.handleId) {
+        clearConnectionOrigin();
+        return;
+      }
+      setHotPort(port);
+      const sourceFraction = getConnectionOrigin()?.nodeId === from.nodeId ? (getConnectionOrigin()?.fraction ?? 0.5) : 0.5;
+      if (sameAttachmentPoint(from.nodeId, from.id, sourceFraction, port.nodeId, port.handleId, port.fraction)) {
+        clearConnectionOrigin();
+        return;
+      }
       onConnect({
         source: from.nodeId,
         sourceHandle: from.id ?? null,
         target: port.nodeId,
         targetHandle: port.handleId,
       });
+      clearConnectionOrigin();
     },
     [onConnect, store],
   );
 
   const isValidConnection = useCallback((connection: Connection | Edge) => {
     if (!connection.source || !connection.target) return false;
-    if (
-      connection.source === connection.target &&
-      (connection.sourceHandle ?? null) === (connection.targetHandle ?? null)
-    ) {
-      return false;
+    if (connection.source === connection.target && (connection.sourceHandle ?? null) === (connection.targetHandle ?? null)) {
+      if (
+        !isSide(connection.sourceHandle) ||
+        sameAttachmentPoint(
+          connection.source,
+          connection.sourceHandle,
+          fractionFor("source", connection),
+          connection.target,
+          connection.targetHandle,
+          fractionFor("target", connection),
+        )
+      ) {
+        return false;
+      }
     }
     const active = reconnectRef.current;
     if (!active) {
@@ -509,15 +575,30 @@ function Board() {
   }, []);
 
   const applyReconnect = useCallback(
-    (edge: Edge, connection: Connection) => {
-      if (sameEnds(edge, connection)) return;
+    (edge: Edge, connection: Connection, dragged: HandleType, fraction: number | undefined) => {
+      const current = readNoodle(edge.data);
+      const nextFraction =
+        (dragged === "source" ? isSide(connection.sourceHandle) : isSide(connection.targetHandle)) ? fraction : undefined;
+      const previous = dragged === "source" ? current.sourceFraction : current.targetFraction;
+      if (sameEnds(edge, connection) && sameFraction(previous, nextFraction)) return;
       takeSnapshot();
-      const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
+      const rewired = reconnectEdge(edge, connection, edgesRef.current, {
         shouldReplaceId: false,
       });
+      const patched = rewired.map((item) => {
+        if (item.id !== edge.id) return item;
+        const noodle = readNoodle(item.data);
+        if (dragged === "source") {
+          if (nextFraction === undefined) delete noodle.sourceFraction;
+          else noodle.sourceFraction = nextFraction;
+        } else if (nextFraction === undefined) delete noodle.targetFraction;
+        else noodle.targetFraction = nextFraction;
+        return applyNoodleData(item, noodle);
+      });
+      const nextEdges = reflowAttachments(patched);
       edgesRef.current = nextEdges;
       setEdges(nextEdges);
-      setNodes((current) => pruneEndpoints(current, nextEdges));
+      setNodes((currentNodes) => pruneEndpoints(currentNodes, nextEdges));
     },
     [takeSnapshot],
   );
@@ -547,9 +628,11 @@ function Board() {
       takeSnapshot();
       const id = `end-${crypto.randomUUID()}`;
       const connection = connectionForPark(edge, dragged, id);
-      const nextEdges = reconnectEdge(edge, connection, edgesRef.current, {
-        shouldReplaceId: false,
-      });
+      const nextEdges = reflowAttachments(
+        reconnectEdge(edge, connection, edgesRef.current, {
+          shouldReplaceId: false,
+        }),
+      );
       edgesRef.current = nextEdges;
       setNodes((current) => [...current, makeEndpoint(id, position)]);
       setEdges(nextEdges);
@@ -585,16 +668,26 @@ function Board() {
 
       const hot = nearestPort(store.getState(), connectionState.pointer);
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
-      if (
-        hotConnection &&
-        !sameEnds(edge, hotConnection) &&
-        allowsPort(nodesRef.current, dragged, hotConnection)
-      ) {
-        applyReconnect(edge, hotConnection);
+      const held = (connection: Connection, fraction: number | undefined) => {
+        if (!sameEnds(edge, connection)) return false;
+        const data = readNoodle(edge.data);
+        const previous = dragged === "source" ? data.sourceFraction : data.targetFraction;
+        const next =
+          (dragged === "source" ? isSide(connection.sourceHandle) : isSide(connection.targetHandle)) ? fraction : undefined;
+        return sameFraction(previous, next);
+      };
+      if (hotConnection && allowsPort(nodesRef.current, dragged, hotConnection)) {
+        if (!held(hotConnection, hot?.fraction)) applyReconnect(edge, hotConnection, dragged, hot?.fraction);
+        clearConnectionOrigin();
         return;
       }
-      if (rf && !sameEnds(edge, rf) && allowsPort(nodesRef.current, dragged, rf)) {
-        applyReconnect(edge, rf);
+      if (rf && allowsPort(nodesRef.current, dragged, rf)) {
+        const nodeId = dragged === "source" ? rf.source : rf.target;
+        const handleId = dragged === "source" ? rf.sourceHandle : rf.targetHandle;
+        const fraction =
+          hot && hot.nodeId === nodeId && (hot.handleId ?? null) === (handleId ?? null) ? hot.fraction : 0.5;
+        if (!held(rf, fraction)) applyReconnect(edge, rf, dragged, fraction);
+        clearConnectionOrigin();
         return;
       }
       const stationaryId = dragged === "source" ? edge.target : edge.source;
@@ -617,9 +710,13 @@ function Board() {
           point.y <= box.bottom
         );
       };
-      if (onHandle(stationaryId, stationaryHandle) || onHandle(currentId, currentHandle)) return;
+      if (onHandle(stationaryId, stationaryHandle) || onHandle(currentId, currentHandle)) {
+        clearConnectionOrigin();
+        return;
+      }
 
       parkEnd(edge, dragged, point);
+      clearConnectionOrigin();
     },
     [applyReconnect, parkEnd, store],
   );
@@ -720,8 +817,10 @@ function Board() {
     if (!selectedNodes.length && !selectedEdges.length) return;
     takeSnapshot();
     const removed = new Set(selectedNodes.map((node) => node.id));
-    const nextEdges = edgesRef.current.filter(
-      (edge) => !edge.selected && !removed.has(edge.source) && !removed.has(edge.target),
+    const nextEdges = reflowAttachments(
+      edgesRef.current.filter(
+        (edge) => !edge.selected && !removed.has(edge.source) && !removed.has(edge.target),
+      ),
     );
     const nextNodes = pruneEndpoints(
       nodesRef.current.filter((node) => !node.selected),
@@ -1109,6 +1208,7 @@ function Board() {
         suppressConnectRef.current = true;
         store.getState().cancelConnection();
         store.setState({ connectionClickStartHandle: null });
+        clearConnectionOrigin();
         document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, view: window }));
         suppressConnectRef.current = false;
         setConnectMode(false);
@@ -1256,6 +1356,17 @@ function Board() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onConnectStart={(_event, params) => {
+            if (!params.nodeId || !params.handleId || !isSide(params.handleId)) return;
+            const existing = getConnectionOrigin();
+            if (existing?.nodeId === params.nodeId && existing.handleId === params.handleId) return;
+            const hot = getHotPort();
+            const fraction =
+              hot && hot.nodeId === params.nodeId && hot.handleId === params.handleId && hot.fraction != null
+                ? hot.fraction
+                : 0.5;
+            setConnectionOrigin({ nodeId: params.nodeId, handleId: params.handleId, fraction });
+          }}
           onConnectEnd={onConnectEnd}
           onReconnect={onReconnect}
           onReconnectStart={onReconnectStart}

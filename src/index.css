@@ -275,6 +275,7 @@ body,
 }
 
 .react-flow__edgeupdater {
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -327,13 +328,27 @@ body,
   opacity: 1;
 }
 
-.noodle-node .react-flow__handle.noodle-port-hot,
+.noodle-node .react-flow__handle.noodle-port-hot {
+  opacity: 0 !important;
+}
+
 .noodle-node .react-flow__handle.clickconnecting {
   opacity: 1;
   background: #0f172a;
   width: calc(var(--noodle-port-size, 10px) * 1.45);
   height: calc(var(--noodle-port-size, 10px) * 1.45);
   box-shadow: 0 0 0 4px rgba(51, 65, 85, 0.35);
+}
+
+.noodle-port-marker {
+  position: absolute;
+  z-index: 20;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #0f172a;
+  box-shadow: 0 0 0 4px rgba(51, 65, 85, 0.35);
+  pointer-events: none;
 }
 
 .noodle-align-guides {
