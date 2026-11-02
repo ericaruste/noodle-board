@@ -161,14 +161,68 @@ function shiftDrag(changes: NodeChange[], active: Set<string>, dx: number, dy: n
   });
 }
 
-function snapDrag(nodes: Node[], changes: NodeChange[], active: Set<string>, primaryId: string): AlignResult {
+/** "horizontal" keeps the drag on a line of constant y. "vertical" keeps constant x. */
+export type AxisLock = "horizontal" | "vertical";
+
+/** Drag-start position used to lock an Alt-drag while Shift is held. */
+export type DragAxisLock = {
+  origin: { x: number; y: number };
+  primaryId: string;
+};
+
+/**
+ * Keep a drag on the axis the pointer has moved further along.
+ * The other axis is left free so alignment can still snap it.
+ */
+function constrainDragChanges(
+  changes: NodeChange[],
+  active: Set<string>,
+  primaryId: string,
+  origin: { x: number; y: number },
+): { changes: NodeChange[]; lock: AxisLock } | null {
+  const primary = changes.find(
+    (change) => change.type === "position" && change.id === primaryId && change.position,
+  );
+  if (!primary || primary.type !== "position" || !primary.position) return null;
+  const dx = primary.position.x - origin.x;
+  const dy = primary.position.y - origin.y;
+  const lock: AxisLock = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+  const shifted =
+    lock === "horizontal"
+      ? shiftDrag(changes, active, 0, origin.y - primary.position.y)
+      : shiftDrag(changes, active, origin.x - primary.position.x, 0);
+  return { changes: shifted, lock };
+}
+
+function withAxisLock(
+  changes: NodeChange[],
+  active: Set<string>,
+  primaryId: string,
+  constraint: DragAxisLock | null,
+): { changes: NodeChange[]; lock: AxisLock | null; primaryId: string } {
+  if (!constraint || !active.has(constraint.primaryId)) {
+    return { changes, lock: null, primaryId };
+  }
+  const locked = constrainDragChanges(changes, active, constraint.primaryId, constraint.origin);
+  if (!locked) return { changes, lock: null, primaryId };
+  return { changes: locked.changes, lock: locked.lock, primaryId: constraint.primaryId };
+}
+
+function snapDrag(
+  nodes: Node[],
+  changes: NodeChange[],
+  active: Set<string>,
+  primaryId: string,
+  lock: AxisLock | null,
+): AlignResult {
   const primary = nodes.find((node) => node.id === primaryId);
   const moving = primary ? proposedBox(primary, changes) : null;
   if (!primary || !moving) return { changes, guides: [] };
 
   const others = otherBoxes(nodes, active);
-  const xSnap = bestSnap(moving, others, "x", ANCHORS, true);
-  const ySnap = bestSnap(moving, others, "y", ANCHORS, true);
+  // A locked axis stays on the start line. Guides still snap the free axis.
+  const xSnap = lock === "vertical" ? null : bestSnap(moving, others, "x", ANCHORS, true);
+  const ySnap = lock === "horizontal" ? null : bestSnap(moving, others, "y", ANCHORS, true);
   const dx = xSnap?.delta ?? 0;
   const dy = ySnap?.delta ?? 0;
   const snapped = { ...moving, x: moving.x + dx, y: moving.y + dy };
@@ -382,6 +436,7 @@ export function alignNodeChanges(
   dragNodeId: string | null,
   resizeOrigins: Map<string, FlowBox>,
   snappedSizes: Map<string, { width: number; height: number }>,
+  constraint: DragAxisLock | null = null,
 ): AlignResult {
   const resizeChange = changes.find((change) => change.type === "dimensions" && change.resizing === true);
   if (resizeChange?.type === "dimensions") {
@@ -401,7 +456,8 @@ export function alignNodeChanges(
   if (draggingIds.length > 0) {
     const active = new Set(draggingIds);
     const primaryId = dragNodeId && active.has(dragNodeId) ? dragNodeId : draggingIds[0];
-    return snapDrag(nodes, changes, active, primaryId);
+    const locked = withAxisLock(changes, active, primaryId, constraint);
+    return snapDrag(nodes, locked.changes, active, locked.primaryId, locked.lock);
   }
 
   if (
@@ -414,7 +470,8 @@ export function alignNodeChanges(
       ),
     );
     const primaryId = active.has(dragNodeId) ? dragNodeId : [...active][0];
-    const snapped = snapDrag(nodes, changes, active, primaryId);
+    const locked = withAxisLock(changes, active, primaryId, constraint);
+    const snapped = snapDrag(nodes, locked.changes, active, locked.primaryId, locked.lock);
     return { changes: snapped.changes, guides: [] };
   }
 

@@ -1,7 +1,7 @@
 ---
 id: NB-16
 title: Copy and duplicate with Alt-drag and Ctrl+D
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX, Canvas]
 parent: NB-E1
@@ -29,18 +29,18 @@ Repeating an object means building it again by hand. Alt-drag does not leave a c
 
 ## Acceptance criteria
 
-- [ ] Alt-drag (Option-drag on macOS) on a node leaves a copy of the whole selection at the drag-start positions and moves the selection. Copies are not selected, so they stay put
-- [ ] Alt must be held when the drag starts. Pressing or releasing Alt mid-drag does not add or remove a copy
-- [ ] Ctrl+D (Cmd+D on macOS) duplicates the current selection, offsets the copies by the repeat step, selects the copies, and deselects the sources
-- [ ] The first Ctrl+D in a chain steps copies by a fixed gap (32 flow px to the right). Each later Ctrl+D duplicates the copies from the previous press by that same step, so holding the rhythm stamps a row
-- [ ] If those copies are moved before the next Ctrl+D, the step becomes the delta from where that press created them to where they are now. An Alt-drag sets the same step to the drag delta, so the next Ctrl+D continues that spacing
-- [ ] A noodle is copied only when both ends are in the duplicated set. Ends that are `endpoint` nodes are included even though those nodes are not selectable. Noodles that leave the set are not copied
-- [ ] Copied noodles get new edge ids, remapped source and target, and the same style and label. Bends are shifted by the same delta as the nodes. `curveOffset` is kept
-- [ ] Copies are deep clones (`structuredClone` of `data`) with new ids (`crypto.randomUUID()`). Editing a copy does not change the source. This includes sticky text and color, text paragraphs, shape kind and colors, and image `src`
-- [ ] Each Alt-drag and each Ctrl+D is one undo step through `takeSnapshot`. Ctrl+Z removes that duplicate and restores the previous selection. Ctrl+Shift+Z brings it back
-- [ ] Ctrl+D does nothing while typing (`isTypingTarget`) or while a noodle toolbar field is focused, and it calls `preventDefault` so the browser does not bookmark the page
-- [ ] Both gestures no-op when nothing that can be copied is selected. They work for a multi-selection of mixed node types
-- [ ] Copies are ordinary nodes and edges, so the existing autosave and project file pick them up with no format change
+- [x] Alt-drag (Option-drag on macOS) on a node leaves a copy of the whole selection at the drag-start positions and moves the selection. Copies are not selected, so they stay put
+- [x] Alt must be held when the drag starts. Pressing or releasing Alt mid-drag does not add or remove a copy
+- [x] Ctrl+D (Cmd+D on macOS) duplicates the current selection, offsets the copies by the repeat step, selects the copies, and deselects the sources
+- [x] The first Ctrl+D in a chain steps copies by a fixed gap (32 flow px to the right). Each later Ctrl+D duplicates the copies from the previous press by that same step, so holding the rhythm stamps a row
+- [x] If those copies are moved before the next Ctrl+D, the step becomes the delta from where that press created them to where they are now. An Alt-drag sets the same step to the drag delta, so the next Ctrl+D continues that spacing
+- [x] A noodle is copied only when both ends are in the duplicated set. Ends that are `endpoint` nodes are included even though those nodes are not selectable. Noodles that leave the set are not copied
+- [x] Copied noodles get new edge ids, remapped source and target, and the same style and label. Bends are shifted by the same delta as the nodes. `curveOffset` is kept
+- [x] Copies are deep clones (`structuredClone` of `data`) with new ids (`crypto.randomUUID()`). Editing a copy does not change the source. This includes sticky text and color, text paragraphs, shape kind and colors, and image `src`
+- [x] Each Alt-drag and each Ctrl+D is one undo step through `takeSnapshot`. Ctrl+Z removes that duplicate and restores the previous selection. Ctrl+Shift+Z brings it back
+- [x] Ctrl+D does nothing while typing (`isTypingTarget`) or while a noodle toolbar field is focused, and it calls `preventDefault` so the browser does not bookmark the page
+- [x] Both gestures no-op when nothing that can be copied is selected. They work for a multi-selection of mixed node types
+- [x] Copies are ordinary nodes and edges, so the existing autosave and project file pick them up with no format change
 
 ## Technical notes
 

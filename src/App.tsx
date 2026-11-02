@@ -26,7 +26,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import AlignmentGuides from "./AlignmentGuides";
-import { alignNodeChanges, sameGuides, type FlowBox, type GuideLine } from "./alignSnap";
+import { alignNodeChanges, sameGuides, type DragAxisLock, type FlowBox, type GuideLine } from "./alignSnap";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import {
@@ -73,6 +73,17 @@ import {
   pruneEndpoints,
   sameEnds,
 } from "./noodleEnds";
+import {
+  NODE_CLIPBOARD_MARKER,
+  appendMissing,
+  duplicateGraph,
+  nextDuplicateStep,
+  pasteClipboard,
+  repeatFromDrag,
+  takeClipboard,
+  type NodeClipboard,
+  type RepeatMemory,
+} from "./duplicate";
 
 const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
@@ -133,6 +144,11 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return target.isContentEditable;
 }
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (isTypingTarget(target)) return true;
+  return target instanceof Element && Boolean(target.closest("[data-noodle-toolbar]"));
+}
+
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -172,6 +188,18 @@ function Board() {
   const applyingHistory = useRef(false);
   const dragSnapshotTaken = useRef(false);
   const dragNodeIdRef = useRef<string | null>(null);
+  const repeatRef = useRef<RepeatMemory | null>(null);
+  const altDragRef = useRef<{
+    nodeId: string;
+    origin: { x: number; y: number };
+    ids: Set<string>;
+    settled: boolean;
+    previous: RepeatMemory | null;
+  } | null>(null);
+  const parkedCopiesRef = useRef<{ nodes: Node[]; edges: Edge[] } | null>(null);
+  const clipboardRef = useRef<NodeClipboard | null>(null);
+  const shiftHeldRef = useRef(false);
+  const rawDragRef = useRef<Map<string, { x: number; y: number }> | null>(null);
   const resizeOriginRef = useRef(new Map<string, FlowBox>());
   const snappedSizeRef = useRef(new Map<string, { width: number; height: number }>());
   const guidesRef = useRef<GuideLine[]>([]);
@@ -326,30 +354,89 @@ function Board() {
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       if (changes.some((change) => change.type === "remove")) takeSnapshot();
+      const dragEnded = changes.some((change) => change.type === "position" && change.dragging === false);
+      const parkedNodes = parkedCopiesRef.current?.nodes;
+      const alt = dragEnded ? altDragRef.current : null;
+      const dragId = dragNodeIdRef.current;
+      const axisLock: DragAxisLock | null =
+        altDragRef.current && shiftHeldRef.current
+          ? { origin: altDragRef.current.origin, primaryId: altDragRef.current.nodeId }
+          : null;
+      if (altDragRef.current) {
+        const raw = new Map<string, { x: number; y: number }>();
+        for (const change of changes) {
+          if (change.type === "position" && change.position) {
+            raw.set(change.id, { x: change.position.x, y: change.position.y });
+          }
+        }
+        if (raw.size > 0) rawDragRef.current = raw;
+      }
       setNodes((current) => {
+        const base = appendMissing(current, parkedNodes);
         const aligned = alignNodeChanges(
-          current,
+          base,
           changes,
-          dragNodeIdRef.current,
+          dragEnded ? dragId : dragNodeIdRef.current,
           resizeOriginRef.current,
           snappedSizeRef.current,
+          axisLock,
         );
         if (aligned.guides && !sameGuides(guidesRef.current, aligned.guides)) {
           guidesRef.current = aligned.guides;
         }
-        const next = applyNodeChanges(aligned.changes, current);
+        const next = applyNodeChanges(aligned.changes, base);
         nodesRef.current = next;
+        if (alt && (altDragRef.current === null || altDragRef.current === alt)) {
+          alt.settled = true;
+          const memory = repeatFromDrag(next, alt.nodeId, alt.origin, alt.ids);
+          repeatRef.current = memory ?? alt.previous;
+        }
         return next;
       });
     },
     [takeSnapshot],
   );
 
+  useEffect(() => {
+    const applyShift = (held: boolean) => {
+      if (shiftHeldRef.current === held) return;
+      shiftHeldRef.current = held;
+      const alt = altDragRef.current;
+      const raw = rawDragRef.current;
+      if (!alt || !raw || raw.size === 0) return;
+      onNodesChange(
+        [...raw.entries()].map(([id, position]) => ({
+          id,
+          type: "position",
+          position: { x: position.x, y: position.y },
+          dragging: true,
+        })),
+      );
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Shift") applyShift(true);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift") applyShift(false);
+    };
+    const onBlur = () => applyShift(false);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [onNodesChange]);
+
   const onEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
       const removed = changes.some((change) => change.type === "remove");
       if (removed) takeSnapshot();
-      const next = applyEdgeChanges(changes, edgesRef.current);
+      const parkedEdges = parkedCopiesRef.current?.edges;
+      const base = appendMissing(edgesRef.current, parkedEdges);
+      const next = applyEdgeChanges(changes, base);
       edgesRef.current = next;
       setEdges(next);
       if (removed) setNodes((current) => pruneEndpoints(current, next));
@@ -648,6 +735,10 @@ function Board() {
 
   const applyHistory = useCallback(
     (snapshot: Snapshot) => {
+      repeatRef.current = null;
+      altDragRef.current = null;
+      parkedCopiesRef.current = null;
+      rawDragRef.current = null;
       applyingHistory.current = true;
       nodesRef.current = snapshot.nodes;
       edgesRef.current = snapshot.edges;
@@ -830,6 +921,10 @@ function Board() {
         window.setTimeout(() => {
           blockMoveAutosaveRef.current = false;
         }, 400);
+        repeatRef.current = null;
+        altDragRef.current = null;
+        parkedCopiesRef.current = null;
+        rawDragRef.current = null;
         nodesRef.current = nextNodes;
         edgesRef.current = nextEdges;
         documentNameRef.current = name;
@@ -944,6 +1039,53 @@ function Board() {
     [openProjectFile],
   );
 
+  const duplicateSelection = useCallback(() => {
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+    const selectedIds = new Set(
+      currentNodes.filter((node) => node.selected && node.type !== ENDPOINT_TYPE).map((node) => node.id),
+    );
+    if (selectedIds.size === 0) return;
+    const step = nextDuplicateStep(currentNodes, selectedIds, repeatRef.current);
+    const result = duplicateGraph(currentNodes, currentEdges, selectedIds, step, true);
+    if (!result) return;
+    takeSnapshot();
+    const nextNodes = [
+      ...currentNodes.map((node) => (node.selected ? { ...node, selected: false } : node)),
+      ...result.nodes,
+    ];
+    const nextEdges = [...currentEdges, ...result.edges];
+    nodesRef.current = nextNodes;
+    edgesRef.current = nextEdges;
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+    repeatRef.current = { ids: new Set(result.cloneIds), birth: result.birth, step };
+  }, [takeSnapshot]);
+
+  const pasteSelection = useCallback(() => {
+    const clip = clipboardRef.current;
+    if (!clip) return false;
+    const pasted = pasteClipboard(clip);
+    if (!pasted) return false;
+    takeSnapshot();
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+    const nextNodes = [
+      ...currentNodes.map((node) => (node.selected ? { ...node, selected: false } : node)),
+      ...pasted.result.nodes,
+    ];
+    const nextEdges = [
+      ...currentEdges.map((edge) => (edge.selected ? { ...edge, selected: false } : edge)),
+      ...pasted.result.edges,
+    ];
+    nodesRef.current = nextNodes;
+    edgesRef.current = nextEdges;
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+    clipboardRef.current = pasted.clipboard;
+    return true;
+  }, [takeSnapshot]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -976,29 +1118,57 @@ function Board() {
         event.preventDefault();
         if (event.shiftKey) redo();
         else undo();
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && key === "d" && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        duplicateSelection();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [openProject, redo, saveProject, store, undo]);
+  }, [duplicateSelection, openProject, redo, saveProject, store, undo]);
 
   useEffect(() => {
+    const onCopy = (event: ClipboardEvent) => {
+      if (event.defaultPrevented || isEditableTarget(event.target)) return;
+      const currentNodes = nodesRef.current;
+      const selectedIds = new Set(
+        currentNodes.filter((node) => node.selected && node.type !== ENDPOINT_TYPE).map((node) => node.id),
+      );
+      const taken = takeClipboard(currentNodes, edgesRef.current, selectedIds);
+      if (!taken) return;
+      clipboardRef.current = taken;
+      event.preventDefault();
+      event.clipboardData?.setData("text/plain", NODE_CLIPBOARD_MARKER);
+    };
     const onPaste = (event: ClipboardEvent) => {
-      if (isTypingTarget(event.target)) return;
-      const items = event.clipboardData?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile();
-          if (file) void addImageAt(file);
-          event.preventDefault();
-          break;
+      const data = event.clipboardData;
+      if (!data) return;
+      const editable = isEditableTarget(event.target);
+      if (!editable) {
+        for (const item of data.items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            if (file) void addImageAt(file);
+            event.preventDefault();
+            return;
+          }
         }
       }
+      if (data.getData("text/plain") !== NODE_CLIPBOARD_MARKER) return;
+      // Capture phase, so an editor never inserts the marker as text.
+      event.preventDefault();
+      event.stopPropagation();
+      if (!editable) pasteSelection();
     };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-  }, [addImageAt]);
+    window.addEventListener("copy", onCopy);
+    window.addEventListener("paste", onPaste, true);
+    return () => {
+      window.removeEventListener("copy", onCopy);
+      window.removeEventListener("paste", onPaste, true);
+    };
+  }, [addImageAt, pasteSelection]);
 
   const canDelete =
     nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
@@ -1108,15 +1278,63 @@ function Board() {
           selectionKeyCode="Shift"
           multiSelectionKeyCode="Shift"
           deleteKeyCode={["Delete", "Backspace"]}
-          onNodeDragStart={(_event, node) => {
+          onNodeDragStart={(event, node, dragged) => {
             dragNodeIdRef.current = node.id;
+            if ("shiftKey" in event) shiftHeldRef.current = event.shiftKey;
             if (dragSnapshotTaken.current) return;
             dragSnapshotTaken.current = true;
             takeSnapshot();
+            altDragRef.current = null;
+            parkedCopiesRef.current = null;
+            if (!("altKey" in event) || !event.altKey) return;
+            const rootIds = new Set(
+              (dragged ?? [node])
+                .filter((item) => item.type !== ENDPOINT_TYPE)
+                .map((item) => item.id),
+            );
+            const present = nodesRef.current.filter((item) => rootIds.has(item.id));
+            if (!present.some((item) => item.id === node.id) && node.type !== ENDPOINT_TYPE) {
+              const self = nodesRef.current.find((item) => item.id === node.id);
+              if (self) present.push(self);
+            }
+            if (present.length === 0) return;
+            const ids = new Set(present.map((item) => item.id));
+            const result = duplicateGraph(nodesRef.current, edgesRef.current, ids, { x: 0, y: 0 }, false);
+            if (!result) return;
+            const source = present.find((item) => item.id === node.id) ?? present[0];
+            altDragRef.current = {
+              nodeId: source.id,
+              origin: { x: source.position.x, y: source.position.y },
+              ids,
+              settled: false,
+              previous: repeatRef.current,
+            };
+            parkedCopiesRef.current = { nodes: result.nodes, edges: result.edges };
+            const nextNodes = [...nodesRef.current, ...result.nodes];
+            const nextEdges = [...edgesRef.current, ...result.edges];
+            nodesRef.current = nextNodes;
+            edgesRef.current = nextEdges;
+            setNodes(nextNodes);
+            setEdges(nextEdges);
           }}
           onNodeDragStop={() => {
+            const alt = altDragRef.current;
+            altDragRef.current = null;
+            parkedCopiesRef.current = null;
+            rawDragRef.current = null;
             dragSnapshotTaken.current = false;
             dragNodeIdRef.current = null;
+            if (alt && !alt.settled) {
+              const memory = repeatFromDrag(nodesRef.current, alt.nodeId, alt.origin, alt.ids);
+              if (memory) repeatRef.current = memory;
+              window.setTimeout(() => {
+                if (alt.settled) return;
+                if (altDragRef.current && altDragRef.current !== alt) return;
+                const settled = repeatFromDrag(nodesRef.current, alt.nodeId, alt.origin, alt.ids);
+                repeatRef.current = settled ?? alt.previous;
+                alt.settled = true;
+              }, 0);
+            }
             if (guidesRef.current.length > 0) {
               guidesRef.current = [];
               setGuides([]);
