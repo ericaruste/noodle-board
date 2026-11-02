@@ -100,6 +100,11 @@
       "id": "fd7f5173-fa61-48ca-a13a-b9a6b2a506a2",
       "identifier": "ERI-22",
       "url": "https://linear.app/ericar/issue/ERI-22/keep-selection-chrome-a-fixed-screen-size"
+    },
+    "NB-15": {
+      "id": "845da805-3370-4bb0-a461-6c21ee3932e9",
+      "identifier": "ERI-23",
+      "url": "https://linear.app/ericar/issue/ERI-23/equal-spacing-guides-while-dragging"
     }
   }
 }
