@@ -347,13 +347,39 @@ body,
   z-index: 4000;
 }
 
+.noodle-align-guides .noodle-align-lines {
+  z-index: 1;
+}
+
+.noodle-align-guides .noodle-spacing-layer {
+  z-index: 2;
+}
+
 .noodle-align-guides line {
-  stroke: #e11d48;
+  stroke: #0d99ff;
   stroke-linecap: square;
 }
 
 .noodle-align-guides .noodle-spacing-bracket line {
-  stroke: #7c3aed;
+  stroke: #9747ff;
+}
+
+.noodle-align-guides .noodle-spacing-bracket .noodle-spacing-halo {
+  stroke: #fff;
+}
+
+.noodle-spacing-label {
+  pointer-events: none;
+}
+
+.noodle-spacing-label rect {
+  fill: #9747ff;
+}
+
+.noodle-spacing-label text {
+  fill: #fff;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
 }
 
 .noodle-anchor {
