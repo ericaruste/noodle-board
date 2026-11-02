@@ -145,11 +145,11 @@ function imageSize(src: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const max = 320;
-      const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const longSide = Math.max(img.naturalWidth, img.naturalHeight);
+      const scale = longSide > 0 ? Math.min(1, 320 / longSide) : 1;
       resolve({
-        width: Math.max(80, Math.round(img.naturalWidth * scale)),
-        height: Math.max(80, Math.round(img.naturalHeight * scale)),
+        width: Math.round(img.naturalWidth * scale),
+        height: Math.round(img.naturalHeight * scale),
       });
     };
     img.onerror = reject;

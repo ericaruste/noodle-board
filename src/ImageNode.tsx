@@ -9,8 +9,19 @@ export type ImageData = {
 
 export type ImageNodeType = Node<ImageData, "image">;
 
-function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
+/** Smallest grab size. The short side of a thin image may already be under 80px,
+ *  and the other minimum stays proportional so a resize cannot crop it back. */
+function imageResizeBounds(width?: number | null, height?: number | null) {
+  const w = typeof width === "number" && width > 0 ? width : 1;
+  const h = typeof height === "number" && height > 0 ? height : 1;
+  const floor = Math.min(8, w, h);
+  if (w <= h) return { minWidth: floor, minHeight: (floor * h) / w };
+  return { minWidth: (floor * w) / h, minHeight: floor };
+}
+
+function ImageNode({ id, data, selected, width, height }: NodeProps<ImageNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
+  const bounds = imageResizeBounds(width, height);
 
   return (
     <div
@@ -22,18 +33,17 @@ function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
       <NoodleResizer
         selected={selected}
         keepAspectRatio
-        minWidth={80}
-        minHeight={80}
+        minWidth={bounds.minWidth}
+        minHeight={bounds.minHeight}
         onResizeStart={() => window.dispatchEvent(new Event("noodle-snapshot"))}
       />
-      <div className="h-full w-full overflow-hidden rounded-md bg-white shadow-[2px_4px_12px_rgba(15,23,42,0.18)]">
-        <img
-          src={data.src}
-          alt=""
-          draggable={false}
-          className="h-full w-full object-cover"
-        />
-      </div>
+      <img
+        src={data.src}
+        alt=""
+        draggable={false}
+        className="block h-full w-full"
+        style={{ filter: "drop-shadow(2px 4px 12px rgba(15, 23, 42, 0.18))" }}
+      />
       <ObjectPorts nodeId={id} />
     </div>
   );

@@ -1,14 +1,14 @@
 ---
 id: NB-13
 title: Import images at their real shape and keep PNG transparency
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-21
+linear_url: https://linear.app/ericar/issue/ERI-21/import-images-at-their-real-shape-and-keep-png-transparency
 ---
 
 ## Context
@@ -31,13 +31,13 @@ A PNG with a transparent background is filled white in the transparent pixels, i
 
 ## Acceptance criteria
 
-- [ ] A narrow tall image is placed with the file’s aspect ratio. The long side is at most 320px. The short side may be under 80px. The full image is visible, including the ends that are cropped today
-- [ ] A short wide image behaves the same way (full image, correct aspect, long side at most 320px)
-- [ ] Images whose short side stays at or above 80px after that scale keep today’s size
-- [ ] A PNG’s transparent pixels show the canvas, including holes inside the artwork. No white fill
-- [ ] The drop shadow follows the opaque silhouette (irregular edges and holes included) and does not draw a rectangle behind the image
-- [ ] Opaque photos still show the full image and still have a shadow
-- [ ] Resizing an image still keeps its aspect ratio. The minimum size must not force the short side back to 80px in a way that crops the picture again
+- [x] A narrow tall image is placed with the file’s aspect ratio. The long side is at most 320px. The short side may be under 80px. The full image is visible, including the ends that are cropped today
+- [x] A short wide image behaves the same way (full image, correct aspect, long side at most 320px)
+- [x] Images whose short side stays at or above 80px after that scale keep today’s size
+- [x] A PNG’s transparent pixels show the canvas, including holes inside the artwork. No white fill
+- [x] The drop shadow follows the opaque silhouette (irregular edges and holes included) and does not draw a rectangle behind the image
+- [x] Opaque photos still show the full image and still have a shadow
+- [x] Resizing an image still keeps its aspect ratio. The minimum size must not force the short side back to 80px in a way that crops the picture again
 
 ## Technical notes
 
