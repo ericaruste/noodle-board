@@ -1,7 +1,7 @@
 ---
 id: NB-17
 title: Attach noodles anywhere along a side
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
@@ -31,16 +31,16 @@ A noodle can only dock at a side’s midpoint. Two noodles cannot share a side, 
 
 ## Acceptance criteria
 
-- [ ] A noodle can attach at the point along a sticky, image, text, or shape side where the pointer hits, including between the corner and the midpoint
-- [ ] A side that already has one or more noodles can still start another. The Arrow tool and handle-drag both highlight that side and create a new noodle from it. Only a side with no noodle is not a requirement
-- [ ] Each noodle stays its own edge. It can be selected, rewired by dragging its end, and deleted on its own. The others on that element stay
-- [ ] While one noodle is alone on a side, it stays at the point where it was attached
-- [ ] When two or more noodles share a side, their attachment points spread evenly along that side, inset from the corners. Adding, deleting, or moving a noodle off that side reflows the ones that remain
-- [ ] The attachment stays on that side, at the same fraction of the side, when the element is moved or resized
-- [ ] Noodles saved with only `top` / `right` / `bottom` / `left` still load. Alone, they sit at the midpoint. Sharing a side, they join the even spacing
-- [ ] The side and the fraction are stored on the edge and survive undo, redo, localStorage, and `.noodle.json`. A copied noodle (NB-16) keeps them
-- [ ] A loose end on an `endpoint` node is unchanged. Dropping an end on empty canvas still parks it there
-- [ ] Connecting both ends of one noodle to the same point on the same element is still rejected
+- [x] A noodle can attach at the point along a sticky, image, text, or shape side where the pointer hits, including between the corner and the midpoint
+- [x] A side that already has one or more noodles can still start another. The Arrow tool and handle-drag both highlight that side and create a new noodle from it. Only a side with no noodle is not a requirement
+- [x] Each noodle stays its own edge. It can be selected, rewired by dragging its end, and deleted on its own. The others on that element stay
+- [x] While one noodle is alone on a side, it stays at the point where it was attached
+- [x] When two or more noodles share a side, their attachment points spread evenly along that side, inset from the corners. Adding, deleting, or moving a noodle off that side reflows the ones that remain
+- [x] The attachment stays on that side, at the same fraction of the side, when the element is moved or resized
+- [x] Noodles saved with only `top` / `right` / `bottom` / `left` still load. Alone, they sit at the midpoint. Sharing a side, they join the even spacing
+- [x] The side and the fraction are stored on the edge and survive undo, redo, localStorage, and `.noodle.json`. A copied noodle (NB-16) keeps them
+- [x] A loose end on an `endpoint` node is unchanged. Dropping an end on empty canvas still parks it there
+- [x] Connecting both ends of one noodle to the same point on the same element is still rejected
 
 ## Technical notes
 

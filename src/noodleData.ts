@@ -26,6 +26,10 @@ export type NoodleData = {
   bends: NoodlePoint[];
   /** Perpendicular push of a curve's midpoint, in flow units. */
   curveOffset: number;
+  /** 0–1 along `sourceHandle`. Missing means the midpoint until several noodles share the side. */
+  sourceFraction?: number;
+  /** 0–1 along `targetHandle`. */
+  targetFraction?: number;
 };
 
 export const NOODLE_COLORS = [
@@ -94,6 +98,12 @@ function oneOf<T extends string>(value: unknown, allowed: Set<string>, fallback:
   return typeof value === "string" && allowed.has(value) ? (value as T) : fallback;
 }
 
+function readFraction(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  if (value < 0 || value > 1) return undefined;
+  return value;
+}
+
 function readBends(value: unknown): NoodlePoint[] {
   if (!Array.isArray(value)) return [];
   const points: NoodlePoint[] = [];
@@ -123,6 +133,8 @@ export function readNoodle(data: unknown): NoodleData {
     markerEnd: oneOf(record.markerEnd, ARROW_SET, "arrow"),
     bends: readBends(record.bends),
     curveOffset,
+    sourceFraction: readFraction(record.sourceFraction),
+    targetFraction: readFraction(record.targetFraction),
   };
 }
 
@@ -136,6 +148,8 @@ export function sameNoodle(a: NoodleData, b: NoodleData) {
     a.markerStart !== b.markerStart ||
     a.markerEnd !== b.markerEnd ||
     a.curveOffset !== b.curveOffset ||
+    a.sourceFraction !== b.sourceFraction ||
+    a.targetFraction !== b.targetFraction ||
     a.bends.length !== b.bends.length
   ) {
     return false;

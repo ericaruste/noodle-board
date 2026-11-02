@@ -1,6 +1,9 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BaseEdge, EdgeLabelRenderer, EdgeToolbar, Position, useReactFlow, useStore, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, EdgeToolbar, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
+import { isSide, nodeBox, pointOnSide, resolveAttachments, sidePosition, type SideId } from "./attachment";
+import { placeHandle, syncPlacedHandles } from "./PortMagnet";
+import { setConnectionOrigin, setHotPort } from "./portHot";
 import {
   publishNoodle,
   readNoodle,
@@ -30,19 +33,39 @@ function atGap(node: FlowNode | undefined, position: Position, x: number, y: num
   return { x, y: origin.y + height + gap };
 }
 
+function sidePoint(
+  node: FlowNode | undefined,
+  side: SideId | null,
+  fraction: number | undefined,
+  fallbackX: number,
+  fallbackY: number,
+) {
+  if (!node || !side) return { x: fallbackX, y: fallbackY };
+  const box = nodeBox(node);
+  if (!box) return { x: fallbackX, y: fallbackY };
+  return pointOnSide(box, side, fraction ?? 0.5);
+}
+
 function EndKnob({
   edgeId,
   x,
   y,
   position,
   end,
+  nodeId,
+  side,
+  fraction,
 }: {
   edgeId: string;
   x: number;
   y: number;
   position: Position;
   end: "source" | "target";
+  nodeId?: string;
+  side?: SideId | null;
+  fraction?: number;
 }) {
+  const store = useStoreApi();
   const size = 14;
   const { cx, cy } = knobOnRim(x, y, position, size / 2);
   return (
@@ -55,6 +78,14 @@ function EndKnob({
           if (event.button !== 0) return;
           const anchor = edgeAnchor(edgeId, end);
           if (!(anchor instanceof Element)) return;
+          if (nodeId && side && fraction != null) {
+            const pin = { nodeId, handleId: side, fraction };
+            setConnectionOrigin(pin);
+            setHotPort(pin);
+            const state = store.getState();
+            syncPlacedHandles(state);
+            placeHandle(state, nodeId, side, fraction);
+          }
           event.preventDefault();
           event.stopPropagation();
           forwardEndDrag(anchor, event);
@@ -186,19 +217,30 @@ function SegmentAnchor({
 export default function NoodleEdge(props: EdgeProps) {
   const sourceNode = useStore((state) => state.nodeLookup.get(props.source));
   const targetNode = useStore((state) => state.nodeLookup.get(props.target));
+  const attachment = useStore((state) => {
+    const found = resolveAttachments(state.edges).get(props.id);
+    return `${found?.source ?? ""}|${found?.target ?? ""}`;
+  });
+  const [sourceKey, targetKey] = attachment.split("|");
+  const sourceFraction = sourceKey === "" ? undefined : Number(sourceKey);
+  const targetFraction = targetKey === "" ? undefined : Number(targetKey);
   const data = readNoodle(props.data);
   const sourceType = sourceNode?.type;
   const targetType = targetNode?.type;
-  const sourcePosition = sourceType === ENDPOINT_TYPE ? outward(props.sourceX, props.sourceY, props.targetX, props.targetY) : props.sourcePosition;
-  const targetPosition = targetType === ENDPOINT_TYPE ? outward(props.targetX, props.targetY, props.sourceX, props.sourceY) : props.targetPosition;
+  const sourceSide = sourceType !== ENDPOINT_TYPE && isSide(props.sourceHandleId) ? props.sourceHandleId : null;
+  const targetSide = targetType !== ENDPOINT_TYPE && isSide(props.targetHandleId) ? props.targetHandleId : null;
+  const sourceOnSide = sidePoint(sourceNode, sourceSide, sourceFraction, props.sourceX, props.sourceY);
+  const targetOnSide = sidePoint(targetNode, targetSide, targetFraction, props.targetX, props.targetY);
+  const sourcePosition = sourceType === ENDPOINT_TYPE ? outward(props.sourceX, props.sourceY, props.targetX, props.targetY) : sourceSide ? sidePosition(sourceSide) : props.sourcePosition;
+  const targetPosition = targetType === ENDPOINT_TYPE ? outward(props.targetX, props.targetY, props.sourceX, props.sourceY) : targetSide ? sidePosition(targetSide) : props.targetPosition;
   const source =
     sourceType === ENDPOINT_TYPE
       ? { x: props.sourceX, y: props.sourceY }
-      : atGap(sourceNode, sourcePosition, props.sourceX, props.sourceY, ROUTE_GAP);
+      : atGap(sourceNode, sourcePosition, sourceOnSide.x, sourceOnSide.y, ROUTE_GAP);
   const target =
     targetType === ENDPOINT_TYPE
       ? { x: props.targetX, y: props.targetY }
-      : atGap(targetNode, targetPosition, props.targetX, props.targetY, ROUTE_GAP);
+      : atGap(targetNode, targetPosition, targetOnSide.x, targetOnSide.y, ROUTE_GAP);
   const route = layoutNoodle({
     shape: data.shape,
     source,
@@ -261,10 +303,28 @@ export default function NoodleEdge(props: EdgeProps) {
           ))
         : null}
       {props.selected && sourceType !== ENDPOINT_TYPE ? (
-        <EndKnob edgeId={props.id} x={source.x} y={source.y} position={sourcePosition} end="source" />
+        <EndKnob
+          edgeId={props.id}
+          x={source.x}
+          y={source.y}
+          position={sourcePosition}
+          end="source"
+          nodeId={props.source}
+          side={sourceSide}
+          fraction={sourceFraction}
+        />
       ) : null}
       {props.selected && targetType !== ENDPOINT_TYPE ? (
-        <EndKnob edgeId={props.id} x={target.x} y={target.y} position={targetPosition} end="target" />
+        <EndKnob
+          edgeId={props.id}
+          x={target.x}
+          y={target.y}
+          position={targetPosition}
+          end="target"
+          nodeId={props.target}
+          side={targetSide}
+          fraction={targetFraction}
+        />
       ) : null}
       {label ? (
         <EdgeLabelRenderer>
