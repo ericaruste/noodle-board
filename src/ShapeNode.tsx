@@ -316,10 +316,12 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
     const widthChanged = Math.abs(userWidth - start.width) > 1;
     if (!heightChanged && !widthChanged) return;
     if (!Number.isFinite(userHeight) || userHeight <= 0) return;
-    const existing = dataRef.current.manualHeight;
-    const locked = heightChanged || typeof existing !== "number" ? userHeight : existing;
-    resizeCommitRef.current = locked;
-    const next = paintedShape(dataRef.current, { manualHeight: locked });
+    if (!heightChanged) {
+      publish(id, dataRef.current, { width: userWidth, height: userHeight });
+      return;
+    }
+    resizeCommitRef.current = userHeight;
+    const next = paintedShape(dataRef.current, { manualHeight: userHeight });
     dataRef.current = next;
     publish(id, next, { width: userWidth, height: userHeight });
   }, [id]);
