@@ -112,18 +112,6 @@ body,
   transform: translate(calc(50% + var(--noodle-handle-outset, 14px)), -50%);
 }
 
-.noodle-text-toolbar {
-  bottom: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
-}
-
-/* The label sits inside the geometry, so its toolbar still clears the shape box. */
-.noodle-shape-text .noodle-text-toolbar {
-  bottom: calc(
-    100% + var(--shape-text-top, 0px) + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 +
-      var(--noodle-chrome-gap, 8px)
-  );
-}
-
 .noodle-text-editor {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -176,14 +164,8 @@ body,
   text-justify: inter-word;
 }
 
-.noodle-node .noodle-sticky-colors,
-.noodle-node .noodle-shape-colors {
-  top: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
-  bottom: auto;
-}
-
-/* The node box is a rectangle. Only the painted geometry, ports, and paint
-   bar should receive hits, so empty corners of an ellipse or diamond miss. */
+/* The node box is a rectangle. Only the painted geometry and ports should
+   receive hits, so empty corners of an ellipse or diamond miss. */
 .react-flow__node-shape {
   overflow: visible;
   background: transparent;

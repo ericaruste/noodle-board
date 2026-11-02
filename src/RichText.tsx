@@ -1,4 +1,3 @@
-import { useStore } from "@xyflow/react";
 import {
   useEffect,
   useLayoutEffect,
@@ -10,6 +9,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
 import {
@@ -215,11 +215,9 @@ export function RichText({
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkMixed, setLinkMixed] = useState(false);
-  const [linkPos, setLinkPos] = useState({ left: 0, top: -40 });
   const [focusTick, setFocusTick] = useState(0);
   const [structureEpoch, setStructureEpoch] = useState(0);
   const [trackedEditing, setTrackedEditing] = useState(editing);
-  const zoom = useStore((state) => state.transform[2]);
 
   bodyRef.current = body;
   editingRef.current = editing;
@@ -427,7 +425,7 @@ export function RichText({
       const target = event.target;
       if (!(target instanceof Node)) return;
       const host = rootRef.current?.closest(".noodle-node");
-      if (target instanceof Element && target.closest("[data-text-toolbar]")) return;
+      if (target instanceof Element && target.closest("[data-text-toolbar], [data-selection-chrome]")) return;
       if (rootRef.current?.contains(target) || host?.contains(target)) return;
       onCommitRef.current(commitDraft());
     };
@@ -463,31 +461,6 @@ export function RichText({
     linkInputRef.current?.focus();
     linkInputRef.current?.select();
   }, [linkOpen]);
-
-  useLayoutEffect(() => {
-    if (!linkOpen || !rootRef.current) return;
-    const host = rootRef.current.getBoundingClientRect();
-    const zoom = rootRef.current.offsetWidth > 0 ? host.width / rootRef.current.offsetWidth : 1;
-    const selection = window.getSelection();
-    let rect: DOMRect | null = null;
-    if (
-      editing &&
-      editorRef.current &&
-      selection &&
-      selection.rangeCount > 0 &&
-      selection.anchorNode &&
-      editorRef.current.contains(selection.anchorNode)
-    ) {
-      const next = selection.getRangeAt(0).getBoundingClientRect();
-      if (next.height > 0 || next.width > 0) rect = next;
-    }
-    if (!rect) rect = (frameRef.current ?? rootRef.current).getBoundingClientRect();
-    const width = 224;
-    const maxLeft = Math.max(0, rootRef.current.offsetWidth - width);
-    const left = Math.min(Math.max(0, (rect.left - host.left) / zoom), maxLeft);
-    const top = (rect.top - host.top) / zoom - 40;
-    setLinkPos({ left, top });
-  }, [editing, linkOpen]);
 
   const toolbarRange = editing && range ? range : fullRange(shown);
   const styleValues = stylesInRange(shown, toolbarRange);
@@ -718,63 +691,61 @@ export function RichText({
   return (
     <div ref={rootRef} className={fill ? "relative h-full w-full" : "relative w-full"}>
       {selected ? (
-        <TextToolbar
-          styleLabel={uniformStyle === "mixed" ? "Mixed" : FONT_STYLE_LABELS[uniformStyle]}
-          alignLabel={uniformAlign === "mixed" ? "Mixed" : ALIGN_LABELS[uniformAlign]}
-          activeStyle={uniformStyle}
-          activeAlign={uniformAlign}
-          bullet={pressFor(listValues, "bullet")}
-          numbered={pressFor(listValues, "numbered")}
-          linkActive={linkPressed === true}
-          onStyle={changeStyle}
-          onAlign={changeAlign}
-          onBullet={() => changeList("bullet")}
-          onNumbered={() => changeList("numbered")}
-          onLink={openLink}
-          zoom={zoom}
-        />
+        <SelectionChrome side="above" order={0}>
+          <TextToolbar
+            styleLabel={uniformStyle === "mixed" ? "Mixed" : FONT_STYLE_LABELS[uniformStyle]}
+            alignLabel={uniformAlign === "mixed" ? "Mixed" : ALIGN_LABELS[uniformAlign]}
+            activeStyle={uniformStyle}
+            activeAlign={uniformAlign}
+            bullet={pressFor(listValues, "bullet")}
+            numbered={pressFor(listValues, "numbered")}
+            linkActive={linkPressed === true}
+            onStyle={changeStyle}
+            onAlign={changeAlign}
+            onBullet={() => changeList("bullet")}
+            onNumbered={() => changeList("numbered")}
+            onLink={openLink}
+          />
+        </SelectionChrome>
       ) : null}
       {linkOpen ? (
-        <form
-          className="nodrag nopan absolute z-30"
-          style={{
-            left: linkPos.left,
-            top: linkPos.top,
-            transform: `scale(${1 / zoom})`,
-            transformOrigin: "top left",
-          }}
-          onSubmit={(event) => {
-            event.preventDefault();
-            commitLink();
-          }}
-          onMouseDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
-          onDoubleClick={(event) => event.stopPropagation()}
-        >
-          <input
-            ref={linkInputRef}
-            aria-label="Link URL"
-            placeholder={linkMixed ? "Multiple links" : "Paste a link"}
-            value={linkUrl}
-            onChange={(event) => setLinkUrl(event.target.value)}
-            onKeyDown={(event) => {
-              event.stopPropagation();
-              if (event.key === "Enter") {
-                event.preventDefault();
-                commitLink();
-              }
-              if (event.key === "Escape") {
-                event.preventDefault();
-                setLinkOpen(false);
-                if (editingRef.current) {
-                  restoreRef.current = linkTargetRef.current;
-                  setFocusTick((tick) => tick + 1);
-                }
-              }
+        <SelectionChrome side="above" order={1}>
+          <form
+            data-text-toolbar
+            className="nodrag nopan nowheel"
+            onSubmit={(event) => {
+              event.preventDefault();
+              commitLink();
             }}
-            className="w-56 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-800 shadow-lg outline-none focus:border-slate-400"
-          />
-        </form>
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            onDoubleClick={(event) => event.stopPropagation()}
+          >
+            <input
+              ref={linkInputRef}
+              aria-label="Link URL"
+              placeholder={linkMixed ? "Multiple links" : "Paste a link"}
+              value={linkUrl}
+              onChange={(event) => setLinkUrl(event.target.value)}
+              onKeyDown={(event) => {
+                event.stopPropagation();
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitLink();
+                }
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  setLinkOpen(false);
+                  if (editingRef.current) {
+                    restoreRef.current = linkTargetRef.current;
+                    setFocusTick((tick) => tick + 1);
+                  }
+                }
+              }}
+              className="w-56 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-800 shadow-lg outline-none focus:border-slate-400"
+            />
+          </form>
+        </SelectionChrome>
       ) : null}
       <div
         ref={frameRef}
@@ -806,12 +777,14 @@ export function RichText({
                         return;
                       }
                       const next = event.relatedTarget;
+                      if (next instanceof Element && next.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                       if (next instanceof Node && rootRef.current?.contains(next)) return;
                       if (blurTimer.current !== null) window.clearTimeout(blurTimer.current);
                       blurTimer.current = window.setTimeout(() => {
                         blurTimer.current = null;
                         if (!editingRef.current) return;
                         const active = document.activeElement;
+                        if (active instanceof Element && active.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                         if (active instanceof Node && rootRef.current?.contains(active)) return;
                         onCommitRef.current(commitDraft());
                       }, 0);

@@ -1,14 +1,14 @@
 ---
 id: NB-14
 title: Keep selection chrome a fixed screen size
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E4
 blockedBy: []
 estimate: 5
-linear_id:
-linear_url:
+linear_id: ERI-22
+linear_url: https://linear.app/ericar/issue/ERI-22/keep-selection-chrome-a-fixed-screen-size
 ---
 
 ## Context
@@ -32,12 +32,12 @@ Toolbar, menus, link field, and color controls change screen size with zoom (lar
 
 ## Acceptance criteria
 
-- [ ] Chrome renders at the same screen size at every zoom level, verified at the app’s minZoom (0.15), maxZoom (3), and the default zoom of 100%. This covers the toolbar, its menus, the link field, the shape fill/stroke bar, and the sticky color swatches
-- [ ] Chrome stays readable and on screen when a very small object is selected at minimum zoom
-- [ ] Toolbar and link field stay anchored just above the selected object; color controls stay just below it. They follow pan, zoom, and moving or resizing the object
-- [ ] Near a viewport edge, chrome stays on screen (clamp or flip) and returns to the preferred side when there is room
-- [ ] Pointer and wheel interaction on the chrome does not pan the board, drag the node, or start a selection. `nodrag` / `nopan` / `nowheel` (or an equivalent screen-space overlay) still apply
-- [ ] Choosing a style, alignment, list, link, fill, stroke, or sticky color still edits the object as it does today
+- [x] Chrome renders at the same screen size at every zoom level, verified at the app’s minZoom (0.15), maxZoom (3), and the default zoom of 100%. This covers the toolbar, its menus, the link field, the shape fill/stroke bar, and the sticky color swatches
+- [x] Chrome stays readable and on screen when a very small object is selected at minimum zoom
+- [x] Toolbar and link field stay anchored just above the selected object; color controls stay just below it. They follow pan, zoom, and moving or resizing the object
+- [x] Near a viewport edge, chrome stays on screen (clamp or flip) and returns to the preferred side when there is room
+- [x] Pointer and wheel interaction on the chrome does not pan the board, drag the node, or start a selection. `nodrag` / `nopan` / `nowheel` (or an equivalent screen-space overlay) still apply
+- [x] Choosing a style, alignment, list, link, fill, stroke, or sticky color still edits the object as it does today
 
 ## Technical notes
 

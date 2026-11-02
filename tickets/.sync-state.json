@@ -90,6 +90,16 @@
       "id": "94f381d4-f0a0-4352-82f7-b494dbea2f10",
       "identifier": "ERI-20",
       "url": "https://linear.app/ericar/issue/ERI-20/smart-alignment-guides-while-dragging"
+    },
+    "NB-13": {
+      "id": "a388ae7d-1627-4333-9af8-7a74f4abaf92",
+      "identifier": "ERI-21",
+      "url": "https://linear.app/ericar/issue/ERI-21/import-images-at-their-real-shape-and-keep-png-transparency"
+    },
+    "NB-14": {
+      "id": "fd7f5173-fa61-48ca-a13a-b9a6b2a506a2",
+      "identifier": "ERI-22",
+      "url": "https://linear.app/ericar/issue/ERI-22/keep-selection-chrome-a-fixed-screen-size"
     }
   }
 }

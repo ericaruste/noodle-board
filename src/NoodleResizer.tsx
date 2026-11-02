@@ -17,6 +17,17 @@ export function zoomCompensate(zoom: number) {
   return inverse ** 0.65;
 }
 
+/** Screen pixels from the node edge to selection chrome, clearing the ports. */
+export function selectionClearance(zoom: number) {
+  if (!(zoom > 0)) return 26;
+  const compensate = zoomCompensate(zoom);
+  const thickness = HIT_PX * compensate;
+  const port = PORT_PX * compensate;
+  const gap = GAP_PX * compensate;
+  const outset = thickness / 2 + port / 2 + gap;
+  return (outset + port / 2) * zoom + 8;
+}
+
 /** Above elevated noodles. Selected nodes lift connected edges by 1000 (see
  *  elevateEdgesOnSelect), so 1002 still loses. The layer lives in the viewport,
  *  under the page toolbar. */

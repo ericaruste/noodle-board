@@ -3,6 +3,7 @@ import { type Node, type NodeProps, useStore } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
+import SelectionChrome from "./SelectionChrome";
 import {
   FILL_SWATCHES,
   SHAPE_DEFAULT_HEIGHT,
@@ -30,17 +31,6 @@ function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): Shape
   const manualHeight = patch.manualHeight === undefined ? current.manualHeight : patch.manualHeight;
   if (typeof manualHeight === "number") next.manualHeight = manualHeight;
   return next;
-}
-
-function textOffsetWithin(child: HTMLElement, ancestor: HTMLElement) {
-  let top = 0;
-  let node: HTMLElement | null = child;
-  while (node && node !== ancestor) {
-    top += node.offsetTop;
-    const parent: Element | null = node.offsetParent;
-    node = parent instanceof HTMLElement ? parent : null;
-  }
-  return top;
 }
 
 function shapeHasText(root: HTMLElement) {
@@ -381,8 +371,6 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
     const fit = () => {
       const contentHeight = measure.offsetHeight;
       if (contentHeight < 1) return;
-      const distance = textOffsetWithin(measure, root);
-      root.style.setProperty("--shape-text-top", `${distance}px`);
       const fitted = shapeHeightForText(kind, boxWidth, contentHeight);
       const floor = Math.round(Math.max(SHAPE_MIN_SIZE, fitted));
       contentFloorRef.current = floor;
@@ -464,28 +452,30 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       </div>
       <ObjectPorts nodeId={id} />
       {selected ? (
-        <div
-          data-shape-colors
-          className="noodle-shape-colors nodrag nopan pointer-events-auto absolute left-1/2 z-10 flex -translate-x-1/2 flex-col gap-1 rounded-xl bg-white p-1.5 shadow"
-          onMouseDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
-          onDoubleClick={(event) => event.stopPropagation()}
-        >
-          <PaintRow
-            label="Fill"
-            value={fill}
-            swatches={FILL_SWATCHES}
-            noneLabel="No fill"
-            onChange={(value) => commitPaint({ fill: value })}
-          />
-          <PaintRow
-            label="Stroke"
-            value={stroke}
-            swatches={STROKE_SWATCHES}
-            noneLabel="No stroke"
-            onChange={(value) => commitPaint({ stroke: value })}
-          />
-        </div>
+        <SelectionChrome side="below">
+          <div
+            data-shape-colors
+            className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl bg-white p-1.5 shadow"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            onDoubleClick={(event) => event.stopPropagation()}
+          >
+            <PaintRow
+              label="Fill"
+              value={fill}
+              swatches={FILL_SWATCHES}
+              noneLabel="No fill"
+              onChange={(value) => commitPaint({ fill: value })}
+            />
+            <PaintRow
+              label="Stroke"
+              value={stroke}
+              swatches={STROKE_SWATCHES}
+              noneLabel="No stroke"
+              onChange={(value) => commitPaint({ stroke: value })}
+            />
+          </div>
+        </SelectionChrome>
       ) : null}
     </div>
   );
