@@ -54,7 +54,9 @@ import { emptyBody } from "./textBody";
 import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
-import PortMagnet, { nearestPort } from "./PortMagnet";
+import ConnectMode from "./ConnectMode";
+import PortMagnet, { nearestPort, portAtClient } from "./PortMagnet";
+import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -181,6 +183,9 @@ function Board() {
   const autosaveErrorRef = useRef<string | null>(null);
   const fileErrorRef = useRef<string | null>(null);
   const flushAutosaveRef = useRef<() => void>(() => {});
+  const [connectMode, setConnectMode] = useState(false);
+  const connectModeRef = useRef(false);
+  const suppressConnectRef = useRef(false);
   const [documentName, setDocumentName] = useState("Untitled");
   const [fileError, setFileError] = useState<string | null>(null);
   const [boundHandle, setBoundHandle] = useState<FileSystemFileHandle | null>(null);
@@ -190,6 +195,10 @@ function Board() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
+
+  useEffect(() => {
+    connectModeRef.current = connectMode;
+  }, [connectMode]);
 
   useEffect(() => {
     fileErrorRef.current = fileError;
@@ -287,6 +296,26 @@ function Board() {
     return () => window.removeEventListener("noodle-update-node", onUpdate);
   }, []);
 
+  useEffect(() => {
+    const onUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<{ id?: string; data?: unknown }>).detail;
+      if (!detail?.id) return;
+      const data = detail.data;
+      if (!data || typeof data !== "object") return;
+      let changed = false;
+      const next = edgesRef.current.map((edge) => {
+        if (edge.id !== detail.id) return edge;
+        changed = true;
+        return applyNoodleData(edge, readNoodle(data));
+      });
+      if (!changed) return;
+      edgesRef.current = next;
+      setEdges(next);
+    };
+    window.addEventListener(NOODLE_EDGE_EVENT, onUpdate);
+    return () => window.removeEventListener(NOODLE_EDGE_EVENT, onUpdate);
+  }, []);
+
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       if (changes.some((change) => change.type === "remove")) takeSnapshot();
@@ -309,12 +338,47 @@ function Board() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
+      if (suppressConnectRef.current) return;
+      if (!connection.source || !connection.target) return;
+      const data = defaultNoodleData();
+      const created = {
+        ...defaultEdgeOptions,
+        ...connection,
+        type: "smoothstep" as const,
+        zIndex: NOODLE_Z_INDEX,
+        data,
+        style: noodleStrokeStyle(data),
+        label: undefined,
+        markerStart: undefined,
+        markerEnd: undefined,
+      };
+      const next = addEdge(created, edgesRef.current);
+      if (next === edgesRef.current) return;
       takeSnapshot();
-      const next = addEdge(connection, edgesRef.current);
       edgesRef.current = next;
       setEdges(next);
     },
     [takeSnapshot],
+  );
+
+  const onConnectEnd = useCallback(
+    (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
+      if (suppressConnectRef.current || reconnectRef.current || !connectModeRef.current) return;
+      if (connectionState.isValid && connectionState.toHandle) return;
+      const from = connectionState.fromHandle;
+      if (!from?.nodeId) return;
+      const point = pointFromEvent(event);
+      const port = portAtClient(store.getState(), point.x, point.y);
+      if (!port?.handleId) return;
+      if (from.nodeId === port.nodeId && (from.id ?? null) === port.handleId) return;
+      onConnect({
+        source: from.nodeId,
+        sourceHandle: from.id ?? null,
+        target: port.nodeId,
+        targetHandle: port.handleId,
+      });
+    },
+    [onConnect, store],
   );
 
   const isValidConnection = useCallback((connection: Connection | Edge) => {
@@ -448,6 +512,7 @@ function Board() {
   }, [getViewport]);
 
   const addSticky = useCallback(() => {
+    setConnectMode(false);
     takeSnapshot();
     const colors: StickyColor[] = ["yellow", "pink", "blue", "green"];
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -464,6 +529,7 @@ function Board() {
   }, [canvasCenter, takeSnapshot]);
 
   const addText = useCallback(() => {
+    setConnectMode(false);
     takeSnapshot();
     setNodes((current) => [
       ...current,
@@ -479,6 +545,7 @@ function Board() {
 
   const addShape = useCallback(
     (kind: ShapeKind) => {
+      setConnectMode(false);
       takeSnapshot();
       const { x, y, zoom } = getViewport();
       const width = SHAPE_DEFAULT_WIDTH;
@@ -508,6 +575,7 @@ function Board() {
   const addImageAt = useCallback(
     async (file: File, position?: { x: number; y: number }) => {
       if (!file.type.startsWith("image/")) return;
+      setConnectMode(false);
       const src = await fileToDataUrl(file);
       const size = await imageSize(src);
       takeSnapshot();
@@ -855,7 +923,21 @@ function Board() {
         void openProject();
         return;
       }
-      if (isTypingTarget(event.target)) return;
+      const inNoodleField = event.target instanceof Element && Boolean(event.target.closest("[data-noodle-toolbar]"));
+      if (isTypingTarget(event.target) && !inNoodleField) return;
+      if (inNoodleField && event.key !== "Escape" && !((event.ctrlKey || event.metaKey) && key === "z")) return;
+      if (event.key === "Escape") {
+        if (document.querySelector("[data-noodle-menu]")) return;
+        if (!connectModeRef.current) return;
+        event.preventDefault();
+        suppressConnectRef.current = true;
+        store.getState().cancelConnection();
+        store.setState({ connectionClickStartHandle: null });
+        document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, view: window }));
+        suppressConnectRef.current = false;
+        setConnectMode(false);
+        return;
+      }
       if ((event.ctrlKey || event.metaKey) && key === "z") {
         event.preventDefault();
         if (event.shiftKey) redo();
@@ -864,7 +946,7 @@ function Board() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [openProject, redo, saveProject, undo]);
+  }, [openProject, redo, saveProject, store, undo]);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -927,6 +1009,8 @@ function Board() {
           </div>
           <div className="flex min-w-0 justify-center">
             <Toolbar
+              connectMode={connectMode}
+              onToggleConnect={() => setConnectMode((current) => !current)}
               onAddSticky={addSticky}
               onAddText={addText}
               onAddShape={addShape}
@@ -954,8 +1038,9 @@ function Board() {
             </button>
           </div>
         ) : null}
-        <PortMagnet />
+        <PortMagnet connectMode={connectMode} />
         <ReactFlow
+          className={connectMode ? "noodle-connect" : undefined}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
@@ -963,6 +1048,7 @@ function Board() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onConnectEnd={onConnectEnd}
           onReconnect={onReconnect}
           onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
@@ -974,11 +1060,13 @@ function Board() {
           connectionLineType={ConnectionLineType.SmoothStep}
           connectionLineContainerStyle={{ zIndex: NOODLE_Z_INDEX }}
           connectionMode={ConnectionMode.Loose}
+          connectOnClick={connectMode}
+          nodesDraggable={!connectMode}
+          panOnDrag={connectMode ? [1, 2] : true}
           fitView={stored.nodes.length > 0}
           minZoom={0.15}
           maxZoom={3}
           panOnScroll
-          panOnDrag
           selectionKeyCode="Shift"
           multiSelectionKeyCode="Shift"
           deleteKeyCode={["Delete", "Backspace"]}
@@ -1010,6 +1098,7 @@ function Board() {
             maskColor="rgba(28, 25, 23, 0.12)"
             className="!bg-white"
           />
+          <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
       </div>
   );

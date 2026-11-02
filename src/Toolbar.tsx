@@ -3,6 +3,8 @@ import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./ShapeNode";
 
 type ToolbarProps = {
+  connectMode: boolean;
+  onToggleConnect: () => void;
   onAddSticky: () => void;
   onAddText: () => void;
   onAddShape: (kind: ShapeKind) => void;
@@ -11,7 +13,18 @@ type ToolbarProps = {
   canDelete: boolean;
 };
 
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="shrink-0">
+      <path d="M2 8h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M8.5 4.5 12.5 8 8.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function Toolbar({
+  connectMode,
+  onToggleConnect,
   onAddSticky,
   onAddText,
   onAddShape,
@@ -101,6 +114,17 @@ export default function Toolbar({
           }}
         />
       </label>
+      <button
+        type="button"
+        aria-pressed={connectMode}
+        onClick={onToggleConnect}
+        className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${
+          connectMode ? "bg-slate-800 text-white" : "text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        <ArrowIcon />
+        Arrow
+      </button>
       <button
         type="button"
         onClick={onDelete}

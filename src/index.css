@@ -34,6 +34,25 @@ body,
   stroke: #0f172a;
 }
 
+.noodle-connect,
+.noodle-connect .react-flow__pane,
+.noodle-connect .react-flow__node,
+.noodle-connect .noodle-shape-hit,
+.noodle-connect .noodle-shape-geometry {
+  cursor: crosshair;
+}
+
+.noodle-connect-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  z-index: 1001;
+}
+
 .react-flow__handle {
   width: 8px;
   height: 8px;
@@ -298,10 +317,52 @@ body,
   transform: translate(-50%, -50%) !important;
 }
 
-.noodle-node .react-flow__handle.noodle-port-hot {
+.noodle-node:has(.react-flow__handle.noodle-port-hot) .react-flow__handle,
+.noodle-node:has(.react-flow__handle.clickconnecting) .react-flow__handle {
+  opacity: 1;
+}
+
+.noodle-node .react-flow__handle.noodle-port-hot,
+.noodle-node .react-flow__handle.clickconnecting {
   opacity: 1;
   background: #0f172a;
   width: calc(var(--noodle-port-size, 10px) * 1.45);
   height: calc(var(--noodle-port-size, 10px) * 1.45);
   box-shadow: 0 0 0 4px rgba(51, 65, 85, 0.35);
+}
+
+.noodle-anchor {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.noodle-anchor-dot {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid #334155;
+  background: #fff;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.noodle-anchor-dot:hover,
+.noodle-anchor-dot:active {
+  background: #334155;
+}
+
+.noodle-edge-label {
+  max-width: 180px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  user-select: none;
 }
