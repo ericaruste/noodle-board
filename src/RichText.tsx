@@ -427,6 +427,7 @@ export function RichText({
       const target = event.target;
       if (!(target instanceof Node)) return;
       const host = rootRef.current?.closest(".noodle-node");
+      if (target instanceof Element && target.closest("[data-text-toolbar]")) return;
       if (rootRef.current?.contains(target) || host?.contains(target)) return;
       onCommitRef.current(commitDraft());
     };

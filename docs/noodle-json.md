@@ -53,7 +53,14 @@ Image nodes keep the picture inline as a data URL on `data.src`. Files can be la
       "type": "shape",
       "position": { "x": 300, "y": 300 },
       "style": { "width": 180, "height": 140 },
-      "data": { "kind": "round-rect", "fill": "#bfdbfe", "stroke": "#334155" }
+      "data": {
+        "kind": "round-rect",
+        "fill": "#bfdbfe",
+        "stroke": "#334155",
+        "paragraphs": [
+          { "align": "left", "list": "none", "runs": [{ "text": "Label", "style": "regular" }] }
+        ]
+      }
     }
   ],
   "edges": []
@@ -73,9 +80,9 @@ While a file handle is bound and readwrite permission is already granted, canvas
 
 **Open** uses `showOpenFilePicker` when the browser has it, and a file input (`accept=".json,.noodle.json"`) otherwise. A valid version-1 file replaces the nodes, edges, and viewport (`setViewport`). The toolbar name comes from the file name, and the file is added to **Recent**. Opening records one undo snapshot first, so undo restores the previous board, its viewport, its name, and its file binding.
 
-Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without a known color and without either a text string or paragraphs, a text node without paragraphs, an image without `data.src`, a shape without a known kind or without a fill and stroke that are each a color string or `null`, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
+Invalid JSON, a missing `nodes` or `edges` array, nodes or edges this board cannot draw (unknown type, a sticky without a known color and without either a text string or paragraphs, a text node without paragraphs, an image without `data.src`, a shape without a known kind or without a fill and stroke that are each a color string or `null`, a shape whose `paragraphs` are present but not a text body, a shape whose `manualHeight` is present but not a positive number, a duplicate id, or an edge whose ends are not nodes in the file), a bad viewport, or a `version` other than `1` shows an error and leaves the current board as it was. Unknown future versions are rejected rather than migrated.
 
-Shape nodes store `data.kind` (`rect`, `ellipse`, `round-rect`, `triangle`, or `diamond`), `data.fill`, and `data.stroke`. Each paint is a CSS color string, or `null` when that paint is cleared. Clearing fill does not clear stroke, and the other way around. A shape with both paints cleared is still a shape node.
+Shape nodes store `data.kind` (`rect`, `ellipse`, `round-rect`, `triangle`, or `diamond`), `data.fill`, and `data.stroke`. Each paint is a CSS color string, or `null` when that paint is cleared. Clearing fill does not clear stroke, and the other way around. A shape with both paints cleared is still a shape node. `data.paragraphs` uses the same text body as a text node. Older shapes without `paragraphs` still open. Until the user resizes a shape, its height follows the text: an empty shape keeps its default height, and typing grows or shrinks the shape so the label stays inside the geometry. After a resize, `data.manualHeight` is that height. The shape keeps it across reload and undo, grows when the text needs more room, and does not shrink below it. The text still sets the minimum, so the handles cannot crop the label.
 
 Text nodes store `data.paragraphs`. Each paragraph has `align` (`left`, `center`, `right`, or `justify`), `list` (`none`, `bullet`, or `numbered`), and `runs` of `{ text, style, href? }`. `style` is `regular`, `bold`, `italic`, or `bold-italic`. Sticky notes keep that same paragraph shape after they are edited. A sticky that only has the older `data.text` string still opens.
 

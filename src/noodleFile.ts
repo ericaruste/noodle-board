@@ -184,7 +184,10 @@ function isStickyData(data: unknown): boolean {
 
 function isShapeData(data: unknown): boolean {
   if (!isRecord(data) || !isShapeKind(data.kind)) return false;
-  return isShapeColor(data.fill) && isShapeColor(data.stroke);
+  if (!isShapeColor(data.fill) || !isShapeColor(data.stroke)) return false;
+  if (data.paragraphs !== undefined && !isTextBody(data.paragraphs)) return false;
+  if (data.manualHeight === undefined) return true;
+  return finiteNumber(data.manualHeight) && data.manualHeight > 0;
 }
 
 function isTextNodeData(data: unknown): boolean {

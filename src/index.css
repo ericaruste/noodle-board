@@ -116,6 +116,14 @@ body,
   bottom: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
 }
 
+/* The label sits inside the geometry, so its toolbar still clears the shape box. */
+.noodle-shape-text .noodle-text-toolbar {
+  bottom: calc(
+    100% + var(--shape-text-top, 0px) + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 +
+      var(--noodle-chrome-gap, 8px)
+  );
+}
+
 .noodle-text-editor {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -187,8 +195,29 @@ body,
   cursor: grab;
 }
 
-.react-flow__node-shape.dragging .noodle-shape-geometry {
+.noodle-shape-text {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.noodle-shape-text-measure {
+  width: 100%;
+  min-width: 0;
+}
+
+.react-flow__node-shape.dragging .noodle-shape-geometry,
+.react-flow__node-shape.dragging .noodle-shape-text {
   cursor: grabbing;
+}
+
+.noodle-shape-text:has(.noodle-text-editor[contenteditable="true"]) {
+  cursor: text;
 }
 
 /* Above elevated noodles. The layer itself ignores hits so a noodle over the

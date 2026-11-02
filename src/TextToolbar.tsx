@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   ALIGN_LABELS,
   FONT_STYLE_LABELS,
@@ -31,17 +32,50 @@ function Menu({
   menuLabel,
   open,
   onToggle,
+  zoom,
   children,
 }: {
   label: string;
   menuLabel: string;
   open: boolean;
   onToggle: () => void;
+  zoom: number;
   children: ReactNode;
 }) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [box, setBox] = useState<{ top: number; left: number; minWidth: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    let frame = 0;
+    const place = () => {
+      const button = buttonRef.current;
+      if (button) {
+        const rect = button.getBoundingClientRect();
+        const next = {
+          top: rect.bottom + 4,
+          left: rect.left,
+          minWidth: rect.width * (zoom > 0 ? zoom : 1),
+        };
+        setBox((prev) =>
+          prev &&
+          Math.abs(prev.top - next.top) < 0.5 &&
+          Math.abs(prev.left - next.left) < 0.5 &&
+          Math.abs(prev.minWidth - next.minWidth) < 0.5
+            ? prev
+            : next,
+        );
+      }
+      frame = requestAnimationFrame(place);
+    };
+    place();
+    return () => cancelAnimationFrame(frame);
+  }, [open, zoom]);
+
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         aria-label={menuLabel}
         aria-expanded={open}
@@ -54,15 +88,33 @@ function Menu({
           <path d="M2 3.5 5 7l3-3.5" />
         </svg>
       </button>
-      {open ? (
-        <div
-          role="menu"
-          aria-label={menuLabel}
-          className="absolute bottom-full left-0 z-20 mb-1 min-w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-        >
-          {children}
-        </div>
-      ) : null}
+      {open && box
+        ? createPortal(
+            <div
+              role="menu"
+              aria-label={menuLabel}
+              data-text-toolbar
+              className="nodrag nopan rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+              style={{
+                position: "fixed",
+                top: box.top,
+                left: box.left,
+                minWidth: box.minWidth,
+                zIndex: 10001,
+                transform: `scale(${zoom > 0 ? 1 / zoom : 1})`,
+                transformOrigin: "top left",
+              }}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {children}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
@@ -159,6 +211,7 @@ export default function TextToolbar({
         menuLabel="Font style"
         open={menu === "style"}
         onToggle={() => toggle("style")}
+        zoom={zoom}
       >
         {FONT_STYLES.map((style) => (
           <MenuItem
@@ -177,6 +230,7 @@ export default function TextToolbar({
         menuLabel="Alignment"
         open={menu === "align"}
         onToggle={() => toggle("align")}
+        zoom={zoom}
       >
         {TEXT_ALIGNS.map((align) => (
           <MenuItem

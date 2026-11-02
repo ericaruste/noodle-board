@@ -1,7 +1,8 @@
-import { memo, useRef } from "react";
-import { type Node, type NodeProps } from "@xyflow/react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { type Node, type NodeProps, useStore } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
+import RichText from "./RichText";
 import {
   FILL_SWATCHES,
   SHAPE_DEFAULT_HEIGHT,
@@ -12,9 +13,41 @@ import {
   STROKE_WIDTH,
   isShapeColor,
   isShapeKind,
+  shapeHeightForText,
+  shapeTextFrame,
   type ShapeData,
   type ShapeKind,
 } from "./shapeData";
+import { coerceBody, isTextBody, sameBody, type TextBody } from "./textBody";
+
+function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): ShapeData {
+  const kind = isShapeKind(patch.kind) ? patch.kind : isShapeKind(current.kind) ? current.kind : "rect";
+  const fill = patch.fill === undefined ? (isShapeColor(current.fill) ? current.fill : null) : patch.fill;
+  const stroke = patch.stroke === undefined ? (isShapeColor(current.stroke) ? current.stroke : null) : patch.stroke;
+  const next: ShapeData = { kind, fill, stroke };
+  const paragraphs = patch.paragraphs === undefined ? current.paragraphs : patch.paragraphs;
+  if (isTextBody(paragraphs)) next.paragraphs = paragraphs;
+  const manualHeight = patch.manualHeight === undefined ? current.manualHeight : patch.manualHeight;
+  if (typeof manualHeight === "number") next.manualHeight = manualHeight;
+  return next;
+}
+
+function textOffsetWithin(child: HTMLElement, ancestor: HTMLElement) {
+  let top = 0;
+  let node: HTMLElement | null = child;
+  while (node && node !== ancestor) {
+    top += node.offsetTop;
+    const parent: Element | null = node.offsetParent;
+    node = parent instanceof HTMLElement ? parent : null;
+  }
+  return top;
+}
+
+function shapeHasText(root: HTMLElement) {
+  const runs = root.querySelectorAll("[data-runs]");
+  if (runs.length === 0) return false;
+  return [...runs].some((run) => (run.textContent ?? "").replace(/\u200b/g, "").trim().length > 0);
+}
 
 function snapshot() {
   window.dispatchEvent(new Event("noodle-snapshot"));
@@ -23,10 +56,18 @@ function snapshot() {
 export type { ShapeData, ShapeKind } from "./shapeData";
 export type ShapeNodeType = Node<ShapeData, "shape">;
 
-function publish(id: string, data: ShapeData) {
+function publish(id: string, data: ShapeData, size?: { width?: number; height?: number }) {
   window.dispatchEvent(
     new CustomEvent("noodle-update-node", {
-      detail: { id, data },
+      detail: { id, data, ...size },
+    }),
+  );
+}
+
+function publishHeight(id: string, height: number) {
+  window.dispatchEvent(
+    new CustomEvent("noodle-update-node", {
+      detail: { id, height },
     }),
   );
 }
@@ -251,36 +292,140 @@ function PaintRow({
 
 function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
+  const resizing = useStore((state) => Boolean(state.nodeLookup.get(id)?.resizing));
   const dataRef = useRef(data);
   dataRef.current = data;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const [contentFloor, setContentFloor] = useState(SHAPE_MIN_SIZE);
   const kind = isShapeKind(data.kind) ? data.kind : "rect";
   const fill = isShapeColor(data.fill) ? data.fill : null;
   const stroke = isShapeColor(data.stroke) ? data.stroke : null;
+  const body = useMemo(() => coerceBody(data.paragraphs), [data.paragraphs]);
   const boxWidth = width && width > 0 ? width : SHAPE_DEFAULT_WIDTH;
   const boxHeight = height && height > 0 ? height : SHAPE_DEFAULT_HEIGHT;
+  const frame = shapeTextFrame(kind, boxWidth, boxHeight);
+  const contentFloorRef = useRef(contentFloor);
+  const manualHeightRef = useRef(data.manualHeight);
+  const resizeCommitRef = useRef<number | null>(null);
+  const sizeRef = useRef({ width: boxWidth, height: boxHeight });
+  sizeRef.current = { width: boxWidth, height: boxHeight };
+  const sizeAtStartRef = useRef(sizeRef.current);
 
-  const commit = (patch: Partial<Pick<ShapeData, "fill" | "stroke">>) => {
+  const beginResize = useCallback(() => {
+    sizeAtStartRef.current = { ...sizeRef.current };
+    snapshot();
+  }, []);
+
+  const rememberManualSize = useCallback((_event: unknown, params: { width: number; height: number }) => {
+    const userHeight = Math.round(params.height);
+    const userWidth = Math.round(params.width);
+    const start = sizeAtStartRef.current;
+    const heightChanged = Math.abs(userHeight - start.height) > 1;
+    const widthChanged = Math.abs(userWidth - start.width) > 1;
+    if (!heightChanged && !widthChanged) return;
+    if (!Number.isFinite(userHeight) || userHeight <= 0) return;
+    const existing = dataRef.current.manualHeight;
+    const locked = heightChanged || typeof existing !== "number" ? userHeight : existing;
+    resizeCommitRef.current = locked;
+    const next = paintedShape(dataRef.current, { manualHeight: locked });
+    dataRef.current = next;
+    publish(id, next, { width: userWidth, height: userHeight });
+  }, [id]);
+
+  const commitPaint = (patch: Partial<Pick<ShapeData, "fill" | "stroke">>) => {
     const current = dataRef.current;
+    const next = paintedShape(current, patch);
     const currentFill = isShapeColor(current.fill) ? current.fill : null;
     const currentStroke = isShapeColor(current.stroke) ? current.stroke : null;
-    const next: ShapeData = {
-      kind: isShapeKind(current.kind) ? current.kind : kind,
-      fill: patch.fill === undefined ? currentFill : patch.fill,
-      stroke: patch.stroke === undefined ? currentStroke : patch.stroke,
-    };
     if (next.fill === currentFill && next.stroke === currentStroke) return;
     dataRef.current = next;
     snapshot();
     publish(id, next);
   };
 
+  const commitText = (next: TextBody) => {
+    setEditing(false);
+    const current = dataRef.current;
+    const stored = isTextBody(current.paragraphs) ? coerceBody(current.paragraphs) : body;
+    if (sameBody(next, stored)) return;
+    const nextData = paintedShape(current, { paragraphs: next });
+    dataRef.current = nextData;
+    snapshot();
+    publish(id, nextData);
+  };
+
+  const formatText = (next: TextBody) => {
+    const current = dataRef.current;
+    const stored = isTextBody(current.paragraphs) ? coerceBody(current.paragraphs) : body;
+    if (sameBody(next, stored)) return;
+    const nextData = paintedShape(current, { paragraphs: next });
+    dataRef.current = nextData;
+    snapshot();
+    publish(id, nextData);
+  };
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const measure = measureRef.current;
+    if (!root || !measure) return;
+
+    if (resizeCommitRef.current != null) {
+      manualHeightRef.current = resizeCommitRef.current;
+      resizeCommitRef.current = null;
+    } else {
+      manualHeightRef.current = data.manualHeight;
+    }
+
+    const fit = () => {
+      const contentHeight = measure.offsetHeight;
+      if (contentHeight < 1) return;
+      const distance = textOffsetWithin(measure, root);
+      root.style.setProperty("--shape-text-top", `${distance}px`);
+      const fitted = shapeHeightForText(kind, boxWidth, contentHeight);
+      const floor = Math.round(Math.max(SHAPE_MIN_SIZE, fitted));
+      contentFloorRef.current = floor;
+      if (!resizing) setContentFloor((prev) => (Math.abs(prev - floor) <= 1 ? prev : floor));
+      if (resizing) return;
+      const hasText = shapeHasText(measure);
+      const manual = manualHeightRef.current;
+      const target =
+        typeof manual === "number"
+          ? Math.round(Math.max(manual, floor))
+          : Math.round(hasText ? floor : Math.max(SHAPE_DEFAULT_HEIGHT, fitted));
+      if (Math.abs(target - boxHeight) <= 1) return;
+      publishHeight(id, target);
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(measure);
+    return () => observer.disconnect();
+  }, [id, kind, boxWidth, boxHeight, body, editing, resizing, data.manualHeight]);
+
   return (
-    <div data-shape-kind={kind} className="noodle-node pointer-events-none relative h-full w-full" style={resizeStyle}>
+    <div
+      ref={rootRef}
+      data-shape-kind={kind}
+      className="noodle-node pointer-events-none relative h-full w-full"
+      style={resizeStyle}
+      onClick={(event) => {
+        if (!selected || editing) return;
+        if ((event.target as HTMLElement).closest("[data-text-toolbar], [data-shape-colors], a, input")) return;
+        setEditing(true);
+      }}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        setEditing(true);
+      }}
+    >
       <NoodleResizer
         selected={selected}
         minWidth={SHAPE_MIN_SIZE}
-        minHeight={SHAPE_MIN_SIZE}
-        onResizeStart={snapshot}
+        minHeight={contentFloor}
+        onResizeStart={beginResize}
+        onResizeEnd={rememberManualSize}
       />
       <svg width={boxWidth} height={boxHeight} className="overflow-visible" style={{ pointerEvents: "none" }}>
         <ShapeGeometry
@@ -301,6 +446,22 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
         className="noodle-shape-hit pointer-events-auto absolute inset-0 z-0 cursor-grab outline-none"
         style={{ clipPath: hitClip(kind, boxWidth, boxHeight) }}
       />
+      <div
+        className="noodle-shape-text"
+        style={{ left: frame.left, top: frame.top, width: frame.width, height: frame.height }}
+      >
+        <div ref={measureRef} className="noodle-shape-text-measure">
+          <RichText
+            body={body}
+            editing={editing}
+            selected={selected}
+            placeholder="Double-click to write"
+            onCommit={commitText}
+            onCancel={() => setEditing(false)}
+            onFormat={formatText}
+          />
+        </div>
+      </div>
       <ObjectPorts nodeId={id} />
       {selected ? (
         <div
@@ -315,14 +476,14 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             value={fill}
             swatches={FILL_SWATCHES}
             noneLabel="No fill"
-            onChange={(value) => commit({ fill: value })}
+            onChange={(value) => commitPaint({ fill: value })}
           />
           <PaintRow
             label="Stroke"
             value={stroke}
             swatches={STROKE_SWATCHES}
             noneLabel="No stroke"
-            onChange={(value) => commit({ stroke: value })}
+            onChange={(value) => commitPaint({ stroke: value })}
           />
         </div>
       ) : null}

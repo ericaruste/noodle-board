@@ -54,6 +54,7 @@ type NoodleResizerProps = {
   minHeight: number;
   keepAspectRatio?: boolean;
   onResizeStart?: () => void;
+  onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void;
 };
 
 export function NoodleResizer({
@@ -62,6 +63,7 @@ export function NoodleResizer({
   minHeight,
   keepAspectRatio,
   onResizeStart,
+  onResizeEnd,
 }: NoodleResizerProps) {
   const resizeStyle = useNoodleResizeStyle();
   const nodeId = useNodeId();
@@ -101,6 +103,7 @@ export function NoodleResizer({
         minHeight={minHeight}
         keepAspectRatio={keepAspectRatio}
         onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         autoScale={false}
         lineClassName="noodle-resize-line"
         handleClassName="noodle-resize-handle"

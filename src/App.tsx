@@ -253,10 +253,35 @@ function Board() {
 
   useEffect(() => {
     const onUpdate = (event: Event) => {
-      const { id, data } = (event as CustomEvent<{ id: string; data: Node["data"] }>).detail;
-      setNodes((current) =>
-        current.map((node) => (node.id === id ? { ...node, data } : node)),
-      );
+      const { id, data, height, width } = (
+        event as CustomEvent<{ id: string; data?: Node["data"]; height?: number; width?: number }>
+      ).detail;
+      setNodes((current) => {
+        let changed = false;
+        const next = current.map((node) => {
+          if (node.id !== id) return node;
+          let updated = data === undefined ? node : { ...node, data };
+          if (data !== undefined) changed = true;
+          if (typeof height === "number") {
+            const currentHeight = typeof updated.height === "number" ? updated.height : Number(updated.style?.height ?? 0);
+            const styleHeight = Number(updated.style?.height ?? 0);
+            if (Math.abs(currentHeight - height) > 1 || Math.abs(styleHeight - height) > 1) {
+              changed = true;
+              updated = { ...updated, height, style: { ...updated.style, height } };
+            }
+          }
+          if (typeof width === "number") {
+            const currentWidth = typeof updated.width === "number" ? updated.width : Number(updated.style?.width ?? 0);
+            const styleWidth = Number(updated.style?.width ?? 0);
+            if (Math.abs(currentWidth - width) > 1 || Math.abs(styleWidth - width) > 1) {
+              changed = true;
+              updated = { ...updated, width, style: { ...updated.style, width } };
+            }
+          }
+          return updated;
+        });
+        return changed ? next : current;
+      });
     };
     window.addEventListener("noodle-update-node", onUpdate);
     return () => window.removeEventListener("noodle-update-node", onUpdate);
@@ -468,7 +493,12 @@ function Board() {
             y: (-y + window.innerHeight / 2) / zoom - height / 2,
           },
           style: { width, height },
-          data: { kind, fill: DEFAULT_SHAPE_FILL, stroke: DEFAULT_SHAPE_STROKE },
+          data: {
+            kind,
+            fill: DEFAULT_SHAPE_FILL,
+            stroke: DEFAULT_SHAPE_STROKE,
+            paragraphs: emptyBody(),
+          },
         },
       ]);
     },
