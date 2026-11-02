@@ -33,6 +33,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 5. **Guides** — NB-12, then NB-15 (equal spacing, after alignment)
 6. **Selection chrome** — NB-14 (fixed screen size for the selection toolbar and color controls)
 7. **Duplicate** — NB-16 (Alt-drag copy, Ctrl+D repeat)
+8. **Edge attachments** — NB-17 (any point on a side, even spacing, occupied sides stay connectable). Follows NB-03 and NB-09.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

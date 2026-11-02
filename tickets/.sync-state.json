@@ -110,6 +110,11 @@
       "id": "cd62fdda-9b3f-4bd7-b8c3-eb8a373af581",
       "identifier": "ERI-24",
       "url": "https://linear.app/ericar/issue/ERI-24/copy-and-duplicate-with-alt-drag-and-ctrld"
+    },
+    "NB-17": {
+      "id": "55f2f99b-f8d0-4a7a-b962-52110e158ac1",
+      "identifier": "ERI-25",
+      "url": "https://linear.app/ericar/issue/ERI-25/attach-noodles-anywhere-along-a-side"
     }
   }
 }
