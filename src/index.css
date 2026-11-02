@@ -168,9 +168,27 @@ body,
   text-justify: inter-word;
 }
 
-.noodle-node .noodle-sticky-colors {
+.noodle-node .noodle-sticky-colors,
+.noodle-node .noodle-shape-colors {
   top: calc(100% + var(--noodle-handle-outset, 14px) + var(--noodle-port-size, 10px) / 2 + var(--noodle-chrome-gap, 8px));
   bottom: auto;
+}
+
+/* The node box is a rectangle. Only the painted geometry, ports, and paint
+   bar should receive hits, so empty corners of an ellipse or diamond miss. */
+.react-flow__node-shape {
+  overflow: visible;
+  background: transparent;
+  border: none;
+  pointer-events: none !important;
+}
+
+.noodle-shape-geometry {
+  cursor: grab;
+}
+
+.react-flow__node-shape.dragging .noodle-shape-geometry {
+  cursor: grabbing;
 }
 
 /* Above elevated noodles. The layer itself ignores hits so a noodle over the

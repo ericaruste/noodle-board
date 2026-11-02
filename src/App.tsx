@@ -41,6 +41,14 @@ import {
 } from "./noodleFile";
 import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./recents";
 import StickyNode, { type StickyColor } from "./StickyNode";
+import ShapeNode from "./ShapeNode";
+import {
+  DEFAULT_SHAPE_FILL,
+  DEFAULT_SHAPE_STROKE,
+  SHAPE_DEFAULT_HEIGHT,
+  SHAPE_DEFAULT_WIDTH,
+  type ShapeKind,
+} from "./shapeData";
 import TextNode from "./TextNode";
 import { emptyBody } from "./textBody";
 import ImageNode from "./ImageNode";
@@ -67,7 +75,13 @@ const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
 const AUTOSAVE_MS = 700;
 
-const nodeTypes = { sticky: StickyNode, image: ImageNode, text: TextNode, endpoint: EndpointNode };
+const nodeTypes = {
+  sticky: StickyNode,
+  image: ImageNode,
+  text: TextNode,
+  shape: ShapeNode,
+  endpoint: EndpointNode,
+};
 const edgeTypes = { smoothstep: NoodleEdge };
 
 /** Above React Flow's selected-node z-index (1000), so noodles paint over images. */
@@ -437,6 +451,29 @@ function Board() {
       },
     ]);
   }, [canvasCenter, takeSnapshot]);
+
+  const addShape = useCallback(
+    (kind: ShapeKind) => {
+      takeSnapshot();
+      const { x, y, zoom } = getViewport();
+      const width = SHAPE_DEFAULT_WIDTH;
+      const height = SHAPE_DEFAULT_HEIGHT;
+      setNodes((current) => [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          type: "shape",
+          position: {
+            x: (-x + window.innerWidth / 2) / zoom - width / 2,
+            y: (-y + window.innerHeight / 2) / zoom - height / 2,
+          },
+          style: { width, height },
+          data: { kind, fill: DEFAULT_SHAPE_FILL, stroke: DEFAULT_SHAPE_STROKE },
+        },
+      ]);
+    },
+    [getViewport, takeSnapshot],
+  );
 
   const addImageAt = useCallback(
     async (file: File, position?: { x: number; y: number }) => {
@@ -862,6 +899,7 @@ function Board() {
             <Toolbar
               onAddSticky={addSticky}
               onAddText={addText}
+              onAddShape={addShape}
               onAddImage={(file) => void addImageAt(file)}
               onDelete={deleteSelected}
               canDelete={canDelete}

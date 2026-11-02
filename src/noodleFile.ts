@@ -1,4 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
+import { isShapeColor, isShapeKind } from "./shapeData";
 import { STICKY_COLORS } from "./StickyNode";
 import { isTextBody } from "./textBody";
 
@@ -69,7 +70,7 @@ const OPEN_NOT_PROJECT = "Could not open this file. It is not a Noodle Board pro
 const OPEN_MISSING = "Could not open this file. It is missing nodes or edges.";
 const OPEN_INVALID_CONTENTS = "Could not open this file. It has invalid nodes or edges.";
 const OPEN_INVALID_VIEWPORT = "Could not open this file. It has an invalid viewport.";
-const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "text", "endpoint"]);
+const RENDERABLE_NODE_TYPES = new Set(["sticky", "image", "text", "shape", "endpoint"]);
 
 /** Board restored from a version-1 `.noodle.json` file. */
 export type NoodleSnapshot = {
@@ -181,6 +182,11 @@ function isStickyData(data: unknown): boolean {
   return hasText || hasParagraphs;
 }
 
+function isShapeData(data: unknown): boolean {
+  if (!isRecord(data) || !isShapeKind(data.kind)) return false;
+  return isShapeColor(data.fill) && isShapeColor(data.stroke);
+}
+
 function isTextNodeData(data: unknown): boolean {
   if (!isRecord(data) || !isTextBody(data.paragraphs)) return false;
   if (data.fontSize === undefined) return true;
@@ -194,6 +200,7 @@ function isNodeRecord(value: unknown): value is Node {
   if (typeof value.type !== "string" || !RENDERABLE_NODE_TYPES.has(value.type)) return false;
   if (value.type === "sticky" && !isStickyData(value.data)) return false;
   if (value.type === "text" && !isTextNodeData(value.data)) return false;
+  if (value.type === "shape" && !isShapeData(value.data)) return false;
   if (value.type === "image") {
     if (!isRecord(value.data) || typeof value.data.src !== "string") return false;
   }

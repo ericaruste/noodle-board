@@ -1,7 +1,7 @@
 ---
 id: NB-08
 title: Add Shape objects
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, Canvas]
 parent: NB-E3
@@ -25,15 +25,15 @@ There is no geometric shape to group or decorate the board, and no way to set a 
 
 ## Acceptance criteria
 
-- [ ] A Shape action (toolbar button or flyout) can add **rectangle**, **ellipse**, **rounded rectangle**, **triangle**, and **diamond**
-- [ ] New shapes appear at the canvas center with a default size, a visible fill, and a visible stroke
-- [ ] A selected shape can change **fill color**, **stroke color**, **no fill**, and **no stroke** (small control on the shape, same idea as the sticky color bar)
-- [ ] No fill leaves the interior transparent. No stroke leaves no outline. Fill and stroke can be cleared independently
-- [ ] A shape with no fill and no stroke stays selectable, movable, and resizable
-- [ ] Fill, stroke, and “none” persist in snapshots / localStorage / `.noodle.json`
-- [ ] Shapes move, resize, select, delete, undo, and connect via handles
-- [ ] Hit-testing follows the visible shape closely enough that empty corners (ellipse, rounded rectangle, triangle, diamond) are not a huge dead zone
-- [ ] If NB-11 exists, Shape is an icon with a flyout; otherwise a control on the current toolbar is enough
+- [x] A Shape action (toolbar button or flyout) can add **rectangle**, **ellipse**, **rounded rectangle**, **triangle**, and **diamond**
+- [x] New shapes appear at the canvas center with a default size, a visible fill, and a visible stroke
+- [x] A selected shape can change **fill color**, **stroke color**, **no fill**, and **no stroke** (small control on the shape, same idea as the sticky color bar)
+- [x] No fill leaves the interior transparent. No stroke leaves no outline. Fill and stroke can be cleared independently
+- [x] A shape with no fill and no stroke stays selectable, movable, and resizable
+- [x] Fill, stroke, and “none” persist in snapshots / localStorage / `.noodle.json`
+- [x] Shapes move, resize, select, delete, undo, and connect via handles
+- [x] Hit-testing follows the visible shape closely enough that empty corners (ellipse, rounded rectangle, triangle, diamond) are not a huge dead zone
+- [x] If NB-11 exists, Shape is an icon with a flyout; otherwise a control on the current toolbar is enough
 
 ## Technical notes
 
