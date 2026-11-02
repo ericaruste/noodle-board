@@ -1,7 +1,7 @@
 ---
 id: NB-15
 title: Equal-spacing guides while dragging
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX, Canvas]
 parent: NB-E4
@@ -29,15 +29,15 @@ Nodes can snap to edges and centers, but not to an even gap. Spacing a row or co
 
 ## Acceptance criteria
 
-- [ ] While dragging a node, neighbouring non-dragged nodes on its row (boxes overlap vertically) and column (boxes overlap horizontally) are found, sorted along that axis, and the gaps between neighbours are measured
-- [ ] If the dragged node’s gap to its nearest left or right neighbour is within the alignment snap threshold of an existing gap between two other nodes on that row, the node snaps so the gaps are equal. Same for top and bottom on a column
-- [ ] If the dragged node sits between two nodes, it also snaps to the centre of that span so both gaps match
-- [ ] A purple bracket (a line with a small perpendicular cap at each end) is drawn in every matching gap, in the same viewport-transformed overlay as the alignment lines
-- [ ] Brackets clear on drop (`onNodeDragStop`)
-- [ ] Mixed sizes use bounding boxes (`nodeBox`), not equal-width assumptions
-- [ ] Multi-select drag applies the same offset to the dragged set (best-effort: the primary dragged node)
-- [ ] Brackets are overlay marks, not nodes in the graph, and they do not fight pan/zoom
-- [ ] Alignment guides and spacing guides can both show. If both want to move the node on the same axis, alignment wins
+- [x] While dragging a node, neighbouring non-dragged nodes on its row (boxes overlap vertically) and column (boxes overlap horizontally) are found, sorted along that axis, and the gaps between neighbours are measured
+- [x] If the dragged node’s gap to its nearest left or right neighbour is within the alignment snap threshold of an existing gap between two other nodes on that row, the node snaps so the gaps are equal. Same for top and bottom on a column
+- [x] If the dragged node sits between two nodes, it also snaps to the centre of that span so both gaps match
+- [x] A purple bracket (a line with a small perpendicular cap at each end) is drawn in every matching gap, in the same viewport-transformed overlay as the alignment lines
+- [x] Brackets clear on drop (`onNodeDragStop`)
+- [x] Mixed sizes use bounding boxes (`nodeBox`), not equal-width assumptions
+- [x] Multi-select drag applies the same offset to the dragged set (best-effort: the primary dragged node)
+- [x] Brackets are overlay marks, not nodes in the graph, and they do not fight pan/zoom
+- [x] Alignment guides and spacing guides can both show. If both want to move the node on the same axis, alignment wins
 
 ## Technical notes
 

@@ -26,7 +26,13 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import AlignmentGuides from "./AlignmentGuides";
-import { alignNodeChanges, sameGuides, type DragAxisLock, type FlowBox, type GuideLine } from "./alignSnap";
+import {
+  alignNodeChanges,
+  sameOverlay,
+  type DragAxisLock,
+  type FlowBox,
+  type GuideOverlay,
+} from "./alignSnap";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import {
@@ -202,8 +208,8 @@ function Board() {
   const rawDragRef = useRef<Map<string, { x: number; y: number }> | null>(null);
   const resizeOriginRef = useRef(new Map<string, FlowBox>());
   const snappedSizeRef = useRef(new Map<string, { width: number; height: number }>());
-  const guidesRef = useRef<GuideLine[]>([]);
-  const [guides, setGuides] = useState<GuideLine[]>([]);
+  const guidesRef = useRef<GuideOverlay>({ lines: [], brackets: [] });
+  const [guides, setGuides] = useState<GuideOverlay>({ lines: [], brackets: [] });
   const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
   const rfConnectionRef = useRef<Connection | null>(null);
   const documentNameRef = useRef("Untitled");
@@ -381,8 +387,9 @@ function Board() {
           snappedSizeRef.current,
           axisLock,
         );
-        if (aligned.guides && !sameGuides(guidesRef.current, aligned.guides)) {
-          guidesRef.current = aligned.guides;
+        if (aligned.guides) {
+          const next = { lines: aligned.guides, brackets: aligned.brackets ?? [] };
+          if (!sameOverlay(guidesRef.current, next)) guidesRef.current = next;
         }
         const next = applyNodeChanges(aligned.changes, base);
         nodesRef.current = next;
@@ -1173,7 +1180,7 @@ function Board() {
   const canDelete =
     nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
 
-  if (!sameGuides(guides, guidesRef.current)) {
+  if (!sameOverlay(guides, guidesRef.current)) {
     setGuides(guidesRef.current);
   }
 
@@ -1335,9 +1342,9 @@ function Board() {
                 alt.settled = true;
               }, 0);
             }
-            if (guidesRef.current.length > 0) {
-              guidesRef.current = [];
-              setGuides([]);
+            if (guidesRef.current.lines.length > 0 || guidesRef.current.brackets.length > 0) {
+              guidesRef.current = { lines: [], brackets: [] };
+              setGuides(guidesRef.current);
             }
           }}
           onMoveEnd={() => {
@@ -1346,7 +1353,7 @@ function Board() {
           }}
           proOptions={{ hideAttribution: true }}
         >
-          <AlignmentGuides lines={guides} />
+          <AlignmentGuides lines={guides.lines} brackets={guides.brackets} />
           <Background
             id="dots"
             variant={BackgroundVariant.Dots}

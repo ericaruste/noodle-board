@@ -352,6 +352,10 @@ body,
   stroke-linecap: square;
 }
 
+.noodle-align-guides .noodle-spacing-bracket line {
+  stroke: #7c3aed;
+}
+
 .noodle-anchor {
   overflow: visible;
   pointer-events: none;

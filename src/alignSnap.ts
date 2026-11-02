@@ -1,8 +1,8 @@
 import type { Node, NodeChange } from "@xyflow/react";
 
 /**
- * Custom alignment snap. The xyflow helper-lines example is Pro-licensed;
- * this is a small local overlay and does not copy that source.
+ * Custom alignment and equal-spacing snap. The xyflow helper-lines example is
+ * Pro-licensed; this is a small local overlay and does not copy that source.
  */
 
 /** Flow-coordinate distance. Kept in flow space so zooming out does not widen the grab. */
@@ -17,6 +17,21 @@ export type GuideLine = {
   at: number;
   from: number;
   to: number;
+};
+
+/** A measurement mark in a gap: a segment between facing edges, plus end caps drawn by the overlay. */
+export type SpacingBracket = {
+  /** "horizontal" runs left-to-right. "vertical" runs top-to-bottom. */
+  orientation: "horizontal" | "vertical";
+  from: number;
+  to: number;
+  /** Cross-axis center of the gap. */
+  at: number;
+};
+
+export type GuideOverlay = {
+  lines: GuideLine[];
+  brackets: SpacingBracket[];
 };
 
 export type FlowBox = { x: number; y: number; w: number; h: number };
@@ -38,6 +53,8 @@ export type AlignResult = {
   changes: NodeChange[];
   /** null leaves the current guides alone. An empty list clears them. */
   guides: GuideLine[] | null;
+  /** null leaves spacing brackets alone. An empty list clears them. */
+  brackets: SpacingBracket[] | null;
 };
 
 function styleSize(value: unknown): number | null {
@@ -208,6 +225,219 @@ function withAxisLock(
   return { changes: locked.changes, lock: locked.lock, primaryId: constraint.primaryId };
 }
 
+function axisStart(box: FlowBox, axis: Axis) {
+  return axis === "x" ? box.x : box.y;
+}
+
+function axisEnd(box: FlowBox, axis: Axis) {
+  return axis === "x" ? box.x + box.w : box.y + box.h;
+}
+
+function axisSize(box: FlowBox, axis: Axis) {
+  return axis === "x" ? box.w : box.h;
+}
+
+/** Row-mates overlap vertically. Column-mates overlap horizontally. */
+function overlapsCross(a: FlowBox, b: FlowBox, axis: Axis) {
+  if (axis === "x") return Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) > 0;
+  return Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) > 0;
+}
+
+function crossAt(a: FlowBox, b: FlowBox, axis: Axis) {
+  if (axis === "x") {
+    const start = Math.max(a.y, b.y);
+    const end = Math.min(a.y + a.h, b.y + b.h);
+    if (end > start) return (start + end) / 2;
+    return (a.y + a.h / 2 + b.y + b.h / 2) / 2;
+  }
+  const start = Math.max(a.x, b.x);
+  const end = Math.min(a.x + a.w, b.x + b.w);
+  if (end > start) return (start + end) / 2;
+  return (a.x + a.w / 2 + b.x + b.w / 2) / 2;
+}
+
+type GapPair = { gap: number; a: FlowBox; b: FlowBox };
+
+type SpacingContext = {
+  existing: GapPair[];
+  before: GapPair | null;
+  after: GapPair | null;
+};
+
+function gapPair(a: FlowBox, b: FlowBox, axis: Axis): GapPair | null {
+  const gap = axisStart(b, axis) - axisEnd(a, axis);
+  if (!(gap >= 0)) return null;
+  return { gap, a, b };
+}
+
+function spacingContext(moving: FlowBox, others: FlowBox[], axis: Axis): SpacingContext | null {
+  const sorted = others
+    .filter((other) => overlapsCross(moving, other, axis))
+    .sort((a, b) => axisStart(a, axis) - axisStart(b, axis) || axisEnd(a, axis) - axisEnd(b, axis));
+  if (sorted.length === 0) return null;
+
+  const center = (axisStart(moving, axis) + axisEnd(moving, axis)) / 2;
+  const existing: GapPair[] = [];
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i];
+    const b = sorted[i + 1];
+    const pair = gapPair(a, b, axis);
+    if (!pair) continue;
+    // The span the dragged node sits in is not an existing gap.
+    if (center > axisEnd(a, axis) && center < axisStart(b, axis)) continue;
+    existing.push(pair);
+  }
+
+  let before: FlowBox | null = null;
+  let beforeEnd = Number.NEGATIVE_INFINITY;
+  let after: FlowBox | null = null;
+  let afterStart = Number.POSITIVE_INFINITY;
+  const start = axisStart(moving, axis);
+  const end = axisEnd(moving, axis);
+  for (const other of sorted) {
+    const otherEnd = axisEnd(other, axis);
+    if (otherEnd <= start + 0.01 && otherEnd >= beforeEnd) {
+      before = other;
+      beforeEnd = otherEnd;
+    }
+    const otherStart = axisStart(other, axis);
+    if (otherStart >= end - 0.01 && otherStart <= afterStart) {
+      after = other;
+      afterStart = otherStart;
+    }
+  }
+
+  return {
+    existing,
+    before: before ? gapPair(before, moving, axis) : null,
+    after: after ? gapPair(moving, after, axis) : null,
+  };
+}
+
+type SpacingSnap = { delta: number; targets: number[]; tolerance: number };
+
+const NO_SPACING: SpacingSnap = { delta: 0, targets: [], tolerance: ALIGN_SNAP };
+
+function uniqueGaps(values: number[]) {
+  const out: number[] = [];
+  for (const value of values) {
+    if (out.some((item) => Math.abs(item - value) <= 0.05)) continue;
+    out.push(value);
+  }
+  return out;
+}
+
+function equalSpan(context: SpacingContext, moving: FlowBox, axis: Axis) {
+  if (!context.before || !context.after) return null;
+  const left = context.before.a;
+  const right = context.after.b;
+  const space = axisStart(right, axis) - axisEnd(left, axis);
+  const gap = (space - axisSize(moving, axis)) / 2;
+  if (!(gap >= 0)) return null;
+  return { delta: axisEnd(left, axis) + gap - axisStart(moving, axis), gap };
+}
+
+/**
+ * Snap so the gap to a neighbour matches an existing gap on that row or column.
+ * A node sitting between two neighbours prefers the centre of that span.
+ * Alignment already owns an axis when `allowSnap` is false: report matching gaps, but do not move.
+ */
+function spacingSnap(moving: FlowBox, others: FlowBox[], axis: Axis, allowSnap: boolean): SpacingSnap {
+  const context = spacingContext(moving, others, axis);
+  if (!context) return NO_SPACING;
+
+  const centered = equalSpan(context, moving, axis);
+  if (centered && Math.abs(centered.delta) <= ALIGN_SNAP) {
+    if (!allowSnap) return { delta: 0, targets: [centered.gap], tolerance: ALIGN_SNAP };
+    return { delta: centered.delta, targets: [centered.gap], tolerance: 0.05 };
+  }
+
+  const sideTargets = (limit: number) => {
+    const targets: number[] = [];
+    for (const item of context.existing) {
+      if (context.before && Math.abs(context.before.gap - item.gap) <= limit) targets.push(item.gap);
+      if (context.after && Math.abs(context.after.gap - item.gap) <= limit) targets.push(item.gap);
+    }
+    return uniqueGaps(targets);
+  };
+
+  if (!allowSnap) return { delta: 0, targets: sideTargets(ALIGN_SNAP), tolerance: ALIGN_SNAP };
+
+  const candidates: { delta: number; target: number; dist: number }[] = [];
+  const consider = (pair: GapPair | null, side: "before" | "after") => {
+    if (!pair) return;
+    for (const item of context.existing) {
+      const dist = Math.abs(pair.gap - item.gap);
+      if (dist > ALIGN_SNAP) continue;
+      const delta = side === "before" ? item.gap - pair.gap : pair.gap - item.gap;
+      candidates.push({ delta, target: item.gap, dist });
+    }
+  };
+  consider(context.before, "before");
+  consider(context.after, "after");
+  if (candidates.length === 0) return NO_SPACING;
+
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (const candidate of candidates) bestDist = Math.min(bestDist, candidate.dist);
+  const closest = candidates.filter((candidate) => candidate.dist <= bestDist + 1e-6);
+
+  let chosen: { delta: number; targets: number[] } | null = null;
+  const seen = new Set<string>();
+  for (const candidate of closest) {
+    const key = candidate.delta.toFixed(4);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const targets = uniqueGaps(
+      closest.filter((item) => item.delta.toFixed(4) === key).map((item) => item.target),
+    );
+    if (!chosen || targets.length > chosen.targets.length) chosen = { delta: candidate.delta, targets };
+  }
+  if (!chosen) return NO_SPACING;
+  return { delta: chosen.delta, targets: chosen.targets, tolerance: 0.05 };
+}
+
+function bracketBetween(pair: GapPair, axis: Axis): SpacingBracket | null {
+  if (!(pair.gap > 0)) return null;
+  return {
+    orientation: axis === "x" ? "horizontal" : "vertical",
+    from: axisEnd(pair.a, axis),
+    to: axisStart(pair.b, axis),
+    at: crossAt(pair.a, pair.b, axis),
+  };
+}
+
+function spacingBrackets(
+  moving: FlowBox,
+  others: FlowBox[],
+  axis: Axis,
+  targets: number[],
+  tolerance: number,
+): SpacingBracket[] {
+  if (targets.length === 0) return [];
+  const context = spacingContext(moving, others, axis);
+  if (!context) return [];
+  const near = (gap: number, limit: number) => targets.some((target) => Math.abs(gap - target) <= limit);
+  const brackets: SpacingBracket[] = [];
+  for (const pair of context.existing) {
+    if (!near(pair.gap, 0.05)) continue;
+    const bracket = bracketBetween(pair, axis);
+    if (bracket) brackets.push(bracket);
+  }
+  for (const pair of [context.before, context.after]) {
+    if (!pair || !near(pair.gap, tolerance)) continue;
+    const bracket = bracketBetween(pair, axis);
+    if (bracket) brackets.push(bracket);
+  }
+  return brackets;
+}
+
+function sortBrackets(brackets: SpacingBracket[]) {
+  return [...brackets].sort((a, b) => {
+    if (a.orientation !== b.orientation) return a.orientation < b.orientation ? -1 : 1;
+    return a.at - b.at || a.from - b.from || a.to - b.to;
+  });
+}
+
 function snapDrag(
   nodes: Node[],
   changes: NodeChange[],
@@ -217,20 +447,35 @@ function snapDrag(
 ): AlignResult {
   const primary = nodes.find((node) => node.id === primaryId);
   const moving = primary ? proposedBox(primary, changes) : null;
-  if (!primary || !moving) return { changes, guides: [] };
+  if (!primary || !moving) return { changes, guides: [], brackets: [] };
 
   const others = otherBoxes(nodes, active);
   // A locked axis stays on the start line. Guides still snap the free axis.
   const xSnap = lock === "vertical" ? null : bestSnap(moving, others, "x", ANCHORS, true);
   const ySnap = lock === "horizontal" ? null : bestSnap(moving, others, "y", ANCHORS, true);
-  const dx = xSnap?.delta ?? 0;
-  const dy = ySnap?.delta ?? 0;
-  const snapped = { ...moving, x: moving.x + dx, y: moving.y + dy };
+  const alignDx = xSnap?.delta ?? 0;
+  const alignDy = ySnap?.delta ?? 0;
+  const aligned = { ...moving, x: moving.x + alignDx, y: moving.y + alignDy };
+  // Alignment owns an axis it already rewrote. Spacing can still mark gaps that match.
+  const xSpace = spacingSnap(aligned, others, "x", xSnap == null && lock !== "vertical");
+  const ySpace = spacingSnap(
+    { ...aligned, x: aligned.x + xSpace.delta },
+    others,
+    "y",
+    ySnap == null && lock !== "horizontal",
+  );
+  const dx = alignDx + xSpace.delta;
+  const dy = alignDy + ySpace.delta;
+  const placed = { ...moving, x: moving.x + dx, y: moving.y + dy };
   const guides = [
-    ...(xSnap ? guidesFor("x", snapped, xSnap.matches) : []),
-    ...(ySnap ? guidesFor("y", snapped, ySnap.matches) : []),
+    ...(xSnap ? guidesFor("x", placed, xSnap.matches) : []),
+    ...(ySnap ? guidesFor("y", placed, ySnap.matches) : []),
   ];
-  return { changes: shiftDrag(changes, active, dx, dy), guides };
+  const brackets = sortBrackets([
+    ...spacingBrackets(placed, others, "x", xSpace.targets, xSpace.tolerance),
+    ...spacingBrackets(placed, others, "y", ySpace.targets, ySpace.tolerance),
+  ]);
+  return { changes: shiftDrag(changes, active, dx, dy), guides, brackets };
 }
 
 function movedSides(origin: FlowBox, next: FlowBox): Sides {
@@ -334,7 +579,7 @@ function snapResize(
   const node = nodes.find((item) => item.id === id);
   const prev = node ? nodeBox(node) : null;
   const next = node && prev ? proposedBox(node, changes) : null;
-  if (!node || !prev || !next) return { changes, guides: [] };
+  if (!node || !prev || !next) return { changes, guides: [], brackets: [] };
 
   if (!resizingNode(node) || !resizeOrigins.has(id)) resizeOrigins.set(id, prev);
   const origin = resizeOrigins.get(id) ?? prev;
@@ -388,7 +633,7 @@ function snapResize(
 
   snappedSizes.set(id, { width: box.w, height: box.h });
   const wrote = box === next ? changes : writeBox(changes, id, box, prev);
-  return { changes: wrote, guides };
+  return { changes: wrote, guides, brackets: [] };
 }
 
 function finishResize(
@@ -425,10 +670,28 @@ export function sameGuides(a: GuideLine[], b: GuideLine[]) {
   });
 }
 
+export function sameBrackets(a: SpacingBracket[], b: SpacingBracket[]) {
+  if (a.length !== b.length) return false;
+  return a.every((bracket, index) => {
+    const other = b[index];
+    return (
+      bracket.orientation === other.orientation &&
+      bracket.from === other.from &&
+      bracket.to === other.to &&
+      bracket.at === other.at
+    );
+  });
+}
+
+export function sameOverlay(a: GuideOverlay, b: GuideOverlay) {
+  return sameGuides(a.lines, b.lines) && sameBrackets(a.brackets, b.brackets);
+}
+
 /**
  * Rewrites drag and resize changes so a moving node snaps to other nodes'
- * left/center/right and top/middle/bottom. Guide lines are for an overlay;
- * nothing is added to the graph.
+ * left/center/right and top/middle/bottom, and while dragging also to an equal
+ * gap on its row or column. Guides and brackets are for an overlay; nothing
+ * is added to the graph. Spacing is not applied while resizing.
  */
 export function alignNodeChanges(
   nodes: Node[],
@@ -447,6 +710,7 @@ export function alignNodeChanges(
     return {
       changes: finishResize(changes, resizeOrigins, snappedSizes),
       guides: [],
+      brackets: [],
     };
   }
 
@@ -472,8 +736,8 @@ export function alignNodeChanges(
     const primaryId = active.has(dragNodeId) ? dragNodeId : [...active][0];
     const locked = withAxisLock(changes, active, primaryId, constraint);
     const snapped = snapDrag(nodes, locked.changes, active, locked.primaryId, locked.lock);
-    return { changes: snapped.changes, guides: [] };
+    return { changes: snapped.changes, guides: [], brackets: [] };
   }
 
-  return { changes, guides: null };
+  return { changes, guides: null, brackets: null };
 }
