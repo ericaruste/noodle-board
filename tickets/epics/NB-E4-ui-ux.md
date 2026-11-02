@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-8/uiux-chrome
 
 Chrome today: a top-center text toolbar (`bg-white/95 backdrop-blur` in [`src/Toolbar.tsx`](../../src/Toolbar.tsx)), a solid title chip and MiniMap in [`src/App.tsx`](../../src/App.tsx). No alignment guides. The 10/29 notes ask for Google Stitch–style frosted glass, a FigJam/Wodle bottom icon bar, and Miro/Figma smart guides.
 
-Child tickets: [NB-10](../NB-10-frosted-glass-nav.md), [NB-11](../NB-11-bottom-icon-toolbar.md), [NB-12](../NB-12-smart-alignment-guides.md).
+Child tickets: [NB-10](../NB-10-frosted-glass-nav.md), [NB-11](../NB-11-bottom-icon-toolbar.md), [NB-12](../NB-12-smart-alignment-guides.md), [NB-14](../NB-14-fixed-screen-selection-chrome.md).
 
 ## Goal
 
@@ -24,6 +24,7 @@ Move primary actions to a bottom-center icon pill, frost navigation surfaces, an
 - NB-10 Frosted-glass navigation containers
 - NB-11 Bottom-center icon toolbar
 - NB-12 Smart alignment guides while dragging
+- NB-14 Keep selection chrome a fixed screen size
 
 ## Success looks like
 
