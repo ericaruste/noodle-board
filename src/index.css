@@ -336,6 +336,22 @@ body,
   box-shadow: 0 0 0 4px rgba(51, 65, 85, 0.35);
 }
 
+.noodle-align-guides {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 4000;
+}
+
+.noodle-align-guides line {
+  stroke: #e11d48;
+  stroke-linecap: square;
+}
+
 .noodle-anchor {
   overflow: visible;
   pointer-events: none;
