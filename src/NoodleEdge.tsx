@@ -51,8 +51,17 @@ function flowRect(pane: DOMRect, tx: number, ty: number, zoom: number, rect: DOM
 let frameCacheKey = "";
 let frameCache: RouteFrame | null = null;
 
+function chromeKey() {
+  const box = (selector: string) => {
+    const rect = document.querySelector(selector)?.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) return "0";
+    return `${rect.left.toFixed(0)},${rect.top.toFixed(0)},${rect.width.toFixed(0)},${rect.height.toFixed(0)}`;
+  };
+  return `${box("[data-canvas-chrome]")}|${box(".react-flow__minimap")}`;
+}
+
 export function routeFrame(transform: [number, number, number], width: number, height: number) {
-  const key = `${width}x${height}:${transform[0].toFixed(1)}:${transform[1].toFixed(1)}:${transform[2].toFixed(3)}`;
+  const key = `${width}x${height}:${transform[0].toFixed(1)}:${transform[1].toFixed(1)}:${transform[2].toFixed(3)}:${chromeKey()}`;
   if (key === frameCacheKey) return frameCache;
   frameCacheKey = key;
   frameCache = measureFrame(transform);

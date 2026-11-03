@@ -7,7 +7,6 @@ import {
   outlineRadius,
   pointOnOutline,
   pointOnSide,
-  projectOntoBox,
   projectOntoOutline,
   projectOntoSideMidpoint,
   routeEnd,
@@ -91,8 +90,23 @@ export function connectionAttachmentMode(state: ReactFlowState): AttachmentMode 
   return state.connection.fromHandle?.type === "source" ? "edge" : "midpoint";
 }
 
-function projectForMode(box: Parameters<typeof projectOntoBox>[0], point: { x: number; y: number }, mode: AttachmentMode) {
-  return mode === "midpoint" ? projectOntoSideMidpoint(box, point) : projectOntoBox(box, point);
+function projectForMode(
+  node: { type?: string; data?: unknown },
+  box: NonNullable<ReturnType<typeof nodeBox>>,
+  point: { x: number; y: number },
+  mode: AttachmentMode,
+) {
+  const radius = outlineRadius(node.type, node.data, box);
+  if (mode === "midpoint") {
+    let best: { side: SideId; x: number; y: number; distance: number } | null = null;
+    for (const side of SIDES) {
+      const mid = pointOnOutline(box, side, 0.5, radius);
+      const distance = Math.hypot(mid.x - point.x, mid.y - point.y);
+      if (!best || distance < best.distance) best = { side, x: mid.x, y: mid.y, distance };
+    }
+    return { side: best?.side ?? "top", fraction: 0.5, x: best?.x ?? point.x, y: best?.y ?? point.y, distance: best?.distance ?? Infinity };
+  }
+  return projectOntoOutline(box, point, radius);
 }
 
 function skipOrigin(nodeId: string, side: SideId, fraction: number) {
@@ -113,7 +127,7 @@ function closestPerimeter(
     if (node.type === ENDPOINT_TYPE) continue;
     const box = nodeBox(node);
     if (!box) continue;
-    const hit = projectForMode(box, point, mode);
+    const hit = projectForMode(node, box, point, mode);
     if (hit.distance > radius || skipOrigin(node.id, hit.side, hit.fraction)) continue;
     const z = node.internals.z ?? 0;
     if (!best || hit.distance < best.distance - 0.5 || (Math.abs(hit.distance - best.distance) <= 0.5 && z >= best.z)) {
@@ -143,7 +157,7 @@ export function nearestHandleOnNode(
   if (!node || node.type === ENDPOINT_TYPE) return null;
   const box = nodeBox(node);
   if (!box) return null;
-  return portFromHit(nodeId, projectForMode(box, point, mode));
+  return portFromHit(nodeId, projectForMode(node, box, point, mode));
 }
 
 function nodeAtFlowPoint(state: ReactFlowState, point: XYPosition) {

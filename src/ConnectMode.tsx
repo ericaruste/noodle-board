@@ -12,7 +12,7 @@ import { layers } from "./layers";
 import { forwardEndDrag } from "./noodleEnds";
 import { clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
-import { getConnectionOrigin, getHoverTarget, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
+import { armClickSwallow, getConnectionOrigin, getHoverTarget, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -123,6 +123,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         ) &&
         isValidRef.current(connection)
       ) {
+        armClickSwallow();
         onConnectRef.current(connection);
       }
       clearConnectionOrigin();
