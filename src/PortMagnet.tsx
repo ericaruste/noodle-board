@@ -10,6 +10,7 @@ import {
   sidePosition,
   type SideId,
 } from "./attachment";
+import { layers } from "./layers";
 import { ENDPOINT_TYPE, PORT_SCREEN_RADIUS, forwardEndDrag, type HotPort } from "./noodleEnds";
 import { getConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort, useHotPort } from "./portHot";
 
@@ -296,7 +297,10 @@ function HotMarker() {
     <ViewportPortal>
       <div
         className="noodle-port-marker"
-        style={{ transform: `translate(${marker.x}px, ${marker.y}px) translate(-50%, -50%)` }}
+        style={{
+          zIndex: layers.selection,
+          transform: `translate(${marker.x}px, ${marker.y}px) translate(-50%, -50%)`,
+        }}
         aria-hidden
       />
     </ViewportPortal>

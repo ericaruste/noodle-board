@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BaseEdge, EdgeLabelRenderer, EdgeToolbar, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
+import { FloatingPanel } from "./FloatingPanel";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
 import { isSide, nodeBox, pointOnSide, resolveAttachments, sidePosition, type SideId } from "./attachment";
 import { placeHandle, syncPlacedHandles } from "./PortMagnet";
@@ -106,7 +107,7 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
   const [shift, setShift] = useState(0);
   useLayoutEffect(() => {
     const el = ref.current;
-    const pane = el?.closest(".react-flow");
+    const pane = document.querySelector(".react-flow");
     if (!el || !pane) return;
     const box = el.getBoundingClientRect();
     const bounds = pane.getBoundingClientRect();
@@ -120,6 +121,29 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
     <div ref={ref} style={{ pointerEvents: "auto", transform: shift ? `translateX(${shift}px)` : undefined }}>
       {children}
     </div>
+  );
+}
+
+function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children: ReactNode }) {
+  const [panX, panY, zoom] = useStore(
+    (state) => state.transform,
+    (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2],
+  );
+  const safeZoom = zoom || 1;
+  return (
+    <FloatingPanel
+      layer="toolbar"
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: "max-content",
+        pointerEvents: "none",
+        transform: `translate(${x * safeZoom + panX}px, ${y * safeZoom + panY}px) translate(-50%, -100%)`,
+      }}
+    >
+      {children}
+    </FloatingPanel>
   );
 }
 
@@ -348,20 +372,11 @@ export default function NoodleEdge(props: EdgeProps) {
         </EdgeLabelRenderer>
       ) : null}
       {props.selected ? (
-        <EdgeToolbar
-          edgeId={props.id}
-          x={labelX}
-          y={labelY - 28 / zoom}
-          alignX="center"
-          alignY="bottom"
-          isVisible
-          className="nodrag nopan nowheel"
-          style={{ pointerEvents: "none" }}
-        >
+        <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
           <ClampedToolbar>
             <NoodleToolbar edgeId={props.id} data={data} />
           </ClampedToolbar>
-        </EdgeToolbar>
+        </ScreenEdgeToolbar>
       ) : null}
     </>
   );

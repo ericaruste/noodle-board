@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
   NOODLE_ARROW_LABELS,
   NOODLE_ARROWS,
@@ -60,7 +61,6 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
   const dataRef = useRef(data);
   dataRef.current = data;
   const [menu, setMenu] = useState<"color" | "start" | "end" | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
   const labelHistory = useRef(false);
   const colorHistory = useRef(false);
 
@@ -74,7 +74,9 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
   useEffect(() => {
     if (!menu) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setMenu(null);
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-noodle-toolbar]")) return;
+      setMenu(null);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -98,7 +100,6 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
 
   return (
     <div
-      ref={rootRef}
       data-noodle-toolbar
       data-noodle-menu={menu ? "" : undefined}
       className="nodrag nopan nowheel flex max-w-[36rem] flex-wrap items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
@@ -110,24 +111,8 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="relative">
-        <button
-          type="button"
-          aria-label="Color"
-          aria-expanded={menu === "color"}
-          title="Color"
-          onClick={() => setMenu((current) => (current === "color" ? null : "color"))}
-          className="flex items-center gap-1 rounded-lg px-1.5 py-1 hover:bg-slate-100"
-        >
-          <span className="h-4 w-4 rounded-full border border-slate-300" style={{ background: data.color }} />
-        </button>
-        {menu === "color" ? (
-          <div
-            role="menu"
-            aria-label="Color"
-            data-noodle-toolbar
-            className="absolute left-0 top-full z-10 mt-1 flex w-44 flex-wrap gap-1 rounded-lg border border-slate-200 bg-white p-2 shadow-lg"
-          >
+      <ColorMenu open={menu === "color"} color={data.color} onToggle={() => setMenu((current) => (current === "color" ? null : "color"))}>
+          <div className="flex w-44 flex-wrap gap-1">
             {NOODLE_COLORS.map((swatch) => (
               <button
                 key={swatch.value}
@@ -162,8 +147,7 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
               />
             </label>
           </div>
-        ) : null}
-      </div>
+      </ColorMenu>
 
       <span className="mx-0.5 h-5 w-px bg-slate-200" />
 
@@ -276,6 +260,78 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
   );
 }
 
+function AnchoredMenu({
+  open,
+  anchorRef,
+  label,
+  className,
+  children,
+}: {
+  open: boolean;
+  anchorRef: RefObject<HTMLButtonElement | null>;
+  label: string;
+  className: string;
+  children: ReactNode;
+}) {
+  const { menuRef, box } = useAnchoredBox(open, anchorRef, "start");
+  if (!open) return null;
+  return (
+    <FloatingPanel
+      layer="dropdown"
+      panelRef={menuRef}
+      role="menu"
+      ariaLabel={label}
+      data-noodle-toolbar=""
+      className={className}
+      style={{
+        position: "absolute",
+        top: box?.top ?? 0,
+        left: box?.left ?? 0,
+        visibility: box ? "visible" : "hidden",
+      }}
+    >
+      {children}
+    </FloatingPanel>
+  );
+}
+
+function ColorMenu({
+  open,
+  color,
+  onToggle,
+  children,
+}: {
+  open: boolean;
+  color: string;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  return (
+    <div>
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label="Color"
+        aria-expanded={open}
+        title="Color"
+        onClick={onToggle}
+        className="flex items-center gap-1 rounded-lg px-1.5 py-1 hover:bg-slate-100"
+      >
+        <span className="h-4 w-4 rounded-full border border-slate-300" style={{ background: color }} />
+      </button>
+      <AnchoredMenu
+        open={open}
+        anchorRef={buttonRef}
+        label="Color"
+        className="flex rounded-lg border border-slate-200 bg-white p-2 shadow-lg"
+      >
+        {children}
+      </AnchoredMenu>
+    </div>
+  );
+}
+
 function ArrowMenu({
   label,
   value,
@@ -289,9 +345,11 @@ function ArrowMenu({
   onToggle: () => void;
   onPick: (value: NoodleArrow) => void;
 }) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   return (
-    <div className="relative">
+    <div>
       <button
+        ref={buttonRef}
         type="button"
         aria-label={label}
         aria-expanded={open}
@@ -304,30 +362,28 @@ function ArrowMenu({
           <path d="M2 3.5 5 7l3-3.5" />
         </svg>
       </button>
-      {open ? (
-        <div
-          role="menu"
-          aria-label={label}
-          data-noodle-toolbar
-          className="absolute left-0 top-full z-10 mt-1 w-36 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-        >
-          {NOODLE_ARROWS.map((kind) => (
-            <button
-              key={kind}
-              type="button"
-              role="menuitemradio"
-              aria-checked={value === kind}
-              onClick={() => onPick(kind)}
-              className={`flex w-full items-center gap-2 px-2 py-1 text-left text-xs ${
-                value === kind ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <ArrowGlyph kind={kind} />
-              {NOODLE_ARROW_LABELS[kind]}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <AnchoredMenu
+        open={open}
+        anchorRef={buttonRef}
+        label={label}
+        className="w-36 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+      >
+        {NOODLE_ARROWS.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            role="menuitemradio"
+            aria-checked={value === kind}
+            onClick={() => onPick(kind)}
+            className={`flex w-full items-center gap-2 px-2 py-1 text-left text-xs ${
+              value === kind ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <ArrowGlyph kind={kind} />
+            {NOODLE_ARROW_LABELS[kind]}
+          </button>
+        ))}
+      </AnchoredMenu>
     </div>
   );
 }

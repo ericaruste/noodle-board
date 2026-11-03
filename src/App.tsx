@@ -33,6 +33,8 @@ import {
   type FlowBox,
   type GuideOverlay,
 } from "./alignSnap";
+import { FloatingLayer } from "./FloatingPanel";
+import { layers } from "./layers";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar from "./Toolbar";
 import {
@@ -77,6 +79,7 @@ import {
   connectionForPark,
   draggedEnd,
   makeEndpoint,
+  paintEndpoints,
   pointFromEvent,
   pruneEndpoints,
   sameEnds,
@@ -106,12 +109,9 @@ const nodeTypes = {
 };
 const edgeTypes = { smoothstep: NoodleEdge };
 
-/** Above React Flow's selected-node z-index (1000), so noodles paint over images. */
-const NOODLE_Z_INDEX = 1001;
-
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "smoothstep",
-  zIndex: NOODLE_Z_INDEX,
+  zIndex: layers.canvas,
   markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: "#334155" },
   style: { strokeWidth: 2 },
 };
@@ -185,7 +185,11 @@ function loadCanvas(): Snapshot {
     const parsed = JSON.parse(raw) as Snapshot;
     const nodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
     const edges = Array.isArray(parsed.edges) ? parsed.edges : [];
-    return { nodes: pruneEndpoints(nodes, edges), edges: reflowAttachments(edges) };
+    const kept = pruneEndpoints(nodes, edges);
+    return {
+      nodes: paintEndpoints(kept),
+      edges: reflowAttachments(edges.map((edge) => (edge.zIndex == null ? { ...edge, zIndex: layers.canvas } : edge))),
+    };
   } catch {
     return { nodes: [], edges: [] };
   }
@@ -526,7 +530,7 @@ function Board() {
         ...defaultEdgeOptions,
         ...landed,
         type: "smoothstep" as const,
-        zIndex: NOODLE_Z_INDEX,
+        zIndex: layers.canvas,
         data,
         style: noodleStrokeStyle(data),
         label: undefined,
@@ -1123,9 +1127,9 @@ function Board() {
           fileHandle: fileHandleRef.current,
           recentId: boundRecentIdRef.current,
         });
-        const nextNodes = pruneEndpoints(snapshot.nodes, snapshot.edges);
+        const nextNodes = paintEndpoints(pruneEndpoints(snapshot.nodes, snapshot.edges));
         const nextEdges = reflowAttachments(
-          snapshot.edges.map((edge) => (edge.zIndex == null ? { ...edge, zIndex: NOODLE_Z_INDEX } : edge)),
+          snapshot.edges.map((edge) => (edge.zIndex == null ? { ...edge, zIndex: layers.canvas } : edge)),
         );
         const name = projectNameFromFileName(file.name);
         suppressAutosaveRef.current = true;
@@ -1394,8 +1398,8 @@ function Board() {
   }
 
   return (
-    <div
-        className="h-full w-full bg-stone-100"
+      <div
+        className="relative h-full w-full bg-stone-100"
         onDragOver={(event) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
@@ -1420,7 +1424,10 @@ function Board() {
           void addImageAt(file, position);
         }}
       >
-        <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[800px]:items-center min-[800px]:gap-3">
+        <div
+          className="pointer-events-none absolute inset-x-4 top-4 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[800px]:items-center min-[800px]:gap-3"
+          style={{ zIndex: layers.selection }}
+        >
           <div className="min-w-0 self-start min-[800px]:justify-self-start">
             <SaveToolbar
               documentName={documentName}
@@ -1456,7 +1463,8 @@ function Board() {
         {fileError ? (
           <div
             role="alert"
-            className="absolute bottom-4 left-4 z-30 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
+            className="absolute bottom-4 left-4 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
+            style={{ zIndex: layers.selection }}
           >
             <span>{fileError}</span>
             <button
@@ -1504,7 +1512,7 @@ function Board() {
           reconnectRadius={END_RADIUS}
           connectionRadius={PORT_SCREEN_RADIUS}
           connectionLineType={ConnectionLineType.SmoothStep}
-          connectionLineContainerStyle={{ zIndex: NOODLE_Z_INDEX }}
+          connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
           connectOnClick={connectMode}
           nodesDraggable={!connectMode}
@@ -1601,6 +1609,7 @@ function Board() {
           />
           <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
+        <FloatingLayer />
       </div>
   );
 }

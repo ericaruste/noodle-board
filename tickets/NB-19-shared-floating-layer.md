@@ -1,7 +1,7 @@
 ---
 id: NB-19
 title: Route floating toolbars and dropdowns through one shared layer
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E4
@@ -36,15 +36,15 @@ Each floating panel picks its own portal and z-index. A selected node, a node mi
 
 ## Acceptance criteria
 
-- [ ] One layering module owns the z-index tokens, in this order: canvas, selection, toolbar, dropdown, modal. `FloatingPanel` is the only wrapper for a toolbar, dropdown, or popover, and it renders through one portal above the canvas
-- [ ] The noodle style bar, text format bar, fill/stroke picker, sticky color bar, and the color, line-style, and arrowhead menus use `FloatingPanel`. The shapes flyout and the recent-boards menu do too. None of them sets its own z-index
-- [ ] Each panel renders above all nodes, noodles, end knobs, ports, and selection handles, including selected elements and elements mid-drag
-- [ ] Each panel still follows its element when the canvas is panned or zoomed and while the element is dragged, so moving it into the portal never leaves it behind
-- [ ] None is covered or crossed, including near the sidebar (the save cluster and the rest of the top chrome) and the canvas edges
-- [ ] Each stays clickable while it overlaps any of those elements. Choosing a style, color, arrowhead, shape, or recent board still edits or opens what it does today
-- [ ] The existing port highlight reads its layer from the selection token, not a hardcoded number
-- [ ] Every panel stays below the modal token. A dialog that uses that token covers the panels
-- [ ] `.cursor/rules` and [`tickets/_template.md`](_template.md) state that every new toolbar, dropdown, and popover uses `FloatingPanel` and the tokens, and that a ticket is not done until those panels have been checked against selected and mid-drag elements
+- [x] One layering module owns the z-index tokens, in this order: canvas, selection, toolbar, dropdown, modal. `FloatingPanel` is the only wrapper for a toolbar, dropdown, or popover, and it renders through one portal above the canvas
+- [x] The noodle style bar, text format bar, fill/stroke picker, sticky color bar, and the color, line-style, and arrowhead menus use `FloatingPanel`. The shapes flyout and the recent-boards menu do too. None of them sets its own z-index
+- [x] Each panel renders above all nodes, noodles, end knobs, ports, and selection handles, including selected elements and elements mid-drag
+- [x] Each panel still follows its element when the canvas is panned or zoomed and while the element is dragged, so moving it into the portal never leaves it behind
+- [x] None is covered or crossed, including near the sidebar (the save cluster and the rest of the top chrome) and the canvas edges
+- [x] Each stays clickable while it overlaps any of those elements. Choosing a style, color, arrowhead, shape, or recent board still edits or opens what it does today
+- [x] The existing port highlight reads its layer from the selection token, not a hardcoded number
+- [x] Every panel stays below the modal token. A dialog that uses that token covers the panels
+- [x] `.cursor/rules` and [`tickets/_template.md`](_template.md) state that every new toolbar, dropdown, and popover uses `FloatingPanel` and the tokens, and that a ticket is not done until those panels have been checked against selected and mid-drag elements
 
 ## Technical notes
 

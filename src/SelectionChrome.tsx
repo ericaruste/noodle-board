@@ -1,6 +1,6 @@
 import { useNodeId, useStore } from "@xyflow/react";
-import { useLayoutEffect, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent, type ReactNode, type WheelEvent } from "react";
-import { createPortal } from "react-dom";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { FloatingPanel } from "./FloatingPanel";
 import { selectionClearance } from "./NoodleResizer";
 import {
   placeSelectionChrome,
@@ -142,7 +142,7 @@ function readSafeArea(renderer: HTMLElement): SafeArea {
   const board = flow?.parentElement;
   if (board && flow) {
     for (const child of board.children) {
-      if (!(child instanceof HTMLElement) || child === flow) continue;
+      if (!(child instanceof HTMLElement) || child === flow || child.hasAttribute("data-floating-layer")) continue;
       const rect = child.getBoundingClientRect();
       if (rect.width < 8 || rect.height < 8) continue;
       const overlaps =
@@ -229,7 +229,9 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
     const board = flow?.parentElement;
     if (board && flow) {
       for (const child of board.children) {
-        if (child instanceof HTMLElement && child !== flow) observer.observe(child);
+        if (child instanceof HTMLElement && child !== flow && !child.hasAttribute("data-floating-layer")) {
+          observer.observe(child);
+        }
       }
     }
     const minimap = flow?.querySelector(".react-flow__minimap");
@@ -258,39 +260,21 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
 
   if (!host || !nodeId) return null;
 
-  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-    const target = event.target;
-    if (target instanceof Element && target.closest("input, textarea")) return;
-    event.preventDefault();
-  };
-
-  const onWheel = (event: WheelEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-  };
-
-  return createPortal(
-    <div
-      ref={rootRef}
+  return (
+    <FloatingPanel
+      layer="toolbar"
+      panelRef={rootRef}
       data-selection-chrome={side}
-      className="nodrag nopan nowheel"
       style={{
         position: "absolute",
         left: 0,
         top: 0,
         width: "max-content",
-        zIndex: 10,
-        pointerEvents: "auto",
         visibility: placed ? "visible" : "hidden",
         transform: placed ? `translate(${placed.left}px, ${placed.top}px)` : "translate(-9999px, -9999px)",
       }}
-      onPointerDown={onPointerDown}
-      onClick={(event) => event.stopPropagation()}
-      onDoubleClick={(event) => event.stopPropagation()}
-      onWheel={onWheel}
     >
       {children}
-    </div>,
-    host,
+    </FloatingPanel>
   );
 }

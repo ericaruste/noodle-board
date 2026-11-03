@@ -1,6 +1,7 @@
 import { type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { NodeResizer, useNodeId, useStore } from "@xyflow/react";
+import { layers } from "./layers";
 
 /** Sizes at zoom 1. Zoom-out only partly cancels the viewport scale, so chrome
  *  shrinks a little instead of staying this large on screen. */
@@ -27,11 +28,6 @@ export function selectionClearance(zoom: number) {
   const outset = thickness / 2 + port / 2 + gap;
   return (outset + port / 2) * zoom + 8;
 }
-
-/** Above elevated noodles. Selected nodes lift connected edges by 1000 (see
- *  elevateEdgesOnSelect), so 1002 still loses. The layer lives in the viewport,
- *  under the page toolbar. */
-const RESIZE_LAYER_Z = 10000;
 
 export function useNoodleResizeStyle(): CSSProperties {
   const zoom = useStore((state) => state.transform[2]);
@@ -103,7 +99,7 @@ export function NoodleResizer({
         transform: `translate(${box.x}px, ${box.y}px)`,
         width: box.width,
         height: box.height,
-        zIndex: RESIZE_LAYER_Z,
+        zIndex: layers.selection,
       }}
     >
       <svg className="noodle-selection-stroke" width="100%" height="100%" aria-hidden>

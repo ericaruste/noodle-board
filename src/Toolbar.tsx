@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./ShapeNode";
 
@@ -33,12 +34,15 @@ export default function Toolbar({
   canDelete,
 }: ToolbarProps) {
   const [shapesOpen, setShapesOpen] = useState(false);
-  const shapesRef = useRef<HTMLDivElement>(null);
+  const shapesButtonRef = useRef<HTMLButtonElement>(null);
+  const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center", 8);
 
   useEffect(() => {
     if (!shapesOpen) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!shapesRef.current?.contains(event.target as Node)) setShapesOpen(false);
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-shapes-menu]")) return;
+      setShapesOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setShapesOpen(false);
@@ -67,8 +71,9 @@ export default function Toolbar({
       >
         Add Text
       </button>
-      <div ref={shapesRef} className="relative">
+      <div data-shapes-menu="">
         <button
+          ref={shapesButtonRef}
           type="button"
           aria-expanded={shapesOpen}
           aria-haspopup="menu"
@@ -78,10 +83,19 @@ export default function Toolbar({
           Add Shape
         </button>
         {shapesOpen ? (
-          <div
+          <FloatingPanel
+            layer="dropdown"
+            panelRef={shapesMenuRef}
             role="menu"
-            aria-label="Shapes"
-            className="absolute left-1/2 top-full z-30 mt-2 w-52 -translate-x-1/2 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            ariaLabel="Shapes"
+            data-shapes-menu=""
+            className="w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            style={{
+              position: "absolute",
+              top: shapesBox?.top ?? 0,
+              left: shapesBox?.left ?? 0,
+              visibility: shapesBox ? "visible" : "hidden",
+            }}
           >
             {SHAPE_KINDS.map((kind) => (
               <button
@@ -98,7 +112,7 @@ export default function Toolbar({
                 {SHAPE_LABELS[kind]}
               </button>
             ))}
-          </div>
+          </FloatingPanel>
         ) : null}
       </div>
       <label className="cursor-pointer whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-sky-50">
