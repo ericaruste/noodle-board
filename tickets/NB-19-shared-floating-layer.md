@@ -1,7 +1,7 @@
 ---
 id: NB-19
 title: Route floating toolbars and dropdowns through one shared layer
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E4
