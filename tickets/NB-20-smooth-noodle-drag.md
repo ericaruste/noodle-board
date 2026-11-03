@@ -1,7 +1,7 @@
 ---
 id: NB-20
 title: Smooth noodle drag feedback and edge-following
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
