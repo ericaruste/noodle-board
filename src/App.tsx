@@ -65,10 +65,11 @@ import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
 import ConnectMode from "./ConnectMode";
-import PortMagnet, { nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient } from "./PortMagnet";
+import NoodleConnectionLine from "./connectionLine";
+import PortMagnet, { dragKind, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
-import { clearConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort } from "./portHot";
+import { armClickSwallow, clearConnectionOrigin, getHotPort, getHoverTarget, setConnectionOrigin, setHotPort } from "./portHot";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -136,11 +137,16 @@ function cloneSnapshot(nodes: Node[], edges: Edge[]): Snapshot {
  * React Flow can snap the target to a different side than the pointer near a corner.
  * The magnet's side and fraction are the drop.
  */
+function releaseHitsNode(event: MouseEvent | TouchEvent) {
+  const target = event.target;
+  return target instanceof Element && Boolean(target.closest(".react-flow__node"));
+}
+
 function connectionWithDrop<T extends Connection | Edge>(connection: T): T {
   const hot = getHotPort();
-  if (!hot || hot.nodeId !== connection.target || !isSide(hot.handleId)) return connection;
-  if ((connection.targetHandle ?? null) === hot.handleId) return connection;
-  return { ...connection, targetHandle: hot.handleId };
+  if (!hot || !isSide(hot.handleId)) return connection;
+  if (hot.nodeId === connection.target && (connection.targetHandle ?? null) === hot.handleId) return connection;
+  return { ...connection, target: hot.nodeId, targetHandle: hot.handleId };
 }
 
 /** Origin ends are side midpoints. The target keeps the point under the pointer. */
@@ -279,6 +285,7 @@ function Board() {
   const [connectMode, setConnectMode] = useState(false);
   const connectModeRef = useRef(false);
   const suppressConnectRef = useRef(false);
+  const gestureEdgeRef = useRef<string | null>(null);
   const [documentName, setDocumentName] = useState("Untitled");
   const [fileError, setFileError] = useState<string | null>(null);
   const [boundHandle, setBoundHandle] = useState<FileSystemFileHandle | null>(null);
@@ -508,6 +515,8 @@ function Board() {
     (connection: Connection) => {
       if (suppressConnectRef.current) return;
       if (!connection.source || !connection.target) return;
+      // The handle hit and the body drop can both report one gesture.
+      if (gestureEdgeRef.current) return;
       const landed = connectionWithDrop(connection);
       const sourceFraction = fractionFor("source", landed);
       const targetFraction = fractionFor("target", landed);
@@ -539,10 +548,13 @@ function Board() {
       };
       const added = addEdge(created, edgesRef.current);
       // addEdge drops a second noodle that reuses the same side ids. Each noodle is its own edge.
+      const freshId = `noodle-${crypto.randomUUID()}`;
       const withNew =
         added === edgesRef.current
-          ? edgesRef.current.concat({ ...created, id: `noodle-${crypto.randomUUID()}` })
+          ? edgesRef.current.concat({ ...created, id: freshId })
           : added;
+      gestureEdgeRef.current =
+        withNew.find((edge) => !edgesRef.current.some((item) => item.id === edge.id))?.id ?? null;
       const next = reflowAttachments(withNew);
       takeSnapshot();
       edgesRef.current = next;
@@ -551,35 +563,94 @@ function Board() {
     [takeSnapshot],
   );
 
+  const alignGestureEdge = useCallback(
+    (hovered: ReturnType<typeof getHoverTarget>) => {
+      const id = gestureEdgeRef.current;
+      if (!id || !hovered) return;
+      const port = portFromHover(hovered, dragKind(store.getState()));
+      if (!port.handleId) return;
+      const edge = edgesRef.current.find((item) => item.id === id);
+      if (!edge) return;
+      const data = readNoodle(edge.data);
+      const fraction = port.fraction ?? 0.5;
+      if (
+        edge.target === port.nodeId &&
+        edge.targetHandle === port.handleId &&
+        sameFraction(data.targetFraction ?? 0.5, fraction)
+      ) {
+        return;
+      }
+      const sourceFraction = isSide(edge.sourceHandle) ? 0.5 : data.sourceFraction;
+      if (
+        sameAttachmentPoint(edge.source, edge.sourceHandle, sourceFraction, port.nodeId, port.handleId, fraction)
+      ) {
+        const next = edgesRef.current.filter((item) => item.id !== id);
+        edgesRef.current = next;
+        setEdges(next);
+        return;
+      }
+      const next = reflowAttachments(
+        edgesRef.current.map((item) =>
+          item.id === id
+            ? applyNoodleData(
+                { ...item, target: port.nodeId, targetHandle: port.handleId },
+                { ...data, targetFraction: fraction },
+              )
+            : item,
+        ),
+      );
+      edgesRef.current = next;
+      setEdges(next);
+    },
+    [store],
+  );
+
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
-      if (suppressConnectRef.current || reconnectRef.current) return;
-      if (connectionState.isValid && connectionState.toHandle) {
+      const finish = () => {
+        const id = gestureEdgeRef.current;
+        queueMicrotask(() => {
+          if (gestureEdgeRef.current === id) gestureEdgeRef.current = null;
+        });
         clearConnectionOrigin();
         setHotPort(null);
+      };
+      if (suppressConnectRef.current || reconnectRef.current) {
+        finish();
+        return;
+      }
+      const hovered = getHoverTarget();
+      if (hovered || releaseHitsNode(event)) armClickSwallow();
+      if (connectionState.isValid && connectionState.toHandle) {
+        alignGestureEdge(hovered);
+        finish();
         return;
       }
       const from = connectionState.fromHandle;
       if (!from?.nodeId) {
-        clearConnectionOrigin();
-        setHotPort(null);
+        finish();
+        return;
+      }
+      if (gestureEdgeRef.current) {
+        alignGestureEdge(hovered);
+        finish();
         return;
       }
       const point = pointFromEvent(event);
       const state = store.getState();
+      const kind = dragKind(state);
       const port =
+        (hovered ? portFromHover(hovered, kind) : null) ??
         (connectModeRef.current ? portAtClient(state, point.x, point.y, "edge") : null) ??
         nearestPort(state, connectionState.pointer, "edge");
       if (!port?.handleId) {
-        clearConnectionOrigin();
-        setHotPort(null);
+        finish();
         return;
       }
       setHotPort(port);
       const sourceFraction = isSide(from.id) ? 0.5 : undefined;
       if (sameAttachmentPoint(from.nodeId, from.id, sourceFraction, port.nodeId, port.handleId, port.fraction)) {
-        clearConnectionOrigin();
-        setHotPort(null);
+        finish();
         return;
       }
       onConnect({
@@ -588,10 +659,9 @@ function Board() {
         target: port.nodeId,
         targetHandle: port.handleId,
       });
-      clearConnectionOrigin();
-      setHotPort(null);
+      finish();
     },
-    [onConnect, store],
+    [alignGestureEdge, onConnect, store],
   );
 
   const isValidConnection = useCallback((connection: Connection | Edge) => {
@@ -725,12 +795,17 @@ function Board() {
       const rf = rfConnectionRef.current;
       reconnectRef.current = null;
       rfConnectionRef.current = null;
-
-      const hot = nearestPort(
-        store.getState(),
-        connectionState.pointer,
-        dragged === "source" ? "midpoint" : "edge",
-      );
+      const hovered = getHoverTarget();
+      if (hovered || releaseHitsNode(event)) armClickSwallow();
+      const kind = dragged === "source" ? "origin" : "target";
+      const hot =
+        (hovered ? portFromHover(hovered, kind) : null) ??
+        nearestPort(
+          store.getState(),
+          connectionState.pointer,
+          dragged === "source" ? "midpoint" : "edge",
+        );
+      setHotPort(null);
       const dropFraction = dragged === "source" ? (hot ? 0.5 : undefined) : hot?.fraction;
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
       const held = (connection: Connection, fraction: number | undefined) => {
@@ -1425,6 +1500,7 @@ function Board() {
         }}
       >
         <div
+          data-canvas-chrome
           className="pointer-events-none absolute inset-x-4 top-4 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[800px]:items-center min-[800px]:gap-3"
           style={{ zIndex: layers.selection }}
         >
@@ -1487,6 +1563,7 @@ function Board() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onConnectStart={(_event, params) => {
+            gestureEdgeRef.current = null;
             if (!params.nodeId || !params.handleId || !isSide(params.handleId)) return;
             // Dragging the origin reports the stationary target. Pin the source midpoint instead.
             if (params.handleType === "target") {
@@ -1512,6 +1589,7 @@ function Board() {
           reconnectRadius={END_RADIUS}
           connectionRadius={PORT_SCREEN_RADIUS}
           connectionLineType={ConnectionLineType.SmoothStep}
+          connectionLineComponent={NoodleConnectionLine}
           connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
           connectOnClick={connectMode}

@@ -1,5 +1,6 @@
 import { Position, type Edge } from "@xyflow/react";
 import { applyNoodleData, readNoodle } from "./noodleData";
+import { roundRectRadius } from "./shapeData";
 
 export const SIDES = ["top", "right", "bottom", "left"] as const;
 export type SideId = (typeof SIDES)[number];
@@ -118,6 +119,197 @@ export function projectOntoSideMidpoint(box: NodeBox, point: { x: number; y: num
   const edge = projectOntoBox(box, point);
   const at = pointOnSide(box, edge.side, 0.5);
   return { side: edge.side, fraction: 0.5, x: at.x, y: at.y, distance: edge.distance };
+}
+
+/** Corner radius for a rounded rectangle. Other objects stay a sharp box. */
+export function outlineRadius(type: string | undefined, data: unknown, box: NodeBox) {
+  if (type !== "shape" || !data || typeof data !== "object") return 0;
+  if ((data as { kind?: string }).kind !== "round-rect") return 0;
+  return roundRectRadius(box.width, box.height);
+}
+
+function cappedRadius(box: NodeBox, radius: number) {
+  return Math.min(Math.max(0, radius), box.width / 2, box.height / 2);
+}
+
+/**
+ * Point on the outline at `fraction` along a side. A radius pulls the corners
+ * onto the arc; the midpoint of a normal side stays on the straight edge.
+ */
+export function pointOnOutline(box: NodeBox, side: SideId, fraction: number, radius = 0) {
+  const r = cappedRadius(box, radius);
+  const t = clampFraction(fraction);
+  if (r < 0.5) return pointOnSide(box, side, t);
+  const left = box.x;
+  const right = box.x + box.width;
+  const top = box.y;
+  const bottom = box.y + box.height;
+  if (side === "top" || side === "bottom") {
+    const d = t * box.width;
+    const cy = side === "top" ? top + r : bottom - r;
+    if (d < r) {
+      const u = r === 0 ? 0 : d / r;
+      const angle = side === "top" ? -Math.PI * 0.75 + u * (Math.PI / 4) : Math.PI * 0.75 - u * (Math.PI / 4);
+      return { x: left + r + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+    }
+    if (d > box.width - r) {
+      const u = r === 0 ? 1 : (d - (box.width - r)) / r;
+      const angle = side === "top" ? -Math.PI / 2 + u * (Math.PI / 4) : Math.PI / 2 - u * (Math.PI / 4);
+      return { x: right - r + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+    }
+    return { x: left + d, y: side === "top" ? top : bottom };
+  }
+  const d = t * box.height;
+  const cx = side === "left" ? left + r : right - r;
+  if (d < r) {
+    const u = r === 0 ? 0 : d / r;
+    const angle = side === "left" ? -Math.PI * 0.75 - u * (Math.PI / 4) : -Math.PI / 4 + u * (Math.PI / 4);
+    return { x: cx + r * Math.cos(angle), y: top + r + r * Math.sin(angle) };
+  }
+  if (d > box.height - r) {
+    const u = r === 0 ? 1 : (d - (box.height - r)) / r;
+    const angle = side === "left" ? Math.PI - u * (Math.PI / 4) : u * (Math.PI / 4);
+    return { x: cx + r * Math.cos(angle), y: bottom - r + r * Math.sin(angle) };
+  }
+  return { x: side === "left" ? left : right, y: top + d };
+}
+
+function closestOnSegment(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  point: { x: number; y: number },
+) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.min(1, Math.max(0, ((point.x - ax) * dx + (point.y - ay) * dy) / len2));
+  const x = ax + dx * t;
+  const y = ay + dy * t;
+  return { x, y, distance: Math.hypot(x - point.x, y - point.y) };
+}
+
+/** Closest point on a circular arc swept counterclockwise from `start` by `sweep` radians. */
+function closestOnArc(
+  cx: number,
+  cy: number,
+  radius: number,
+  start: number,
+  sweep: number,
+  point: { x: number; y: number },
+) {
+  let rel = Math.atan2(point.y - cy, point.x - cx) - start;
+  const turn = Math.PI * 2;
+  rel = ((rel % turn) + turn) % turn;
+  const clamped = Math.min(sweep, Math.max(0, rel));
+  const angle = start + clamped;
+  const x = cx + radius * Math.cos(angle);
+  const y = cy + radius * Math.sin(angle);
+  return { x, y, angle, distance: Math.hypot(x - point.x, y - point.y) };
+}
+
+function hit(side: SideId, fraction: number, x: number, y: number, point: { x: number; y: number }): PerimeterHit {
+  return {
+    side,
+    fraction: quantizeFraction(fraction),
+    x,
+    y,
+    distance: Math.hypot(x - point.x, y - point.y),
+  };
+}
+
+/**
+ * Closest point on the outline. `radius` follows a rounded rectangle; zero is the sharp box.
+ * The fraction runs along the full side, corners included, and inverts `pointOnOutline`.
+ */
+export function projectOntoOutline(box: NodeBox, point: { x: number; y: number }, radius = 0): PerimeterHit {
+  const r = cappedRadius(box, radius);
+  if (r < 0.5) return projectOntoBox(box, point);
+  const left = box.x;
+  const right = box.x + box.width;
+  const top = box.y;
+  const bottom = box.y + box.height;
+  const width = box.width || 1;
+  const height = box.height || 1;
+  const candidates: PerimeterHit[] = [];
+
+  const topSeg = closestOnSegment(left + r, top, right - r, top, point);
+  candidates.push(hit("top", (topSeg.x - left) / width, topSeg.x, topSeg.y, point));
+  const bottomSeg = closestOnSegment(left + r, bottom, right - r, bottom, point);
+  candidates.push(hit("bottom", (bottomSeg.x - left) / width, bottomSeg.x, bottomSeg.y, point));
+  const leftSeg = closestOnSegment(left, top + r, left, bottom - r, point);
+  candidates.push(hit("left", (leftSeg.y - top) / height, leftSeg.x, leftSeg.y, point));
+  const rightSeg = closestOnSegment(right, top + r, right, bottom - r, point);
+  candidates.push(hit("right", (rightSeg.y - top) / height, rightSeg.x, rightSeg.y, point));
+
+  const arcs: { cx: number; cy: number; start: number }[] = [
+    { cx: left + r, cy: top + r, start: -Math.PI },
+    { cx: right - r, cy: top + r, start: -Math.PI / 2 },
+    { cx: right - r, cy: bottom - r, start: 0 },
+    { cx: left + r, cy: bottom - r, start: Math.PI / 2 },
+  ];
+  for (const arc of arcs) {
+    const near = closestOnArc(arc.cx, arc.cy, r, arc.start, Math.PI / 2, point);
+    const quarter = (near.angle - arc.start) / (Math.PI / 2);
+    let side: SideId;
+    let fraction: number;
+    if (arc.start === -Math.PI) {
+      if (quarter < 0.5) {
+        side = "left";
+        const u = quarter / 0.5;
+        fraction = (r * (1 - u)) / height;
+      } else {
+        side = "top";
+        const u = (quarter - 0.5) / 0.5;
+        fraction = (r * u) / width;
+      }
+    } else if (arc.start === -Math.PI / 2) {
+      if (quarter < 0.5) {
+        side = "top";
+        const u = quarter / 0.5;
+        fraction = (width - r + r * u) / width;
+      } else {
+        side = "right";
+        const u = (quarter - 0.5) / 0.5;
+        fraction = (r * u) / height;
+      }
+    } else if (arc.start === 0) {
+      if (quarter < 0.5) {
+        side = "right";
+        const u = quarter / 0.5;
+        fraction = (height - r + r * u) / height;
+      } else {
+        side = "bottom";
+        const u = (quarter - 0.5) / 0.5;
+        fraction = (width - r * u) / width;
+      }
+    } else if (quarter < 0.5) {
+      side = "bottom";
+      const u = quarter / 0.5;
+      fraction = (r * (1 - u)) / width;
+    } else {
+      side = "left";
+      const u = (quarter - 0.5) / 0.5;
+      fraction = (height - r * u) / height;
+    }
+    candidates.push(hit(side, fraction, near.x, near.y, point));
+  }
+
+  let best = candidates[0];
+  for (const candidate of candidates) {
+    if (candidate.distance < best.distance) best = candidate;
+  }
+  return best;
+}
+
+/** Where a noodle end is drawn: on the outline, then a gap outside that side. */
+export function routeEnd(box: NodeBox, side: SideId, fraction: number, radius: number, gap: number) {
+  const on = pointOnOutline(box, side, fraction, radius);
+  if (side === "left") return { x: box.x - gap, y: on.y };
+  if (side === "right") return { x: box.x + box.width + gap, y: on.y };
+  if (side === "top") return { x: on.x, y: box.y - gap };
+  return { x: on.x, y: box.y + box.height + gap };
 }
 
 export function pointOnSide(box: NodeBox, side: SideId, fraction: number) {

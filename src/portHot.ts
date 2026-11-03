@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+import type { SideId } from "./attachment";
 import type { HotPort } from "./noodleEnds";
+
+/** One landing while a noodle end is dragged. Port fill, outline, marker, preview, and drop all read it. */
+export type HoverTarget = {
+  elementId: string;
+  mode: "port" | "edge";
+  side: SideId;
+  fraction: number;
+};
 
 export type ConnectionOrigin = { nodeId: string; handleId: string; fraction: number };
 
 export type HandlePlacement = { fraction: number; hot: boolean };
 
 let current: HotPort | null = null;
+let hover: HoverTarget | null = null;
 let origin: ConnectionOrigin | null = null;
+let swallowUntil = 0;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -15,6 +26,10 @@ function emit() {
 
 function sameHot(a: HotPort | null, b: HotPort | null) {
   return a?.nodeId === b?.nodeId && (a?.handleId ?? null) === (b?.handleId ?? null) && a?.fraction === b?.fraction;
+}
+
+function sameHover(a: HoverTarget | null, b: HoverTarget | null) {
+  return a?.elementId === b?.elementId && a?.mode === b?.mode && a?.side === b?.side && a?.fraction === b?.fraction;
 }
 
 function sameOrigin(a: ConnectionOrigin | null, b: ConnectionOrigin | null) {
@@ -29,10 +44,33 @@ export function getConnectionOrigin() {
   return origin;
 }
 
+export function getHoverTarget() {
+  return hover;
+}
+
 export function setHotPort(next: HotPort | null) {
-  if (sameHot(current, next)) return;
+  const clearHover = next == null && hover != null;
+  if (!clearHover && sameHot(current, next)) return;
   current = next;
+  if (next == null) hover = null;
   emit();
+}
+
+/** Sets the landing and the port the drop will use, in one update. */
+export function setDragFeedback(nextHover: HoverTarget | null, nextHot: HotPort | null) {
+  if (sameHover(hover, nextHover) && sameHot(current, nextHot)) return;
+  hover = nextHover;
+  current = nextHot;
+  emit();
+}
+
+/** The click and double-click that finish a drag should not select or edit. */
+export function armClickSwallow() {
+  swallowUntil = performance.now() + 400;
+}
+
+export function swallowsClick() {
+  return performance.now() <= swallowUntil;
 }
 
 export function setConnectionOrigin(next: ConnectionOrigin | null) {
@@ -46,6 +84,8 @@ export function clearConnectionOrigin() {
 }
 
 function placementFor(nodeId: string, handleId: string): HandlePlacement | null {
+  // While this element is the landing zone, its four ports stay on the midpoints.
+  if (hover?.elementId === nodeId) return null;
   const hotHere =
     current?.nodeId === nodeId && (current.handleId ?? null) === handleId && current.fraction != null;
   const originHere = origin?.nodeId === nodeId && origin.handleId === handleId;
@@ -58,6 +98,21 @@ function placementFor(nodeId: string, handleId: string): HandlePlacement | null 
 
 function samePlacement(a: HandlePlacement | null, b: HandlePlacement | null) {
   return a?.hot === b?.hot && a?.fraction === b?.fraction;
+}
+
+export function useHoverTarget() {
+  const [value, setValue] = useState<HoverTarget | null>(() => hover);
+
+  useEffect(() => {
+    const sync = () => setValue((prev) => (sameHover(prev, hover) ? prev : hover));
+    listeners.add(sync);
+    sync();
+    return () => {
+      listeners.delete(sync);
+    };
+  }, []);
+
+  return value;
 }
 
 export function useHotPort() {

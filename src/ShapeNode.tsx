@@ -13,6 +13,7 @@ import {
   STROKE_SWATCHES,
   STROKE_WIDTH,
   isShapeColor,
+  roundRectRadius,
   isShapeKind,
   shapeHeightForText,
   shapeTextFrame,
@@ -99,10 +100,7 @@ type Paint = {
 };
 
 function cornerRadius(width: number, height: number) {
-  const inset = STROKE_WIDTH / 2;
-  const innerWidth = Math.max(0, width - inset * 2);
-  const innerHeight = Math.max(0, height - inset * 2);
-  return Math.min(28, innerWidth / 2, innerHeight / 2, width * 0.22, height * 0.22);
+  return roundRectRadius(width, height);
 }
 
 /** Matches the painted geometry so empty corners of the node box are not a hit target. */
@@ -400,11 +398,6 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       data-shape-kind={kind}
       className="noodle-node pointer-events-none relative h-full w-full"
       style={resizeStyle}
-      onClick={(event) => {
-        if (!selected || editing) return;
-        if ((event.target as HTMLElement).closest("[data-text-toolbar], [data-shape-colors], a, input")) return;
-        setEditing(true);
-      }}
       onDoubleClick={(event) => {
         event.stopPropagation();
         setEditing(true);

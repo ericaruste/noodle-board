@@ -4,15 +4,32 @@ import {
   containsPoint,
   isSide,
   nodeBox,
+  outlineRadius,
+  pointOnOutline,
   pointOnSide,
   projectOntoBox,
+  projectOntoOutline,
   projectOntoSideMidpoint,
+  routeEnd,
   sidePosition,
+  SIDES,
   type SideId,
 } from "./attachment";
 import { layers } from "./layers";
 import { ENDPOINT_TYPE, PORT_SCREEN_RADIUS, forwardEndDrag, type HotPort } from "./noodleEnds";
-import { getConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort, useHotPort } from "./portHot";
+import { ROUTE_GAP } from "./noodleRoute";
+import {
+  getConnectionOrigin,
+  getHotPort,
+  getHoverTarget,
+  setConnectionOrigin,
+  setDragFeedback,
+  setHotPort,
+  swallowsClick,
+  useHotPort,
+  useHoverTarget,
+  type HoverTarget,
+} from "./portHot";
 
 /** Screen pixels. Hover and handle-drag grab the side this far from the border. */
 const BAND_SCREEN_PX = 28;
@@ -45,8 +62,27 @@ function portFromHit(nodeId: string, hit: { side: SideId; fraction: number }): H
   return { nodeId, handleId: hit.side, fraction: hit.fraction };
 }
 
+/** Screen pixels past the port snap before a filled port returns to an outline. */
+const PORT_SNAP_EXIT_PX = PORT_SCREEN_RADIUS + 10;
+/** How far outside the outline still counts as over the element. */
+const EDGE_BAND_PX = 14;
+
 /** A source-end drag lands on midpoints. A target-end drag follows the edge. */
 export type AttachmentMode = "midpoint" | "edge";
+export type DragKind = "origin" | "target";
+
+export function dragKind(state: ReactFlowState): DragKind {
+  if (state.connection.inProgress && state.connection.fromHandle?.type === "target") return "origin";
+  return "target";
+}
+
+export function portFromHover(target: HoverTarget, kind: DragKind): HotPort {
+  return {
+    nodeId: target.elementId,
+    handleId: target.side,
+    fraction: kind === "origin" || target.mode === "port" ? 0.5 : target.fraction,
+  };
+}
 
 export function connectionAttachmentMode(state: ReactFlowState): AttachmentMode {
   if (!state.connection.inProgress) return "midpoint";
@@ -238,7 +274,99 @@ function resetHandle(state: ReactFlowState, nodeId: string, side: SideId) {
   }
 }
 
-/** Keep the origin handle on its midpoint. Slide only a different side to the landing fraction. */
+/**
+ * The element under the pointer, or the midpoint dot the pointer is close to.
+ * Midpoint hits win over a free edge point. An origin drag never uses a free edge.
+ */
+export function resolveHover(state: ReactFlowState, point: XYPosition, kind: DragKind): HoverTarget | null {
+  const zoom = state.transform[2] || 1;
+  const prev = getHoverTarget();
+  let contained: { id: string; box: NonNullable<ReturnType<typeof nodeBox>>; radius: number; z: number } | null = null;
+  let outside: { id: string; side: SideId; distance: number; z: number } | null = null;
+
+  for (const node of state.nodeLookup.values()) {
+    if (node.type === ENDPOINT_TYPE) continue;
+    const box = nodeBox(node);
+    if (!box) continue;
+    const radius = outlineRadius(node.type, node.data, box);
+    const z = node.internals?.z ?? 0;
+    const projected = projectOntoOutline(box, point, radius);
+    const over = containsPoint(box, point) || projected.distance * zoom <= EDGE_BAND_PX;
+    if (over) {
+      if (!contained || z >= contained.z) contained = { id: node.id, box, radius, z };
+      continue;
+    }
+    const port = nearestMidpoint(node.id, box, radius, point, prev, zoom);
+    if (!port) continue;
+    if (!outside || port.distance < outside.distance - 0.5 || (Math.abs(port.distance - outside.distance) <= 0.5 && z >= outside.z)) {
+      outside = { id: node.id, side: port.side, distance: port.distance, z };
+    }
+  }
+
+  if (contained) {
+    const port = nearestMidpoint(contained.id, contained.box, contained.radius, point, prev, zoom);
+    if (port) return { elementId: contained.id, mode: "port", side: port.side, fraction: 0.5 };
+    const edge = projectOntoOutline(contained.box, point, contained.radius);
+    if (kind === "origin") {
+      const side = originSide(contained.id, contained.box, contained.radius, point, edge.side);
+      return { elementId: contained.id, mode: "port", side, fraction: 0.5 };
+    }
+    return { elementId: contained.id, mode: "edge", side: edge.side, fraction: edge.fraction };
+  }
+  if (!outside) return null;
+  return { elementId: outside.id, mode: "port", side: outside.side, fraction: 0.5 };
+}
+
+function nearestMidpoint(
+  nodeId: string,
+  box: NonNullable<ReturnType<typeof nodeBox>>,
+  radius: number,
+  point: XYPosition,
+  prev: HoverTarget | null,
+  zoom: number,
+) {
+  let best: { side: SideId; distance: number } | null = null;
+  for (const side of SIDES) {
+    const mid = pointOnOutline(box, side, 0.5, radius);
+    const distance = Math.hypot(mid.x - point.x, mid.y - point.y);
+    if (!best || distance < best.distance) best = { side, distance };
+  }
+  if (!best || !zoom) return null;
+  const pixels = prev?.elementId === nodeId && prev.mode === "port" && prev.side === best.side ? PORT_SNAP_EXIT_PX : PORT_SCREEN_RADIUS;
+  if (best.distance > pixels / zoom) return null;
+  return best;
+}
+
+function originSide(
+  nodeId: string,
+  box: NonNullable<ReturnType<typeof nodeBox>>,
+  radius: number,
+  point: XYPosition,
+  projected: SideId,
+) {
+  if (!skipOrigin(nodeId, projected, 0.5)) return projected;
+  let best: { side: SideId; distance: number } | null = null;
+  for (const side of SIDES) {
+    if (skipOrigin(nodeId, side, 0.5)) continue;
+    const mid = pointOnOutline(box, side, 0.5, radius);
+    const distance = Math.hypot(mid.x - point.x, mid.y - point.y);
+    if (!best || distance < best.distance) best = { side, distance };
+  }
+  return best?.side ?? projected;
+}
+
+/** Where the preview line ends: outside the side, on the midpoint or the free edge. */
+export function landingGeometry(state: ReactFlowState, target: HoverTarget) {
+  const node = state.nodeLookup.get(target.elementId);
+  const box = node ? nodeBox(node) : null;
+  if (!node || !box) return null;
+  const radius = outlineRadius(node.type, node.data, box);
+  const fraction = dragKind(state) === "origin" || target.mode === "port" ? 0.5 : target.fraction;
+  const point = routeEnd(box, target.side, fraction, radius, ROUTE_GAP);
+  return { ...point, side: target.side, position: sidePosition(target.side) };
+}
+
+/** Keep the origin handle on its midpoint. Slide a free landing only when no drag outline is showing. */
 export function syncPlacedHandles(state: ReactFlowState) {
   const wanted = new Map<string, { nodeId: string; side: SideId; fraction: number }>();
   const from = getConnectionOrigin();
@@ -246,7 +374,7 @@ export function syncPlacedHandles(state: ReactFlowState) {
   if (from && isSide(from.handleId)) {
     wanted.set(`${from.nodeId}:${from.handleId}`, { nodeId: from.nodeId, side: from.handleId, fraction: 0.5 });
   }
-  if (hot && isSide(hot.handleId) && hot.fraction != null) {
+  if (!getHoverTarget() && hot && isSide(hot.handleId) && hot.fraction != null) {
     const key = `${hot.nodeId}:${hot.handleId}`;
     if (!wanted.has(key)) {
       wanted.set(key, {
@@ -271,6 +399,7 @@ export function syncPlacedHandles(state: ReactFlowState) {
 }
 
 function HotMarker() {
+  const landing = useHoverTarget();
   const port = useHotPort();
   const nodeId = port && isSide(port.handleId) ? port.nodeId : "";
   const side = port && isSide(port.handleId) ? port.handleId : null;
@@ -281,7 +410,7 @@ function HotMarker() {
     if (!box) return "";
     return `${box.x}:${box.y}:${box.width}:${box.height}`;
   });
-  if (!side || !boxKey) return null;
+  if (landing || !side || !boxKey) return null;
   const [x, y, width, height] = boxKey.split(":").map(Number);
   const point = pointOnSide({ x, y, width, height }, side, fraction);
   const outset = readOutset(nodeId);
@@ -307,18 +436,62 @@ function HotMarker() {
   );
 }
 
+function DragLanding() {
+  const hover = useHoverTarget();
+  const zoom = useStore((state) => state.transform[2] || 1);
+  const kind = useStore((state) => dragKind(state));
+  const boxKey = useStore((state) => {
+    const id = getHoverTarget()?.elementId;
+    if (!id) return "";
+    const node = state.nodeLookup.get(id);
+    const box = nodeBox(node);
+    if (!node || !box) return "";
+    return `${box.x}:${box.y}:${box.width}:${box.height}:${outlineRadius(node.type, node.data, box)}`;
+  });
+  if (!hover || !boxKey) return null;
+  const [x, y, width, height, radius] = boxKey.split(":").map(Number);
+  const box = { x, y, width, height };
+  const showMarker = kind === "target" && hover.mode === "edge" && !skipOrigin(hover.elementId, hover.side, hover.fraction);
+  const marker = showMarker ? pointOnOutline(box, hover.side, hover.fraction, radius) : null;
+  const markerSize = 8 / zoom;
+  return (
+    <ViewportPortal>
+      <svg className="noodle-landing" style={{ zIndex: layers.selection }} aria-hidden>
+        <rect
+          x={box.x}
+          y={box.y}
+          width={box.width}
+          height={box.height}
+          rx={radius}
+          ry={radius}
+          fill="none"
+          stroke="#334155"
+          strokeWidth={2}
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      {marker ? (
+        <div
+          className="noodle-edge-marker"
+          style={{
+            zIndex: layers.selection,
+            width: markerSize,
+            height: markerSize,
+            transform: `translate(${marker.x}px, ${marker.y}px) translate(-50%, -50%)`,
+          }}
+          aria-hidden
+        />
+      ) : null}
+    </ViewportPortal>
+  );
+}
+
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
       ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__node-endpoint",
     ),
   );
-}
-
-function containerPointer(state: ReactFlowState, clientX: number, clientY: number): XYPosition | null {
-  const bounds = state.domNode?.getBoundingClientRect();
-  if (!bounds) return null;
-  return { x: clientX - bounds.left, y: clientY - bounds.top };
 }
 
 export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
@@ -334,18 +507,21 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
   useEffect(() => {
     const placeAt = (clientX: number, clientY: number) => {
       const state = store.getState();
-      if (state.connection.inProgress) {
-        const pointer = containerPointer(state, clientX, clientY);
-        setHotPort(pointer ? nearestPort(state, pointer) : null);
+      const armed = connectMode && state.connectionClickStartHandle;
+      if (state.connection.inProgress || armed) {
+        const flow = clientToFlow(state, clientX, clientY);
+        const kind = dragKind(state);
+        const hover = flow ? resolveHover(state, flow, kind) : null;
+        setDragFeedback(hover, hover ? portFromHover(hover, kind) : null);
         syncPlacedHandles(state);
         return;
       }
       if (connectMode) {
-        setHotPort(portAtClient(state, clientX, clientY));
+        setDragFeedback(null, portAtClient(state, clientX, clientY));
         syncPlacedHandles(state);
         return;
       }
-      setHotPort(portOnBand(state, clientX, clientY));
+      setDragFeedback(null, portOnBand(state, clientX, clientY));
       syncPlacedHandles(state);
     };
     const onPointerMove = (event: PointerEvent) => {
@@ -365,6 +541,20 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       document.removeEventListener("mouseup", onMouseMove, true);
     };
   }, [connectMode, store]);
+
+  useEffect(() => {
+    const stop = (event: Event) => {
+      if (!swallowsClick()) return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    window.addEventListener("click", stop, true);
+    window.addEventListener("dblclick", stop, true);
+    return () => {
+      window.removeEventListener("click", stop, true);
+      window.removeEventListener("dblclick", stop, true);
+    };
+  }, []);
 
   useEffect(() => {
     if (connectMode) return;
@@ -393,5 +583,10 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
     return () => root.removeEventListener("pointerdown", onDown, true);
   }, [connectMode, store]);
 
-  return <HotMarker />;
+  return (
+    <>
+      <DragLanding />
+      <HotMarker />
+    </>
+  );
 }

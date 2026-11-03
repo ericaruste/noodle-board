@@ -24,6 +24,13 @@ const ELBOW_OFFSET = 24;
 const ELBOW_RADIUS = 10;
 const STUB = 28;
 
+/** Gap between a node edge and the drawn noodle end. */
+export const ROUTE_GAP = 8;
+
+export type FlowRect = { minX: number; minY: number; maxX: number; maxY: number };
+
+export type RouteFrame = { view: FlowRect; obstacles: FlowRect[] };
+
 const handleDirections = {
   [Position.Left]: { x: -1, y: 0 },
   [Position.Right]: { x: 1, y: 0 },
@@ -327,6 +334,75 @@ function curveLayout(
   };
 }
 
+function clampPoint(point: NoodlePoint, view: FlowRect): NoodlePoint {
+  return {
+    x: Math.min(view.maxX, Math.max(view.minX, point.x)),
+    y: Math.min(view.maxY, Math.max(view.minY, point.y)),
+  };
+}
+
+function segmentHits(a: NoodlePoint, b: NoodlePoint, rect: FlowRect) {
+  const minX = Math.min(a.x, b.x);
+  const maxX = Math.max(a.x, b.x);
+  const minY = Math.min(a.y, b.y);
+  const maxY = Math.max(a.y, b.y);
+  return maxX > rect.minX + 0.5 && minX < rect.maxX - 0.5 && maxY > rect.minY + 0.5 && minY < rect.maxY - 0.5;
+}
+
+function detourAround(a: NoodlePoint, b: NoodlePoint, rect: FlowRect, view: FlowRect): NoodlePoint[] {
+  const horizontal = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x);
+  if (horizontal) {
+    const y = Math.abs(a.y - rect.minY) <= Math.abs(a.y - rect.maxY) ? rect.minY : rect.maxY;
+    const clamped = Math.min(view.maxY, Math.max(view.minY, y));
+    return [
+      { x: a.x, y: clamped },
+      { x: b.x, y: clamped },
+    ];
+  }
+  const x = Math.abs(a.x - rect.minX) <= Math.abs(a.x - rect.maxX) ? rect.minX : rect.maxX;
+  const clamped = Math.min(view.maxX, Math.max(view.minX, x));
+  return [
+    { x: clamped, y: a.y },
+    { x: clamped, y: b.y },
+  ];
+}
+
+function avoidObstacles(points: NoodlePoint[], frame: RouteFrame): NoodlePoint[] {
+  let current = points;
+  for (const rect of frame.obstacles) {
+    const next: NoodlePoint[] = [];
+    for (let i = 0; i < current.length; i += 1) {
+      const point = current[i];
+      if (i > 0 && segmentHits(current[i - 1], point, rect)) {
+        next.push(...detourAround(current[i - 1], point, rect, frame.view));
+      }
+      next.push(point);
+    }
+    current = next;
+  }
+  return current;
+}
+
+/**
+ * Draw-only. Elbow waypoints that would leave the visible canvas, or run under
+ * the toolbars, bend back inside. Stored bends are not changed.
+ */
+export function fitElbowToView(points: NoodlePoint[], frame: RouteFrame | null): NoodlePoint[] {
+  if (!frame || points.length < 3) return points;
+  const { view } = frame;
+  if (!(view.maxX > view.minX) || !(view.maxY > view.minY)) return points;
+  const source = points[0];
+  const target = points[points.length - 1];
+  const clamped = points.map((point, index) =>
+    index === 0 || index === points.length - 1 ? { ...point } : clampPoint(point, view),
+  );
+  const around = avoidObstacles(pinEnds(orthogonalize(clamped), source, target), frame);
+  const again = around.map((point, index) =>
+    index === 0 || index === around.length - 1 ? { ...point } : clampPoint(point, view),
+  );
+  return pinEnds(mergeCollinear(orthogonalize(again)), source, target);
+}
+
 export function layoutNoodle(input: {
   shape: NoodleShape;
   source: NoodlePoint;
@@ -335,6 +411,8 @@ export function layoutNoodle(input: {
   targetPosition: Position;
   bends: NoodlePoint[];
   curveOffset: number;
+  /** Visible canvas, in flow units. Elbows bend back inside it. */
+  frame?: RouteFrame | null;
 }): NoodleLayout {
   const source = roundPoint(input.source);
   const target = roundPoint(input.target);
@@ -348,6 +426,7 @@ export function layoutNoodle(input: {
         ? orthogonalize([source, ...bends, target])
         : mergeCollinear(elbowPoints(source, input.sourcePosition, target, input.targetPosition))
       : mergeCollinear([source, ...bends, target]);
+  if (input.shape === "elbow") points = fitElbowToView(points, input.frame ?? null);
   points = pinEnds(points.map(roundPoint), source, target);
   const label = labelOn(points);
   return {

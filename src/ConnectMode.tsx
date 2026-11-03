@@ -10,9 +10,9 @@ import {
 } from "@xyflow/react";
 import { layers } from "./layers";
 import { forwardEndDrag } from "./noodleEnds";
-import { clientToFlow, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
-import { getConnectionOrigin, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
+import { getConnectionOrigin, getHoverTarget, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -207,17 +207,20 @@ function ConnectPreview({
   const bounds = state.domNode?.getBoundingClientRect();
   if (!bounds || state.transform[2] === 0) return null;
   const [tx, ty, zoom] = state.transform;
-  const to = {
+  const raw = {
     x: (pointer.x - bounds.left - tx) / zoom,
     y: (pointer.y - bounds.top - ty) / zoom,
   };
+  const hover = getHoverTarget();
+  const landing = hover ? landingGeometry(state, hover) : null;
+  const to = landing ?? raw;
   const [path] = getSmoothStepPath({
     sourceX: from.x,
     sourceY: from.y,
     sourcePosition: from.position,
     targetX: to.x,
     targetY: to.y,
-    targetPosition: facing(from.x, from.y, to.x, to.y),
+    targetPosition: landing ? landing.position : facing(from.x, from.y, to.x, to.y),
   });
 
   return (
