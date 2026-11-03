@@ -57,11 +57,6 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
       aria-label="Text"
       className="noodle-node relative"
       style={{ ...resizeStyle, width: "100%", height: "100%" }}
-      onClick={(event) => {
-        if (!selected || editing) return;
-        if ((event.target as HTMLElement).closest("[data-text-toolbar], a, input")) return;
-        setEditing(true);
-      }}
       onDoubleClick={(event) => {
         event.stopPropagation();
         setEditing(true);

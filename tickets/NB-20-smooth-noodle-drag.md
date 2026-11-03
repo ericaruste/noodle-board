@@ -1,7 +1,7 @@
 ---
 id: NB-20
 title: Smooth noodle drag feedback and edge-following
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
@@ -40,20 +40,20 @@ Noodle Board draws one filled marker, lets the preview follow the cursor into th
 
 ## Acceptance criteria
 
-- [ ] While a noodle end is dragged over an element, that element’s outline edge shows as the landing zone
-- [ ] All four side-midpoint ports show as outlined, unfilled dots. Only the port under the pointer fills and enlarges, and the end snaps to that midpoint. The other three stay outlined
-- [ ] Moving the pointer off a port returns it to an outline. No port is filled while the pointer is on the edge or the body between ports
-- [ ] Off a port but still over the element, all four ports stay outlined, the outline edge stays visible, and a small marker follows the pointer along the edge at the exact drop point
-- [ ] Switching between a filled port and the edge marker is immediate and does not flicker. The port snap radius is easy to hit
-- [ ] During an origin-end drag, only the hovered midpoint fills. The other three stay outlined. No free edge marker appears
-- [ ] Highlights clear when the pointer leaves the element or the drag ends
-- [ ] While a target end is dragged over an element, including its center, the end is projected onto the nearest point of the outline and follows the pointer along that edge. The line and arrowhead never enter the interior
-- [ ] The final segment approaches from outside the side it lands on. Releasing attaches at the projected point
-- [ ] An origin-end drag follows the same rule using the four midpoints instead of the free edge
-- [ ] Releasing over the element’s center attaches to the nearest valid point. It does not open text editing and it does not select the element
-- [ ] A plain single click on an element body, with no drag, still selects it. Editing text still requires a double-click
-- [ ] When a route would run past the visible canvas edge, it bends back inside the viewport with a small margin and rounded corners. It does not go off-screen or under the sidebar and toolbars
-- [ ] NB-18 still holds: several noodles between the same two elements, origins on midpoints, target fractions left where they were dropped, same-point rejection, and the same values after undo, redo, localStorage, and `.noodle.json`
+- [x] While a noodle end is dragged over an element, that element’s outline edge shows as the landing zone
+- [x] All four side-midpoint ports show as outlined, unfilled dots. Only the port under the pointer fills and enlarges, and the end snaps to that midpoint. The other three stay outlined
+- [x] Moving the pointer off a port returns it to an outline. No port is filled while the pointer is on the edge or the body between ports
+- [x] Off a port but still over the element, all four ports stay outlined, the outline edge stays visible, and a small marker follows the pointer along the edge at the exact drop point
+- [x] Switching between a filled port and the edge marker is immediate and does not flicker. The port snap radius is easy to hit
+- [x] During an origin-end drag, only the hovered midpoint fills. The other three stay outlined. No free edge marker appears
+- [x] Highlights clear when the pointer leaves the element or the drag ends
+- [x] While a target end is dragged over an element, including its center, the end is projected onto the nearest point of the outline and follows the pointer along that edge. The line and arrowhead never enter the interior
+- [x] The final segment approaches from outside the side it lands on. Releasing attaches at the projected point
+- [x] An origin-end drag follows the same rule using the four midpoints instead of the free edge
+- [x] Releasing over the element’s center attaches to the nearest valid point. It does not open text editing and it does not select the element
+- [x] A plain single click on an element body, with no drag, still selects it. Editing text still requires a double-click
+- [x] When a route would run past the visible canvas edge, it bends back inside the viewport with a small margin and rounded corners. It does not go off-screen or under the sidebar and toolbars
+- [x] NB-18 still holds: several noodles between the same two elements, origins on midpoints, target fractions left where they were dropped, same-point rejection, and the same values after undo, redo, localStorage, and `.noodle.json`
 
 ## Technical notes
 

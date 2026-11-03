@@ -72,11 +72,6 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
       aria-label="Sticky note"
       className="noodle-node relative h-full w-full rounded-sm shadow-[2px_4px_12px_rgba(15,23,42,0.18)]"
       style={{ ...resizeStyle, background: STICKY_COLORS[data.color] }}
-      onClick={(event) => {
-        if (!selected || editing) return;
-        if ((event.target as HTMLElement).closest("[data-text-toolbar], [data-sticky-colors], a, input")) return;
-        setEditing(true);
-      }}
       onDoubleClick={(event) => {
         event.stopPropagation();
         setEditing(true);

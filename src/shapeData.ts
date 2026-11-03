@@ -22,6 +22,14 @@ export const DEFAULT_SHAPE_STROKE = "#334155";
 
 export const STROKE_WIDTH = 2;
 
+/** Corner radius of a rounded rectangle, matching the painted geometry. */
+export function roundRectRadius(width: number, height: number) {
+  const inset = STROKE_WIDTH / 2;
+  const innerWidth = Math.max(0, width - inset * 2);
+  const innerHeight = Math.max(0, height - inset * 2);
+  return Math.min(28, innerWidth / 2, innerHeight / 2, width * 0.22, height * 0.22);
+}
+
 export const FILL_SWATCHES = [
   { name: "White", value: "#ffffff" },
   { name: "Slate", value: "#e2e8f0" },

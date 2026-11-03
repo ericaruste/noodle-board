@@ -352,6 +352,42 @@ body,
   pointer-events: none;
 }
 
+.noodle-landing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.noodle-edge-marker {
+  position: absolute;
+  border-radius: 999px;
+  background: #0f172a;
+  pointer-events: none;
+}
+
+.noodle-node .react-flow__handle.noodle-port-outline,
+.noodle-node .react-flow__handle.noodle-port-fill {
+  opacity: 1;
+  box-sizing: border-box;
+}
+
+.noodle-node .react-flow__handle.noodle-port-outline {
+  background: #fff;
+  border: 2px solid #334155;
+}
+
+.noodle-node .react-flow__handle.noodle-port-fill {
+  background: #0f172a;
+  border: 2px solid #0f172a;
+  width: calc(var(--noodle-port-size, 10px) * 1.7);
+  height: calc(var(--noodle-port-size, 10px) * 1.7);
+  box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.28);
+}
+
 .noodle-align-guides {
   position: absolute;
   left: 0;

@@ -2,17 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import {
   Position,
   ViewportPortal,
-  getSmoothStepPath,
   useStore,
   useStoreApi,
   type Connection,
   type ReactFlowState,
 } from "@xyflow/react";
 import { layers } from "./layers";
+import { routeFrame, useChromeLayout } from "./NoodleEdge";
+import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
-import { clientToFlow, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
-import { getConnectionOrigin, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
+import { armClickSwallow, getConnectionOrigin, getHoverTarget, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -123,6 +124,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         ) &&
         isValidRef.current(connection)
       ) {
+        armClickSwallow();
         onConnectRef.current(connection);
       }
       clearConnectionOrigin();
@@ -197,6 +199,10 @@ function ConnectPreview({
   start: NonNullable<ReactFlowState["connectionClickStartHandle"]>;
   pointer: { x: number; y: number };
 }) {
+  useChromeLayout();
+  const frame = useStore((state) =>
+    routeFrame(state.transform as [number, number, number], state.width, state.height),
+  );
   const store = useStoreApi();
   const state = store.getState();
   const origin = getConnectionOrigin();
@@ -207,18 +213,23 @@ function ConnectPreview({
   const bounds = state.domNode?.getBoundingClientRect();
   if (!bounds || state.transform[2] === 0) return null;
   const [tx, ty, zoom] = state.transform;
-  const to = {
+  const raw = {
     x: (pointer.x - bounds.left - tx) / zoom,
     y: (pointer.y - bounds.top - ty) / zoom,
   };
-  const [path] = getSmoothStepPath({
-    sourceX: from.x,
-    sourceY: from.y,
+  const hover = getHoverTarget();
+  const landing = hover ? landingGeometry(state, hover) : null;
+  const to = landing ?? raw;
+  const path = layoutNoodle({
+    shape: "elbow",
+    source: { x: from.x, y: from.y },
+    target: { x: to.x, y: to.y },
     sourcePosition: from.position,
-    targetX: to.x,
-    targetY: to.y,
-    targetPosition: facing(from.x, from.y, to.x, to.y),
-  });
+    targetPosition: landing ? landing.position : facing(from.x, from.y, to.x, to.y),
+    bends: [],
+    curveOffset: 0,
+    frame,
+  }).path;
 
   return (
     <ViewportPortal>

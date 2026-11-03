@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
 import { FloatingPanel } from "./FloatingPanel";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
-import { isSide, nodeBox, pointOnSide, resolveAttachments, sidePosition, type SideId } from "./attachment";
+import { isSide, nodeBox, outlineRadius, resolveAttachments, routeEnd, sidePosition, type SideId } from "./attachment";
 import { placeHandle, syncPlacedHandles } from "./PortMagnet";
 import { setConnectionOrigin, setHotPort } from "./portHot";
 import {
@@ -13,26 +13,15 @@ import {
   type NoodleArrow,
   type NoodleData,
 } from "./noodleData";
-import { bendsFromPoints, layoutNoodle, moveSegment, type NoodleAnchor } from "./noodleRoute";
+import { bendsFromPoints, layoutNoodle, moveSegment, ROUTE_GAP, type FlowRect, type NoodleAnchor, type RouteFrame } from "./noodleRoute";
 import NoodleToolbar from "./NoodleToolbar";
 
-const ROUTE_GAP = 8;
-
 type FlowNode = {
+  type?: string;
+  data?: unknown;
   measured?: { width?: number | null; height?: number | null };
   internals?: { positionAbsolute: { x: number; y: number } };
 };
-
-function atGap(node: FlowNode | undefined, position: Position, x: number, y: number, gap: number) {
-  const width = node?.measured?.width;
-  const height = node?.measured?.height;
-  const origin = node?.internals?.positionAbsolute;
-  if (!origin || !width || !height) return { x, y };
-  if (position === Position.Left) return { x: origin.x - gap, y };
-  if (position === Position.Right) return { x: origin.x + width + gap, y };
-  if (position === Position.Top) return { x, y: origin.y - gap };
-  return { x, y: origin.y + height + gap };
-}
 
 function sidePoint(
   node: FlowNode | undefined,
@@ -44,7 +33,104 @@ function sidePoint(
   if (!node || !side) return { x: fallbackX, y: fallbackY };
   const box = nodeBox(node);
   if (!box) return { x: fallbackX, y: fallbackY };
-  return pointOnSide(box, side, fraction ?? 0.5);
+  return routeEnd(box, side, fraction ?? 0.5, outlineRadius(node.type, node.data, box), ROUTE_GAP);
+}
+
+const VIEW_MARGIN = 16;
+
+function screenToFlow(pane: DOMRect, tx: number, ty: number, zoom: number, x: number, y: number) {
+  return { x: (x - pane.left - tx) / zoom, y: (y - pane.top - ty) / zoom };
+}
+
+function flowRect(pane: DOMRect, tx: number, ty: number, zoom: number, rect: DOMRect, pad: number): FlowRect {
+  const min = screenToFlow(pane, tx, ty, zoom, rect.left - pad, rect.top - pad);
+  const max = screenToFlow(pane, tx, ty, zoom, rect.right + pad, rect.bottom + pad);
+  return { minX: min.x, minY: min.y, maxX: max.x, maxY: max.y };
+}
+
+let frameCacheKey = "";
+let frameCache: RouteFrame | null = null;
+let chromeVersion = 0;
+const chromeListeners = new Set<() => void>();
+let chromeWatch: ResizeObserver | null = null;
+const chromeWatched = new Set<Element>();
+
+function attachChromeWatch(observer: ResizeObserver) {
+  for (const selector of ["[data-canvas-chrome]", ".react-flow__minimap", ".react-flow"]) {
+    const element = document.querySelector(selector);
+    if (!element || chromeWatched.has(element)) continue;
+    chromeWatched.add(element);
+    observer.observe(element);
+  }
+}
+
+function ensureChromeWatch() {
+  if (chromeWatch || typeof ResizeObserver === "undefined") return;
+  chromeWatch = new ResizeObserver(() => {
+    frameCacheKey = "";
+    chromeVersion += 1;
+    attachChromeWatch(chromeWatch!);
+    chromeListeners.forEach((listener) => listener());
+  });
+  attachChromeWatch(chromeWatch);
+  requestAnimationFrame(() => {
+    if (chromeWatch) attachChromeWatch(chromeWatch);
+  });
+}
+
+/** Re-render when the toolbar or minimap changes size without a pan or zoom. */
+export function useChromeLayout() {
+  return useSyncExternalStore(
+    (listener) => {
+      ensureChromeWatch();
+      chromeListeners.add(listener);
+      return () => chromeListeners.delete(listener);
+    },
+    () => chromeVersion,
+    () => 0,
+  );
+}
+
+function chromeKey() {
+  const box = (selector: string) => {
+    const rect = document.querySelector(selector)?.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) return "0";
+    return `${rect.left.toFixed(0)},${rect.top.toFixed(0)},${rect.width.toFixed(0)},${rect.height.toFixed(0)}`;
+  };
+  return `${box("[data-canvas-chrome]")}|${box(".react-flow__minimap")}`;
+}
+
+export function routeFrame(transform: [number, number, number], width: number, height: number) {
+  const key = `${width}x${height}:${transform[0].toFixed(1)}:${transform[1].toFixed(1)}:${transform[2].toFixed(3)}:${chromeKey()}`;
+  if (key === frameCacheKey) return frameCache;
+  frameCacheKey = key;
+  frameCache = measureFrame(transform);
+  return frameCache;
+}
+
+/** Visible canvas minus the top toolbars, with the minimap kept as an obstacle. */
+function measureFrame(transform: [number, number, number]): RouteFrame | null {
+  const pane = document.querySelector(".react-flow")?.getBoundingClientRect();
+  const zoom = transform[2];
+  if (!pane || !zoom) return null;
+  const [tx, ty] = transform;
+  let top = pane.top + VIEW_MARGIN;
+  let bottom = pane.bottom - VIEW_MARGIN;
+  let left = pane.left + VIEW_MARGIN;
+  let right = pane.right - VIEW_MARGIN;
+  const chrome = document.querySelector("[data-canvas-chrome]")?.getBoundingClientRect();
+  if (chrome && chrome.width > 0 && chrome.bottom > pane.top && chrome.top < pane.bottom) {
+    top = Math.max(top, chrome.bottom + VIEW_MARGIN);
+  }
+  const viewMin = screenToFlow(pane, tx, ty, zoom, left, top);
+  const viewMax = screenToFlow(pane, tx, ty, zoom, right, bottom);
+  const map = document.querySelector(".react-flow__minimap")?.getBoundingClientRect();
+  const obstacles =
+    map && map.width > 0 && map.height > 0 ? [flowRect(pane, tx, ty, zoom, map, VIEW_MARGIN)] : [];
+  return {
+    view: { minX: viewMin.x, minY: viewMin.y, maxX: viewMax.x, maxY: viewMax.y },
+    obstacles,
+  };
 }
 
 function EndKnob({
@@ -250,6 +336,7 @@ function SegmentAnchor({
 }
 
 export default function NoodleEdge(props: EdgeProps) {
+  useChromeLayout();
   const sourceNode = useStore((state) => state.nodeLookup.get(props.source));
   const targetNode = useStore((state) => state.nodeLookup.get(props.target));
   const attachment = useStore((state) => {
@@ -268,14 +355,11 @@ export default function NoodleEdge(props: EdgeProps) {
   const targetOnSide = sidePoint(targetNode, targetSide, targetFraction, props.targetX, props.targetY);
   const sourcePosition = sourceType === ENDPOINT_TYPE ? outward(props.sourceX, props.sourceY, props.targetX, props.targetY) : sourceSide ? sidePosition(sourceSide) : props.sourcePosition;
   const targetPosition = targetType === ENDPOINT_TYPE ? outward(props.targetX, props.targetY, props.sourceX, props.sourceY) : targetSide ? sidePosition(targetSide) : props.targetPosition;
-  const source =
-    sourceType === ENDPOINT_TYPE
-      ? { x: props.sourceX, y: props.sourceY }
-      : atGap(sourceNode, sourcePosition, sourceOnSide.x, sourceOnSide.y, ROUTE_GAP);
-  const target =
-    targetType === ENDPOINT_TYPE
-      ? { x: props.targetX, y: props.targetY }
-      : atGap(targetNode, targetPosition, targetOnSide.x, targetOnSide.y, ROUTE_GAP);
+  const source = sourceType === ENDPOINT_TYPE ? { x: props.sourceX, y: props.sourceY } : sourceOnSide;
+  const target = targetType === ENDPOINT_TYPE ? { x: props.targetX, y: props.targetY } : targetOnSide;
+  const frame = useStore((state) =>
+    routeFrame(state.transform as [number, number, number], state.width, state.height),
+  );
   const route = layoutNoodle({
     shape: data.shape,
     source,
@@ -284,6 +368,7 @@ export default function NoodleEdge(props: EdgeProps) {
     targetPosition,
     bends: data.bends,
     curveOffset: data.curveOffset,
+    frame,
   });
   const startId = markerId(props.id, "start");
   const endId = markerId(props.id, "end");
