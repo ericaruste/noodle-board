@@ -47,7 +47,10 @@ function registerSlot(name: SlotName, node: HTMLElement | null) {
 
 const slotClass = "pointer-events-none absolute inset-0";
 
-/** One full-board layer. Toolbars, dropdowns, and the reserved modal slot paint here. */
+/**
+ * One full-board layer. The root uses the toolbar token so every panel paints
+ * above the selection chrome. The dropdown and modal slots stack above that.
+ */
 export function FloatingLayer() {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,11 @@ export function FloatingLayer() {
   }, []);
 
   return (
-    <div data-floating-layer="" className="pointer-events-none absolute inset-0">
+    <div
+      data-floating-layer=""
+      className="pointer-events-none absolute inset-0"
+      style={{ zIndex: layers.toolbar }}
+    >
       <div ref={toolbarRef} data-floating-slot="toolbar" className={slotClass} style={{ zIndex: layers.toolbar }} />
       <div ref={dropdownRef} data-floating-slot="dropdown" className={slotClass} style={{ zIndex: layers.dropdown }} />
       <div ref={modalRef} data-floating-slot="modal" className={slotClass} style={{ zIndex: layers.modal }} />

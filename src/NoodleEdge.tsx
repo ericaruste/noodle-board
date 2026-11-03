@@ -104,6 +104,7 @@ function EndKnob({
 
 function ClampedToolbar({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  const shiftRef = useRef(0);
   const [shift, setShift] = useState(0);
   useLayoutEffect(() => {
     const el = ref.current;
@@ -112,10 +113,14 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
     const box = el.getBoundingClientRect();
     const bounds = pane.getBoundingClientRect();
     const pad = 8;
-    let delta = 0;
-    if (box.left < bounds.left + pad) delta = bounds.left + pad - box.left;
-    if (box.right + delta > bounds.right - pad) delta += bounds.right - pad - (box.right + delta);
-    if (Math.abs(delta) > 0.5) setShift((current) => current + delta);
+    const left = box.left - shiftRef.current;
+    const right = box.right - shiftRef.current;
+    let next = 0;
+    if (left < bounds.left + pad) next = bounds.left + pad - left;
+    if (right + next > bounds.right - pad) next += bounds.right - pad - (right + next);
+    if (Math.abs(shiftRef.current - next) <= 0.5) return;
+    shiftRef.current = next;
+    setShift(next);
   });
   return (
     <div ref={ref} style={{ pointerEvents: "auto", transform: shift ? `translateX(${shift}px)` : undefined }}>
@@ -142,7 +147,7 @@ function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children:
         transform: `translate(${x * safeZoom + panX}px, ${y * safeZoom + panY}px) translate(-50%, -100%)`,
       }}
     >
-      {children}
+      <ClampedToolbar>{children}</ClampedToolbar>
     </FloatingPanel>
   );
 }
@@ -373,9 +378,7 @@ export default function NoodleEdge(props: EdgeProps) {
       ) : null}
       {props.selected ? (
         <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
-          <ClampedToolbar>
-            <NoodleToolbar edgeId={props.id} data={data} />
-          </ClampedToolbar>
+          <NoodleToolbar edgeId={props.id} data={data} />
         </ScreenEdgeToolbar>
       ) : null}
     </>
