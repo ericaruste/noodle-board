@@ -42,6 +42,10 @@ body,
   cursor: crosshair;
 }
 
+.noodle-connect .noodle-end-dot {
+  pointer-events: none;
+}
+
 .noodle-connect-preview {
   position: absolute;
   top: 0;

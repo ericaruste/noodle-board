@@ -6,6 +6,7 @@ import {
   nodeBox,
   pointOnSide,
   projectOntoBox,
+  projectOntoSideMidpoint,
   sidePosition,
   type SideId,
 } from "./attachment";
@@ -14,6 +15,12 @@ import { getConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort, useHo
 
 /** Screen pixels. Hover and handle-drag grab the side this far from the border. */
 const BAND_SCREEN_PX = 28;
+
+export function pointerToFlow(state: ReactFlowState, pointer?: XYPosition | null): XYPosition | null {
+  const flow = flowPoint(state, pointer);
+  if (!flow) return null;
+  return { x: flow.x, y: flow.y };
+}
 
 function flowPoint(state: ReactFlowState, pointer?: XYPosition | null) {
   const point = pointer === undefined ? (state.connection.inProgress ? state.connection.pointer : null) : pointer;
@@ -37,20 +44,39 @@ function portFromHit(nodeId: string, hit: { side: SideId; fraction: number }): H
   return { nodeId, handleId: hit.side, fraction: hit.fraction };
 }
 
+/** A source-end drag lands on midpoints. A target-end drag follows the edge. */
+export type AttachmentMode = "midpoint" | "edge";
+
+export function connectionAttachmentMode(state: ReactFlowState): AttachmentMode {
+  if (!state.connection.inProgress) return "midpoint";
+  // The stationary handle is the source while the target end moves. Until that
+  // handle is known, stay on midpoints so the origin side does not flash a free point.
+  return state.connection.fromHandle?.type === "source" ? "edge" : "midpoint";
+}
+
+function projectForMode(box: Parameters<typeof projectOntoBox>[0], point: { x: number; y: number }, mode: AttachmentMode) {
+  return mode === "midpoint" ? projectOntoSideMidpoint(box, point) : projectOntoBox(box, point);
+}
+
 function skipOrigin(nodeId: string, side: SideId, fraction: number) {
   const from = getConnectionOrigin();
   if (!from || from.nodeId !== nodeId || from.handleId !== side) return false;
   return Math.abs(from.fraction - fraction) < 0.02;
 }
 
-/** Closest point on any object side, within `radius` flow units. */
-function closestPerimeter(state: ReactFlowState, point: XYPosition, radius: number): HotPort | null {
+/** Closest port on any object, within `radius` flow units. */
+function closestPerimeter(
+  state: ReactFlowState,
+  point: XYPosition,
+  radius: number,
+  mode: AttachmentMode,
+): HotPort | null {
   let best: { port: HotPort; distance: number; z: number } | null = null;
   for (const node of state.nodeLookup.values()) {
     if (node.type === ENDPOINT_TYPE) continue;
     const box = nodeBox(node);
     if (!box) continue;
-    const hit = projectOntoBox(box, point);
+    const hit = projectForMode(box, point, mode);
     if (hit.distance > radius || skipOrigin(node.id, hit.side, hit.fraction)) continue;
     const z = node.internals.z ?? 0;
     if (!best || hit.distance < best.distance - 0.5 || (Math.abs(hit.distance - best.distance) <= 0.5 && z >= best.z)) {
@@ -60,19 +86,27 @@ function closestPerimeter(state: ReactFlowState, point: XYPosition, radius: numb
   return best?.port ?? null;
 }
 
-export function nearestPort(state: ReactFlowState, pointer?: XYPosition | null): HotPort | null {
+export function nearestPort(
+  state: ReactFlowState,
+  pointer?: XYPosition | null,
+  mode: AttachmentMode = connectionAttachmentMode(state),
+): HotPort | null {
   const flow = flowPoint(state, pointer);
   if (!flow) return null;
-  return closestPerimeter(state, flow, PORT_SCREEN_RADIUS / flow.zoom);
+  return closestPerimeter(state, flow, PORT_SCREEN_RADIUS / flow.zoom, mode);
 }
 
-export function nearestHandleOnNode(state: ReactFlowState, nodeId: string, point: XYPosition): HotPort | null {
+export function nearestHandleOnNode(
+  state: ReactFlowState,
+  nodeId: string,
+  point: XYPosition,
+  mode: AttachmentMode = "midpoint",
+): HotPort | null {
   const node = state.nodeLookup.get(nodeId);
   if (!node || node.type === ENDPOINT_TYPE) return null;
   const box = nodeBox(node);
   if (!box) return null;
-  const hit = projectOntoBox(box, point);
-  return portFromHit(nodeId, hit);
+  return portFromHit(nodeId, projectForMode(box, point, mode));
 }
 
 function nodeAtFlowPoint(state: ReactFlowState, point: XYPosition) {
@@ -87,13 +121,18 @@ function nodeAtFlowPoint(state: ReactFlowState, point: XYPosition) {
   return best?.id ?? null;
 }
 
-/** Nearest side on the object under the pointer, or just outside its border. Used by the Arrow tool. */
-export function portAtClient(state: ReactFlowState, clientX: number, clientY: number): HotPort | null {
+/** Nearest port on the object under the pointer, or just outside its border. Used by the Arrow tool. */
+export function portAtClient(
+  state: ReactFlowState,
+  clientX: number,
+  clientY: number,
+  mode: AttachmentMode = "midpoint",
+): HotPort | null {
   const flow = clientToFlow(state, clientX, clientY);
   if (!flow || state.transform[2] === 0) return null;
   const nodeId = nodeAtFlowPoint(state, flow);
-  if (nodeId) return nearestHandleOnNode(state, nodeId, flow);
-  return closestPerimeter(state, flow, BAND_SCREEN_PX / state.transform[2]);
+  if (nodeId) return nearestHandleOnNode(state, nodeId, flow, mode);
+  return closestPerimeter(state, flow, BAND_SCREEN_PX / state.transform[2], mode);
 }
 
 /**
@@ -111,7 +150,7 @@ export function portOnBand(state: ReactFlowState, clientX: number, clientY: numb
     if (node.type === ENDPOINT_TYPE) continue;
     const box = nodeBox(node);
     if (!box) continue;
-    const hit = projectOntoBox(box, flow);
+    const hit = projectOntoSideMidpoint(box, flow);
     if (hit.distance > radius) continue;
     if (containsPoint(box, flow) && hit.distance > insideSlop) continue;
     const z = node.internals.z ?? 0;
@@ -198,20 +237,23 @@ function resetHandle(state: ReactFlowState, nodeId: string, side: SideId) {
   }
 }
 
-/** Keep measured handles on the hot side and the drag origin. Put the others back at the midpoint. */
+/** Keep the origin handle on its midpoint. Slide only a different side to the landing fraction. */
 export function syncPlacedHandles(state: ReactFlowState) {
   const wanted = new Map<string, { nodeId: string; side: SideId; fraction: number }>();
   const from = getConnectionOrigin();
   const hot = getHotPort();
   if (from && isSide(from.handleId)) {
-    wanted.set(`${from.nodeId}:${from.handleId}`, { nodeId: from.nodeId, side: from.handleId, fraction: from.fraction });
+    wanted.set(`${from.nodeId}:${from.handleId}`, { nodeId: from.nodeId, side: from.handleId, fraction: 0.5 });
   }
   if (hot && isSide(hot.handleId) && hot.fraction != null) {
-    wanted.set(`${hot.nodeId}:${hot.handleId}`, {
-      nodeId: hot.nodeId,
-      side: hot.handleId,
-      fraction: hot.fraction,
-    });
+    const key = `${hot.nodeId}:${hot.handleId}`;
+    if (!wanted.has(key)) {
+      wanted.set(key, {
+        nodeId: hot.nodeId,
+        side: hot.handleId,
+        fraction: hot.fraction,
+      });
+    }
   }
   for (const key of placed) {
     if (wanted.has(key)) continue;

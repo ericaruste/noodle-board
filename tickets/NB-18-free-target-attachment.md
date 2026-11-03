@@ -1,7 +1,7 @@
 ---
 id: NB-18
 title: Connect many noodles from a side midpoint to any edge point
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
@@ -34,18 +34,18 @@ Noodle Board does the opposite. Either end can leave from any point along a side
 
 ## Acceptance criteria
 
-- [ ] Any number of noodles can connect the same two elements. Each is its own edge: it can be selected, rewired, and deleted on its own, and the others stay
-- [ ] Starting a noodle from a sticky, image, text, or shape — Arrow tool or dragging out of the element — highlights only that element’s four side-midpoint ports. The new origin end is one of those ports
-- [ ] Several noodles may share one midpoint. They stay on that port. The port can still start another noodle. They are not spread along the side
-- [ ] The target end can drop anywhere along the target element’s edge, including between a corner and the midpoint. It keeps that exact point. It does not snap to a midpoint, and adding, deleting, or moving other noodles does not move it
-- [ ] Dragging a noodle’s target end afterward reattaches it to a new point on any element’s edge. During that drag the origin end stays on its port
-- [ ] Dragging the origin end only moves it to another of the four side midpoints, on this element or another. It cannot be parked partway along a side
-- [ ] While the target end is dragging, the landing highlight follows the pointer along the edge under it. While the origin end is dragging, only side midpoints highlight
-- [ ] Moving or resizing an element keeps the origin on the midpoint of its side and the target at the same fraction of its side
-- [ ] The origin side and the target side plus fraction are stored on the edge and survive undo, redo, localStorage, and `.noodle.json`. A copied noodle (NB-16) keeps them
-- [ ] A noodle saved with a free point on the origin snaps that end to the side midpoint. A saved target fraction is kept and is not run through even spacing
-- [ ] A loose end on an `endpoint` node is unchanged. Dropping an end on empty canvas still parks it there
-- [ ] Connecting both ends of one noodle to the same point on the same element is still rejected
+- [x] Any number of noodles can connect the same two elements. Each is its own edge: it can be selected, rewired, and deleted on its own, and the others stay
+- [x] Starting a noodle from a sticky, image, text, or shape — Arrow tool or dragging out of the element — highlights only that element’s four side-midpoint ports. The new origin end is one of those ports
+- [x] Several noodles may share one midpoint. They stay on that port. The port can still start another noodle. They are not spread along the side
+- [x] The target end can drop anywhere along the target element’s edge, including between a corner and the midpoint. It keeps that exact point. It does not snap to a midpoint, and adding, deleting, or moving other noodles does not move it
+- [x] Dragging a noodle’s target end afterward reattaches it to a new point on any element’s edge. During that drag the origin end stays on its port
+- [x] Dragging the origin end only moves it to another of the four side midpoints, on this element or another. It cannot be parked partway along a side
+- [x] While the target end is dragging, the landing highlight follows the pointer along the edge under it. While the origin end is dragging, only side midpoints highlight
+- [x] Moving or resizing an element keeps the origin on the midpoint of its side and the target at the same fraction of its side
+- [x] The origin side and the target side plus fraction are stored on the edge and survive undo, redo, localStorage, and `.noodle.json`. A copied noodle (NB-16) keeps them
+- [x] A noodle saved with a free point on the origin snaps that end to the side midpoint. A saved target fraction is kept and is not run through even spacing
+- [x] A loose end on an `endpoint` node is unchanged. Dropping an end on empty canvas still parks it there
+- [x] Connecting both ends of one noodle to the same point on the same element is still rejected
 
 ## Technical notes
 

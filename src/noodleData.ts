@@ -26,9 +26,9 @@ export type NoodleData = {
   bends: NoodlePoint[];
   /** Perpendicular push of a curve's midpoint, in flow units. */
   curveOffset: number;
-  /** 0–1 along `sourceHandle`. Missing means the midpoint until several noodles share the side. */
+  /** 0–1 along `sourceHandle`. The origin is the side midpoint; any other value snaps back to 0.5. */
   sourceFraction?: number;
-  /** 0–1 along `targetHandle`. */
+  /** 0–1 along `targetHandle`. The drop point. Missing means the midpoint. */
   targetFraction?: number;
 };
 
