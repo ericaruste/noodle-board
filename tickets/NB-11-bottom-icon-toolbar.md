@@ -72,4 +72,4 @@ The alignment menu is the Alignment `Menu` in [`src/TextToolbar.tsx`](../src/Tex
 
 ## Out of scope
 
-Hand and Select, until those tools are decided. Smart guides (NB-12). Font style, list, and link glyphs on the text toolbar. Do not remove the title chip; it can stay top-left.
+Hand and Select behavior (NB-23). This ticket only reserves their icon names. Smart guides (NB-12). Font style, list, and link glyphs on the text toolbar. Do not remove the title chip; it can stay top-left.
