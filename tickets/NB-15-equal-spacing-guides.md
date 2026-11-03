@@ -1,7 +1,7 @@
 ---
 id: NB-15
 title: Equal-spacing guides while dragging
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX, Canvas]
 parent: NB-E4
