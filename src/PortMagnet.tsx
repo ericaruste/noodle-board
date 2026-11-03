@@ -223,7 +223,7 @@ export function portGeometry(
   if (isSide(handleId)) {
     const box = nodeBox(node);
     if (box) {
-      const point = pointOnSide(box, handleId, fraction ?? 0.5);
+      const point = routeEnd(box, handleId, fraction ?? 0.5, outlineRadius(node.type, node.data, box), ROUTE_GAP);
       return { ...point, position: sidePosition(handleId) };
     }
   }

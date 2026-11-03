@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
 import { FloatingPanel } from "./FloatingPanel";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
@@ -50,6 +50,46 @@ function flowRect(pane: DOMRect, tx: number, ty: number, zoom: number, rect: DOM
 
 let frameCacheKey = "";
 let frameCache: RouteFrame | null = null;
+let chromeVersion = 0;
+const chromeListeners = new Set<() => void>();
+let chromeWatch: ResizeObserver | null = null;
+const chromeWatched = new Set<Element>();
+
+function attachChromeWatch(observer: ResizeObserver) {
+  for (const selector of ["[data-canvas-chrome]", ".react-flow__minimap", ".react-flow"]) {
+    const element = document.querySelector(selector);
+    if (!element || chromeWatched.has(element)) continue;
+    chromeWatched.add(element);
+    observer.observe(element);
+  }
+}
+
+function ensureChromeWatch() {
+  if (chromeWatch || typeof ResizeObserver === "undefined") return;
+  chromeWatch = new ResizeObserver(() => {
+    frameCacheKey = "";
+    chromeVersion += 1;
+    attachChromeWatch(chromeWatch!);
+    chromeListeners.forEach((listener) => listener());
+  });
+  attachChromeWatch(chromeWatch);
+  requestAnimationFrame(() => {
+    if (chromeWatch) attachChromeWatch(chromeWatch);
+  });
+}
+
+/** Re-render when the toolbar or minimap changes size without a pan or zoom. */
+export function useChromeLayout() {
+  return useSyncExternalStore(
+    (listener) => {
+      ensureChromeWatch();
+      chromeListeners.add(listener);
+      return () => chromeListeners.delete(listener);
+    },
+    () => chromeVersion,
+    () => 0,
+  );
+}
 
 function chromeKey() {
   const box = (selector: string) => {
@@ -296,6 +336,7 @@ function SegmentAnchor({
 }
 
 export default function NoodleEdge(props: EdgeProps) {
+  useChromeLayout();
   const sourceNode = useStore((state) => state.nodeLookup.get(props.source));
   const targetNode = useStore((state) => state.nodeLookup.get(props.target));
   const attachment = useStore((state) => {
