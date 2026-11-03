@@ -8,6 +8,7 @@ import {
   type Connection,
   type ReactFlowState,
 } from "@xyflow/react";
+import { layers } from "./layers";
 import { forwardEndDrag } from "./noodleEnds";
 import { clientToFlow, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
@@ -221,7 +222,7 @@ function ConnectPreview({
 
   return (
     <ViewportPortal>
-      <svg className="noodle-connect-preview" aria-hidden>
+      <svg className="noodle-connect-preview" style={{ zIndex: layers.canvas }} aria-hidden>
         <defs>
           <marker id="noodle-connect-preview-arrow" viewBox="0 0 16 16" markerWidth="14" markerHeight="14" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
             <path d="M2 2.5 14 8 2 13.5 5.2 8Z" fill="#334155" />

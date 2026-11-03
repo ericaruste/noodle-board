@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { formatRecentTime, type RecentProject } from "./recents";
 
 type RecentMenuProps = {
@@ -9,14 +10,17 @@ type RecentMenuProps = {
 export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
   const [open, setOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start", 8);
 
   useEffect(() => {
     if (!open) return;
     setNow(Date.now());
     const timer = window.setInterval(() => setNow(Date.now()), 30_000);
     const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-recent-menu]")) return;
+      setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -31,8 +35,9 @@ export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div data-recent-menu="" className="shrink-0">
       <button
+        ref={buttonRef}
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
@@ -43,10 +48,19 @@ export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
         Recent
       </button>
       {open ? (
-        <div
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
           role="menu"
-          aria-label="Recent boards"
-          className="absolute left-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+          ariaLabel="Recent boards"
+          data-recent-menu=""
+          className="w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            visibility: box ? "visible" : "hidden",
+          }}
         >
           {recents.length === 0 ? (
             <p className="px-3 py-2 text-sm text-slate-500">No recent boards yet.</p>
@@ -78,7 +92,7 @@ export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
               );
             })
           )}
-        </div>
+        </FloatingPanel>
       ) : null}
     </div>
   );

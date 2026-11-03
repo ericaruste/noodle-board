@@ -1,5 +1,6 @@
 import type { Connection, Edge, HandleType, Node, Position } from "@xyflow/react";
 import { Position as Side } from "@xyflow/react";
+import { layers } from "./layers";
 
 /** Hit radius of the edge-updater circles. The visible knob is centered on that circle. */
 export const END_RADIUS = 10;
@@ -10,7 +11,17 @@ export const PORT_SCREEN_RADIUS = 48;
 export const ENDPOINT_TYPE = "endpoint";
 export const ENDPOINT_HANDLE = "end";
 export const ENDPOINT_SIZE = 14;
-export const ENDPOINT_Z = 2100;
+export const ENDPOINT_Z = layers.selection;
+
+export function paintEndpoints<T extends { type?: string; zIndex?: number }>(nodes: T[]): T[] {
+  let changed = false;
+  const next = nodes.map((node) => {
+    if (node.type !== ENDPOINT_TYPE || node.zIndex === ENDPOINT_Z) return node;
+    changed = true;
+    return { ...node, zIndex: ENDPOINT_Z };
+  });
+  return changed ? next : nodes;
+}
 
 export type HotPort = { nodeId: string; handleId: string | null; fraction?: number };
 

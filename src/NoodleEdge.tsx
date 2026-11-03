@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BaseEdge, EdgeLabelRenderer, EdgeToolbar, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
+import { FloatingPanel } from "./FloatingPanel";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
 import { isSide, nodeBox, pointOnSide, resolveAttachments, sidePosition, type SideId } from "./attachment";
 import { placeHandle, syncPlacedHandles } from "./PortMagnet";
@@ -103,23 +104,51 @@ function EndKnob({
 
 function ClampedToolbar({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  const shiftRef = useRef(0);
   const [shift, setShift] = useState(0);
   useLayoutEffect(() => {
     const el = ref.current;
-    const pane = el?.closest(".react-flow");
+    const pane = document.querySelector(".react-flow");
     if (!el || !pane) return;
     const box = el.getBoundingClientRect();
     const bounds = pane.getBoundingClientRect();
     const pad = 8;
-    let delta = 0;
-    if (box.left < bounds.left + pad) delta = bounds.left + pad - box.left;
-    if (box.right + delta > bounds.right - pad) delta += bounds.right - pad - (box.right + delta);
-    if (Math.abs(delta) > 0.5) setShift((current) => current + delta);
+    const left = box.left - shiftRef.current;
+    const right = box.right - shiftRef.current;
+    let next = 0;
+    if (left < bounds.left + pad) next = bounds.left + pad - left;
+    if (right + next > bounds.right - pad) next += bounds.right - pad - (right + next);
+    if (Math.abs(shiftRef.current - next) <= 0.5) return;
+    shiftRef.current = next;
+    setShift(next);
   });
   return (
     <div ref={ref} style={{ pointerEvents: "auto", transform: shift ? `translateX(${shift}px)` : undefined }}>
       {children}
     </div>
+  );
+}
+
+function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children: ReactNode }) {
+  const [panX, panY, zoom] = useStore(
+    (state) => state.transform,
+    (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2],
+  );
+  const safeZoom = zoom || 1;
+  return (
+    <FloatingPanel
+      layer="toolbar"
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: "max-content",
+        pointerEvents: "none",
+        transform: `translate(${x * safeZoom + panX}px, ${y * safeZoom + panY}px) translate(-50%, -100%)`,
+      }}
+    >
+      <ClampedToolbar>{children}</ClampedToolbar>
+    </FloatingPanel>
   );
 }
 
@@ -348,20 +377,9 @@ export default function NoodleEdge(props: EdgeProps) {
         </EdgeLabelRenderer>
       ) : null}
       {props.selected ? (
-        <EdgeToolbar
-          edgeId={props.id}
-          x={labelX}
-          y={labelY - 28 / zoom}
-          alignX="center"
-          alignY="bottom"
-          isVisible
-          className="nodrag nopan nowheel"
-          style={{ pointerEvents: "none" }}
-        >
-          <ClampedToolbar>
-            <NoodleToolbar edgeId={props.id} data={data} />
-          </ClampedToolbar>
-        </EdgeToolbar>
+        <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
+          <NoodleToolbar edgeId={props.id} data={data} />
+        </ScreenEdgeToolbar>
       ) : null}
     </>
   );

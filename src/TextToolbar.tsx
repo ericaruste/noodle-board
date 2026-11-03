@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useRef, useState, type ReactNode } from "react";
+import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
   ALIGN_LABELS,
   FONT_STYLE_LABELS,
@@ -40,42 +40,7 @@ function Menu({
   children: ReactNode;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [box, setBox] = useState<{ top: number; left: number; minWidth: number } | null>(null);
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    let frame = 0;
-    const place = () => {
-      const button = buttonRef.current;
-      if (button) {
-        const rect = button.getBoundingClientRect();
-        const menu = menuRef.current;
-        const width = Math.max(rect.width, menu?.offsetWidth ?? 0);
-        const height = menu?.offsetHeight ?? 0;
-        let top = rect.bottom + 4;
-        if (height > 0 && top + height > window.innerHeight - 8) {
-          const above = rect.top - 4 - height;
-          if (above >= 8) top = above;
-        }
-        let left = rect.left;
-        if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - width);
-        if (left < 8) left = 8;
-        const next = { top, left, minWidth: rect.width };
-        setBox((prev) =>
-          prev &&
-          Math.abs(prev.top - next.top) < 0.5 &&
-          Math.abs(prev.left - next.left) < 0.5 &&
-          Math.abs(prev.minWidth - next.minWidth) < 0.5
-            ? prev
-            : next,
-        );
-      }
-      frame = requestAnimationFrame(place);
-    };
-    place();
-    return () => cancelAnimationFrame(frame);
-  }, [open]);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
 
   return (
     <div className="relative">
@@ -93,32 +58,25 @@ function Menu({
           <path d="M2 3.5 5 7l3-3.5" />
         </svg>
       </button>
-      {open && box
-        ? createPortal(
-            <div
-              ref={menuRef}
-              role="menu"
-              aria-label={menuLabel}
-              data-text-toolbar
-              className="nodrag nopan nowheel rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-              style={{
-                position: "fixed",
-                top: box.top,
-                left: box.left,
-                minWidth: box.minWidth,
-                zIndex: 10001,
-              }}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              {children}
-            </div>,
-            document.body,
-          )
-        : null}
+      {open ? (
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
+          role="menu"
+          ariaLabel={menuLabel}
+          data-text-toolbar=""
+          className="rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            minWidth: box?.minWidth,
+            visibility: box ? "visible" : "hidden",
+          }}
+        >
+          {children}
+        </FloatingPanel>
+      ) : null}
     </div>
   );
 }

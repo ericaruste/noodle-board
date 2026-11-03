@@ -1,5 +1,6 @@
 import { ViewportPortal, useStore } from "@xyflow/react";
 import type { GuideLine, SpacingBracket } from "./alignSnap";
+import { layers } from "./layers";
 
 function screenPx(zoom: number, px: number) {
   return zoom > 0 ? px / zoom : px;
@@ -77,7 +78,7 @@ export default function AlignmentGuides({
 
   return (
     <ViewportPortal>
-      <svg className="noodle-align-guides" aria-hidden>
+      <svg className="noodle-align-guides" style={{ zIndex: layers.selection }} aria-hidden>
         <g className="noodle-align-lines">
           {lines.map((line, index) => {
             const vertical = line.orientation === "vertical";
