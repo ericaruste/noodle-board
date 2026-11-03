@@ -7,8 +7,8 @@ labels: [Bug, UX, Toolbar]
 parent: NB-E4
 blockedBy: []
 estimate: 5
-linear_id:
-linear_url:
+linear_id: ERI-27
+linear_url: https://linear.app/ericar/issue/ERI-27/route-floating-toolbars-and-dropdowns-through-one-shared-layer
 ---
 
 ## Context

@@ -120,6 +120,16 @@
       "id": "4b07c9b8-b584-486c-af9b-af89d5381686",
       "identifier": "ERI-26",
       "url": "https://linear.app/ericar/issue/ERI-26/connect-many-noodles-from-a-side-midpoint-to-any-edge-point"
+    },
+    "NB-19": {
+      "id": "81ff4819-74c0-4f77-a7f8-34e381d3d191",
+      "identifier": "ERI-27",
+      "url": "https://linear.app/ericar/issue/ERI-27/route-floating-toolbars-and-dropdowns-through-one-shared-layer"
+    },
+    "NB-20": {
+      "id": "91db479d-c3a1-4453-990a-8db63dbc0f28",
+      "identifier": "ERI-28",
+      "url": "https://linear.app/ericar/issue/ERI-28/smooth-noodle-drag-feedback-and-edge-following"
     }
   }
 }

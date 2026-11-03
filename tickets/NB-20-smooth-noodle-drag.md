@@ -7,8 +7,8 @@ labels: [Feature, Canvas]
 parent: NB-E1
 blockedBy: [NB-18]
 estimate: 5
-linear_id:
-linear_url:
+linear_id: ERI-28
+linear_url: https://linear.app/ericar/issue/ERI-28/smooth-noodle-drag-feedback-and-edge-following
 ---
 
 ## Context
