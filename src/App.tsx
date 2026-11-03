@@ -552,11 +552,13 @@ function Board() {
       if (suppressConnectRef.current || reconnectRef.current) return;
       if (connectionState.isValid && connectionState.toHandle) {
         clearConnectionOrigin();
+        setHotPort(null);
         return;
       }
       const from = connectionState.fromHandle;
       if (!from?.nodeId) {
         clearConnectionOrigin();
+        setHotPort(null);
         return;
       }
       const point = pointFromEvent(event);
@@ -566,12 +568,14 @@ function Board() {
         nearestPort(state, connectionState.pointer, "edge");
       if (!port?.handleId) {
         clearConnectionOrigin();
+        setHotPort(null);
         return;
       }
       setHotPort(port);
       const sourceFraction = isSide(from.id) ? 0.5 : undefined;
       if (sameAttachmentPoint(from.nodeId, from.id, sourceFraction, port.nodeId, port.handleId, port.fraction)) {
         clearConnectionOrigin();
+        setHotPort(null);
         return;
       }
       onConnect({
@@ -581,6 +585,7 @@ function Board() {
         targetHandle: port.handleId,
       });
       clearConnectionOrigin();
+      setHotPort(null);
     },
     [onConnect, store],
   );
@@ -778,13 +783,16 @@ function Board() {
               : undefined
             : projected && isSide(projected.handleId) && projected.fraction != null
               ? projected.fraction
-              : matched
-                ? hot?.fraction
+              : matched && hot?.fraction != null
+                ? hot.fraction
                 : nodeId === previousId && (handleId ?? null) === previousHandle
                   ? previous
-                  : isSide(drop.targetHandle)
-                    ? 0.5
-                    : undefined;
+                  : undefined;
+        // A target drop with no measured point stays put. Do not invent a midpoint.
+        if (dragged === "target" && fraction == null && isSide(drop.targetHandle)) {
+          clearConnectionOrigin();
+          return;
+        }
         if (reconnectsToSamePoint(edge, drop, dragged, fraction)) {
           clearConnectionOrigin();
           return;
