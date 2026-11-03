@@ -123,8 +123,9 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         isValidRef.current(connection)
       ) {
         onConnectRef.current(connection);
-        clearConnectionOrigin();
       }
+      clearConnectionOrigin();
+      setHotPort(null);
     };
 
     const onDown = (event: PointerEvent) => {
@@ -137,6 +138,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         if (state.connectionClickStartHandle) {
           store.setState({ connectionClickStartHandle: null });
           clearConnectionOrigin();
+          setHotPort(null);
         }
         return;
       }
@@ -172,6 +174,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       root.removeEventListener("click", onClick, true);
       store.setState({ connectionClickStartHandle: null });
       clearConnectionOrigin();
+      setHotPort(null);
     };
   }, [active, store]);
 

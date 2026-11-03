@@ -1316,6 +1316,7 @@ function Board() {
         store.getState().cancelConnection();
         store.setState({ connectionClickStartHandle: null });
         clearConnectionOrigin();
+        setHotPort(null);
         document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, view: window }));
         suppressConnectRef.current = false;
         setConnectMode(false);

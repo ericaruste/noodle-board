@@ -44,13 +44,14 @@ function portFromHit(nodeId: string, hit: { side: SideId; fraction: number }): H
   return { nodeId, handleId: hit.side, fraction: hit.fraction };
 }
 
-/** A new noodle and a source-end drag land on midpoints. A target-end drag follows the edge. */
+/** A source-end drag lands on midpoints. A target-end drag follows the edge. */
 export type AttachmentMode = "midpoint" | "edge";
 
 export function connectionAttachmentMode(state: ReactFlowState): AttachmentMode {
   if (!state.connection.inProgress) return "midpoint";
-  // Reconnecting the source end reports the stationary handle, which is the target.
-  return state.connection.fromHandle?.type === "target" ? "midpoint" : "edge";
+  // The stationary handle is the source while the target end moves. Until that
+  // handle is known, stay on midpoints so the origin side does not flash a free point.
+  return state.connection.fromHandle?.type === "source" ? "edge" : "midpoint";
 }
 
 function projectForMode(box: Parameters<typeof projectOntoBox>[0], point: { x: number; y: number }, mode: AttachmentMode) {
