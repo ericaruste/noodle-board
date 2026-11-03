@@ -115,6 +115,11 @@
       "id": "55f2f99b-f8d0-4a7a-b962-52110e158ac1",
       "identifier": "ERI-25",
       "url": "https://linear.app/ericar/issue/ERI-25/attach-noodles-anywhere-along-a-side"
+    },
+    "NB-18": {
+      "id": "4b07c9b8-b584-486c-af9b-af89d5381686",
+      "identifier": "ERI-26",
+      "url": "https://linear.app/ericar/issue/ERI-26/connect-many-noodles-from-a-side-midpoint-to-any-edge-point"
     }
   }
 }
