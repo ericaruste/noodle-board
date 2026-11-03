@@ -793,6 +793,13 @@ function Board() {
       handleType: HandleType,
       connectionState: FinalConnectionState,
     ) => {
+      if (suppressConnectRef.current) {
+        reconnectRef.current = null;
+        rfConnectionRef.current = null;
+        clearConnectionOrigin();
+        setHotPort(null);
+        return;
+      }
       const dragged = reconnectRef.current?.dragged ?? draggedEnd(handleType);
       const rf = rfConnectionRef.current;
       reconnectRef.current = null;
@@ -1399,6 +1406,28 @@ function Board() {
       if (inNoodleField && event.key !== "Escape" && !((event.ctrlKey || event.metaKey) && key === "z")) return;
       if (event.key === "Escape") {
         if (document.querySelector("[data-noodle-menu]")) return;
+        const dragging = store.getState().connection.inProgress || reconnectRef.current;
+        if (dragging) {
+          event.preventDefault();
+          suppressConnectRef.current = true;
+          reconnectRef.current = null;
+          rfConnectionRef.current = null;
+          store.getState().cancelConnection();
+          store.setState({ connectionClickStartHandle: null });
+          clearConnectionOrigin();
+          setHotPort(null);
+          document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+          suppressConnectRef.current = false;
+          armClickSwallow();
+          const swallowRelease = () => {
+            armClickSwallow();
+            window.removeEventListener("pointerup", swallowRelease, true);
+            window.removeEventListener("pointercancel", swallowRelease, true);
+          };
+          window.addEventListener("pointerup", swallowRelease, true);
+          window.addEventListener("pointercancel", swallowRelease, true);
+          return;
+        }
         if (!connectModeRef.current) return;
         event.preventDefault();
         suppressConnectRef.current = true;
@@ -1406,7 +1435,7 @@ function Board() {
         store.setState({ connectionClickStartHandle: null });
         clearConnectionOrigin();
         setHotPort(null);
-        document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, view: window }));
+        document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
         suppressConnectRef.current = false;
         setConnectMode(false);
         return;

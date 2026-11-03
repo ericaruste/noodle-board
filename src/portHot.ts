@@ -18,6 +18,8 @@ let current: HotPort | null = null;
 let hover: HoverTarget | null = null;
 let origin: ConnectionOrigin | null = null;
 let swallowUntil = 0;
+let portGesture = false;
+let portGestureTimer = 0;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -71,6 +73,33 @@ export function armClickSwallow() {
 
 export function swallowsClick() {
   return performance.now() <= swallowUntil;
+}
+
+/**
+ * A port press starts a connect. The click that follows pointerup lands on the
+ * noodle, because the noodle is painted above the port. That click stays part
+ * of the gesture until it arrives, so it cannot select the noodle.
+ */
+export function beginPortGesture() {
+  portGesture = true;
+  window.clearTimeout(portGestureTimer);
+}
+
+export function notePortRelease() {
+  window.clearTimeout(portGestureTimer);
+  // The click is dispatched in this same turn, before the timer.
+  portGestureTimer = window.setTimeout(() => {
+    portGesture = false;
+  }, 50);
+}
+
+export function portGestureOwnsClick() {
+  return portGesture;
+}
+
+export function consumePortGesture() {
+  portGesture = false;
+  window.clearTimeout(portGestureTimer);
 }
 
 export function setConnectionOrigin(next: ConnectionOrigin | null) {

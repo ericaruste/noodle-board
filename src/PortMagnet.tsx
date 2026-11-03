@@ -18,9 +18,13 @@ import { layers } from "./layers";
 import { ENDPOINT_TYPE, PORT_SCREEN_RADIUS, forwardEndDrag, type HotPort } from "./noodleEnds";
 import { ROUTE_GAP } from "./noodleRoute";
 import {
+  consumePortGesture,
+  beginPortGesture,
   getConnectionOrigin,
   getHotPort,
   getHoverTarget,
+  notePortRelease,
+  portGestureOwnsClick,
   setConnectionOrigin,
   setDragFeedback,
   setHotPort,
@@ -59,6 +63,13 @@ export function clientToFlow(state: ReactFlowState, clientX: number, clientY: nu
 
 function portFromHit(nodeId: string, hit: { side: SideId; fraction: number }): HotPort {
   return { nodeId, handleId: hit.side, fraction: hit.fraction };
+}
+
+/** A port connect must not leave the noodle selected. Pass `nodes: []` so other elements stay selected. */
+export function clearEdgeSelection(state: ReactFlowState) {
+  const selected = state.edges.filter((edge) => edge.selected);
+  if (selected.length === 0) return;
+  state.unselectNodesAndEdges({ nodes: [], edges: selected });
 }
 
 /** Screen pixels past the port snap before a filled port returns to an outline. */
@@ -573,7 +584,11 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
 
   useEffect(() => {
     const stop = (event: Event) => {
-      if (!swallowsClick()) return;
+      const target = event.target;
+      const onNoodle = target instanceof Element && Boolean(target.closest(".react-flow__edge"));
+      const owns = portGestureOwnsClick() && onNoodle;
+      if (!swallowsClick() && !owns) return;
+      if (owns) consumePortGesture();
       event.preventDefault();
       event.stopPropagation();
     };
@@ -604,6 +619,15 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       syncPlacedHandles(state);
       const handle = placeHandle(state, port.nodeId, port.handleId, port.fraction);
       if (!handle) return;
+      clearEdgeSelection(state);
+      beginPortGesture();
+      const onRelease = () => {
+        notePortRelease();
+        window.removeEventListener("pointerup", onRelease, true);
+        window.removeEventListener("pointercancel", onRelease, true);
+      };
+      window.addEventListener("pointerup", onRelease, true);
+      window.addEventListener("pointercancel", onRelease, true);
       event.preventDefault();
       event.stopPropagation();
       forwardEndDrag(handle, event);

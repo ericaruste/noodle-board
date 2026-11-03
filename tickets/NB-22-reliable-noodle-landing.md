@@ -1,7 +1,7 @@
 ---
 id: NB-22
 title: Land noodles reliably and stay in connect mode
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas, UX]
 parent: NB-E1
@@ -34,6 +34,8 @@ While the Arrow tool is connecting, or while a noodle end is being dragged, the 
 
 The same landing is unreliable for both the Arrow tool and a manual drag. Sometimes the noodle attaches. Sometimes the release or the second click does nothing, including when the pointer is over the element the user aimed at. A click that hits the toolbar that just opened is one way the Arrow tool drops the pending connection: that click is outside the node, `portAtClient` misses, and `ConnectMode` clears `connectionClickStartHandle`. The drag path can also miss when the hover target has already been cleared and the pointer is farther than 48 screen pixels from the outline, which is the center of a large element. Manual drags do not use the whole-element `portAtClient` fallback that the Arrow tool uses.
 
+A port that already has a noodle has a second problem. Noodles use `zIndex: layers.canvas`, so the edge interaction path is painted above the element and covers the port. The press still starts a connect, because the port is found from geometry. The click that follows `pointerup` then hits the noodle. React Flow selects that edge, and the noodle toolbar opens. The session is no longer only a drag or a click-to-connect. On the Arrow tool this click is easy to miss: `pointerup` records the origin, and `portAtClient` then skips that origin, so the click is not treated as part of the connect.
+
 ## Repro
 
 1. Turn on the Arrow tool. Click a sticky to start a noodle, then click a second sticky, text object, or shape to land it. The target becomes selected and its text toolbar (and sticky colors or shape fill/stroke) appears. Repeat the landing click. Sometimes a noodle appears, sometimes the pending connection disappears and no noodle is created.
@@ -41,6 +43,9 @@ The same landing is unreliable for both the Arrow tool and a manual drag. Someti
 3. Turn the Arrow tool off. Drag from a side of one element onto another, including the center, and release. Sometimes the noodle attaches. Sometimes the line disappears and the target is selected with its toolbar open.
 4. Drag an existing noodle end onto another element and release. Same split: some drops attach, some do not, and the landing element shows its toolbar.
 5. Click an element while no noodle is being connected and the Arrow tool is off. It still selects and shows its toolbar.
+6. With a noodle already on a port, turn on the Arrow tool and click that port. The noodle toolbar opens (color, line style, label, arrowheads). Turn the Arrow tool off and click the same port to start a manual drag. The toolbar opens again.
+7. Click a noodle away from any port, with the Arrow tool off and no drag in progress. The noodle toolbar opens. That one stays.
+8. Drag a new noodle from a port, or drag an existing end, and press Escape before release. The drag keeps going and the release still attaches or parks the end. Escape only leaves the Arrow tool when that tool is on and nothing is being dragged.
 
 ## Acceptance criteria
 
@@ -53,6 +58,12 @@ The same landing is unreliable for both the Arrow tool and a manual drag. Someti
 - [ ] Repeating those four gestures on stickies, text, shapes, and images does not alternate between a landed noodle and a missed one
 - [ ] A click or release on empty canvas does not invent an attachment. An existing end dropped on empty canvas still parks there (NB-03)
 - [ ] With the Arrow tool off and no noodle drag in progress, a click still selects the element and shows its toolbar
+- [x] With the Arrow tool on, clicking a port that already has a noodle does not select that noodle and does not open the noodle toolbar. The click still starts or completes the connection
+- [x] With the Arrow tool off, a drag started by clicking a port that already has a noodle does not select that noodle and does not open the noodle toolbar. The gesture stays a noodle drag until release
+- [x] While that connect is in progress, the noodle toolbar stays closed
+- [x] Clicking a noodle away from a port, with the Arrow tool off and no drag in progress, still selects it and shows the noodle toolbar
+- [x] While a noodle is being dragged — an Arrow-tool drag, a manual drag from a port, or an existing end — Escape cancels that drag. No noodle is created, and an existing end stays where it was. The Arrow tool stays on when it was already on
+- [x] With no drag in progress, Escape still leaves the Arrow tool
 - [ ] NB-18 and NB-20 still hold: origin on a side midpoint, target at the drop, several noodles between the same pair, and the same values after undo, redo, localStorage, and `.noodle.json`
 
 ## Technical notes
@@ -62,6 +73,10 @@ Treat “noodle connecting” as one session: Arrow tool with a pending origin (
 The landing hit test has to be the same for the Arrow tool and for a manual drag. Both should read one hover value captured at pointerup, and the element body, including its center, has to count. Do not let the capture-phase `mouseup` in `PortMagnet` clear that hover before `onConnectEnd` / `onReconnectEnd` read it. Do not take the `isValid && toHandle` branch when `onConnect` did not actually add an edge. Clear `gestureEdgeRef` before the next gesture can be ignored.
 
 `ConnectMode` must not treat a click on selection chrome as “missed the board, cancel the connection.” Hiding that chrome for the session removes the overlap. The pending connection is cancelled only by empty canvas, Escape, or switching tools.
+
+The click after a port press belongs to the connect. `beginPortGesture` marks that press, and the click is swallowed when its target is the edge. Clear edge selection on the press so a noodle toolbar that was already open closes. Do not decide that click with `portAtClient`: once `pointerup` stores the origin, an outside-the-border hit skips it. `NoodleToolbar` stays unmounted while `connection.inProgress` or `connectionClickStartHandle` is set.
+
+Escape during `connection.inProgress` or a reconnect cancels that drag and leaves the Arrow tool as it was. `suppressConnectRef` makes `onConnect`, `onConnectEnd`, and `onReconnectEnd` drop the result. `cancelConnection` plus a `mouseup` releases React Flow's drag listeners before the real pointer comes up. Escape with no drag in progress still leaves connect mode.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

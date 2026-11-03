@@ -11,9 +11,9 @@ import { layers } from "./layers";
 import { routeFrame, useChromeLayout } from "./NoodleEdge";
 import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
-import { clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
-import { armClickSwallow, getConnectionOrigin, getHoverTarget, setConnectionOrigin, setHotPort, clearConnectionOrigin } from "./portHot";
+import { armClickSwallow, beginPortGesture, clearConnectionOrigin, consumePortGesture, getConnectionOrigin, getHoverTarget, notePortRelease, setConnectionOrigin, setHotPort } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -85,6 +85,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       const current = gesture;
       gesture = null;
       finishGesture();
+      if (current) notePortRelease();
       if (!current || current.dragged || event.button !== 0) return;
       const state = store.getState();
       const flow = clientToFlow(state, event.clientX, event.clientY);
@@ -145,6 +146,8 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         }
         return;
       }
+      clearEdgeSelection(state);
+      beginPortGesture();
       event.stopPropagation();
       event.preventDefault();
       gesture = {
@@ -173,6 +176,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     return () => {
       gesture = null;
       finishGesture();
+      consumePortGesture();
       root.removeEventListener("pointerdown", onDown, true);
       root.removeEventListener("click", onClick, true);
       store.setState({ connectionClickStartHandle: null });

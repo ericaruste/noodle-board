@@ -375,6 +375,7 @@ export default function NoodleEdge(props: EdgeProps) {
   const width = thicknessPx(data.thickness);
   const label = data.label.trim();
   const zoom = useStore((state) => state.transform[2] || 1);
+  const connecting = useStore((state) => state.connection.inProgress || state.connectionClickStartHandle != null);
   const lift = 18 / zoom;
   const guide = route.anchors[0];
   const labelShift = !guide
@@ -461,7 +462,7 @@ export default function NoodleEdge(props: EdgeProps) {
           </div>
         </EdgeLabelRenderer>
       ) : null}
-      {props.selected ? (
+      {props.selected && !connecting ? (
         <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
           <NoodleToolbar edgeId={props.id} data={data} />
         </ScreenEdgeToolbar>
