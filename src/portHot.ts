@@ -46,12 +46,13 @@ export function clearConnectionOrigin() {
 }
 
 function placementFor(nodeId: string, handleId: string): HandlePlacement | null {
-  if (current?.nodeId === nodeId && (current.handleId ?? null) === handleId && current.fraction != null) {
-    return { fraction: current.fraction, hot: true };
-  }
-  if (origin?.nodeId === nodeId && origin.handleId === handleId) {
-    return { fraction: origin.fraction, hot: false };
-  }
+  const hotHere =
+    current?.nodeId === nodeId && (current.handleId ?? null) === handleId && current.fraction != null;
+  const originHere = origin?.nodeId === nodeId && origin.handleId === handleId;
+  // The landing marker follows `current`. The origin handle itself stays on its port.
+  if (hotHere && originHere && origin) return { fraction: origin.fraction, hot: true };
+  if (hotHere && current?.fraction != null) return { fraction: current.fraction, hot: true };
+  if (originHere && origin) return { fraction: origin.fraction, hot: false };
   return null;
 }
 

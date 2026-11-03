@@ -31,7 +31,7 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
 function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .noodle-end, .react-flow__resize-control, .react-flow__node-endpoint",
+      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__resize-control, .react-flow__node-endpoint",
     ),
   );
 }
@@ -86,13 +86,14 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       if (!current || current.dragged || event.button !== 0) return;
       const state = store.getState();
       const flow = clientToFlow(state, event.clientX, event.clientY);
-      const port = flow ? nearestHandleOnNode(state, current.nodeId, flow) : null;
+      const armed = state.connectionClickStartHandle;
+      const completing = Boolean(armed && armed.nodeId !== current.nodeId);
+      const port = flow ? nearestHandleOnNode(state, current.nodeId, flow, completing ? "edge" : "midpoint") : null;
       const nodeId = current.nodeId;
       const handleId = port?.handleId ?? current.handleId;
       const fraction = port?.fraction ?? current.fraction;
       if (!handleId || !isSide(handleId)) return;
-      const armed = state.connectionClickStartHandle;
-      const pin = { nodeId, handleId, fraction };
+      const pin = { nodeId, handleId, fraction: completing ? fraction : 0.5 };
       if (!armed || armed.nodeId === nodeId) {
         setConnectionOrigin(pin);
         setHotPort(pin);
@@ -114,7 +115,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         !sameAttachmentPoint(
           connection.source,
           connection.sourceHandle,
-          getConnectionOrigin()?.fraction,
+          0.5,
           connection.target,
           connection.targetHandle,
           fraction,

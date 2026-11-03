@@ -78,13 +78,19 @@ function EndKnob({
           if (event.button !== 0) return;
           const anchor = edgeAnchor(edgeId, end);
           if (!(anchor instanceof Element)) return;
-          if (nodeId && side && fraction != null) {
-            const pin = { nodeId, handleId: side, fraction };
-            setConnectionOrigin(pin);
-            setHotPort(pin);
+          if (nodeId && side) {
             const state = store.getState();
-            syncPlacedHandles(state);
-            placeHandle(state, nodeId, side, fraction);
+            if (end === "source") {
+              const pin = { nodeId, handleId: side, fraction: 0.5 };
+              setConnectionOrigin(pin);
+              setHotPort(pin);
+              syncPlacedHandles(state);
+              placeHandle(state, nodeId, side, 0.5);
+            } else if (fraction != null) {
+              setHotPort({ nodeId, handleId: side, fraction });
+              syncPlacedHandles(state);
+              placeHandle(state, nodeId, side, fraction);
+            }
           }
           event.preventDefault();
           event.stopPropagation();

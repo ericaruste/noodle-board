@@ -110,6 +110,16 @@ export function projectOntoBox(box: NodeBox, point: { x: number; y: number }): P
   return { ...best, fraction: quantizeFraction(best.fraction) };
 }
 
+/**
+ * The side under the pointer, with the port fixed at that side's midpoint.
+ * `distance` is the distance to the side, so a grab along the side still lands on the midpoint.
+ */
+export function projectOntoSideMidpoint(box: NodeBox, point: { x: number; y: number }): PerimeterHit {
+  const edge = projectOntoBox(box, point);
+  const at = pointOnSide(box, edge.side, 0.5);
+  return { side: edge.side, fraction: 0.5, x: at.x, y: at.y, distance: edge.distance };
+}
+
 export function pointOnSide(box: NodeBox, side: SideId, fraction: number) {
   const t = clampFraction(fraction);
   if (side === "top") return { x: box.x + box.width * t, y: box.y };
@@ -131,74 +141,50 @@ export function sameAttachmentPoint(
   return sameFraction(sourceFraction ?? 0.5, targetFraction ?? 0.5);
 }
 
-type Slot = {
-  edgeId: string;
-  end: "source" | "target";
-  fraction: number | undefined;
-};
-
-function slotFraction(data: unknown, end: "source" | "target") {
-  const noodle = readNoodle(data);
-  return end === "source" ? noodle.sourceFraction : noodle.targetFraction;
-}
-
 /**
- * Where each end sits. One edge on a side keeps its fraction (midpoint when
- * none was stored). Two or more edges share the side evenly, inset from the corners.
+ * Where each end sits. The origin (source) is the midpoint of its side.
+ * The target keeps the fraction it was dropped at. Nothing is spread along a side.
  */
 export function resolveAttachments(edges: readonly Edge[]) {
-  const groups = new Map<string, Slot[]>();
-  for (const edge of edges) {
-    if (isSide(edge.sourceHandle)) {
-      const key = `${edge.source}:${edge.sourceHandle}`;
-      const slots = groups.get(key) ?? [];
-      slots.push({ edgeId: edge.id, end: "source", fraction: slotFraction(edge.data, "source") });
-      groups.set(key, slots);
-    }
-    if (isSide(edge.targetHandle)) {
-      const key = `${edge.target}:${edge.targetHandle}`;
-      const slots = groups.get(key) ?? [];
-      slots.push({ edgeId: edge.id, end: "target", fraction: slotFraction(edge.data, "target") });
-      groups.set(key, slots);
-    }
-  }
-
   const resolved = new Map<string, { source?: number; target?: number }>();
-  for (const slots of groups.values()) {
-    const edgeCount = new Set(slots.map((slot) => slot.edgeId)).size;
-    const ranked = [...slots].sort((a, b) => {
-      const delta = (a.fraction ?? 0.5) - (b.fraction ?? 0.5);
-      if (Math.abs(delta) > 0.0001) return delta;
-      if (a.edgeId !== b.edgeId) return a.edgeId < b.edgeId ? -1 : 1;
-      return a.end < b.end ? -1 : 1;
-    });
-    ranked.forEach((slot, index) => {
-      const fraction =
-        edgeCount < 2 ? quantizeFraction(slot.fraction ?? 0.5) : quantizeFraction((index + 1) / (ranked.length + 1));
-      const entry = resolved.get(slot.edgeId) ?? {};
-      entry[slot.end] = fraction;
-      resolved.set(slot.edgeId, entry);
-    });
+  for (const edge of edges) {
+    const entry: { source?: number; target?: number } = {};
+    if (isSide(edge.sourceHandle)) entry.source = 0.5;
+    if (isSide(edge.targetHandle)) {
+      const stored = readNoodle(edge.data).targetFraction;
+      entry.target = stored == null ? 0.5 : clampFraction(stored);
+    }
+    if (entry.source !== undefined || entry.target !== undefined) resolved.set(edge.id, entry);
   }
   return resolved;
 }
 
-/** Write resolved fractions onto `edge.data`. Returns the same array when nothing changed. */
+/**
+ * Snap a free origin back to the side midpoint and drop fractions that no longer
+ * sit on a side. Target fractions are left where they were dropped.
+ * Returns the same array when nothing changed.
+ */
 export function reflowAttachments(edges: Edge[]): Edge[] {
-  const resolved = resolveAttachments(edges);
   let changed = false;
   const next = edges.map((edge) => {
-    const found = resolved.get(edge.id);
     const data = readNoodle(edge.data);
-    const sourceFraction = isSide(edge.sourceHandle) ? found?.source : undefined;
-    const targetFraction = isSide(edge.targetHandle) ? found?.target : undefined;
-    if (data.sourceFraction === sourceFraction && data.targetFraction === targetFraction) return edge;
-    changed = true;
     const noodle = { ...data };
-    if (sourceFraction === undefined) delete noodle.sourceFraction;
-    else noodle.sourceFraction = sourceFraction;
-    if (targetFraction === undefined) delete noodle.targetFraction;
-    else noodle.targetFraction = targetFraction;
+    let touched = false;
+    if (isSide(edge.sourceHandle)) {
+      if (noodle.sourceFraction != null && !sameFraction(noodle.sourceFraction, 0.5)) {
+        noodle.sourceFraction = 0.5;
+        touched = true;
+      }
+    } else if (noodle.sourceFraction != null) {
+      delete noodle.sourceFraction;
+      touched = true;
+    }
+    if (!isSide(edge.targetHandle) && noodle.targetFraction != null) {
+      delete noodle.targetFraction;
+      touched = true;
+    }
+    if (!touched) return edge;
+    changed = true;
     return applyNoodleData(edge, noodle);
   });
   return changed ? next : edges;
