@@ -1,7 +1,7 @@
 ---
 id: NB-16
 title: Copy and duplicate with Alt-drag and Ctrl+D
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX, Canvas]
 parent: NB-E1
