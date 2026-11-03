@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 
 The MVP canvas in [`src/App.tsx`](../../src/App.tsx) is a controlled React Flow board with sticky and image nodes. Noodles are smoothstep edges with arrow markers. Selection, keyboard delete, and a top-nav Delete button exist; resize and edge editing are incomplete.
 
-Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md).
+Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md).
 
 ## Goal
 
@@ -29,6 +29,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-17 Attach noodles anywhere along a side
 - NB-18 Connect many noodles from a side midpoint to any edge point
 - NB-20 Smooth noodle drag feedback and edge-following
+- NB-22 Land noodles reliably and stay in connect mode
 
 ## Success looks like
 
@@ -40,6 +41,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - [ ] A noodle can attach anywhere along a side, shared attachments space evenly, and an occupied side can still start another noodle
 - [ ] Several noodles can join the same two elements; each origin stays on a side midpoint and each target keeps the exact point where it was dropped
 - [ ] Dragging a noodle end shows the landing edge and a single filled port, stays outside the shape, and keeps the route inside the viewport
+- [ ] Landing a noodle does not select the target or open its toolbar, and both the Arrow tool and a manual drag attach every time the pointer is over the element
 
 ## Out of scope
 

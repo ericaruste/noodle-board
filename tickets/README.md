@@ -37,6 +37,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 9. **Free target** — NB-18 (many noodles between the same elements; origin stays on a side midpoint, target keeps the exact drop). Follows NB-17.
 10. **Floating layer** — NB-19 (one portal and z-index scale for every toolbar, dropdown, and popover). High priority. Follows the screen-space chrome from NB-14.
 11. **Drag feedback** — NB-20 (landing outline, one filled port, edge-following, routes kept inside the viewport). Follows NB-18. Does not change attachment data.
+12. **Reliable landing** — NB-22 (stay in connect mode while landing; Arrow tool and manual drops attach every time). Follows NB-20.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
