@@ -615,7 +615,9 @@ function Board() {
         clearConnectionOrigin();
         setHotPort(null);
       };
-      if (suppressConnectRef.current || reconnectRef.current) {
+      // Reconnect still needs the hover. onReconnectEnd clears it.
+      if (reconnectRef.current) return;
+      if (suppressConnectRef.current) {
         finish();
         return;
       }

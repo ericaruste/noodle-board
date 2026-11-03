@@ -288,6 +288,20 @@ function resetHandle(state: ReactFlowState, nodeId: string, side: SideId) {
   }
 }
 
+/** True when the point is inside the outline, including a rounded rectangle's curve. */
+function insideOutline(box: NonNullable<ReturnType<typeof nodeBox>>, point: XYPosition, radius: number) {
+  if (!containsPoint(box, point)) return false;
+  if (radius < 0.5) return true;
+  const left = point.x < box.x + radius ? box.x + radius - point.x : 0;
+  const right = point.x > box.x + box.width - radius ? point.x - (box.x + box.width - radius) : 0;
+  const top = point.y < box.y + radius ? box.y + radius - point.y : 0;
+  const bottom = point.y > box.y + box.height - radius ? point.y - (box.y + box.height - radius) : 0;
+  const dx = left || right;
+  const dy = top || bottom;
+  if (!dx || !dy) return true;
+  return dx * dx + dy * dy <= radius * radius;
+}
+
 /**
  * The element under the pointer, or the midpoint dot the pointer is close to.
  * Midpoint hits win over a free edge point. An origin drag never uses a free edge.
@@ -305,7 +319,7 @@ export function resolveHover(state: ReactFlowState, point: XYPosition, kind: Dra
     const radius = outlineRadius(node.type, node.data, box);
     const z = node.internals?.z ?? 0;
     const projected = projectOntoOutline(box, point, radius);
-    const over = containsPoint(box, point) || projected.distance * zoom <= EDGE_BAND_PX;
+    const over = insideOutline(box, point, radius) || projected.distance * zoom <= EDGE_BAND_PX;
     if (over) {
       if (!contained || z >= contained.z) contained = { id: node.id, box, radius, z };
       continue;
@@ -420,13 +434,14 @@ function HotMarker() {
   const fraction = port?.fraction ?? 0.5;
   const boxKey = useStore((state) => {
     if (!side) return "";
-    const box = nodeBox(state.nodeLookup.get(nodeId));
-    if (!box) return "";
-    return `${box.x}:${box.y}:${box.width}:${box.height}`;
+    const node = state.nodeLookup.get(nodeId);
+    const box = nodeBox(node);
+    if (!node || !box) return "";
+    return `${box.x}:${box.y}:${box.width}:${box.height}:${outlineRadius(node.type, node.data, box)}`;
   });
   if (landing || !side || !boxKey) return null;
-  const [x, y, width, height] = boxKey.split(":").map(Number);
-  const point = pointOnSide({ x, y, width, height }, side, fraction);
+  const [x, y, width, height, radius] = boxKey.split(":").map(Number);
+  const point = pointOnOutline({ x, y, width, height }, side, fraction, radius);
   const outset = readOutset(nodeId);
   const marker =
     side === "right"
