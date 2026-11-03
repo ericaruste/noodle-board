@@ -63,7 +63,7 @@ import ImageNode from "./ImageNode";
 import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
 import ConnectMode from "./ConnectMode";
-import PortMagnet, { nearestPort, portAtClient } from "./PortMagnet";
+import PortMagnet, { nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
 import { clearConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort } from "./portHot";
@@ -130,6 +130,17 @@ function cloneSnapshot(nodes: Node[], edges: Edge[]): Snapshot {
     nodes: structuredClone(nodes),
     edges: structuredClone(edges),
   };
+}
+
+/**
+ * React Flow can snap the target to a different side than the pointer near a corner.
+ * The magnet's side and fraction are the drop.
+ */
+function connectionWithDrop<T extends Connection | Edge>(connection: T): T {
+  const hot = getHotPort();
+  if (!hot || hot.nodeId !== connection.target || !isSide(hot.handleId)) return connection;
+  if ((connection.targetHandle ?? null) === hot.handleId) return connection;
+  return { ...connection, targetHandle: hot.handleId };
 }
 
 /** Origin ends are side midpoints. The target keeps the point under the pointer. */
@@ -493,15 +504,16 @@ function Board() {
     (connection: Connection) => {
       if (suppressConnectRef.current) return;
       if (!connection.source || !connection.target) return;
-      const sourceFraction = fractionFor("source", connection);
-      const targetFraction = fractionFor("target", connection);
+      const landed = connectionWithDrop(connection);
+      const sourceFraction = fractionFor("source", landed);
+      const targetFraction = fractionFor("target", landed);
       if (
         sameAttachmentPoint(
-          connection.source,
-          connection.sourceHandle,
+          landed.source,
+          landed.sourceHandle,
           sourceFraction,
-          connection.target,
-          connection.targetHandle,
+          landed.target,
+          landed.targetHandle,
           targetFraction,
         )
       ) {
@@ -512,7 +524,7 @@ function Board() {
       if (targetFraction !== undefined) data.targetFraction = targetFraction;
       const created = {
         ...defaultEdgeOptions,
-        ...connection,
+        ...landed,
         type: "smoothstep" as const,
         zIndex: NOODLE_Z_INDEX,
         data,
@@ -576,20 +588,21 @@ function Board() {
   const isValidConnection = useCallback((connection: Connection | Edge) => {
     if (!connection.source || !connection.target) return false;
     const active = reconnectRef.current;
-    if (connection.source === connection.target && (connection.sourceHandle ?? null) === (connection.targetHandle ?? null)) {
+    const landed = active?.dragged === "source" ? connection : connectionWithDrop(connection);
+    if (landed.source === landed.target && (landed.sourceHandle ?? null) === (landed.targetHandle ?? null)) {
       const data = active ? readNoodle(active.edge.data) : null;
       const sourceFraction =
-        active?.dragged === "target" ? (data?.sourceFraction ?? 0.5) : fractionFor("source", connection);
+        active?.dragged === "target" ? (data?.sourceFraction ?? 0.5) : fractionFor("source", landed);
       const targetFraction =
-        active?.dragged === "source" ? data?.targetFraction : fractionFor("target", connection);
+        active?.dragged === "source" ? data?.targetFraction : fractionFor("target", landed);
       if (
-        !isSide(connection.sourceHandle) ||
+        !isSide(landed.sourceHandle) ||
         sameAttachmentPoint(
-          connection.source,
-          connection.sourceHandle,
+          landed.source,
+          landed.sourceHandle,
           sourceFraction,
-          connection.target,
-          connection.targetHandle,
+          landed.target,
+          landed.targetHandle,
           targetFraction,
         )
       ) {
@@ -751,23 +764,32 @@ function Board() {
               : data.sourceFraction
             : data.targetFraction;
         const matched = hot && hot.nodeId === nodeId && (hot.handleId ?? null) === (handleId ?? null);
+        const flow = dragged === "target" ? pointerToFlow(store.getState(), connectionState.pointer) : null;
+        const projected =
+          flow && nodeId ? nearestHandleOnNode(store.getState(), nodeId, flow, "edge") : null;
+        const drop =
+          dragged === "target" && projected && isSide(projected.handleId)
+            ? { ...rf, target: projected.nodeId, targetHandle: projected.handleId }
+            : rf;
         const fraction =
           dragged === "source"
             ? isSide(handleId)
               ? 0.5
               : undefined
-            : matched
-              ? hot.fraction
-              : nodeId === previousId && (handleId ?? null) === previousHandle
-                ? previous
-                : isSide(handleId)
-                  ? 0.5
-                  : undefined;
-        if (reconnectsToSamePoint(edge, rf, dragged, fraction)) {
+            : projected && isSide(projected.handleId) && projected.fraction != null
+              ? projected.fraction
+              : matched
+                ? hot?.fraction
+                : nodeId === previousId && (handleId ?? null) === previousHandle
+                  ? previous
+                  : isSide(drop.targetHandle)
+                    ? 0.5
+                    : undefined;
+        if (reconnectsToSamePoint(edge, drop, dragged, fraction)) {
           clearConnectionOrigin();
           return;
         }
-        if (!held(rf, fraction)) applyReconnect(edge, rf, dragged, fraction);
+        if (!held(drop, fraction)) applyReconnect(edge, drop, dragged, fraction);
         clearConnectionOrigin();
         return;
       }

@@ -16,6 +16,12 @@ import { getConnectionOrigin, getHotPort, setConnectionOrigin, setHotPort, useHo
 /** Screen pixels. Hover and handle-drag grab the side this far from the border. */
 const BAND_SCREEN_PX = 28;
 
+export function pointerToFlow(state: ReactFlowState, pointer?: XYPosition | null): XYPosition | null {
+  const flow = flowPoint(state, pointer);
+  if (!flow) return null;
+  return { x: flow.x, y: flow.y };
+}
+
 function flowPoint(state: ReactFlowState, pointer?: XYPosition | null) {
   const point = pointer === undefined ? (state.connection.inProgress ? state.connection.pointer : null) : pointer;
   const [tx, ty, zoom] = state.transform;
