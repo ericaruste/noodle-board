@@ -1,7 +1,7 @@
 ---
 id: NB-18
 title: Connect many noodles from a side midpoint to any edge point
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas]
 parent: NB-E1
