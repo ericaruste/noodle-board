@@ -1,7 +1,7 @@
 ---
 id: NB-25
 title: Place sticky, text, shape, and image from the cursor
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E4
