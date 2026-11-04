@@ -270,6 +270,7 @@ body,
 
 .noodle-connect .react-flow__handle,
 .noodle-connect .react-flow__handle.connectionindicator {
+  opacity: 1;
   pointer-events: all;
 }
 

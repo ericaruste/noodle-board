@@ -587,7 +587,8 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
         syncPlacedHandles(state);
         return;
       }
-      setDragFeedback(null, portOnBand(state, clientX, clientY));
+      // A port stays hidden until the element is selected or the Arrow tool is on.
+      setDragFeedback(null, null);
       syncPlacedHandles(state);
     };
     const onPointerMove = (event: PointerEvent) => {

@@ -1538,6 +1538,11 @@ function Board() {
         chooseTool("select");
         return;
       }
+      if (key === "h" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        chooseTool("hand");
+        return;
+      }
       if (event.key === "Escape") {
         if (document.querySelector("[data-noodle-menu]")) return;
         const dragging = store.getState().connection.inProgress || reconnectRef.current;

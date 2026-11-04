@@ -1,7 +1,7 @@
 ---
 id: NB-23
 title: Split pan and select into Hand and Select tools
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E1
@@ -46,13 +46,14 @@ Hand tool:
 - [x] A left drag pans the canvas when the pointer starts on empty canvas, an element, a port, or a noodle
 - [x] While Hand is active, nothing is selected and nothing hovered shows chrome: no ports, bounding box, corner or edge handles, noodle knobs, or floating toolbars
 - [x] Holding Space, then left-dragging, pans the same way from the Select tool, including when the drag starts on an element, a port, or a noodle. Releasing Space returns to Select and does not change which objects were selected
+- [x] Pressing H switches to the Hand tool from Select or the Arrow tool. It does nothing while text is being edited
 - [x] Pressing the mouse wheel and dragging pans from any tool, including over elements, ports, and noodles, and does not select or show hover chrome
 
 Select tool (default):
 
 - [x] The main toolbar has a Select tool, and it is the active tool when the board opens
 - [x] Pressing V switches to the Select tool from Hand or the Arrow tool. It does nothing while text is being edited
-- [x] Hovering an element shows nothing: no ports, bounding box, corner handles, or floating toolbar
+- [x] Hovering an element shows nothing: no ports, bounding box, corner handles, or floating toolbar. Ports stay hidden until that element is clicked, or the Arrow tool is on
 - [x] A single click on an element selects it and shows its controls together: the four noodle ports, the edge and corner resize handles, the bounding box, and that element’s floating toolbar
 - [x] A single click on a noodle selects it and shows its end knobs and the noodle toolbar
 - [x] Double-clicking an element still starts text editing
@@ -66,9 +67,9 @@ Select tool (default):
 
 ## Technical notes
 
-One active mode among Select, Hand, and Arrow. Select is the initial mode. V selects that mode from anywhere except a typing target (`isTypingTarget` in [`src/App.tsx`](../src/App.tsx)), and it does not repeat while the key is held. `panOnDrag` is the middle button in every mode, and the left button only while Hand is active or Space is held. Select keeps `nodesDraggable` and Shift multi-select, and does not use the left button to pan. Hand sets `nodesDraggable` and `elementsSelectable` off for the gesture so a drag cannot select or move. Space uses `panActivationKeyCode` only for the duration of the key; it must win over node drag when the pointer is down on an element, a port, or a noodle.
+One active mode among Select, Hand, and Arrow. Select is the initial mode. V selects Select and H selects Hand from anywhere except a typing target (`isTypingTarget` in [`src/App.tsx`](../src/App.tsx)), and neither repeats while the key is held. `panOnDrag` is the middle button in every mode, and the left button only while Hand is active or Space is held. Select keeps `nodesDraggable` and Shift multi-select, and does not use the left button to pan. Hand sets `nodesDraggable` and `elementsSelectable` off for the gesture so a drag cannot select or move. Space uses `panActivationKeyCode` only for the duration of the key; it must win over node drag when the pointer is down on an element, a port, or a noodle.
 
-Hide ports from hover. The opacity rule in [`src/index.css`](../src/index.css) should follow selection, not `:hover`. Per-element chrome ([`NoodleResizer`](../src/NoodleResizer.tsx), [`SelectionChrome`](../src/SelectionChrome.tsx), [`NoodleToolbar`](../src/NoodleToolbar.tsx)) mounts only for a single selected object of that kind. Two or more selected objects mount one box around their union and one toolbar.
+Hide ports from hover. They stay hidden until the element is clicked or the Arrow tool is on. The opacity rule in [`src/index.css`](../src/index.css) should follow selection or the Arrow tool, not `:hover`. Per-element chrome ([`NoodleResizer`](../src/NoodleResizer.tsx), [`SelectionChrome`](../src/SelectionChrome.tsx), [`NoodleToolbar`](../src/NoodleToolbar.tsx)) mounts only for a single selected object of that kind. Two or more selected objects mount one box around their union and one toolbar.
 
 The group toolbar reuses the existing properties: shape `fill` and `stroke` ([`ShapeNode`](../src/ShapeNode.tsx)), sticky `color` ([`StickyNode`](../src/StickyNode.tsx)), and noodle `color` ([`noodleData.ts`](../src/noodleData.ts)). A control is omitted when nothing in the selection supports it. Neutral means the control does not present one of the disagreeing values as the current choice. Apply the change through one `takeSnapshot` before the node and edge updates.
 
