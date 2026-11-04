@@ -34,15 +34,15 @@ The label sits under the noodle, so the text is hidden by the stroke. The only w
 
 ## Acceptance criteria
 
-- [ ] A noodle’s text paints above its stroke, including where the line passes through the label, on a selected noodle and on one that is not selected
-- [ ] The floating toolbar for a selected noodle has no text field. In that field’s place is a Text button, pressed while the on-noodle field is open
-- [ ] Clicking the Text button opens a text field on the noodle at the current label point. Clicking it again closes the field and keeps what was typed
-- [ ] Double-clicking a noodle selects it if needed and opens that same field at the label point. The double-click does not zoom the board
-- [ ] The field shows the current label. An empty label still opens the field at that point, with the “Label” placeholder
-- [ ] Typing updates the text on the noodle. The field uses the noodle’s color on the same white pill as the resting label. Enter or clicking away closes the field and keeps the text. Clearing it and closing removes the label. Escape closes the field and keeps what was typed
-- [ ] While the field is focused, Delete and Backspace edit the text and do not delete the noodle. One typing session is one undo step, and one redo restores it
-- [ ] Zooming in or out does not move the text off the noodle. The resting label and the open field stay the same distance from the stroke, and they stay on that point while the board pans. A pointer or wheel event on the field does not pan the board or drag the noodle
-- [ ] The floating toolbar stays above the label and above the open field. Color, line style, thickness, shape, and arrowheads still work, and their menus still open above the toolbar
+- [x] A noodle’s text paints above its stroke, including where the line passes through the label, on a selected noodle and on one that is not selected
+- [x] The floating toolbar for a selected noodle has no text field. In that field’s place is a Text button, pressed while the on-noodle field is open
+- [x] Clicking the Text button opens a text field on the noodle at the current label point. Clicking it again closes the field and keeps what was typed
+- [x] Double-clicking a noodle selects it if needed and opens that same field at the label point. The double-click does not zoom the board
+- [x] The field shows the current label. An empty label still opens the field at that point, with the “Label” placeholder
+- [x] Typing updates the text on the noodle. The field uses the noodle’s color on the same white pill as the resting label. Enter or clicking away closes the field and keeps the text. Clearing it and closing removes the label. Escape closes the field and keeps what was typed
+- [x] While the field is focused, Delete and Backspace edit the text and do not delete the noodle. One typing session is one undo step, and one redo restores it
+- [x] Zooming in or out does not move the text off the noodle. The resting label and the open field stay the same distance from the stroke, and they stay on that point while the board pans. A pointer or wheel event on the field does not pan the board or drag the noodle
+- [x] The floating toolbar stays above the label and above the open field. Color, line style, thickness, shape, and arrowheads still work, and their menus still open above the toolbar
 
 ## Technical notes
 
