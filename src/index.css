@@ -499,3 +499,24 @@ body,
   pointer-events: none;
   user-select: none;
 }
+
+.noodle-edge-label-input {
+  box-sizing: border-box;
+  display: block;
+  margin: 0;
+  border: 0;
+  outline: none;
+  appearance: none;
+  font-family: inherit;
+  text-overflow: clip;
+  pointer-events: auto;
+  user-select: text;
+  caret-color: currentColor;
+  min-width: 4.5rem;
+  max-width: 16rem;
+}
+
+.noodle-edge-label-input::placeholder {
+  color: currentColor;
+  opacity: 0.45;
+}

@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
 import { FloatingPanel } from "./FloatingPanel";
+import { layers } from "./layers";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
 import { isSide, nodeBox, outlineRadius, resolveAttachments, routeEnd, sidePosition, type SideId } from "./attachment";
 import { placeHandle, syncPlacedHandles } from "./PortMagnet";
@@ -8,11 +9,13 @@ import { setConnectionOrigin, setHotPort } from "./portHot";
 import {
   publishNoodle,
   readNoodle,
+  sameNoodle,
   snapshotBoard,
   thicknessPx,
   type NoodleArrow,
   type NoodleData,
 } from "./noodleData";
+import { closeNoodleLabel, useNoodleLabelEditing } from "./noodleLabel";
 import { bendsFromPoints, layoutNoodle, moveSegment, ROUTE_GAP, type FlowRect, type NoodleAnchor, type RouteFrame } from "./noodleRoute";
 import NoodleToolbar from "./NoodleToolbar";
 import { useSelectedObjectCount } from "./selectionScope";
@@ -239,6 +242,117 @@ function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children:
   );
 }
 
+function labelStyle(x: number, y: number) {
+  return {
+    position: "absolute" as const,
+    zIndex: layers.selection,
+    transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+  };
+}
+
+function NoodleLabelEditor({
+  edgeId,
+  data,
+  x,
+  y,
+}: {
+  edgeId: string;
+  data: NoodleData;
+  x: number;
+  y: number;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const historyRef = useRef(false);
+
+  const write = (label: string, history: boolean) => {
+    const next = { ...dataRef.current, label };
+    if (sameNoodle(dataRef.current, next)) return;
+    dataRef.current = next;
+    if (history) snapshotBoard();
+    publishNoodle(edgeId, next);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (!historyRef.current) return;
+      const current = dataRef.current;
+      if (current.label === "" || current.label.trim()) return;
+      publishNoodle(edgeId, { ...current, label: "" });
+    };
+  }, [edgeId]);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+  }, []);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    const stop = (event: Event) => {
+      event.stopPropagation();
+    };
+    const stopWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    input.addEventListener("pointerdown", stop);
+    input.addEventListener("mousedown", stop);
+    input.addEventListener("click", stop);
+    input.addEventListener("dblclick", stop);
+    input.addEventListener("wheel", stopWheel, { passive: false });
+    return () => {
+      input.removeEventListener("pointerdown", stop);
+      input.removeEventListener("mousedown", stop);
+      input.removeEventListener("click", stop);
+      input.removeEventListener("dblclick", stop);
+      input.removeEventListener("wheel", stopWheel);
+    };
+  }, []);
+
+  const shown = data.label.length > 0 ? data.label : "Label";
+  return (
+    <EdgeLabelRenderer>
+      <input
+        ref={inputRef}
+        data-noodle-label=""
+        aria-label="Label"
+        value={data.label}
+        placeholder="Label"
+        maxLength={160}
+        onFocus={() => {
+          historyRef.current = false;
+        }}
+        onChange={(event) => {
+          const history = !historyRef.current;
+          historyRef.current = true;
+          write(event.target.value, history);
+        }}
+        onBlur={() => {
+          closeNoodleLabel();
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== "Escape") return;
+          event.preventDefault();
+          event.stopPropagation();
+          closeNoodleLabel();
+        }}
+        className="noodle-edge-label noodle-edge-label-input nodrag nopan nowheel"
+        style={{
+          ...labelStyle(x, y),
+          color: data.color,
+          width: `${Math.min(Math.max(shown.length, 1), 32) + 1}ch`,
+        }}
+      />
+    </EdgeLabelRenderer>
+  );
+}
+
 function markerId(edgeId: string, end: "start" | "end") {
   return `noodle-${end}-${edgeId.replace(/[^A-Za-z0-9_-]/g, "")}`;
 }
@@ -377,9 +491,17 @@ export default function NoodleEdge(props: EdgeProps) {
   const endId = markerId(props.id, "end");
   const width = thicknessPx(data.thickness);
   const label = data.label.trim();
+  const editing = useNoodleLabelEditing(props.id);
+  const wasSelected = useRef(props.selected);
+  useEffect(() => {
+    const was = wasSelected.current;
+    wasSelected.current = Boolean(props.selected);
+    if (editing && was && !props.selected) closeNoodleLabel();
+  }, [editing, props.selected]);
   const zoom = useStore((state) => state.transform[2] || 1);
   const connecting = useStore((state) => state.connection.inProgress || state.connectionClickStartHandle != null);
-  const lift = 18 / zoom;
+  // Board units. Dividing by zoom holds a screen gap, so zooming out lifts the text off the stroke.
+  const lift = 18;
   const guide = route.anchors[0];
   const labelShift = !guide
     ? { x: 0, y: -lift }
@@ -450,13 +572,14 @@ export default function NoodleEdge(props: EdgeProps) {
           fraction={targetFraction}
         />
       ) : null}
-      {label ? (
+      {editing ? (
+        <NoodleLabelEditor edgeId={props.id} data={data} x={labelX} y={labelY} />
+      ) : label ? (
         <EdgeLabelRenderer>
           <div
             className="noodle-edge-label"
             style={{
-              position: "absolute",
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              ...labelStyle(labelX, labelY),
               color: data.color,
               pointerEvents: "none",
             }}
