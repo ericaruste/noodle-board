@@ -60,12 +60,21 @@ let chromeWatch: ResizeObserver | null = null;
 const chromeWatched = new Set<Element>();
 
 function attachChromeWatch(observer: ResizeObserver) {
+  let attached = false;
   for (const selector of ["[data-canvas-chrome]", ".board-toolbar", ".react-flow__minimap", ".react-flow"]) {
     const element = document.querySelector(selector);
     if (!element || chromeWatched.has(element)) continue;
     chromeWatched.add(element);
     observer.observe(element);
+    attached = true;
   }
+  return attached;
+}
+
+function noteChromeAttached() {
+  frameCacheKey = "";
+  chromeVersion += 1;
+  chromeListeners.forEach((listener) => listener());
 }
 
 function ensureChromeWatch() {
@@ -77,8 +86,9 @@ function ensureChromeWatch() {
     chromeListeners.forEach((listener) => listener());
   });
   attachChromeWatch(chromeWatch);
+  // The tool pill portals after the first layout, so watch again on the next frame.
   requestAnimationFrame(() => {
-    if (chromeWatch) attachChromeWatch(chromeWatch);
+    if (chromeWatch && attachChromeWatch(chromeWatch)) noteChromeAttached();
   });
 }
 
