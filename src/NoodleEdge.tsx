@@ -309,7 +309,7 @@ function NoodleLabelEditor({
       baseTop < tools.bottom;
     const next = hits ? (tools.top - 8 - baseBottom) / z : 0;
     if (Math.abs(next - lift) > 0.5) setLift(next);
-  }, [zoom, lift, x, y]);
+  });
 
   const write = (label: string, history: boolean) => {
     const next = { ...dataRef.current, label };
