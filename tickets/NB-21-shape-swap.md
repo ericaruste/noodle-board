@@ -1,7 +1,7 @@
 ---
 id: NB-21
 title: Add shape swap on the shape's floating toolbar
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E3
