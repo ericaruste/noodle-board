@@ -1,12 +1,23 @@
 import type { ReactFlowState, Viewport } from "@xyflow/react";
 
+function isMacOs() {
+  return typeof navigator !== "undefined" && navigator.userAgent.indexOf("Mac") >= 0;
+}
+
+/**
+ * A pinch and Ctrl+wheel set ctrlKey. Cmd+wheel on a Mac sets metaKey, and
+ * Chromium often sets ctrlKey for that gesture too.
+ */
+export function isEditorZoomGesture(event: Pick<WheelEvent, "ctrlKey" | "metaKey">) {
+  return event.ctrlKey || (isMacOs() && event.metaKey);
+}
+
 /**
  * Same wheel scale React Flow uses for a pinch or Ctrl/Cmd+wheel.
  * A Mac pinch reports a much smaller delta, so the library multiplies it by 10.
  */
 export function pinchZoomDelta(event: Pick<WheelEvent, "ctrlKey" | "deltaY" | "deltaMode">) {
-  const mac = typeof navigator !== "undefined" && navigator.userAgent.indexOf("Mac") >= 0;
-  const factor = event.ctrlKey && mac ? 10 : 1;
+  const factor = event.ctrlKey && isMacOs() ? 10 : 1;
   const mode = event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002;
   return -event.deltaY * mode * factor;
 }

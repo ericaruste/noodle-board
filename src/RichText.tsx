@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useStoreApi } from "@xyflow/react";
-import { zoomBoardFromWheel } from "./editorZoom";
+import { isEditorZoomGesture, zoomBoardFromWheel } from "./editorZoom";
 import { useConnectChromeHidden } from "./portHot";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
@@ -410,10 +410,10 @@ export function RichText({
   useEffect(() => {
     const editor = editorRef.current;
     if (!editing || !editor) return;
-    // nowheel blocks the board gesture. A ctrl wheel is a pinch or Ctrl/Cmd+zoom;
-    // let that through and keep a plain wheel for the overflow frame.
+    // nowheel blocks the board gesture. A pinch or Ctrl+wheel sets ctrlKey, and
+    // Cmd+wheel on a Mac sets metaKey. Let those through; a plain wheel still scrolls.
     const onWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return;
+      if (!isEditorZoomGesture(event)) return;
       event.preventDefault();
       event.stopPropagation();
       zoomBoardFromWheel(store.getState(), event);
