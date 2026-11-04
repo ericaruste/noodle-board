@@ -1,5 +1,6 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { type Node, type NodeProps, useStore } from "@xyflow/react";
+import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
@@ -249,6 +250,95 @@ function PaintNone({
   );
 }
 
+function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: ShapeKind) => void }) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-shape-kind-menu], [data-text-toolbar]")) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div data-shape-kind-menu="">
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label={`Shape, ${SHAPE_LABELS[kind]}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((current) => !current);
+        }}
+        className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+      >
+        <ShapeKindIcon kind={kind} />
+        <span className="whitespace-nowrap text-left">{SHAPE_LABELS[kind]}</span>
+        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
+          <path d="M2 3.5 5 7l3-3.5" />
+        </svg>
+      </button>
+      {open ? (
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
+          role="menu"
+          ariaLabel="Shape"
+          data-text-toolbar=""
+          className="overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            minWidth: box?.minWidth,
+            visibility: box ? "visible" : "hidden",
+          }}
+        >
+          {SHAPE_KINDS.map((option) => {
+            const current = option === kind;
+            return (
+              <button
+                key={option}
+                type="button"
+                role="menuitemradio"
+                aria-checked={current}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setOpen(false);
+                  onPick(option);
+                }}
+                className={`flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-xs ${
+                  current ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <ShapeKindIcon kind={option} />
+                {SHAPE_LABELS[option]}
+              </button>
+            );
+          })}
+        </FloatingPanel>
+      ) : null}
+    </div>
+  );
+}
+
 function PaintRow({
   label,
   value,
@@ -300,6 +390,8 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
   const prevKindRef = useRef(kind);
   /** Height before a kind change. Text-fit may grow past it, and may not shrink below it. */
   const kindHeightRef = useRef<number | null>(null);
+  /** Height when text editing started. The hint leaves the flow, and the shape must not shrink with it. */
+  const editHeightRef = useRef<number | null>(null);
   const resizeCommitRef = useRef<number | null>(null);
   const sizeRef = useRef({ width: boxWidth, height: boxHeight });
   sizeRef.current = { width: boxWidth, height: boxHeight };
@@ -389,6 +481,12 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       kindHeightRef.current = null;
     }
 
+    if (editing) {
+      if (editHeightRef.current == null) editHeightRef.current = boxHeight;
+    } else {
+      editHeightRef.current = null;
+    }
+
     const fit = () => {
       const contentHeight = measure.offsetHeight;
       if (contentHeight < 1) return;
@@ -405,6 +503,8 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
           : Math.round(hasText ? floor : Math.max(SHAPE_DEFAULT_HEIGHT, fitted));
       const held = kindHeightRef.current;
       if (held != null) target = Math.max(target, Math.round(held));
+      const editFloor = editHeightRef.current;
+      if (editFloor != null) target = Math.max(target, Math.round(editFloor));
       if (Math.abs(target - boxHeight) <= 1) return;
       publishHeight(id, target);
     };
@@ -465,6 +565,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             onCommit={commitText}
             onCancel={() => setEditing(false)}
             onFormat={formatText}
+            toolbarExtra={<ShapeKindMenu kind={kind} onPick={commitKind} />}
           />
         </div>
       </div>
@@ -478,28 +579,6 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             onClick={(event) => event.stopPropagation()}
             onDoubleClick={(event) => event.stopPropagation()}
           >
-            <div role="group" aria-label="Shape" className="flex items-center gap-0.5">
-              {SHAPE_KINDS.map((option) => {
-                const pressed = kind === option;
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    title={SHAPE_LABELS[option]}
-                    aria-label={SHAPE_LABELS[option]}
-                    aria-pressed={pressed}
-                    className={`rounded-lg p-1 ${pressed ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      commitKind(option);
-                    }}
-                  >
-                    <ShapeKindIcon kind={option} />
-                  </button>
-                );
-              })}
-            </div>
             <PaintRow
               label="Fill"
               value={fill}
