@@ -1,7 +1,7 @@
 ---
 id: NB-22
 title: Land noodles reliably and stay in connect mode
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas, UX]
 parent: NB-E1
