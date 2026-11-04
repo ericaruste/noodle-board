@@ -222,7 +222,8 @@ export function RichText({
   const [linkMixed, setLinkMixed] = useState(false);
   const [focusTick, setFocusTick] = useState(0);
   const [structureEpoch, setStructureEpoch] = useState(0);
-  const [trackedEditing, setTrackedEditing] = useState(editing);
+  // Start closed so a node that mounts already editing still runs the focus setup.
+  const [trackedEditing, setTrackedEditing] = useState(false);
 
   bodyRef.current = body;
   editingRef.current = editing;

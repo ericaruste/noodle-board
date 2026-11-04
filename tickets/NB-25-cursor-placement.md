@@ -1,7 +1,7 @@
 ---
 id: NB-25
 title: Place sticky, text, shape, and image from the cursor
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E4
@@ -32,16 +32,16 @@ Picking a tool drops an object in the middle of the view. The user cannot aim it
 
 ## Acceptance criteria
 
-- [ ] Clicking Sticky note, Text, or a shape kind adds nothing. That tool stays pressed (`aria-pressed`) and Select does not. A translucent ghost of the object follows the cursor over the canvas
-- [ ] Image still opens the file picker. Choosing an image adds nothing yet. The ghost is that image at its `imageSize` box. A file that is not an image does not enter placement
-- [ ] The ghost hides when the pointer leaves the canvas or is over the toolbar, the shapes menu, or the other board chrome. It returns when the pointer is over the canvas again
-- [ ] The ghost is drawn in flow coordinates inside the viewport. At 25% and at 200% zoom its board size matches the node that click will create
-- [ ] The ghost does not receive pointer events. A click passes through it
-- [ ] One primary click on the canvas creates exactly one element, centered on the cursor (`screenToFlowPosition`). When snap-to-grid is enabled, that center is snapped to the active grid first. The tool returns to Select, the new element is selected, and the ghost is gone
-- [ ] The placed sticky, shape, or image matches the ghost’s size and look, including the sticky color chosen when placement started and the shape kind. The text tool opens its text field, focused, as soon as the text node is created
-- [ ] Escape, right-click, or clicking the pressed tool again cancels placement, adds nothing, and returns to Select. Choosing a different shape kind switches the ghost and still adds nothing. Clicking Select, Hand, or Noodle cancels placement and activates that tool
-- [ ] Panning, zooming, and the toolbar keep working during placement. A left click places; it does not pan. Space+drag, middle-button drag, scroll, and the wheel still pan or zoom
-- [ ] Clicking any toolbar control, including the control that armed placement and any shapes-menu item, does not create an element. Delete still deletes the current selection and does not drop the ghost’s object
+- [x] Clicking Sticky note, Text, or a shape kind adds nothing. That tool stays pressed (`aria-pressed`) and Select does not. A translucent ghost of the object follows the cursor over the canvas
+- [x] Image still opens the file picker. Choosing an image adds nothing yet. The ghost is that image at its `imageSize` box. A file that is not an image does not enter placement
+- [x] The ghost hides when the pointer leaves the canvas or is over the toolbar, the shapes menu, or the other board chrome. It returns when the pointer is over the canvas again
+- [x] The ghost is drawn in flow coordinates inside the viewport. At 25% and at 200% zoom its board size matches the node that click will create
+- [x] The ghost does not receive pointer events. A click passes through it
+- [x] One primary click on the canvas creates exactly one element, centered on the cursor (`screenToFlowPosition`). When snap-to-grid is enabled, that center is snapped to the active grid first. The tool returns to Select, the new element is selected, and the ghost is gone
+- [x] The placed sticky, shape, or image matches the ghost’s size and look, including the sticky color chosen when placement started and the shape kind. The text tool opens its text field, focused, as soon as the text node is created
+- [x] Escape, right-click, or clicking the pressed tool again cancels placement, adds nothing, and returns to Select. Choosing a different shape kind switches the ghost and still adds nothing. Clicking Select, Hand, or Noodle cancels placement and activates that tool
+- [x] Panning, zooming, and the toolbar keep working during placement. A left click places; it does not pan. Space+drag, middle-button drag, scroll, and the wheel still pan or zoom
+- [x] Clicking any toolbar control, including the control that armed placement and any shapes-menu item, does not create an element. Delete still deletes the current selection and does not drop the ghost’s object
 
 ## Technical notes
 

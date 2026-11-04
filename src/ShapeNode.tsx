@@ -6,6 +6,8 @@ import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
 import SelectionChrome from "./SelectionChrome";
 import {
+  DEFAULT_SHAPE_FILL,
+  DEFAULT_SHAPE_STROKE,
   FILL_SWATCHES,
   SHAPE_DEFAULT_HEIGHT,
   SHAPE_DEFAULT_WIDTH,
@@ -192,6 +194,31 @@ function ShapeGeometry({
   const radius = kind === "round-rect" ? cornerRadius(width, height) : 0;
 
   return <rect x={inset} y={inset} width={innerWidth} height={innerHeight} rx={radius} ry={radius} {...shared} />;
+}
+
+export function ShapePreview({
+  kind,
+  width,
+  height,
+}: {
+  kind: ShapeKind;
+  width: number;
+  height: number;
+}) {
+  return (
+    <svg width={width} height={height} className="overflow-visible" aria-hidden>
+      <ShapeGeometry
+        kind={kind}
+        width={width}
+        height={height}
+        paint={{
+          fill: DEFAULT_SHAPE_FILL,
+          stroke: DEFAULT_SHAPE_STROKE,
+          strokeWidth: STROKE_WIDTH,
+        }}
+      />
+    </svg>
+  );
 }
 
 function PaintSwatch({

@@ -1,10 +1,11 @@
-import { memo, useMemo, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { useSelectedObjectCount } from "./selectionScope";
+import { clearTextEdit, peekTextEdit } from "./textEdit";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -28,7 +29,17 @@ function publish(id: string, data: TextData) {
 
 function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
   const body = useMemo(() => coerceBody(data.paragraphs), [data.paragraphs]);
-  const [editing, setEditing] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(() => peekTextEdit(id));
+  // The placement click finishes after this node mounts and would blur an immediate focus.
+  useLayoutEffect(() => {
+    if (!peekTextEdit(id)) return;
+    const timer = window.setTimeout(() => {
+      rootRef.current?.querySelector<HTMLElement>("[contenteditable='true']")?.focus();
+      clearTextEdit(id);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [id]);
   const resizeStyle = useNoodleResizeStyle();
   const hideChrome = useConnectChromeHidden();
   const soloSelection = useSelectedObjectCount() === 1;
@@ -58,6 +69,7 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
 
   return (
     <div
+      ref={rootRef}
       role="group"
       aria-label="Text"
       className="noodle-node relative"
