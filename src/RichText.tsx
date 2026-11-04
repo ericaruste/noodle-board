@@ -8,6 +8,7 @@ import {
   type FocusEvent,
   type FormEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
@@ -67,6 +68,8 @@ export type RichTextProps = {
   onCommit: (body: TextBody) => void;
   onCancel: () => void;
   onFormat: (body: TextBody) => void;
+  /** Sits beside the text controls. Shapes use it for the kind dropdown. */
+  toolbarExtra?: ReactNode;
 };
 
 type HistoryStep = {
@@ -180,6 +183,7 @@ export function RichText({
   onCommit,
   onCancel,
   onFormat,
+  toolbarExtra,
 }: RichTextProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -705,6 +709,7 @@ export function RichText({
             onBullet={() => changeList("bullet")}
             onNumbered={() => changeList("numbered")}
             onLink={openLink}
+            extra={toolbarExtra}
           />
         </SelectionChrome>
       ) : null}

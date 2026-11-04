@@ -31,8 +31,10 @@ The kind is chosen once, when the shape is created. Turning a rectangle into an 
 
 ## Acceptance criteria
 
-- [x] The selected shape’s floating toolbar shows the five kinds — Rectangle, Ellipse, Rounded rectangle, Triangle, Diamond — in that order, with the same icons as Add Shape
+- [x] The fill and stroke panel has no kind buttons. Beside the text toolbar, a dropdown lists Rectangle, Ellipse, Rounded rectangle, Triangle, and Diamond, in that order, with the same icons as Add Shape. Its closed label is the shape’s current kind
 - [x] The kind the shape already has is pressed
+- [x] The text inside a shape does not show a scrollbar
+- [x] Double-clicking inside a shape to edit its text does not shrink the shape. Typing can still grow it so the text fits. Leaving text mode sizes it from the hint again
 - [x] Choosing a different kind changes that shape in place. It keeps the same id, position, width, fill, stroke, text, and attached noodles
 - [x] Choosing the kind that is already pressed does not change the shape and does not add an undo step
 - [x] The label moves into the new kind’s text band. Height stays, unless the existing text-fit grows it so the label still fits. That growth belongs to the same edit
@@ -45,7 +47,9 @@ The kind is chosen once, when the shape is created. Turning a rectangle into an 
 
 ## Technical notes
 
-Add the kind buttons on the existing `data-shape-colors` panel, ahead of Fill and Stroke. Use [`SHAPE_KINDS`](../src/shapeData.ts), [`SHAPE_LABELS`](../src/shapeData.ts), and [`ShapeKindIcon`](../src/ShapeNode.tsx). The current kind uses `aria-pressed`.
+The kind control is a dropdown on the text toolbar, beside the font controls, not on the fill and stroke panel. Its closed label is the current kind. The menu uses [`SHAPE_KINDS`](../src/shapeData.ts), [`SHAPE_LABELS`](../src/shapeData.ts), and [`ShapeKindIcon`](../src/ShapeNode.tsx), and the current kind is checked. The menu is a [`FloatingPanel`](../src/FloatingPanel.tsx) on the dropdown layer. Shape text does not scroll inside the geometry.
+
+Entering text mode takes the empty-shape hint out of the flow, so the measured height drops. While editing, the layout effect holds the height from when editing started and still publishes a taller height when the text needs it.
 
 Write the kind the same way as paint: `paintedShape` with only `kind` changed, then `noodle-snapshot`, then `noodle-update-node`. Leave `fill`, `stroke`, `paragraphs`, and `manualHeight` on the node. Do not publish a new width or a new position. Skip the snapshot when the pressed kind is chosen again.
 
@@ -53,7 +57,7 @@ Write the kind the same way as paint: `paintedShape` with only `kind` changed, t
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 
-This ticket adds no new panel. The kind buttons sit in the shape toolbar [`SelectionChrome`](../src/SelectionChrome.tsx) already portals on the toolbar layer. They stay above the selected shape and above that shape while it is mid-drag. Pointer and wheel events on them do not pan the board or move the shape, same as the fill and stroke swatches (`nodrag nopan nowheel`).
+The kind dropdown is a [`FloatingPanel`](../src/FloatingPanel.tsx) on the dropdown layer, anchored to the text toolbar [`SelectionChrome`](../src/SelectionChrome.tsx) already portals. It stays above the selected shape and above that shape while it is mid-drag. Pointer and wheel events on it do not pan the board or move the shape, same as the text toolbar (`nodrag nopan nowheel`).
 
 ## Out of scope
 

@@ -24,6 +24,7 @@ type TextToolbarProps = {
   onNumbered: () => void;
   onLink: () => void;
   linkActive: boolean;
+  extra?: ReactNode;
 };
 
 function Menu({
@@ -147,6 +148,7 @@ export default function TextToolbar({
   onNumbered,
   onLink,
   linkActive,
+  extra,
 }: TextToolbarProps) {
   const [menu, setMenu] = useState<"style" | "align" | null>(null);
 
@@ -166,6 +168,12 @@ export default function TextToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
+      {extra ? (
+        <>
+          {extra}
+          <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
+        </>
+      ) : null}
       <Menu
         label={styleLabel}
         menuLabel="Font style"
