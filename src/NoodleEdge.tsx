@@ -288,6 +288,28 @@ function NoodleLabelEditor({
   const dataRef = useRef(data);
   dataRef.current = data;
   const historyRef = useRef(false);
+  const zoom = useStore((state) => state.transform[2]);
+  const [lift, setLift] = useState(0);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    const z = zoom || 1;
+    if (!input || !tools || tools.width <= 0) {
+      if (lift !== 0) setLift(0);
+      return;
+    }
+    const box = input.getBoundingClientRect();
+    const baseBottom = box.bottom - lift * z;
+    const baseTop = box.top - lift * z;
+    const hits =
+      box.right > tools.left &&
+      box.left < tools.right &&
+      baseBottom > tools.top &&
+      baseTop < tools.bottom;
+    const next = hits ? (tools.top - 8 - baseBottom) / z : 0;
+    if (Math.abs(next - lift) > 0.5) setLift(next);
+  }, [zoom, lift, x, y]);
 
   const write = (label: string, history: boolean) => {
     const next = { ...dataRef.current, label };
@@ -330,6 +352,7 @@ function NoodleLabelEditor({
   }, []);
 
   const shown = data.label.length > 0 ? data.label : "Label";
+  const place = labelStyle(x, y);
   return (
     <EdgeLabelRenderer>
       <input
@@ -364,7 +387,8 @@ function NoodleLabelEditor({
         }}
         className="noodle-edge-label noodle-edge-label-input nodrag nopan nowheel"
         style={{
-          ...labelStyle(x, y),
+          ...place,
+          transform: `${place.transform} translateY(${lift}px)`,
           color: data.color,
           width: `${Math.min(Math.max(shown.length, 1), 32) + 1}ch`,
         }}
