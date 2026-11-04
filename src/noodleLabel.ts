@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 
 let editingId: string | null = null;
 let blockClose = false;
-let blockTimer = 0;
+let endRetain: (() => void) | null = null;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -18,18 +18,32 @@ export function noodleLabelEditingId() {
   return editingId;
 }
 
-/** The Text button's press blurs the field before its click can toggle it. */
+/** The Text button's press blurs the field before its click can toggle it. The block ends with that gesture. */
 export function retainNoodleLabel() {
   blockClose = true;
-  window.clearTimeout(blockTimer);
-  blockTimer = window.setTimeout(() => {
+  if (endRetain) {
+    window.removeEventListener("pointerup", endRetain, true);
+    window.removeEventListener("pointercancel", endRetain, true);
+  }
+  endRetain = () => {
+    const finish = endRetain;
+    endRetain = null;
+    if (finish) {
+      window.removeEventListener("pointerup", finish, true);
+      window.removeEventListener("pointercancel", finish, true);
+    }
     blockClose = false;
-  }, 500);
+  };
+  window.addEventListener("pointerup", endRetain, true);
+  window.addEventListener("pointercancel", endRetain, true);
 }
 
 export function releaseNoodleLabel() {
   blockClose = false;
-  window.clearTimeout(blockTimer);
+  if (!endRetain) return;
+  window.removeEventListener("pointerup", endRetain, true);
+  window.removeEventListener("pointercancel", endRetain, true);
+  endRetain = null;
 }
 
 export function openNoodleLabel(id: string) {

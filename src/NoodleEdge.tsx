@@ -568,11 +568,19 @@ export default function NoodleEdge(props: EdgeProps) {
       ) : label ? (
         <EdgeLabelRenderer>
           <div
-            className="noodle-edge-label"
+            data-noodle-rest={props.id}
+            className="noodle-edge-label nodrag nopan nowheel"
+            onDoubleClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onWheel={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
             style={{
               ...labelStyle(labelX, labelY),
               color: data.color,
-              pointerEvents: "none",
             }}
           >
             {label}

@@ -1605,11 +1605,12 @@ function Board() {
   }, [chooseTool, duplicateSelection, openProject, redo, saveProject, store, undo]);
 
   const openNoodleFromDoubleClick = useCallback(
-    (event: { preventDefault: () => void; stopPropagation: () => void }, edgeId: string, selected: boolean | undefined) => {
+    (event: { preventDefault: () => void; stopPropagation: () => void; shiftKey?: boolean }, edgeId: string, selected: boolean | undefined) => {
       if (toolRef.current === "hand" || spaceHeldRef.current) return;
       // d3 zoom hears the double-click on the pane before React's edge handler.
       event.preventDefault();
       event.stopPropagation();
+      if (event.shiftKey) return;
       const flow = store.getState();
       if (flow.connection.inProgress || flow.connectionClickStartHandle != null) return;
       if (!selected) flow.addSelectedEdges([edgeId]);
@@ -1622,9 +1623,9 @@ function Board() {
     const onDoubleClick = (event: MouseEvent) => {
       const target = event.target;
       if (!(target instanceof Element) || !target.closest(".react-flow")) return;
+      const rest = target.closest("[data-noodle-rest]");
       const edgeEl = target.closest(".react-flow__edge");
-      if (!edgeEl) return;
-      const edgeId = edgeEl.getAttribute("data-id");
+      const edgeId = rest?.getAttribute("data-noodle-rest") || edgeEl?.getAttribute("data-id");
       if (!edgeId) return;
       const selected = store.getState().edges.some((edge) => edge.id === edgeId && edge.selected);
       openNoodleFromDoubleClick(event, edgeId, selected);
