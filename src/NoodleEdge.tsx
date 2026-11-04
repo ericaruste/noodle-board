@@ -275,15 +275,6 @@ function NoodleLabelEditor({
   };
 
   useEffect(() => {
-    return () => {
-      if (!historyRef.current) return;
-      const current = dataRef.current;
-      if (current.label === "" || current.label.trim()) return;
-      publishNoodle(edgeId, { ...current, label: "" });
-    };
-  }, [edgeId]);
-
-  useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
     input.focus({ preventScroll: true });

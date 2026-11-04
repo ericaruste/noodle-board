@@ -70,7 +70,7 @@ import NoodleConnectionLine from "./connectionLine";
 import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
-import { openNoodleLabel } from "./noodleLabel";
+import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./noodleLabel";
 import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
 import {
   END_RADIUS,
@@ -330,6 +330,13 @@ function Board() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
+
+  useEffect(() => {
+    const id = noodleLabelEditingId();
+    if (!id || edges.some((edge) => edge.id === id)) return;
+    releaseNoodleLabel();
+    closeNoodleLabel();
+  }, [edges]);
 
   useEffect(() => {
     toolRef.current = tool;
