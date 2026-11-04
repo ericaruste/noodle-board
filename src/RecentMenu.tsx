@@ -54,7 +54,7 @@ export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
           role="menu"
           ariaLabel="Recent boards"
           data-recent-menu=""
-          className="w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+          className="w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,

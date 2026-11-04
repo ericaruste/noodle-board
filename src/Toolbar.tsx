@@ -172,7 +172,7 @@ export default function Toolbar({
             role="menu"
             ariaLabel="Shapes"
             data-shapes-menu=""
-            className="w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            className="w-52 overflow-hidden rounded-xl border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
             style={{
               position: "absolute",
               top: shapesBox?.top ?? 0,

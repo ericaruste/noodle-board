@@ -90,8 +90,8 @@ function Menu({
           data-text-toolbar=""
           className={
             horizontal
-              ? "flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
-              : "rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+              ? "flex items-center gap-0.5 rounded-xl border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
+              : "rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
           }
           style={{
             position: "absolute",
@@ -197,7 +197,7 @@ export default function TextToolbar({
   return (
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-0.5 rounded-xl border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();

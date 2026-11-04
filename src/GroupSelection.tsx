@@ -295,14 +295,13 @@ function GroupToolbar({
       panelRef={rootRef}
       ariaLabel="Selection"
       data-group-toolbar=""
-      className="flex max-w-[36rem] flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
+      className="flex max-w-[36rem] flex-wrap items-center gap-2 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow-lg backdrop-blur-xl"
       style={{
         position: "absolute",
-        left: 0,
-        top: 0,
+        left: pos?.left ?? -9999,
+        top: pos?.top ?? -9999,
         width: "max-content",
         visibility: pos ? "visible" : "hidden",
-        transform: pos ? `translate(${pos.left}px, ${pos.top}px)` : "translate(-9999px, -9999px)",
       }}
     >
       {showFill ? (

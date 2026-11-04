@@ -303,7 +303,7 @@ function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: Shape
           role="menu"
           ariaLabel="Shape"
           data-text-toolbar=""
-          className="overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          className="overflow-hidden rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -580,7 +580,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
         <SelectionChrome side="below">
           <div
             data-shape-colors
-            className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl bg-white p-1.5 shadow"
+            className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow backdrop-blur-xl"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
             onDoubleClick={(event) => event.stopPropagation()}

@@ -104,7 +104,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         <SelectionChrome side="below">
           <div
             data-sticky-colors
-            className="noodle-sticky-colors nodrag nopan nowheel flex gap-1 rounded-full bg-white p-1 shadow"
+            className="noodle-sticky-colors nodrag nopan nowheel flex gap-1 rounded-full border border-white/50 bg-white/40 p-1 shadow backdrop-blur-xl"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
             onDoubleClick={(event) => event.stopPropagation()}

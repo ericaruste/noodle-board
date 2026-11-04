@@ -285,11 +285,10 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
       data-selection-chrome={side}
       style={{
         position: "absolute",
-        left: 0,
-        top: 0,
+        left: placed?.left ?? -9999,
+        top: placed?.top ?? -9999,
         width: "max-content",
         visibility: placed ? "visible" : "hidden",
-        transform: placed ? `translate(${placed.left}px, ${placed.top}px)` : "translate(-9999px, -9999px)",
       }}
     >
       {children}

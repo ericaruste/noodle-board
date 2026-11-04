@@ -236,9 +236,12 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
     shiftRef.current = { x, y };
     setShift({ x, y });
   });
-  const transform = shift.x || shift.y ? `translate(${shift.x}px, ${shift.y}px)` : undefined;
   return (
-    <div ref={ref} style={{ pointerEvents: "auto", transform }}>
+    <div
+      ref={ref}
+      className="w-max -translate-x-1/2 -translate-y-full rounded-xl border border-white/50 bg-white/40 shadow-lg backdrop-blur-xl"
+      style={{ pointerEvents: "auto", marginLeft: shift.x, marginTop: shift.y }}
+    >
       {children}
     </div>
   );
@@ -255,11 +258,10 @@ function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children:
       layer="toolbar"
       style={{
         position: "absolute",
-        left: 0,
-        top: 0,
+        left: x * safeZoom + panX,
+        top: y * safeZoom + panY,
         width: "max-content",
         pointerEvents: "none",
-        transform: `translate(${x * safeZoom + panX}px, ${y * safeZoom + panY}px) translate(-50%, -100%)`,
       }}
     >
       <ClampedToolbar>{children}</ClampedToolbar>

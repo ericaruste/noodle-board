@@ -111,7 +111,7 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
     <div
       data-noodle-toolbar
       data-noodle-menu={menu ? "" : undefined}
-      className="nodrag nopan nowheel flex max-w-[36rem] flex-wrap items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+      className="nodrag nopan nowheel flex max-w-[36rem] flex-wrap items-center gap-0.5 p-1"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input")) return;
@@ -324,7 +324,7 @@ function ColorMenu({
         open={open}
         anchorRef={buttonRef}
         label="Color"
-        className="flex rounded-lg border border-slate-200 bg-white p-2 shadow-lg"
+        className="flex rounded-lg border border-white/50 bg-white/40 p-2 shadow-lg backdrop-blur-xl"
       >
         {children}
       </AnchoredMenu>
@@ -366,7 +366,7 @@ function ArrowMenu({
         open={open}
         anchorRef={buttonRef}
         label={label}
-        className="w-36 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+        className="w-36 rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
       >
         {NOODLE_ARROWS.map((kind) => (
           <button

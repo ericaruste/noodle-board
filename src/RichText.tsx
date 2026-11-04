@@ -750,7 +750,7 @@ export function RichText({
                   }
                 }
               }}
-              className="w-56 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-800 shadow-lg outline-none focus:border-slate-400"
+              className="w-56 rounded-lg border border-white/50 bg-white/40 px-2 py-1 text-sm text-slate-800 shadow-lg outline-none backdrop-blur-xl focus:border-slate-400"
             />
           </form>
         </SelectionChrome>
