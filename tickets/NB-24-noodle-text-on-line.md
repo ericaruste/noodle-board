@@ -1,7 +1,7 @@
 ---
 id: NB-24
 title: Edit noodle text on the line
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E4
