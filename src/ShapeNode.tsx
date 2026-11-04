@@ -8,6 +8,7 @@ import {
   FILL_SWATCHES,
   SHAPE_DEFAULT_HEIGHT,
   SHAPE_DEFAULT_WIDTH,
+  SHAPE_KINDS,
   SHAPE_LABELS,
   SHAPE_MIN_SIZE,
   STROKE_SWATCHES,
@@ -296,6 +297,9 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
   const frame = shapeTextFrame(kind, boxWidth, boxHeight);
   const contentFloorRef = useRef(contentFloor);
   const manualHeightRef = useRef(data.manualHeight);
+  const prevKindRef = useRef(kind);
+  /** Height before a kind change. Text-fit may grow past it, and may not shrink below it. */
+  const kindHeightRef = useRef<number | null>(null);
   const resizeCommitRef = useRef<number | null>(null);
   const sizeRef = useRef({ width: boxWidth, height: boxHeight });
   sizeRef.current = { width: boxWidth, height: boxHeight };
@@ -335,6 +339,16 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
     publish(id, next);
   };
 
+  const commitKind = (nextKind: ShapeKind) => {
+    const current = dataRef.current;
+    const currentKind = isShapeKind(current.kind) ? current.kind : "rect";
+    if (nextKind === currentKind) return;
+    const next = paintedShape(current, { kind: nextKind });
+    dataRef.current = next;
+    snapshot();
+    publish(id, next);
+  };
+
   const commitText = (next: TextBody) => {
     setEditing(false);
     const current = dataRef.current;
@@ -368,6 +382,13 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       manualHeightRef.current = data.manualHeight;
     }
 
+    if (prevKindRef.current !== kind) {
+      kindHeightRef.current = boxHeight;
+      prevKindRef.current = kind;
+    } else {
+      kindHeightRef.current = null;
+    }
+
     const fit = () => {
       const contentHeight = measure.offsetHeight;
       if (contentHeight < 1) return;
@@ -378,10 +399,12 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       if (resizing) return;
       const hasText = shapeHasText(measure);
       const manual = manualHeightRef.current;
-      const target =
+      let target =
         typeof manual === "number"
           ? Math.round(Math.max(manual, floor))
           : Math.round(hasText ? floor : Math.max(SHAPE_DEFAULT_HEIGHT, fitted));
+      const held = kindHeightRef.current;
+      if (held != null) target = Math.max(target, Math.round(held));
       if (Math.abs(target - boxHeight) <= 1) return;
       publishHeight(id, target);
     };
@@ -455,6 +478,28 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             onClick={(event) => event.stopPropagation()}
             onDoubleClick={(event) => event.stopPropagation()}
           >
+            <div role="group" aria-label="Shape" className="flex items-center gap-0.5">
+              {SHAPE_KINDS.map((option) => {
+                const pressed = kind === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    title={SHAPE_LABELS[option]}
+                    aria-label={SHAPE_LABELS[option]}
+                    aria-pressed={pressed}
+                    className={`rounded-lg p-1 ${pressed ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      commitKind(option);
+                    }}
+                  >
+                    <ShapeKindIcon kind={option} />
+                  </button>
+                );
+              })}
+            </div>
             <PaintRow
               label="Fill"
               value={fill}
