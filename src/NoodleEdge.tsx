@@ -60,7 +60,7 @@ let chromeWatch: ResizeObserver | null = null;
 const chromeWatched = new Set<Element>();
 
 function attachChromeWatch(observer: ResizeObserver) {
-  for (const selector of ["[data-canvas-chrome]", ".react-flow__minimap", ".react-flow"]) {
+  for (const selector of ["[data-canvas-chrome]", ".board-toolbar", ".react-flow__minimap", ".react-flow"]) {
     const element = document.querySelector(selector);
     if (!element || chromeWatched.has(element)) continue;
     chromeWatched.add(element);
@@ -101,7 +101,7 @@ function chromeKey() {
     if (!rect || rect.width <= 0 || rect.height <= 0) return "0";
     return `${rect.left.toFixed(0)},${rect.top.toFixed(0)},${rect.width.toFixed(0)},${rect.height.toFixed(0)}`;
   };
-  return `${box("[data-canvas-chrome]")}|${box(".react-flow__minimap")}`;
+  return `${box("[data-canvas-chrome]")}|${box(".board-toolbar")}|${box(".react-flow__minimap")}`;
 }
 
 export function routeFrame(transform: [number, number, number], width: number, height: number) {
@@ -112,7 +112,7 @@ export function routeFrame(transform: [number, number, number], width: number, h
   return frameCache;
 }
 
-/** Visible canvas minus the top toolbars, with the minimap kept as an obstacle. */
+/** Visible canvas minus the top bar. The minimap and the bottom tool pill are obstacles. */
 function measureFrame(transform: [number, number, number]): RouteFrame | null {
   const pane = document.querySelector(".react-flow")?.getBoundingClientRect();
   const zoom = transform[2];
@@ -128,9 +128,11 @@ function measureFrame(transform: [number, number, number]): RouteFrame | null {
   }
   const viewMin = screenToFlow(pane, tx, ty, zoom, left, top);
   const viewMax = screenToFlow(pane, tx, ty, zoom, right, bottom);
-  const map = document.querySelector(".react-flow__minimap")?.getBoundingClientRect();
-  const obstacles =
-    map && map.width > 0 && map.height > 0 ? [flowRect(pane, tx, ty, zoom, map, VIEW_MARGIN)] : [];
+  const obstacles: FlowRect[] = [];
+  for (const selector of [".react-flow__minimap", ".board-toolbar"]) {
+    const rect = document.querySelector(selector)?.getBoundingClientRect();
+    if (rect && rect.width > 0 && rect.height > 0) obstacles.push(flowRect(pane, tx, ty, zoom, rect, VIEW_MARGIN));
+  }
   return {
     view: { minX: viewMin.x, minY: viewMin.y, maxX: viewMax.x, maxY: viewMax.y },
     obstacles,

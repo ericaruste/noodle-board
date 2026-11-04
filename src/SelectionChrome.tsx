@@ -167,6 +167,12 @@ function readSafeArea(renderer: HTMLElement): SafeArea {
     }
   }
 
+  const tools = document.querySelector(".board-toolbar");
+  if (tools instanceof HTMLElement) {
+    const rect = tools.getBoundingClientRect();
+    if (rect.width > 8 && rect.height > 8) pushOverlay(rect);
+  }
+
   return {
     top,
     left,
