@@ -13,6 +13,7 @@ import {
   type NoodleShape,
   type NoodleThickness,
 } from "./noodleData";
+import { releaseNoodleLabel, retainNoodleLabel, toggleNoodleLabel, useNoodleLabelEditing } from "./noodleLabel";
 
 type NoodleToolbarProps = {
   edgeId: string;
@@ -57,11 +58,19 @@ function ShapeGlyph({ shape }: { shape: NoodleShape }) {
   );
 }
 
+function TextGlyph() {
+  return (
+    <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden>
+      <path d="M4.5 3.25h9M9 3.25v7.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
   const dataRef = useRef(data);
   dataRef.current = data;
   const [menu, setMenu] = useState<"color" | "start" | "end" | null>(null);
-  const labelHistory = useRef(false);
+  const editing = useNoodleLabelEditing(edgeId);
   const colorHistory = useRef(false);
 
   const write = (next: NoodleData, history: boolean) => {
@@ -211,30 +220,21 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
 
       <span className="mx-0.5 h-5 w-px bg-slate-200" />
 
-      <input
-        aria-label="Text label"
-        value={data.label}
-        placeholder="Label"
-        maxLength={160}
-        onFocus={() => {
-          labelHistory.current = false;
+      <button
+        type="button"
+        aria-label="Text"
+        aria-pressed={editing}
+        title="Text"
+        onPointerDown={() => retainNoodleLabel()}
+        onPointerCancel={() => releaseNoodleLabel()}
+        onClick={() => {
+          setMenu(null);
+          toggleNoodleLabel(edgeId);
         }}
-        onChange={(event) => {
-          const history = !labelHistory.current;
-          labelHistory.current = true;
-          write({ ...dataRef.current, label: event.target.value }, history);
-        }}
-        onBlur={() => {
-          labelHistory.current = false;
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.currentTarget.blur();
-            event.stopPropagation();
-          }
-        }}
-        className="w-28 rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-800 outline-none focus:border-slate-400"
-      />
+        className={`rounded-lg px-1.5 py-1 ${editing ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+      >
+        <TextGlyph />
+      </button>
 
       <ArrowMenu
         label="Start arrowhead"

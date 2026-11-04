@@ -1,7 +1,7 @@
 ---
 id: NB-24
 title: Edit noodle text on the line
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E4
@@ -30,18 +30,19 @@ The label sits under the noodle, so the text is hidden by the stroke. The only w
 1. Connect two elements. Select the noodle and type in the toolbar field labeled “Label”. The text appears on the line and the stroke runs over it.
 2. With the noodle selected, the floating toolbar always shows that text field between the shape buttons and the arrowhead menus.
 3. Double-click the noodle. No text field opens on the line.
+4. Put text on a noodle and zoom out. The text moves above the stroke and sits far from the line. Zooming back in pulls it toward the stroke.
 
 ## Acceptance criteria
 
-- [ ] A noodle’s text paints above its stroke, including where the line passes through the label, on a selected noodle and on one that is not selected
-- [ ] The floating toolbar for a selected noodle has no text field. In that field’s place is a Text button, pressed while the on-noodle field is open
-- [ ] Clicking the Text button opens a text field on the noodle at the current label point. Clicking it again closes the field and keeps what was typed
-- [ ] Double-clicking a noodle selects it if needed and opens that same field at the label point. The double-click does not zoom the board
-- [ ] The field shows the current label. An empty label still opens the field at that point, with the “Label” placeholder
-- [ ] Typing updates the text on the noodle. The field uses the noodle’s color on the same white pill as the resting label. Enter or clicking away closes the field and keeps the text. Clearing it and closing removes the label. Escape closes the field and keeps what was typed
-- [ ] While the field is focused, Delete and Backspace edit the text and do not delete the noodle. One typing session is one undo step, and one redo restores it
-- [ ] The field stays on the label point while the board pans or zooms, and a pointer or wheel event on it does not pan the board or drag the noodle
-- [ ] The floating toolbar stays above the label and above the open field. Color, line style, thickness, shape, and arrowheads still work, and their menus still open above the toolbar
+- [x] A noodle’s text paints above its stroke, including where the line passes through the label, on a selected noodle and on one that is not selected
+- [x] The floating toolbar for a selected noodle has no text field. In that field’s place is a Text button, pressed while the on-noodle field is open
+- [x] Clicking the Text button opens a text field on the noodle at the current label point. Clicking it again closes the field and keeps what was typed
+- [x] Double-clicking a noodle selects it if needed and opens that same field at the label point. The double-click does not zoom the board
+- [x] The field shows the current label. An empty label still opens the field at that point, with the “Label” placeholder
+- [x] Typing updates the text on the noodle. The field uses the noodle’s color on the same white pill as the resting label. Enter or clicking away closes the field and keeps the text. Clearing it and closing removes the label. Escape closes the field and keeps what was typed
+- [x] While the field is focused, Delete and Backspace edit the text and do not delete the noodle. One typing session is one undo step, and one redo restores it
+- [x] Zooming in or out does not move the text off the noodle. The resting label and the open field stay the same distance from the stroke, and they stay on that point while the board pans. A pointer or wheel event on the field does not pan the board or drag the noodle
+- [x] The floating toolbar stays above the label and above the open field. Color, line style, thickness, shape, and arrowheads still work, and their menus still open above the toolbar
 
 ## Technical notes
 
@@ -54,6 +55,8 @@ Keep the current history rule: the first change in a focus session snapshots onc
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 
 The open field has to stay above the noodle and below the noodle toolbar, including while the noodle or either end is mid-drag. A pointer or wheel event on the field or the toolbar must not pan the board or move the noodle.
+
+`labelShift` is a fixed distance in board coordinates. Do not divide it by zoom. Dividing by zoom holds the text a constant number of screen pixels off the stroke, so zooming out leaves the text sitting far above the line and zooming in pulls it onto the stroke. The toolbar’s `28 / zoom` offset stays, because that bar is screen chrome.
 
 ## Out of scope
 

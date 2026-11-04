@@ -70,6 +70,7 @@ import NoodleConnectionLine from "./connectionLine";
 import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
+import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./noodleLabel";
 import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
 import {
   END_RADIUS,
@@ -329,6 +330,13 @@ function Board() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
+
+  useEffect(() => {
+    const id = noodleLabelEditingId();
+    if (!id || edges.some((edge) => edge.id === id)) return;
+    releaseNoodleLabel();
+    closeNoodleLabel();
+  }, [edges]);
 
   useEffect(() => {
     toolRef.current = tool;
@@ -1521,8 +1529,10 @@ function Board() {
         return;
       }
       const inNoodleField = event.target instanceof Element && Boolean(event.target.closest("[data-noodle-toolbar]"));
-      if (isTypingTarget(event.target) && !inNoodleField) return;
-      if (inNoodleField && event.key !== "Escape" && !((event.ctrlKey || event.metaKey) && key === "z")) return;
+      const inNoodleLabel = event.target instanceof Element && Boolean(event.target.closest("[data-noodle-label]"));
+      const undoKey = (event.ctrlKey || event.metaKey) && key === "z";
+      if (isTypingTarget(event.target) && !inNoodleField && !(inNoodleLabel && undoKey)) return;
+      if (inNoodleField && event.key !== "Escape" && !undoKey) return;
       if ((event.key === " " || event.code === "Space") && !event.repeat) {
         if (spaceHeldRef.current) return;
         event.preventDefault();
@@ -1594,6 +1604,36 @@ function Board() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [chooseTool, duplicateSelection, openProject, redo, saveProject, store, undo]);
 
+  const openNoodleFromDoubleClick = useCallback(
+    (event: { preventDefault: () => void; stopPropagation: () => void; shiftKey?: boolean }, edgeId: string, selected: boolean | undefined) => {
+      if (toolRef.current === "hand" || spaceHeldRef.current) return;
+      // d3 zoom hears the double-click on the pane before React's edge handler.
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.shiftKey) return;
+      const flow = store.getState();
+      if (flow.connection.inProgress || flow.connectionClickStartHandle != null) return;
+      if (!selected) flow.addSelectedEdges([edgeId]);
+      openNoodleLabel(edgeId);
+    },
+    [store],
+  );
+
+  useEffect(() => {
+    const onDoubleClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest(".react-flow")) return;
+      const rest = target.closest("[data-noodle-rest]");
+      const edgeEl = target.closest(".react-flow__edge");
+      const edgeId = rest?.getAttribute("data-noodle-rest") || edgeEl?.getAttribute("data-id");
+      if (!edgeId) return;
+      const selected = store.getState().edges.some((edge) => edge.id === edgeId && edge.selected);
+      openNoodleFromDoubleClick(event, edgeId, selected);
+    };
+    document.addEventListener("dblclick", onDoubleClick, true);
+    return () => document.removeEventListener("dblclick", onDoubleClick, true);
+  }, [openNoodleFromDoubleClick, store]);
+
   useEffect(() => {
     const onCopy = (event: ClipboardEvent) => {
       if (event.defaultPrevented || isEditableTarget(event.target)) return;
@@ -1662,7 +1702,7 @@ function Board() {
     const blockedTarget = (target: EventTarget | null) => {
       if (!(target instanceof Element)) return null;
       if (!target.closest(".react-flow")) return null;
-      if (target.closest(".react-flow__minimap, .react-flow__controls, [data-floating-panel], [data-canvas-chrome]")) return null;
+      if (target.closest(".react-flow__minimap, .react-flow__controls, [data-floating-panel], [data-canvas-chrome], [data-noodle-label]")) return null;
       return target.closest(".nopan");
     };
     const onDown = (event: PointerEvent) => {
@@ -1809,6 +1849,9 @@ function Board() {
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onEdgeDoubleClick={(event, edge) => {
+            openNoodleFromDoubleClick(event, edge.id, edge.selected);
+          }}
           onConnect={onConnect}
           onConnectStart={(_event, params) => {
             gestureEdgeRef.current = null;
