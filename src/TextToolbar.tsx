@@ -46,6 +46,7 @@ function Menu({
   label,
   menuLabel,
   glyph,
+  horizontal = false,
   open,
   onToggle,
   children,
@@ -53,6 +54,7 @@ function Menu({
   label: string;
   menuLabel: string;
   glyph?: ReactNode;
+  horizontal?: boolean;
   open: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -86,7 +88,11 @@ function Menu({
           role="menu"
           ariaLabel={menuLabel}
           data-text-toolbar=""
-          className="rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          className={
+            horizontal
+              ? "flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+              : "rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          }
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -105,11 +111,13 @@ function Menu({
 function MenuItem({
   label,
   glyph,
+  horizontal = false,
   active,
   onPick,
 }: {
   label: string;
   glyph?: ReactNode;
+  horizontal?: boolean;
   active: boolean;
   onPick: () => void;
 }) {
@@ -122,9 +130,9 @@ function MenuItem({
       title={glyph ? label : undefined}
       onClick={onPick}
       className={
-        glyph
-          ? `flex h-10 w-full items-center justify-center ${
-              active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+        horizontal
+          ? `flex h-10 items-center justify-center rounded-lg px-2 text-slate-700 ${
+              active ? "bg-slate-100" : "hover:bg-slate-50"
             }`
           : `block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
               active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
@@ -228,6 +236,7 @@ export default function TextToolbar({
         glyph={
           activeAlign === "mixed" ? undefined : <AlignGlyph align={activeAlign} />
         }
+        horizontal
         open={menu === "align"}
         onToggle={() => toggle("align")}
       >
@@ -236,6 +245,7 @@ export default function TextToolbar({
             key={align}
             label={ALIGN_LABELS[align]}
             glyph={<AlignGlyph align={align} />}
+            horizontal
             active={activeAlign === align}
             onPick={() => {
               setMenu(null);
