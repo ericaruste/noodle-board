@@ -145,6 +145,11 @@
       "id": "4fb42e54-95ff-4ef2-a743-be6f4531eba3",
       "identifier": "ERI-32",
       "url": "https://linear.app/ericar/issue/ERI-32/add-shape-swap-on-the-shapes-floating-toolbar"
+    },
+    "NB-24": {
+      "id": "f10dcc9d-4eb0-4680-91a9-565b68c444e7",
+      "identifier": "ERI-33",
+      "url": "https://linear.app/ericar/issue/ERI-33/edit-noodle-text-on-the-line"
     }
   }
 }
