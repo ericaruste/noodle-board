@@ -325,12 +325,18 @@ function NoodleLabelEditor({
           write(event.target.value, history);
         }}
         onBlur={() => {
+          const current = dataRef.current;
+          if (current.label && !current.label.trim()) publishNoodle(edgeId, { ...current, label: "" });
           closeNoodleLabel(edgeId);
         }}
         onKeyDown={(event) => {
           if (event.key !== "Enter" && event.key !== "Escape") return;
           event.preventDefault();
           event.stopPropagation();
+          if (event.key === "Enter") {
+            const current = dataRef.current;
+            if (current.label && !current.label.trim()) publishNoodle(edgeId, { ...current, label: "" });
+          }
           closeNoodleLabel(edgeId);
         }}
         className="noodle-edge-label noodle-edge-label-input nodrag nopan nowheel"
@@ -483,6 +489,7 @@ export default function NoodleEdge(props: EdgeProps) {
   const width = thicknessPx(data.thickness);
   const label = data.label.trim();
   const editing = useNoodleLabelEditing(props.id);
+  const store = useStoreApi();
   const wasSelected = useRef(props.selected);
   useEffect(() => {
     const was = wasSelected.current;
@@ -570,6 +577,12 @@ export default function NoodleEdge(props: EdgeProps) {
           <div
             data-noodle-rest={props.id}
             className="noodle-edge-label nodrag nopan nowheel"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (document.querySelector(".noodle-hand")) return;
+              store.getState().addSelectedEdges([props.id]);
+            }}
             onDoubleClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
