@@ -22,6 +22,7 @@ import {
   type ShapeData,
   type ShapeKind,
 } from "./shapeData";
+import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { coerceBody, isTextBody, sameBody, type TextBody } from "./textBody";
 
 function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): ShapeData {
@@ -371,6 +372,8 @@ function PaintRow({
 
 function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
+  const hideChrome = useConnectChromeHidden();
+  const showChrome = selected && !hideChrome;
   const resizing = useStore((state) => Boolean(state.nodeLookup.get(id)?.resizing));
   const dataRef = useRef(data);
   dataRef.current = data;
@@ -523,11 +526,12 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       style={resizeStyle}
       onDoubleClick={(event) => {
         event.stopPropagation();
+        if (selectionHeld() || swallowsClick()) return;
         setEditing(true);
       }}
     >
       <NoodleResizer
-        selected={selected}
+        selected={showChrome}
         minWidth={SHAPE_MIN_SIZE}
         minHeight={contentFloor}
         onResizeStart={beginResize}
@@ -560,7 +564,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
           <RichText
             body={body}
             editing={editing}
-            selected={selected}
+            selected={showChrome}
             placeholder="Double-click to write"
             onCommit={commitText}
             onCancel={() => setEditing(false)}
@@ -570,7 +574,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
         </div>
       </div>
       <ObjectPorts nodeId={id} />
-      {selected ? (
+      {showChrome ? (
         <SelectionChrome side="below">
           <div
             data-shape-colors

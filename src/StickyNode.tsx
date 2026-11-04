@@ -4,6 +4,7 @@ import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
 import SelectionChrome from "./SelectionChrome";
+import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -42,6 +43,8 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
   );
   const [editing, setEditing] = useState(false);
   const resizeStyle = useNoodleResizeStyle();
+  const hideChrome = useConnectChromeHidden();
+  const showChrome = selected && !hideChrome;
   const dataRef = useRef(data);
   dataRef.current = data;
 
@@ -74,11 +77,12 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
       style={{ ...resizeStyle, background: STICKY_COLORS[data.color] }}
       onDoubleClick={(event) => {
         event.stopPropagation();
+        if (selectionHeld() || swallowsClick()) return;
         setEditing(true);
       }}
     >
       <NoodleResizer
-        selected={selected}
+        selected={showChrome}
         minWidth={140}
         minHeight={140}
         onResizeStart={snapshot}
@@ -87,14 +91,14 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
       <RichText
         body={body}
         editing={editing}
-        selected={selected}
+        selected={showChrome}
         fill
         placeholder="Double-click to write"
         onCommit={commit}
         onCancel={() => setEditing(false)}
         onFormat={format}
       />
-      {selected ? (
+      {showChrome ? (
         <SelectionChrome side="below">
           <div
             data-sticky-colors

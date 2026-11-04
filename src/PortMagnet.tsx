@@ -20,11 +20,15 @@ import { ROUTE_GAP } from "./noodleRoute";
 import {
   consumePortGesture,
   beginPortGesture,
+  captureReleaseLanding,
   getConnectionOrigin,
   getHotPort,
   getHoverTarget,
+  holdSelection,
   notePortRelease,
   portGestureOwnsClick,
+  readReleaseLanding,
+  setConnectSession,
   setConnectionOrigin,
   setDragFeedback,
   setHotPort,
@@ -394,6 +398,19 @@ function originSide(
   return best?.side ?? projected;
 }
 
+/** The element under a pointerup, including its center. Prefers the value captured before hover is cleared. */
+export function hoverForRelease(
+  state: ReactFlowState,
+  clientX: number,
+  clientY: number,
+  kind: DragKind,
+): HoverTarget | null {
+  const captured = readReleaseLanding();
+  if (captured !== undefined) return captured;
+  const flow = clientToFlow(state, clientX, clientY);
+  return flow ? resolveHover(state, flow, kind) : null;
+}
+
 /** Where the preview line ends: outside the side, on the midpoint or the free edge. */
 export function landingGeometry(state: ReactFlowState, target: HoverTarget) {
   const node = state.nodeLookup.get(target.elementId);
@@ -545,6 +562,15 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
   }, [store]);
 
   useEffect(() => {
+    const sync = () => {
+      const state = store.getState();
+      setConnectSession(Boolean(state.connection.inProgress || state.connectionClickStartHandle));
+    };
+    sync();
+    return store.subscribe(sync);
+  }, [store]);
+
+  useEffect(() => {
     const placeAt = (clientX: number, clientY: number) => {
       const state = store.getState();
       const armed = connectMode && state.connectionClickStartHandle;
@@ -572,13 +598,40 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       if (!store.getState().connection.inProgress) return;
       placeAt(event.clientX, event.clientY);
     };
+    // Capture the landing before React Flow ends the drag. A later mouseup must not clear it.
+    const onRelease = (event: Event) => {
+      if (!(event instanceof MouseEvent) || event.button !== 0) return;
+      const state = store.getState();
+      const live = state.connection.inProgress;
+      const armed = state.connectionClickStartHandle != null;
+      if (!live && !armed) return;
+      holdSelection();
+      if (!live) return;
+      const kind = dragKind(state);
+      const flow = clientToFlow(state, event.clientX, event.clientY);
+      captureReleaseLanding(flow ? resolveHover(state, flow, kind) : null);
+    };
+    const onPress = (event: PointerEvent) => {
+      if (!connectMode || event.button !== 0) return;
+      const state = store.getState();
+      if (state.connection.inProgress) {
+        holdSelection();
+        return;
+      }
+      // Arm the guard before React Flow can select the element under this press.
+      if (portAtClient(state, event.clientX, event.clientY)) holdSelection();
+    };
+    window.addEventListener("pointerdown", onPress, true);
     window.addEventListener("pointermove", onPointerMove);
     document.addEventListener("mousemove", onMouseMove, true);
-    document.addEventListener("mouseup", onMouseMove, true);
+    window.addEventListener("pointerup", onRelease, true);
+    window.addEventListener("mouseup", onRelease, true);
     return () => {
+      window.removeEventListener("pointerdown", onPress, true);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("mousemove", onMouseMove, true);
-      document.removeEventListener("mouseup", onMouseMove, true);
+      window.removeEventListener("pointerup", onRelease, true);
+      window.removeEventListener("mouseup", onRelease, true);
     };
   }, [connectMode, store]);
 
@@ -620,6 +673,7 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       const handle = placeHandle(state, port.nodeId, port.handleId, port.fraction);
       if (!handle) return;
       clearEdgeSelection(state);
+      holdSelection();
       beginPortGesture();
       const onRelease = () => {
         notePortRelease();

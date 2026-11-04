@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useStore } from "@xyflow/react";
 import type { SideId } from "./attachment";
 import type { HotPort } from "./noodleEnds";
 
@@ -20,6 +21,11 @@ let origin: ConnectionOrigin | null = null;
 let swallowUntil = 0;
 let portGesture = false;
 let portGestureTimer = 0;
+let connectSession = false;
+let holdUntil = 0;
+let holdTimer = 0;
+let releaseSet = false;
+let releaseLanding: HoverTarget | null = null;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -100,6 +106,69 @@ export function portGestureOwnsClick() {
 export function consumePortGesture() {
   portGesture = false;
   window.clearTimeout(portGestureTimer);
+}
+
+/** Arrow-tool pending origin, connection drag, or reconnect. Selection changes wait. */
+export function setConnectSession(next: boolean) {
+  if (connectSession === next) return;
+  connectSession = next;
+  emit();
+}
+
+export function selectionHeld() {
+  return connectSession || performance.now() < holdUntil;
+}
+
+/** The click that follows a landing must not select the element under the pointer. */
+export function holdSelection() {
+  holdUntil = performance.now() + 400;
+  window.clearTimeout(holdTimer);
+  holdTimer = window.setTimeout(() => {
+    holdUntil = 0;
+    emit();
+  }, 420);
+  emit();
+}
+
+/**
+ * Hover at pointerup, kept even if the live hover is cleared before the drop is read.
+ * `undefined` means this release has not been captured yet.
+ */
+export function captureReleaseLanding(next: HoverTarget | null) {
+  releaseSet = true;
+  releaseLanding = next;
+}
+
+export function readReleaseLanding(): HoverTarget | null | undefined {
+  if (!releaseSet) return undefined;
+  return releaseLanding;
+}
+
+export function clearReleaseLanding() {
+  releaseSet = false;
+  releaseLanding = null;
+}
+
+/** Hide text toolbars and color chips for the whole connecting session, including the release click. */
+export function useConnectChromeHidden() {
+  const flow = useStore(
+    (state) => state.connection.inProgress || state.connectionClickStartHandle != null,
+  );
+  const [held, setHeld] = useState(() => selectionHeld());
+
+  useEffect(() => {
+    const sync = () => {
+      const next = selectionHeld();
+      setHeld((prev) => (prev === next ? prev : next));
+    };
+    listeners.add(sync);
+    sync();
+    return () => {
+      listeners.delete(sync);
+    };
+  }, []);
+
+  return flow || held;
 }
 
 export function setConnectionOrigin(next: ConnectionOrigin | null) {

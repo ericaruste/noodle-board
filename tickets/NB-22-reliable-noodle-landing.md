@@ -49,15 +49,15 @@ A port that already has a noodle has a second problem. Noodles use `zIndex: laye
 
 ## Acceptance criteria
 
-- [ ] While the Arrow tool is armed or a noodle end is being dragged, the element chosen as the landing target is not selected
-- [ ] That landing does not show the text toolbar, sticky color chips, or shape fill/stroke panel, and it does not open text editing
-- [ ] The Arrow tool stays in connect mode after the noodle lands. Escape or another tool is still what leaves connect mode
-- [ ] A manual drag (Arrow tool off) stays a noodle drag through the release. The landing element does not become selected because of that drop
-- [ ] Arrow-tool click-to-connect attaches a noodle every time the second click is on an element, including its center
+- [x] While the Arrow tool is armed or a noodle end is being dragged, the element chosen as the landing target is not selected
+- [x] That landing does not show the text toolbar, sticky color chips, or shape fill/stroke panel, and it does not open text editing
+- [x] The Arrow tool stays in connect mode after the noodle lands. Escape or another tool is still what leaves connect mode
+- [x] A manual drag (Arrow tool off) stays a noodle drag through the release. The landing element does not become selected because of that drop
+- [x] Arrow-tool click-to-connect attaches a noodle every time the second click is on an element, including its center
 - [ ] Arrow-tool drag, manual side drag, and dragging an existing end attach every time the pointer is released over an element, including its center
 - [ ] Repeating those four gestures on stickies, text, shapes, and images does not alternate between a landed noodle and a missed one
-- [ ] A click or release on empty canvas does not invent an attachment. An existing end dropped on empty canvas still parks there (NB-03)
-- [ ] With the Arrow tool off and no noodle drag in progress, a click still selects the element and shows its toolbar
+- [x] A click or release on empty canvas does not invent an attachment. An existing end dropped on empty canvas still parks there (NB-03)
+- [x] With the Arrow tool off and no noodle drag in progress, a click still selects the element and shows its toolbar
 - [x] With the Arrow tool on, clicking a port that already has a noodle does not select that noodle and does not open the noodle toolbar. The click still starts or completes the connection
 - [x] With the Arrow tool off, a drag started by clicking a port that already has a noodle does not select that noodle and does not open the noodle toolbar. The gesture stays a noodle drag until release
 - [x] While that connect is in progress, the noodle toolbar stays closed

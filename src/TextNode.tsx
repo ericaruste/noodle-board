@@ -3,6 +3,7 @@ import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
+import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -28,6 +29,8 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
   const body = useMemo(() => coerceBody(data.paragraphs), [data.paragraphs]);
   const [editing, setEditing] = useState(false);
   const resizeStyle = useNoodleResizeStyle();
+  const hideChrome = useConnectChromeHidden();
+  const showChrome = selected && !hideChrome;
   const dataRef = useRef(data);
   dataRef.current = data;
 
@@ -59,11 +62,12 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
       style={{ ...resizeStyle, width: "100%", height: "100%" }}
       onDoubleClick={(event) => {
         event.stopPropagation();
+        if (selectionHeld() || swallowsClick()) return;
         setEditing(true);
       }}
     >
       <NoodleResizer
-        selected={selected}
+        selected={showChrome}
         minWidth={120}
         minHeight={32}
         onResizeStart={snapshot}
@@ -72,7 +76,7 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
       <RichText
         body={body}
         editing={editing}
-        selected={selected}
+        selected={showChrome}
         fontSize={data.fontSize}
         placeholder="Double-click to write"
         onCommit={commit}

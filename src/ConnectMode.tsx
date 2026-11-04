@@ -13,7 +13,7 @@ import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
 import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
-import { armClickSwallow, beginPortGesture, clearConnectionOrigin, consumePortGesture, getConnectionOrigin, getHoverTarget, notePortRelease, setConnectionOrigin, setHotPort } from "./portHot";
+import { armClickSwallow, beginPortGesture, clearConnectionOrigin, consumePortGesture, getConnectionOrigin, getHoverTarget, holdSelection, notePortRelease, setConnectionOrigin, setHotPort } from "./portHot";
 
 type ConnectModeProps = {
   active: boolean;
@@ -33,7 +33,7 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
 function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__resize-control, .react-flow__node-endpoint",
+      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint",
     ),
   );
 }
@@ -87,6 +87,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       finishGesture();
       if (current) notePortRelease();
       if (!current || current.dragged || event.button !== 0) return;
+      holdSelection();
       const state = store.getState();
       const flow = clientToFlow(state, event.clientX, event.clientY);
       const armed = state.connectionClickStartHandle;
@@ -147,6 +148,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         return;
       }
       clearEdgeSelection(state);
+      holdSelection();
       beginPortGesture();
       event.stopPropagation();
       event.preventDefault();

@@ -66,10 +66,10 @@ import EndpointNode from "./EndpointNode";
 import NoodleEdge from "./NoodleEdge";
 import ConnectMode from "./ConnectMode";
 import NoodleConnectionLine from "./connectionLine";
-import PortMagnet, { dragKind, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
+import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
-import { armClickSwallow, clearConnectionOrigin, getHotPort, getHoverTarget, setConnectionOrigin, setHotPort } from "./portHot";
+import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -269,6 +269,7 @@ function Board() {
   const guidesRef = useRef<GuideOverlay>({ lines: [], brackets: [] });
   const [guides, setGuides] = useState<GuideOverlay>({ lines: [], brackets: [] });
   const reconnectRef = useRef<{ edge: Edge; dragged: HandleType } | null>(null);
+  const reconnectSettledRef = useRef(false);
   const rfConnectionRef = useRef<Connection | null>(null);
   const documentNameRef = useRef("Untitled");
   const fileHandleRef = useRef<FileSystemFileHandle | null>(null);
@@ -418,8 +419,10 @@ function Board() {
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
-      if (changes.some((change) => change.type === "remove")) takeSnapshot();
-      const dragEnded = changes.some((change) => change.type === "position" && change.dragging === false);
+      const applied = selectionHeld() ? changes.filter((change) => change.type !== "select") : changes;
+      if (applied.length === 0) return;
+      if (applied.some((change) => change.type === "remove")) takeSnapshot();
+      const dragEnded = applied.some((change) => change.type === "position" && change.dragging === false);
       const parkedNodes = parkedCopiesRef.current?.nodes;
       const alt = dragEnded ? altDragRef.current : null;
       const dragId = dragNodeIdRef.current;
@@ -429,7 +432,7 @@ function Board() {
           : null;
       if (altDragRef.current) {
         const raw = new Map<string, { x: number; y: number }>();
-        for (const change of changes) {
+        for (const change of applied) {
           if (change.type === "position" && change.position) {
             raw.set(change.id, { x: change.position.x, y: change.position.y });
           }
@@ -440,7 +443,7 @@ function Board() {
         const base = appendMissing(current, parkedNodes);
         const aligned = alignNodeChanges(
           base,
-          changes,
+          applied,
           dragEnded ? dragId : dragNodeIdRef.current,
           resizeOriginRef.current,
           snappedSizeRef.current,
@@ -553,8 +556,15 @@ function Board() {
         added === edgesRef.current
           ? edgesRef.current.concat({ ...created, id: freshId })
           : added;
-      gestureEdgeRef.current =
+      const createdId =
         withNew.find((edge) => !edgesRef.current.some((item) => item.id === edge.id))?.id ?? null;
+      gestureEdgeRef.current = createdId;
+      // Click-to-connect never reaches onConnectEnd. Drop the guard before the next gesture.
+      if (createdId) {
+        queueMicrotask(() => {
+          if (gestureEdgeRef.current === createdId) gestureEdgeRef.current = null;
+        });
+      }
       const next = reflowAttachments(withNew);
       takeSnapshot();
       edgesRef.current = next;
@@ -564,7 +574,7 @@ function Board() {
   );
 
   const alignGestureEdge = useCallback(
-    (hovered: ReturnType<typeof getHoverTarget>) => {
+    (hovered: HoverTarget | null) => {
       const id = gestureEdgeRef.current;
       if (!id || !hovered) return;
       const port = portFromHover(hovered, dragKind(store.getState()));
@@ -608,22 +618,27 @@ function Board() {
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
       const finish = () => {
-        const id = gestureEdgeRef.current;
-        queueMicrotask(() => {
-          if (gestureEdgeRef.current === id) gestureEdgeRef.current = null;
-        });
+        gestureEdgeRef.current = null;
         clearConnectionOrigin();
         setHotPort(null);
+        clearReleaseLanding();
       };
-      // Reconnect still needs the hover. onReconnectEnd clears it.
-      if (reconnectRef.current) return;
+      // Reconnect still needs the landing. onReconnectEnd reads and clears it.
+      if (reconnectRef.current || reconnectSettledRef.current) return;
       if (suppressConnectRef.current) {
         finish();
         return;
       }
-      const hovered = getHoverTarget();
-      if (hovered || releaseHitsNode(event)) armClickSwallow();
-      if (connectionState.isValid && connectionState.toHandle) {
+      const point = pointFromEvent(event);
+      const state = store.getState();
+      const kind = dragKind(state);
+      const hovered = hoverForRelease(state, point.x, point.y, kind);
+      if (hovered || releaseHitsNode(event)) {
+        holdSelection();
+        armClickSwallow();
+      }
+      // A handle hit only counts when this gesture actually added the noodle.
+      if (connectionState.isValid && connectionState.toHandle && gestureEdgeRef.current) {
         alignGestureEdge(hovered);
         finish();
         return;
@@ -638,13 +653,11 @@ function Board() {
         finish();
         return;
       }
-      const point = pointFromEvent(event);
-      const state = store.getState();
-      const kind = dragKind(state);
+      const mode = kind === "origin" ? "midpoint" : "edge";
       const port =
         (hovered ? portFromHover(hovered, kind) : null) ??
-        (connectModeRef.current ? portAtClient(state, point.x, point.y, "edge") : null) ??
-        nearestPort(state, connectionState.pointer, "edge");
+        portAtClient(state, point.x, point.y, mode) ??
+        nearestPort(state, connectionState.pointer, mode);
       if (!port?.handleId) {
         finish();
         return;
@@ -793,27 +806,36 @@ function Board() {
       handleType: HandleType,
       connectionState: FinalConnectionState,
     ) => {
+      reconnectSettledRef.current = true;
+      queueMicrotask(() => {
+        reconnectSettledRef.current = false;
+      });
       if (suppressConnectRef.current) {
         reconnectRef.current = null;
         rfConnectionRef.current = null;
         clearConnectionOrigin();
         setHotPort(null);
+        clearReleaseLanding();
         return;
       }
       const dragged = reconnectRef.current?.dragged ?? draggedEnd(handleType);
       const rf = rfConnectionRef.current;
       reconnectRef.current = null;
       rfConnectionRef.current = null;
-      const hovered = getHoverTarget();
-      if (hovered || releaseHitsNode(event)) armClickSwallow();
+      const point = pointFromEvent(event);
       const kind = dragged === "source" ? "origin" : "target";
+      const state = store.getState();
+      const hovered = hoverForRelease(state, point.x, point.y, kind);
+      clearReleaseLanding();
+      if (hovered || releaseHitsNode(event)) {
+        holdSelection();
+        armClickSwallow();
+      }
+      const mode = dragged === "source" ? "midpoint" : "edge";
       const hot =
         (hovered ? portFromHover(hovered, kind) : null) ??
-        nearestPort(
-          store.getState(),
-          connectionState.pointer,
-          dragged === "source" ? "midpoint" : "edge",
-        );
+        portAtClient(state, point.x, point.y, mode) ??
+        nearestPort(state, connectionState.pointer, mode);
       setHotPort(null);
       const dropFraction = dragged === "source" ? (hot ? 0.5 : undefined) : hot?.fraction;
       const hotConnection = hot ? connectionForDrop(edge, dragged, hot) : null;
@@ -895,7 +917,6 @@ function Board() {
       const currentId = dragged === "source" ? edge.source : edge.target;
       const currentHandle =
         dragged === "source" ? (edge.sourceHandle ?? null) : (edge.targetHandle ?? null);
-      const point = pointFromEvent(event);
       const onHandle = (nodeId: string, handleId: string | null) => {
         const handle = document.querySelector(
           `.react-flow__handle[data-nodeid="${CSS.escape(nodeId)}"][data-handleid="${CSS.escape(handleId ?? "")}"]`,
@@ -1416,6 +1437,8 @@ function Board() {
           store.setState({ connectionClickStartHandle: null });
           clearConnectionOrigin();
           setHotPort(null);
+          clearReleaseLanding();
+          holdSelection();
           document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
           suppressConnectRef.current = false;
           armClickSwallow();
@@ -1595,6 +1618,7 @@ function Board() {
           onConnect={onConnect}
           onConnectStart={(_event, params) => {
             gestureEdgeRef.current = null;
+            clearReleaseLanding();
             if (!params.nodeId || !params.handleId || !isSide(params.handleId)) return;
             // Dragging the origin reports the stationary target. Pin the source midpoint instead.
             if (params.handleType === "target") {

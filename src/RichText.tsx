@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { useConnectChromeHidden } from "./portHot";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
@@ -691,10 +692,12 @@ export function RichText({
 
   const showPlaceholder = isEmptyBody(shown);
   const textStyle = fontSize ? { fontSize } : undefined;
+  const hideChrome = useConnectChromeHidden();
+  const showChrome = selected && !hideChrome;
 
   return (
     <div ref={rootRef} className={fill ? "relative h-full w-full" : "relative w-full"}>
-      {selected ? (
+      {showChrome ? (
         <SelectionChrome side="above" order={0}>
           <TextToolbar
             styleLabel={uniformStyle === "mixed" ? "Mixed" : FONT_STYLE_LABELS[uniformStyle]}
