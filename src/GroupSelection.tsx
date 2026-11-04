@@ -267,6 +267,19 @@ function GroupToolbar({
     if (width > 0 && top + height > boundsH - 8) top = anchor.top - gap - height;
     if (width > 0) left = Math.max(8, Math.min(left, boundsW - width - 8));
     if (height > 0) top = Math.max(8, Math.min(top, boundsH - height - 8));
+    const tools = document.querySelector(".board-toolbar");
+    const layer = document.querySelector("[data-floating-layer]");
+    if (tools instanceof HTMLElement && layer instanceof HTMLElement && width > 0 && height > 0) {
+      const origin = layer.getBoundingClientRect();
+      const pill = tools.getBoundingClientRect();
+      const pillTop = pill.top - origin.top;
+      const hits =
+        left + width > pill.left - origin.left &&
+        left < pill.right - origin.left &&
+        top + height > pillTop &&
+        top < pill.bottom - origin.top;
+      if (hits) top = Math.max(8, pillTop - gap - height);
+    }
     setPos((prev) =>
       prev && Math.abs(prev.left - left) < 0.5 && Math.abs(prev.top - top) < 0.5 ? prev : { left, top },
     );

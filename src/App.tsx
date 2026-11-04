@@ -1815,7 +1815,7 @@ function Board() {
         {fileError ? (
           <div
             role="alert"
-            className="absolute bottom-4 left-4 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
+            className="absolute left-4 top-20 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
             style={{ zIndex: layers.selection }}
           >
             <span>{fileError}</span>

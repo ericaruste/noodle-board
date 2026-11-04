@@ -206,8 +206,8 @@ function EndKnob({
 
 function ClampedToolbar({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const shiftRef = useRef(0);
-  const [shift, setShift] = useState(0);
+  const shiftRef = useRef({ x: 0, y: 0 });
+  const [shift, setShift] = useState({ x: 0, y: 0 });
   useLayoutEffect(() => {
     const el = ref.current;
     const pane = document.querySelector(".react-flow");
@@ -215,17 +215,28 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
     const box = el.getBoundingClientRect();
     const bounds = pane.getBoundingClientRect();
     const pad = 8;
-    const left = box.left - shiftRef.current;
-    const right = box.right - shiftRef.current;
-    let next = 0;
-    if (left < bounds.left + pad) next = bounds.left + pad - left;
-    if (right + next > bounds.right - pad) next += bounds.right - pad - (right + next);
-    if (Math.abs(shiftRef.current - next) <= 0.5) return;
-    shiftRef.current = next;
-    setShift(next);
+    const left = box.left - shiftRef.current.x;
+    const right = box.right - shiftRef.current.x;
+    let x = 0;
+    if (left < bounds.left + pad) x = bounds.left + pad - left;
+    if (right + x > bounds.right - pad) x += bounds.right - pad - (right + x);
+    let y = 0;
+    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    if (tools && tools.width > 0 && tools.height > 0) {
+      const top = box.top - shiftRef.current.y;
+      const bottom = box.bottom - shiftRef.current.y;
+      const movedLeft = left + x;
+      const movedRight = right + x;
+      const hits = movedRight > tools.left && movedLeft < tools.right && bottom > tools.top && top < tools.bottom;
+      if (hits) y = tools.top - pad - bottom;
+    }
+    if (Math.abs(shiftRef.current.x - x) <= 0.5 && Math.abs(shiftRef.current.y - y) <= 0.5) return;
+    shiftRef.current = { x, y };
+    setShift({ x, y });
   });
+  const transform = shift.x || shift.y ? `translate(${shift.x}px, ${shift.y}px)` : undefined;
   return (
-    <div ref={ref} style={{ pointerEvents: "auto", transform: shift ? `translateX(${shift}px)` : undefined }}>
+    <div ref={ref} style={{ pointerEvents: "auto", transform }}>
       {children}
     </div>
   );
