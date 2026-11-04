@@ -23,7 +23,7 @@ body,
   left: clamp(1rem, calc(50% - 11.5rem), calc(100% - 15.5rem - 23rem));
 }
 
-@media (max-width: 36rem) {
+@media (max-width: 39.5rem) {
   .board-toolbar {
     /* The pill is wider than the gap beside the map, so it sits above that map. */
     bottom: calc(200px + 15px + 1rem);

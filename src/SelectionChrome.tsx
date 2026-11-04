@@ -224,12 +224,18 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
 
   useLayoutEffect(() => {
     if (!host) return;
+    let observer: ResizeObserver;
+    const watchTools = () => {
+      const tools = document.querySelector(".board-toolbar");
+      if (tools instanceof HTMLElement) observer.observe(tools);
+    };
     const update = () => {
+      watchTools();
       const next = readSafeArea(host);
       setSafe((prev) => (sameSafe(prev, next) ? prev : next));
     };
+    observer = new ResizeObserver(update);
     update();
-    const observer = new ResizeObserver(update);
     observer.observe(host);
     const flow = host.closest(".react-flow");
     const board = flow?.parentElement;
@@ -242,7 +248,11 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
     }
     const minimap = flow?.querySelector(".react-flow__minimap");
     if (minimap instanceof HTMLElement) observer.observe(minimap);
-    return () => observer.disconnect();
+    const frame = requestAnimationFrame(update);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [host]);
 
   useLayoutEffect(() => {
