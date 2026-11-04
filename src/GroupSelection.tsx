@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStore, type Edge, type Node, type ReactFlowState } from "@xyflow/react";
 import { FloatingPanel } from "./FloatingPanel";
+import { useChromeLayout } from "./NoodleEdge";
 import { layers } from "./layers";
 import { applyNoodleData, NOODLE_COLORS, readNoodle } from "./noodleData";
 import { useNoodleResizeStyle } from "./NoodleResizer";
@@ -238,6 +239,7 @@ function GroupToolbar({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const host = useStore((state) => state.domNode);
+  useChromeLayout();
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const showFill = model.fills.length > 0;
   const showStroke = model.strokes.length > 0;

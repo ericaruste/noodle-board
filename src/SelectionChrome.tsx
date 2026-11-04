@@ -1,6 +1,7 @@
 import { useNodeId, useStore } from "@xyflow/react";
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { FloatingPanel } from "./FloatingPanel";
+import { useChromeLayout } from "./NoodleEdge";
 import { selectionClearance } from "./NoodleResizer";
 import {
   placeSelectionChrome,
@@ -215,6 +216,7 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
     };
   }, sameAnchor);
   const layoutTick = useSyncExternalStore(subscribe, getTick, getTick);
+  const chrome = useChromeLayout();
   const rootRef = useRef<HTMLDivElement>(null);
   const [safe, setSafe] = useState<SafeArea | null>(null);
 
@@ -253,7 +255,7 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [host]);
+  }, [host, chrome]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
