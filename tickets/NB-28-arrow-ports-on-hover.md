@@ -7,8 +7,8 @@ labels: [UX, Canvas]
 parent: NB-E1
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-37
+linear_url: https://linear.app/ericar/issue/ERI-37/show-arrow-tool-ports-only-on-the-hovered-element
 ---
 
 ## Context
