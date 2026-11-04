@@ -1,7 +1,7 @@
 ---
 id: NB-10
 title: Frosted-glass navigation containers
-status: In Progress
+status: Done
 priority: 3
 labels: [UX, Toolbar]
 parent: NB-E4
