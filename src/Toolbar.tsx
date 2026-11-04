@@ -92,9 +92,14 @@ export default function Toolbar({
   }, [shapesOpen]);
 
   return (
-    <FloatingPanel layer="toolbar" role="toolbar" ariaLabel="Tools" className="board-toolbar">
+    <FloatingPanel
+      layer="toolbar"
+      role="toolbar"
+      ariaLabel="Tools"
+      className="board-toolbar rounded-full border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
+    >
       <div
-        className="flex items-center gap-0.5 rounded-full border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
+        className="flex items-center gap-0.5"
         onPointerDown={(event) => {
           const target = event.target;
           if (target instanceof Element && target.closest("[data-shapes-menu]")) return;
