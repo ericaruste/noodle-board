@@ -38,9 +38,11 @@ export function openNoodleLabel(id: string) {
   emit();
 }
 
-export function closeNoodleLabel() {
+/** Pass the edge id from a blur so closing one field cannot clear a field that just opened on another noodle. */
+export function closeNoodleLabel(id?: string) {
   if (blockClose) return;
   if (editingId == null) return;
+  if (id != null && editingId !== id) return;
   editingId = null;
   emit();
 }

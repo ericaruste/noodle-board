@@ -334,13 +334,13 @@ function NoodleLabelEditor({
           write(event.target.value, history);
         }}
         onBlur={() => {
-          closeNoodleLabel();
+          closeNoodleLabel(edgeId);
         }}
         onKeyDown={(event) => {
           if (event.key !== "Enter" && event.key !== "Escape") return;
           event.preventDefault();
           event.stopPropagation();
-          closeNoodleLabel();
+          closeNoodleLabel(edgeId);
         }}
         className="noodle-edge-label noodle-edge-label-input nodrag nopan nowheel"
         style={{
@@ -496,7 +496,7 @@ export default function NoodleEdge(props: EdgeProps) {
   useEffect(() => {
     const was = wasSelected.current;
     wasSelected.current = Boolean(props.selected);
-    if (editing && was && !props.selected) closeNoodleLabel();
+    if (editing && was && !props.selected) closeNoodleLabel(props.id);
   }, [editing, props.selected]);
   const zoom = useStore((state) => state.transform[2] || 1);
   const connecting = useStore((state) => state.connection.inProgress || state.connectionClickStartHandle != null);
