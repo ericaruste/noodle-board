@@ -94,7 +94,7 @@ export default function Toolbar({
   return (
     <FloatingPanel layer="toolbar" role="toolbar" ariaLabel="Tools" className="board-toolbar">
       <div
-        className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white/95 p-1 shadow-lg backdrop-blur"
+        className="flex items-center gap-0.5 rounded-full border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
         onPointerDown={(event) => {
           const target = event.target;
           if (target instanceof Element && target.closest("[data-shapes-menu]")) return;

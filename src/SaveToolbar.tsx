@@ -19,7 +19,7 @@ export default function SaveToolbar({
   onSaveAs,
 }: SaveToolbarProps) {
   return (
-    <div className="pointer-events-auto flex min-w-0 max-w-full items-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
+    <div className="pointer-events-auto flex min-w-0 max-w-full items-center gap-1 rounded-2xl border border-white/50 bg-white/40 p-1.5 shadow-lg backdrop-blur-xl">
       <span
         className="min-w-0 truncate px-2 text-sm font-medium text-slate-500"
         title={documentName}

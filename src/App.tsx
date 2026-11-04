@@ -1808,7 +1808,7 @@ function Board() {
               onSaveAs={() => void saveProject("save-as")}
             />
           </div>
-          <div className="absolute right-0 top-0 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow min-[800px]:static">
+          <div className="absolute right-0 top-0 rounded-xl border border-white/50 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-700 shadow backdrop-blur-xl min-[800px]:static">
             Noodle Board
           </div>
         </div>
@@ -1972,8 +1972,9 @@ function Board() {
             pannable
             zoomable
             nodeStrokeWidth={2}
+            bgColor="rgba(255, 255, 255, 0.4)"
             maskColor="rgba(28, 25, 23, 0.12)"
-            className="!bg-white"
+            className="border border-white/50 !bg-white/40 backdrop-blur-xl"
           />
           <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>

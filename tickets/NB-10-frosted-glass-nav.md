@@ -1,7 +1,7 @@
 ---
 id: NB-10
 title: Frosted-glass navigation containers
-status: Todo
+status: In Progress
 priority: 3
 labels: [UX, Toolbar]
 parent: NB-E4
@@ -31,11 +31,11 @@ Nav surfaces read as solid white cards, not frosted glass.
 
 ## Acceptance criteria
 
-- [ ] Toolbar container, title chip, and minimap use a low-alpha fill, strong `backdrop-blur` (e.g. `bg-white/40 backdrop-blur-xl`), and a hairline light border
-- [ ] Canvas dots remain visible through those surfaces
-- [ ] Text and icons on those surfaces stay readable (contrast) in default light theme
-- [ ] Hover/disabled button states still work on the frosted toolbar
-- [ ] If NB-11 moves the toolbar, frost travels with it (do not leave a solid white clone)
+- [x] Toolbar container, title chip, and minimap use a low-alpha fill, strong `backdrop-blur` (e.g. `bg-white/40 backdrop-blur-xl`), and a hairline light border
+- [x] Canvas dots remain visible through those surfaces
+- [x] Text and icons on those surfaces stay readable (contrast) in default light theme
+- [x] Hover/disabled button states still work on the frosted toolbar
+- [x] If NB-11 moves the toolbar, frost travels with it (do not leave a solid white clone)
 
 ## Technical notes
 
