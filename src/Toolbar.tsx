@@ -10,6 +10,7 @@ import {
   TypeOutline,
 } from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
+import type { PlacementKind } from "./placement";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./ShapeNode";
 
@@ -17,11 +18,14 @@ export type BoardTool = "select" | "hand" | "arrow";
 
 type ToolbarProps = {
   tool: BoardTool;
+  placement: PlacementKind | null;
+  placingShape: ShapeKind | null;
   onTool: (tool: BoardTool) => void;
   onAddSticky: () => void;
   onAddText: () => void;
   onAddShape: (kind: ShapeKind) => void;
   onAddImage: (file: File) => void;
+  onCancelPlacement: () => void;
   onDelete: () => void;
   canDelete: boolean;
 };
@@ -61,15 +65,19 @@ function Tip({
 
 export default function Toolbar({
   tool,
+  placement,
+  placingShape,
   onTool,
   onAddSticky,
   onAddText,
   onAddShape,
   onAddImage,
+  onCancelPlacement,
   onDelete,
   canDelete,
 }: ToolbarProps) {
   const [shapesOpen, setShapesOpen] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const shapesButtonRef = useRef<HTMLButtonElement>(null);
   const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center", 8);
 
@@ -110,9 +118,9 @@ export default function Toolbar({
         <button
           type="button"
           aria-label="Select"
-          aria-pressed={tool === "select"}
+          aria-pressed={placement == null && tool === "select"}
           onClick={() => onTool("select")}
-          className={`${toolButton} ${tool === "select" ? pressed : idle}`}
+          className={`${toolButton} ${placement == null && tool === "select" ? pressed : idle}`}
         >
           <MousePointer2 {...iconProps} />
         </button>
@@ -121,35 +129,53 @@ export default function Toolbar({
         <button
           type="button"
           aria-label="Hand"
-          aria-pressed={tool === "hand"}
+          aria-pressed={placement == null && tool === "hand"}
           onClick={() => onTool("hand")}
-          className={`${toolButton} ${tool === "hand" ? pressed : idle}`}
+          className={`${toolButton} ${placement == null && tool === "hand" ? pressed : idle}`}
         >
           <Hand {...iconProps} />
         </button>
       </Tip>
       <Tip label="Text">
-        <button type="button" aria-label="Text" onClick={onAddText} className={`${toolButton} ${idle}`}>
+        <button
+          type="button"
+          aria-label="Text"
+          aria-pressed={placement === "text"}
+          onClick={onAddText}
+          className={`${toolButton} ${placement === "text" ? pressed : idle}`}
+        >
           <TypeOutline {...iconProps} />
         </button>
       </Tip>
       <Tip label="Image">
-        <label
-          className={`${toolButton} relative cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-slate-900 ${idle}`}
+        <button
+          type="button"
+          aria-label="Image"
+          aria-pressed={placement === "image"}
+          onClick={() => {
+            if (placement === "image") {
+              onCancelPlacement();
+              return;
+            }
+            imageInputRef.current?.click();
+          }}
+          className={`${toolButton} ${placement === "image" ? pressed : idle}`}
         >
           <Image {...iconProps} />
-          <input
-            type="file"
-            accept="image/*"
-            aria-label="Image"
-            className="absolute inset-0 cursor-pointer opacity-0"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) onAddImage(file);
-              event.target.value = "";
-            }}
-          />
-        </label>
+        </button>
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          tabIndex={-1}
+          aria-hidden
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onAddImage(file);
+            event.target.value = "";
+          }}
+        />
       </Tip>
       <div data-shapes-menu="">
         <Tip label="Shapes" show={!shapesOpen}>
@@ -159,8 +185,9 @@ export default function Toolbar({
             aria-label="Shapes"
             aria-expanded={shapesOpen}
             aria-haspopup="menu"
+            aria-pressed={shapesOpen || placement === "shape"}
             onClick={() => setShapesOpen((open) => !open)}
-            className={`${toolButton} ${shapesOpen ? pressed : idle}`}
+            className={`${toolButton} ${shapesOpen || placement === "shape" ? pressed : idle}`}
           >
             <Shapes {...iconProps} />
           </button>
@@ -185,6 +212,7 @@ export default function Toolbar({
                 key={kind}
                 type="button"
                 role="menuitem"
+                aria-pressed={placingShape === kind}
                 onClick={() => {
                   setShapesOpen(false);
                   onAddShape(kind);
@@ -202,15 +230,21 @@ export default function Toolbar({
         <button
           type="button"
           aria-label="Noodle"
-          aria-pressed={tool === "arrow"}
-          onClick={() => onTool(tool === "arrow" ? "select" : "arrow")}
-          className={`${toolButton} ${tool === "arrow" ? pressed : idle}`}
+          aria-pressed={placement == null && tool === "arrow"}
+          onClick={() => onTool(placement == null && tool === "arrow" ? "select" : "arrow")}
+          className={`${toolButton} ${placement == null && tool === "arrow" ? pressed : idle}`}
         >
           <MoveUpRight {...iconProps} />
         </button>
       </Tip>
       <Tip label="Sticky note">
-        <button type="button" aria-label="Sticky note" onClick={onAddSticky} className={`${toolButton} ${idle}`}>
+        <button
+          type="button"
+          aria-label="Sticky note"
+          aria-pressed={placement === "sticky"}
+          onClick={onAddSticky}
+          className={`${toolButton} ${placement === "sticky" ? pressed : idle}`}
+        >
           <StickyNote {...iconProps} />
         </button>
       </Tip>

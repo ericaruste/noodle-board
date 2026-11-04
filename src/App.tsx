@@ -36,6 +36,16 @@ import {
 } from "./alignSnap";
 import { FloatingLayer } from "./FloatingPanel";
 import { layers } from "./layers";
+import PlacementGhost from "./PlacementGhost";
+import {
+  isCanvasPlacementTarget,
+  placementSize,
+  snapFlowPoint,
+  TEXT_PLACE_HEIGHT,
+  TEXT_PLACE_WIDTH,
+  type Placement,
+} from "./placement";
+import { armTextEdit } from "./textEdit";
 import SaveToolbar from "./SaveToolbar";
 import Toolbar, { type BoardTool } from "./Toolbar";
 import {
@@ -56,8 +66,6 @@ import ShapeNode from "./ShapeNode";
 import {
   DEFAULT_SHAPE_FILL,
   DEFAULT_SHAPE_STROKE,
-  SHAPE_DEFAULT_HEIGHT,
-  SHAPE_DEFAULT_WIDTH,
   type ShapeKind,
 } from "./shapeData";
 import TextNode from "./TextNode";
@@ -314,6 +322,11 @@ function Board() {
   const flushAutosaveRef = useRef<() => void>(() => {});
   const [tool, setTool] = useState<BoardTool>("select");
   const toolRef = useRef<BoardTool>("select");
+  const [placement, setPlacement] = useState<Placement | null>(null);
+  const placementRef = useRef<Placement | null>(null);
+  const placementEpoch = useRef(0);
+  const swallowPlaceRef = useRef(0);
+  const suppressContextRef = useRef(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const spaceHeldRef = useRef(false);
   const spaceSelectionRef = useRef<{ nodes: string[]; edges: string[] } | null>(null);
@@ -399,16 +412,46 @@ function Board() {
     setEdges(nextEdges);
   }, []);
 
+  const clearPlacement = useCallback(() => {
+    placementEpoch.current += 1;
+    if (!placementRef.current) return;
+    placementRef.current = null;
+    setPlacement(null);
+  }, []);
+
   const chooseTool = useCallback(
     (next: BoardTool) => {
+      clearPlacement();
       if (next === "hand") clearSelection();
       clearConnectionOrigin();
       setHotPort(null);
       toolRef.current = next;
       setTool(next);
     },
-    [clearSelection],
+    [clearPlacement, clearSelection],
   );
+
+  const cancelPlacement = useCallback(() => {
+    const had = placementRef.current != null;
+    clearPlacement();
+    if (!had) return;
+    if (toolRef.current === "select") return;
+    clearConnectionOrigin();
+    setHotPort(null);
+    toolRef.current = "select";
+    setTool("select");
+  }, [clearPlacement]);
+
+  const armPlacement = useCallback((next: Placement) => {
+    placementEpoch.current += 1;
+    placementRef.current = next;
+    setPlacement(next);
+    if (toolRef.current === "select") return;
+    clearConnectionOrigin();
+    setHotPort(null);
+    toolRef.current = "select";
+    setTool("select");
+  }, []);
 
   const restoreSpaceSelection = useCallback(() => {
     const saved = spaceSelectionRef.current;
@@ -1054,65 +1097,118 @@ function Board() {
     };
   }, [getViewport]);
 
-  const addSticky = useCallback(() => {
-    chooseTool("select");
-    takeSnapshot();
+  const beginSticky = useCallback(() => {
+    if (placementRef.current?.kind === "sticky") {
+      cancelPlacement();
+      return;
+    }
     const colors: StickyColor[] = ["yellow", "pink", "blue", "green"];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    setNodes((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        type: "sticky",
-        position: canvasCenter(),
-        style: { width: 180, height: 180 },
-        data: { text: "", color },
-      },
-    ]);
-  }, [canvasCenter, takeSnapshot]);
+    const color = colors[Math.floor(Math.random() * colors.length)] ?? "yellow";
+    armPlacement({ kind: "sticky", color });
+  }, [armPlacement, cancelPlacement]);
 
-  const addText = useCallback(() => {
-    chooseTool("select");
-    takeSnapshot();
-    setNodes((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        type: "text",
-        position: canvasCenter(),
-        style: { width: 220 },
-        data: { paragraphs: emptyBody() },
-      },
-    ]);
-  }, [canvasCenter, takeSnapshot]);
+  const beginText = useCallback(() => {
+    if (placementRef.current?.kind === "text") {
+      cancelPlacement();
+      return;
+    }
+    armPlacement({ kind: "text" });
+  }, [armPlacement, cancelPlacement]);
 
-  const addShape = useCallback(
+  const beginShape = useCallback(
     (kind: ShapeKind) => {
-      chooseTool("select");
-      takeSnapshot();
-      const { x, y, zoom } = getViewport();
-      const width = SHAPE_DEFAULT_WIDTH;
-      const height = SHAPE_DEFAULT_HEIGHT;
-      setNodes((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          type: "shape",
-          position: {
-            x: (-x + window.innerWidth / 2) / zoom - width / 2,
-            y: (-y + window.innerHeight / 2) / zoom - height / 2,
-          },
-          style: { width, height },
-          data: {
-            kind,
-            fill: DEFAULT_SHAPE_FILL,
-            stroke: DEFAULT_SHAPE_STROKE,
-            paragraphs: emptyBody(),
-          },
-        },
-      ]);
+      const current = placementRef.current;
+      if (current?.kind === "shape" && current.shape === kind) {
+        cancelPlacement();
+        return;
+      }
+      armPlacement({ kind: "shape", shape: kind });
     },
-    [getViewport, takeSnapshot],
+    [armPlacement, cancelPlacement],
+  );
+
+  const placeAt = useCallback(
+    (clientX: number, clientY: number) => {
+      const current = placementRef.current;
+      if (!current) return;
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.isContentEditable) active.blur();
+      const raw = screenToFlowPosition({ x: clientX, y: clientY }, { snapToGrid: false });
+      const flow = store.getState();
+      const center = snapFlowPoint(raw, flow.snapToGrid, flow.snapGrid);
+      const zoom = flow.transform[2];
+      let size = placementSize(current);
+      if (current.kind === "text") {
+        const ghost = document.querySelector("[data-placement-ghost]");
+        const measured =
+          ghost instanceof HTMLElement && zoom > 0 ? ghost.getBoundingClientRect().height / zoom : 0;
+        size = { width: TEXT_PLACE_WIDTH, height: measured > 1 ? measured : TEXT_PLACE_HEIGHT };
+      }
+      const position = { x: center.x - size.width / 2, y: center.y - size.height / 2 };
+      takeSnapshot();
+      const id = crypto.randomUUID();
+      if (current.kind === "text") armTextEdit(id);
+      const node: Node = {
+        id,
+        position,
+        selected: true,
+        style:
+          current.kind === "text"
+            ? { width: size.width }
+            : { width: size.width, height: size.height },
+        ...(current.kind === "sticky"
+          ? { type: "sticky", data: { text: "", color: current.color } }
+          : current.kind === "text"
+            ? { type: "text", data: { paragraphs: emptyBody() } }
+            : current.kind === "shape"
+              ? {
+                  type: "shape",
+                  data: {
+                    kind: current.shape,
+                    fill: DEFAULT_SHAPE_FILL,
+                    stroke: DEFAULT_SHAPE_STROKE,
+                    paragraphs: emptyBody(),
+                  },
+                }
+              : { type: "image", data: { src: current.src } }),
+      };
+      const nextNodes = [
+        ...nodesRef.current.map((item) => (item.selected ? { ...item, selected: false } : item)),
+        node,
+      ];
+      const nextEdges = edgesRef.current.some((edge) => edge.selected)
+        ? edgesRef.current.map((edge) => (edge.selected ? { ...edge, selected: false } : edge))
+        : edgesRef.current;
+      nodesRef.current = nextNodes;
+      edgesRef.current = nextEdges;
+      setNodes(nextNodes);
+      setEdges(nextEdges);
+      placementEpoch.current += 1;
+      placementRef.current = null;
+      setPlacement(null);
+      if (toolRef.current !== "select") {
+        toolRef.current = "select";
+        setTool("select");
+      }
+      swallowPlaceRef.current = performance.now() + 450;
+    },
+    [screenToFlowPosition, store, takeSnapshot],
+  );
+
+  const beginImage = useCallback(
+    async (file: File) => {
+      if (!file.type.startsWith("image/")) return;
+      const epoch = ++placementEpoch.current;
+      try {
+        const src = await fileToDataUrl(file);
+        const size = await imageSize(src);
+        if (placementEpoch.current !== epoch) return;
+        armPlacement({ kind: "image", src, width: size.width, height: size.height });
+      } catch {
+        if (placementEpoch.current === epoch) placementEpoch.current += 1;
+      }
+    },
+    [armPlacement],
   );
 
   const addImageAt = useCallback(
@@ -1133,7 +1229,7 @@ function Board() {
         },
       ]);
     },
-    [canvasCenter, takeSnapshot],
+    [canvasCenter, chooseTool, takeSnapshot],
   );
 
   const deleteSelected = useCallback(() => {
@@ -1552,6 +1648,11 @@ function Board() {
         return;
       }
       if (event.key === "Escape") {
+        if (placementRef.current) {
+          event.preventDefault();
+          cancelPlacement();
+          return;
+        }
         if (document.querySelector("[data-noodle-menu]")) return;
         const dragging = store.getState().connection.inProgress || reconnectRef.current;
         if (dragging) {
@@ -1602,7 +1703,50 @@ function Board() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [chooseTool, duplicateSelection, openProject, redo, saveProject, store, undo]);
+  }, [cancelPlacement, chooseTool, duplicateSelection, openProject, redo, saveProject, store, undo]);
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!placementRef.current) return;
+      if (event.button === 2) {
+        if (!isCanvasPlacementTarget(event.target)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        suppressContextRef.current = true;
+        cancelPlacement();
+        return;
+      }
+      if (event.button !== 0 || spaceHeldRef.current) return;
+      if (!isCanvasPlacementTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      placeAt(event.clientX, event.clientY);
+    };
+    const onContextMenu = (event: MouseEvent) => {
+      const armed = suppressContextRef.current || placementRef.current != null;
+      suppressContextRef.current = false;
+      if (!armed || !isCanvasPlacementTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (placementRef.current) cancelPlacement();
+    };
+    const swallowPlacedClick = (event: MouseEvent) => {
+      if (performance.now() > swallowPlaceRef.current) return;
+      if (!isCanvasPlacementTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("contextmenu", onContextMenu, true);
+    window.addEventListener("click", swallowPlacedClick, true);
+    window.addEventListener("dblclick", swallowPlacedClick, true);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("contextmenu", onContextMenu, true);
+      window.removeEventListener("click", swallowPlacedClick, true);
+      window.removeEventListener("dblclick", swallowPlacedClick, true);
+    };
+  }, [cancelPlacement, placeAt]);
 
   const openNoodleFromDoubleClick = useCallback(
     (event: { preventDefault: () => void; stopPropagation: () => void; shiftKey?: boolean }, edgeId: string, selected: boolean | undefined) => {
@@ -1808,7 +1952,7 @@ function Board() {
               onSaveAs={() => void saveProject("save-as")}
             />
           </div>
-          <div className="absolute right-0 top-0 rounded-xl border border-white/50 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-700 shadow backdrop-blur-xl min-[800px]:static">
+          <div className="pointer-events-auto absolute right-0 top-0 rounded-xl border border-white/50 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-700 shadow backdrop-blur-xl min-[800px]:static">
             Noodle Board
           </div>
         </div>
@@ -1873,8 +2017,9 @@ function Board() {
           connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
           connectOnClick={connectMode}
-          nodesDraggable={tool === "select" && !spaceHeld}
-          elementsSelectable={tool !== "hand" && !spaceHeld}
+          nodesDraggable={tool === "select" && !spaceHeld && !placement}
+          nodesConnectable={!placement}
+          elementsSelectable={tool !== "hand" && !spaceHeld && !placement}
           panOnDrag={tool === "hand" || spaceHeld ? [0, 1] : [1]}
           panActivationKeyCode={null}
           fitView={stored.nodes.length > 0}
@@ -1960,6 +2105,7 @@ function Board() {
           proOptions={{ hideAttribution: true }}
         >
           <AlignmentGuides lines={guides.lines} brackets={guides.brackets} />
+          {placement ? <PlacementGhost placement={placement} /> : null}
           <GroupSelection />
           <Background
             id="dots"
@@ -1979,11 +2125,14 @@ function Board() {
         </ReactFlow>
         <Toolbar
           tool={tool}
+          placement={placement?.kind ?? null}
+          placingShape={placement?.kind === "shape" ? placement.shape : null}
           onTool={chooseTool}
-          onAddSticky={addSticky}
-          onAddText={addText}
-          onAddShape={addShape}
-          onAddImage={(file) => void addImageAt(file)}
+          onAddSticky={beginSticky}
+          onAddText={beginText}
+          onAddShape={beginShape}
+          onAddImage={(file) => void beginImage(file)}
+          onCancelPlacement={cancelPlacement}
           onDelete={deleteSelected}
           canDelete={canDelete}
         />
