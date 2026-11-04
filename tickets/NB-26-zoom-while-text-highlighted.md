@@ -1,14 +1,14 @@
 ---
 id: NB-26
 title: Zoom the board while element text is highlighted
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-35
+linear_url: https://linear.app/ericar/issue/ERI-35/zoom-the-board-while-element-text-is-highlighted
 ---
 
 ## Context
@@ -32,13 +32,13 @@ Zooming the board fails while text on an element is highlighted. The pinch or Ct
 
 ## Acceptance criteria
 
-- [ ] With a range highlighted in an editing sticky, text object, or shape, a trackpad pinch zooms the board in and out
-- [ ] The same highlight still zooms under Ctrl+wheel on Windows and Cmd+wheel on a Mac
-- [ ] The zoom is anchored at the pointer and stays inside 0.15–3
-- [ ] The highlighted range and the caret stay where they were. The gesture does not type, delete, close the editor, or scroll the text frame
-- [ ] A pinch or Ctrl/Cmd+wheel over the editor with only a caret, and no highlighted range, also zooms
-- [ ] A wheel that is not a zoom gesture may still scroll the text frame when the text overflows. It does not zoom
-- [ ] The format toolbar and the link field still ignore the wheel. A gesture that starts on either one does not zoom or pan the board
+- [x] With a range highlighted in an editing sticky, text object, or shape, a trackpad pinch zooms the board in and out
+- [x] The same highlight still zooms under Ctrl+wheel on Windows and Cmd+wheel on a Mac
+- [x] The zoom is anchored at the pointer and stays inside 0.15–3
+- [x] The highlighted range and the caret stay where they were. The gesture does not type, delete, close the editor, or scroll the text frame
+- [x] A pinch or Ctrl/Cmd+wheel over the editor with only a caret, and no highlighted range, also zooms
+- [x] A wheel that is not a zoom gesture may still scroll the text frame when the text overflows. It does not zoom
+- [x] The format toolbar and the link field still ignore the wheel. A gesture that starts on either one does not zoom or pan the board
 
 ## Technical notes
 

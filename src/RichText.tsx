@@ -10,6 +10,8 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { useStoreApi } from "@xyflow/react";
+import { isEditorZoomGesture, zoomBoardFromWheel } from "./editorZoom";
 import { useConnectChromeHidden } from "./portHot";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
@@ -186,6 +188,7 @@ export function RichText({
   onFormat,
   toolbarExtra,
 }: RichTextProps) {
+  const store = useStoreApi();
   const rootRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -403,6 +406,21 @@ export function RichText({
     root.focus();
     placeRange(root, next);
   }, [draft, editing, focusTick, linkOpen, structureEpoch]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editing || !editor) return;
+    // nowheel blocks the board gesture. A pinch or Ctrl+wheel sets ctrlKey, and
+    // Cmd+wheel on a Mac sets metaKey. Let those through; a plain wheel still scrolls.
+    const onWheel = (event: WheelEvent) => {
+      if (!isEditorZoomGesture(event)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      zoomBoardFromWheel(store.getState(), event);
+    };
+    editor.addEventListener("wheel", onWheel, { passive: false });
+    return () => editor.removeEventListener("wheel", onWheel);
+  }, [editing, store, structureEpoch]);
 
   useEffect(() => {
     if (editing) return;

@@ -7,8 +7,8 @@ labels: [UX, Canvas]
 parent: NB-E1
 blockedBy: []
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-36
+linear_url: https://linear.app/ericar/issue/ERI-36/make-trackpad-pinch-zoom-easier
 ---
 
 ## Context
