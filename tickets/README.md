@@ -41,6 +41,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 13. **Reliable landing** — NB-22 (stay in connect mode while landing; Arrow tool and manual drops attach every time). Follows NB-20.
 14. **Hand and Select** — NB-23 (pan and select are separate tools; hover shows no chrome; a mixed selection is one box, one toolbar, and one undo). Follows the current pan-on-left-drag board.
 15. **Noodle text** — NB-24 (label paints above the stroke; the toolbar text field becomes a Text button that edits on the line; double-click does the same). Follows the current noodle toolbar.
+16. **Cursor placement** — NB-25 (sticky, text, shape, and image arm a ghost that follows the cursor; one canvas click creates the element, centered, then returns to Select). Follows the current toolbar and Select tool.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

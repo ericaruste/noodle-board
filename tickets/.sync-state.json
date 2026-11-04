@@ -150,6 +150,11 @@
       "id": "f10dcc9d-4eb0-4680-91a9-565b68c444e7",
       "identifier": "ERI-33",
       "url": "https://linear.app/ericar/issue/ERI-33/edit-noodle-text-on-the-line"
+    },
+    "NB-25": {
+      "id": "7630e493-a87f-4219-bf6c-2b9e2b1562be",
+      "identifier": "ERI-34",
+      "url": "https://linear.app/ericar/issue/ERI-34/place-sticky-text-shape-and-image-from-the-cursor"
     }
   }
 }
