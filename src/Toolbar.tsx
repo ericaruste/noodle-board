@@ -1,4 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Hand,
+  Image,
+  MousePointer2,
+  MoveUpRight,
+  Shapes,
+  StickyNote,
+  Trash,
+  TypeOutline,
+} from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./ShapeNode";
@@ -16,17 +26,38 @@ type ToolbarProps = {
   canDelete: boolean;
 };
 
-function ArrowIcon() {
+const iconProps = { size: 20, strokeWidth: 2, "aria-hidden": true as const };
+
+const pressed = "bg-slate-900 text-white shadow-sm";
+const idle = "text-slate-800 hover:bg-slate-900/10";
+const disabledClass = "pointer-events-none cursor-not-allowed text-slate-300";
+
+const toolButton =
+  "flex h-10 w-10 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900";
+
+function Tip({
+  label,
+  show = true,
+  children,
+}: {
+  label: string;
+  show?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="shrink-0">
-      <path d="M2 8h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M8.5 4.5 12.5 8 8.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <span className="group relative">
+      {children}
+      {show ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          {label}
+        </span>
+      ) : null}
+    </span>
   );
 }
-
-const pressed = "bg-slate-800 text-white";
-const idle = "text-slate-700 hover:bg-slate-100";
 
 export default function Toolbar({
   tool,
@@ -61,48 +92,74 @@ export default function Toolbar({
   }, [shapesOpen]);
 
   return (
-    <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
-      <button
-        type="button"
-        aria-pressed={tool === "select"}
-        onClick={() => onTool("select")}
-        className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${tool === "select" ? pressed : idle}`}
+    <FloatingPanel layer="toolbar" role="toolbar" ariaLabel="Tools" className="board-toolbar">
+      <div
+        className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white/95 p-1 shadow-lg backdrop-blur"
+        onPointerDown={(event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest("[data-shapes-menu]")) return;
+          setShapesOpen(false);
+        }}
       >
-        Select
-      </button>
-      <button
-        type="button"
-        aria-pressed={tool === "hand"}
-        onClick={() => onTool("hand")}
-        className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${tool === "hand" ? pressed : idle}`}
-      >
-        Hand
-      </button>
-      <button
-        type="button"
-        onClick={onAddSticky}
-        className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-amber-50"
-      >
-        Add Sticky Note
-      </button>
-      <button
-        type="button"
-        onClick={onAddText}
-        className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-violet-50"
-      >
-        Add Text
-      </button>
-      <div data-shapes-menu="">
+      <Tip label="Select">
         <button
-          ref={shapesButtonRef}
           type="button"
-          aria-expanded={shapesOpen}
-          aria-haspopup="menu"
-          onClick={() => setShapesOpen((open) => !open)}
-          className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-emerald-50"
+          aria-label="Select"
+          aria-pressed={tool === "select"}
+          onClick={() => onTool("select")}
+          className={`${toolButton} ${tool === "select" ? pressed : idle}`}
         >
-          Add Shape
+          <MousePointer2 {...iconProps} />
         </button>
+      </Tip>
+      <Tip label="Hand">
+        <button
+          type="button"
+          aria-label="Hand"
+          aria-pressed={tool === "hand"}
+          onClick={() => onTool("hand")}
+          className={`${toolButton} ${tool === "hand" ? pressed : idle}`}
+        >
+          <Hand {...iconProps} />
+        </button>
+      </Tip>
+      <Tip label="Text">
+        <button type="button" aria-label="Text" onClick={onAddText} className={`${toolButton} ${idle}`}>
+          <TypeOutline {...iconProps} />
+        </button>
+      </Tip>
+      <Tip label="Image">
+        <label
+          className={`${toolButton} relative cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-slate-900 ${idle}`}
+        >
+          <Image {...iconProps} />
+          <input
+            type="file"
+            accept="image/*"
+            aria-label="Image"
+            className="absolute inset-0 cursor-pointer opacity-0"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onAddImage(file);
+              event.target.value = "";
+            }}
+          />
+        </label>
+      </Tip>
+      <div data-shapes-menu="">
+        <Tip label="Shapes" show={!shapesOpen}>
+          <button
+            ref={shapesButtonRef}
+            type="button"
+            aria-label="Shapes"
+            aria-expanded={shapesOpen}
+            aria-haspopup="menu"
+            onClick={() => setShapesOpen((open) => !open)}
+            className={`${toolButton} ${shapesOpen ? pressed : idle}`}
+          >
+            <Shapes {...iconProps} />
+          </button>
+        </Tip>
         {shapesOpen ? (
           <FloatingPanel
             layer="dropdown"
@@ -127,7 +184,7 @@ export default function Toolbar({
                   setShapesOpen(false);
                   onAddShape(kind);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-emerald-50"
+                className="flex h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-slate-700 hover:bg-emerald-50"
               >
                 <ShapeKindIcon kind={kind} />
                 {SHAPE_LABELS[kind]}
@@ -136,38 +193,34 @@ export default function Toolbar({
           </FloatingPanel>
         ) : null}
       </div>
-      <label className="cursor-pointer whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-sky-50">
-        Add Image
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) onAddImage(file);
-            event.target.value = "";
-          }}
-        />
-      </label>
-      <button
-        type="button"
-        aria-pressed={tool === "arrow"}
-        onClick={() => onTool(tool === "arrow" ? "select" : "arrow")}
-        className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${
-          tool === "arrow" ? pressed : idle
-        }`}
-      >
-        <ArrowIcon />
-        Arrow
-      </button>
-      <button
-        type="button"
-        onClick={onDelete}
-        disabled={!canDelete}
-        className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
-      >
-        Delete
-      </button>
-    </div>
+      <Tip label="Noodle">
+        <button
+          type="button"
+          aria-label="Noodle"
+          aria-pressed={tool === "arrow"}
+          onClick={() => onTool(tool === "arrow" ? "select" : "arrow")}
+          className={`${toolButton} ${tool === "arrow" ? pressed : idle}`}
+        >
+          <MoveUpRight {...iconProps} />
+        </button>
+      </Tip>
+      <Tip label="Sticky note">
+        <button type="button" aria-label="Sticky note" onClick={onAddSticky} className={`${toolButton} ${idle}`}>
+          <StickyNote {...iconProps} />
+        </button>
+      </Tip>
+      <Tip label="Delete">
+        <button
+          type="button"
+          aria-label="Delete"
+          onClick={onDelete}
+          disabled={!canDelete}
+          className={`${toolButton} ${canDelete ? "text-rose-700 hover:bg-rose-50" : disabledClass}`}
+        >
+          <Trash {...iconProps} />
+        </button>
+      </Tip>
+      </div>
+    </FloatingPanel>
   );
 }

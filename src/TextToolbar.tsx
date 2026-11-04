@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
+import { TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, type LucideIcon } from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
   ALIGN_LABELS,
@@ -8,6 +9,20 @@ import {
   type FontStyle,
   type TextAlign,
 } from "./textBody";
+
+const alignIconProps = { size: 20, strokeWidth: 2, "aria-hidden": true as const };
+
+const ALIGN_ICONS: Record<TextAlign, LucideIcon> = {
+  left: TextAlignStart,
+  center: TextAlignCenter,
+  right: TextAlignEnd,
+  justify: TextAlignJustify,
+};
+
+function AlignGlyph({ align }: { align: TextAlign }) {
+  const Icon = ALIGN_ICONS[align];
+  return <Icon {...alignIconProps} />;
+}
 
 type Pressed = boolean | "mixed";
 
@@ -30,12 +45,14 @@ type TextToolbarProps = {
 function Menu({
   label,
   menuLabel,
+  glyph,
   open,
   onToggle,
   children,
 }: {
   label: string;
   menuLabel: string;
+  glyph?: ReactNode;
   open: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -49,12 +66,15 @@ function Menu({
         ref={buttonRef}
         type="button"
         aria-label={menuLabel}
+        title={glyph ? label : undefined}
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={onToggle}
-        className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+        className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 ${
+          glyph ? "h-10" : ""
+        }`}
       >
-        <span className="min-w-[4.5rem] text-left">{label}</span>
+        {glyph ?? <span className="min-w-[4.5rem] text-left">{label}</span>}
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
           <path d="M2 3.5 5 7l3-3.5" />
         </svg>
@@ -84,10 +104,12 @@ function Menu({
 
 function MenuItem({
   label,
+  glyph,
   active,
   onPick,
 }: {
   label: string;
+  glyph?: ReactNode;
   active: boolean;
   onPick: () => void;
 }) {
@@ -95,13 +117,21 @@ function MenuItem({
     <button
       type="button"
       role="menuitemradio"
+      aria-label={label}
       aria-checked={active}
+      title={glyph ? label : undefined}
       onClick={onPick}
-      className={`block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
-        active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-      }`}
+      className={
+        glyph
+          ? `flex h-10 w-full items-center justify-center ${
+              active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+            }`
+          : `block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
+              active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
+            }`
+      }
     >
-      {label}
+      {glyph ?? label}
     </button>
   );
 }
@@ -195,6 +225,9 @@ export default function TextToolbar({
       <Menu
         label={alignLabel}
         menuLabel="Alignment"
+        glyph={
+          activeAlign === "mixed" ? undefined : <AlignGlyph align={activeAlign} />
+        }
         open={menu === "align"}
         onToggle={() => toggle("align")}
       >
@@ -202,6 +235,7 @@ export default function TextToolbar({
           <MenuItem
             key={align}
             label={ALIGN_LABELS[align]}
+            glyph={<AlignGlyph align={align} />}
             active={activeAlign === align}
             onPick={() => {
               setMenu(null);
