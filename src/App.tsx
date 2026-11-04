@@ -1972,9 +1972,8 @@ function Board() {
             pannable
             zoomable
             nodeStrokeWidth={2}
-            bgColor="rgba(255, 255, 255, 0.4)"
+            bgColor="transparent"
             maskColor="rgba(28, 25, 23, 0.12)"
-            className="border border-white/50 !bg-white/40 backdrop-blur-xl"
           />
           <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
