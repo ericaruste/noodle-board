@@ -106,6 +106,7 @@ type FloatingPanelProps = {
   "data-text-toolbar"?: string;
   "data-shapes-menu"?: string;
   "data-recent-menu"?: string;
+  "data-group-toolbar"?: string;
 };
 
 function setRef(ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null) {

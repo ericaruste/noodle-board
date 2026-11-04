@@ -127,7 +127,8 @@ function cloneEdge(edge: Edge, id: string, source: string, target: string, delta
 
 /**
  * Clone `rootIds` plus endpoint nodes required by noodles whose other end is in that set.
- * A noodle is copied only when both ends are in the resulting set.
+ * An unselected noodle is copied only when both ends are in that set.
+ * A noodle in `selectedEdgeIds` is copied even when an end was not selected, and that end is cloned with it.
  * `delta` is added to each clone position and to each copied bend.
  */
 export function duplicateGraph(
@@ -136,6 +137,7 @@ export function duplicateGraph(
   rootIds: ReadonlySet<string>,
   delta: FlowPoint,
   selectClones: boolean,
+  selectedEdgeIds?: ReadonlySet<string>,
 ): DuplicateResult | null {
   const byId = new Map(nodes.map((node) => [node.id, node]));
   const roots = new Set<string>();
@@ -143,7 +145,13 @@ export function duplicateGraph(
     const node = byId.get(id);
     if (node && node.type !== ENDPOINT_TYPE) roots.add(id);
   }
-  if (roots.size === 0) return null;
+  const pickedEdges = new Set<string>();
+  if (selectedEdgeIds) {
+    for (const edge of edges) {
+      if (selectedEdgeIds.has(edge.id)) pickedEdges.add(edge.id);
+    }
+  }
+  if (roots.size === 0 && pickedEdges.size === 0) return null;
 
   const included = new Set(roots);
   for (const edge of edges) {
@@ -153,6 +161,14 @@ export function duplicateGraph(
     if (roots.has(source.id) && target.type === ENDPOINT_TYPE) included.add(target.id);
     if (roots.has(target.id) && source.type === ENDPOINT_TYPE) included.add(source.id);
   }
+  // Noodles already inside the selected nodes. Extra ends belong only to a selected noodle.
+  const insideSelection = new Set(included);
+  for (const edge of edges) {
+    if (!pickedEdges.has(edge.id)) continue;
+    if (byId.has(edge.source)) included.add(edge.source);
+    if (byId.has(edge.target)) included.add(edge.target);
+  }
+  if (included.size === 0) return null;
 
   const idMap = new Map<string, string>();
   for (const id of included) idMap.set(id, crypto.randomUUID());
@@ -174,13 +190,16 @@ export function duplicateGraph(
 
   const cloneEdges: Edge[] = [];
   for (const edge of edges) {
-    if (!included.has(edge.source) || !included.has(edge.target)) continue;
+    const inside = insideSelection.has(edge.source) && insideSelection.has(edge.target);
+    const picked = pickedEdges.has(edge.id) && included.has(edge.source) && included.has(edge.target);
+    if (!inside && !picked) continue;
     const source = idMap.get(edge.source);
     const target = idMap.get(edge.target);
     if (!source || !target) continue;
     cloneEdges.push(cloneEdge(edge, crypto.randomUUID(), source, target, delta));
   }
 
+  if (cloneNodes.length === 0 && cloneEdges.length === 0) return null;
   return { nodes: cloneNodes, edges: cloneEdges, cloneIds, birth };
 }
 
@@ -194,13 +213,14 @@ export type NodeClipboard = {
   pastes: number;
 };
 
-/** Snapshot of the selected nodes and the noodles that stay inside that set. */
+/** Snapshot of the selected nodes and the noodles that stay inside that set, plus noodles that are themselves selected. */
 export function takeClipboard(
   nodes: readonly Node[],
   edges: readonly Edge[],
   rootIds: ReadonlySet<string>,
+  selectedEdgeIds?: ReadonlySet<string>,
 ): NodeClipboard | null {
-  const result = duplicateGraph(nodes, edges, rootIds, { x: 0, y: 0 }, false);
+  const result = duplicateGraph(nodes, edges, rootIds, { x: 0, y: 0 }, false, selectedEdgeIds);
   if (!result) return null;
   return { nodes: result.nodes, edges: result.edges, pastes: 0 };
 }

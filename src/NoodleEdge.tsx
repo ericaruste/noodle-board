@@ -15,6 +15,7 @@ import {
 } from "./noodleData";
 import { bendsFromPoints, layoutNoodle, moveSegment, ROUTE_GAP, type FlowRect, type NoodleAnchor, type RouteFrame } from "./noodleRoute";
 import NoodleToolbar from "./NoodleToolbar";
+import { useSelectedObjectCount } from "./selectionScope";
 
 type FlowNode = {
   type?: string;
@@ -347,6 +348,8 @@ export default function NoodleEdge(props: EdgeProps) {
   const sourceFraction = sourceKey === "" ? undefined : Number(sourceKey);
   const targetFraction = targetKey === "" ? undefined : Number(targetKey);
   const data = readNoodle(props.data);
+  const soloSelection = useSelectedObjectCount() === 1;
+  const showChrome = props.selected && soloSelection;
   const sourceType = sourceNode?.type;
   const targetType = targetNode?.type;
   const sourceSide = sourceType !== ENDPOINT_TYPE && isSide(props.sourceHandleId) ? props.sourceHandleId : null;
@@ -412,7 +415,7 @@ export default function NoodleEdge(props: EdgeProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {props.selected
+      {showChrome
         ? route.anchors.map((anchor) => (
             <SegmentAnchor
               key={`${anchor.kind}-${anchor.index}`}
@@ -423,7 +426,7 @@ export default function NoodleEdge(props: EdgeProps) {
             />
           ))
         : null}
-      {props.selected && sourceType !== ENDPOINT_TYPE ? (
+      {showChrome && sourceType !== ENDPOINT_TYPE ? (
         <EndKnob
           edgeId={props.id}
           x={source.x}
@@ -435,7 +438,7 @@ export default function NoodleEdge(props: EdgeProps) {
           fraction={sourceFraction}
         />
       ) : null}
-      {props.selected && targetType !== ENDPOINT_TYPE ? (
+      {showChrome && targetType !== ENDPOINT_TYPE ? (
         <EndKnob
           edgeId={props.id}
           x={target.x}
@@ -462,7 +465,7 @@ export default function NoodleEdge(props: EdgeProps) {
           </div>
         </EdgeLabelRenderer>
       ) : null}
-      {props.selected && !connecting ? (
+      {showChrome && !connecting ? (
         <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
           <NoodleToolbar edgeId={props.id} data={data} />
         </ScreenEdgeToolbar>

@@ -23,6 +23,7 @@ import {
   type ShapeKind,
 } from "./shapeData";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
+import { useSelectedObjectCount } from "./selectionScope";
 import { coerceBody, isTextBody, sameBody, type TextBody } from "./textBody";
 
 function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): ShapeData {
@@ -373,7 +374,8 @@ function PaintRow({
 function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
   const hideChrome = useConnectChromeHidden();
-  const showChrome = selected && !hideChrome;
+  const soloSelection = useSelectedObjectCount() === 1;
+  const showChrome = selected && !hideChrome && soloSelection;
   const resizing = useStore((state) => Boolean(state.nodeLookup.get(id)?.resizing));
   const dataRef = useRef(data);
   dataRef.current = data;

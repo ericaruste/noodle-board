@@ -1,7 +1,7 @@
 ---
 id: NB-23
 title: Split pan and select into Hand and Select tools
-status: Todo
+status: In Progress
 priority: 2
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E1
@@ -42,27 +42,27 @@ Panning and selecting are the same left-drag. The board cannot sit in a tool tha
 
 Hand tool:
 
-- [ ] The main toolbar has a Hand tool. It is pressed while it is the active tool, and choosing it leaves the Arrow tool
-- [ ] A left drag pans the canvas when the pointer starts on empty canvas, an element, a port, or a noodle
-- [ ] While Hand is active, nothing is selected and nothing hovered shows chrome: no ports, bounding box, corner or edge handles, noodle knobs, or floating toolbars
-- [ ] Holding Space, then left-dragging, pans the same way from the Select tool, including when the drag starts on an element, a port, or a noodle. Releasing Space returns to Select and does not change which objects were selected
-- [ ] Pressing the mouse wheel and dragging pans from any tool, including over elements, ports, and noodles, and does not select or show hover chrome
+- [x] The main toolbar has a Hand tool. It is pressed while it is the active tool, and choosing it leaves the Arrow tool
+- [x] A left drag pans the canvas when the pointer starts on empty canvas, an element, a port, or a noodle
+- [x] While Hand is active, nothing is selected and nothing hovered shows chrome: no ports, bounding box, corner or edge handles, noodle knobs, or floating toolbars
+- [x] Holding Space, then left-dragging, pans the same way from the Select tool, including when the drag starts on an element, a port, or a noodle. Releasing Space returns to Select and does not change which objects were selected
+- [x] Pressing the mouse wheel and dragging pans from any tool, including over elements, ports, and noodles, and does not select or show hover chrome
 
 Select tool (default):
 
-- [ ] The main toolbar has a Select tool, and it is the active tool when the board opens
-- [ ] Pressing V switches to the Select tool from Hand or the Arrow tool. It does nothing while text is being edited
-- [ ] Hovering an element shows nothing: no ports, bounding box, corner handles, or floating toolbar
-- [ ] A single click on an element selects it and shows its controls together: the four noodle ports, the edge and corner resize handles, the bounding box, and that element’s floating toolbar
-- [ ] A single click on a noodle selects it and shows its end knobs and the noodle toolbar
-- [ ] Double-clicking an element still starts text editing
-- [ ] Clicking empty canvas clears the selection and hides every control
-- [ ] With Select active, a left drag does not pan the canvas. Panning is the Hand tool, Space+left-drag, and the mouse wheel
-- [ ] Shift-click still adds elements and noodles to the selection
-- [ ] Selecting several elements and noodles, then pressing Delete, removes them all. One undo restores them together, including the noodles. One redo removes them again
-- [ ] Copy and drag-to-move apply to the whole mixed selection. The selected elements and the selected noodles move together, and a copy includes those noodles. Each gesture is one undo step
-- [ ] A multi-selection shows one group bounding box and one floating toolbar, not one box and one toolbar per element
-- [ ] Changing fill, stroke, or color on that group toolbar applies to every selected element that already supports that property, in one undo step. A control whose selected values disagree shows a neutral state
+- [x] The main toolbar has a Select tool, and it is the active tool when the board opens
+- [x] Pressing V switches to the Select tool from Hand or the Arrow tool. It does nothing while text is being edited
+- [x] Hovering an element shows nothing: no ports, bounding box, corner handles, or floating toolbar
+- [x] A single click on an element selects it and shows its controls together: the four noodle ports, the edge and corner resize handles, the bounding box, and that element’s floating toolbar
+- [x] A single click on a noodle selects it and shows its end knobs and the noodle toolbar
+- [x] Double-clicking an element still starts text editing
+- [x] Clicking empty canvas clears the selection and hides every control
+- [x] With Select active, a left drag does not pan the canvas. Panning is the Hand tool, Space+left-drag, and the mouse wheel
+- [x] Shift-click still adds elements and noodles to the selection
+- [x] Selecting several elements and noodles, then pressing Delete, removes them all. One undo restores them together, including the noodles. One redo removes them again
+- [x] Copy and drag-to-move apply to the whole mixed selection. The selected elements and the selected noodles move together, and a copy includes those noodles. Each gesture is one undo step
+- [x] A multi-selection shows one group bounding box and one floating toolbar, not one box and one toolbar per element
+- [x] Changing fill, stroke, or color on that group toolbar applies to every selected element that already supports that property, in one undo step. A control whose selected values disagree shows a neutral state
 
 ## Technical notes
 

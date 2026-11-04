@@ -4,6 +4,7 @@ import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
+import { useSelectedObjectCount } from "./selectionScope";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -30,7 +31,8 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
   const [editing, setEditing] = useState(false);
   const resizeStyle = useNoodleResizeStyle();
   const hideChrome = useConnectChromeHidden();
-  const showChrome = selected && !hideChrome;
+  const soloSelection = useSelectedObjectCount() === 1;
+  const showChrome = selected && !hideChrome && soloSelection;
   const dataRef = useRef(data);
   dataRef.current = data;
 

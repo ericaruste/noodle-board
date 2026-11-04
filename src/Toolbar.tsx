@@ -3,9 +3,11 @@ import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./ShapeNode";
 
+export type BoardTool = "select" | "hand" | "arrow";
+
 type ToolbarProps = {
-  connectMode: boolean;
-  onToggleConnect: () => void;
+  tool: BoardTool;
+  onTool: (tool: BoardTool) => void;
   onAddSticky: () => void;
   onAddText: () => void;
   onAddShape: (kind: ShapeKind) => void;
@@ -23,9 +25,12 @@ function ArrowIcon() {
   );
 }
 
+const pressed = "bg-slate-800 text-white";
+const idle = "text-slate-700 hover:bg-slate-100";
+
 export default function Toolbar({
-  connectMode,
-  onToggleConnect,
+  tool,
+  onTool,
   onAddSticky,
   onAddText,
   onAddShape,
@@ -57,6 +62,22 @@ export default function Toolbar({
 
   return (
     <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
+      <button
+        type="button"
+        aria-pressed={tool === "select"}
+        onClick={() => onTool("select")}
+        className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${tool === "select" ? pressed : idle}`}
+      >
+        Select
+      </button>
+      <button
+        type="button"
+        aria-pressed={tool === "hand"}
+        onClick={() => onTool("hand")}
+        className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${tool === "hand" ? pressed : idle}`}
+      >
+        Hand
+      </button>
       <button
         type="button"
         onClick={onAddSticky}
@@ -130,10 +151,10 @@ export default function Toolbar({
       </label>
       <button
         type="button"
-        aria-pressed={connectMode}
-        onClick={onToggleConnect}
+        aria-pressed={tool === "arrow"}
+        onClick={() => onTool(tool === "arrow" ? "select" : "arrow")}
         className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ${
-          connectMode ? "bg-slate-800 text-white" : "text-slate-700 hover:bg-slate-100"
+          tool === "arrow" ? pressed : idle
         }`}
       >
         <ArrowIcon />
