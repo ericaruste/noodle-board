@@ -1,7 +1,7 @@
 ---
 id: NB-11
 title: Bottom-center icon toolbar
-status: Todo
+status: In Progress
 priority: 2
 labels: [UX, Toolbar]
 parent: NB-E4
@@ -27,15 +27,15 @@ The main actions look like a prototype text bar and sit where FigJam-style board
 
 ## Acceptance criteria
 
-- [ ] Toolbar is a single pill **bottom-center**, above the canvas edge (not covering the minimap awkwardly; offset if needed)
-- [ ] Actions are **Lucide icons** (see Icons) with `aria-label` and a tooltip on hover
-- [ ] Bottom bar, in this order: Text, Image, Shapes (flyout), Noodle, Sticky note, Delete. Text, Shapes, and Noodle stay enabled (NB-07–09 are done)
-- [ ] Shapes stays a flyout of the existing shape kinds
-- [ ] Image still uses a hidden file input
-- [ ] Delete remains disabled when nothing is selected
-- [ ] Keyboard and click targets are at least ~40px; tool does not collide with the MiniMap
-- [ ] Active/disabled/hover states are obvious on the frosted surface (coordinate with NB-10)
-- [ ] The alignment menu on the text format toolbar uses the Lucide alignment icons below
+- [x] Toolbar is a single pill **bottom-center**, above the canvas edge (not covering the minimap awkwardly; offset if needed)
+- [x] Actions are **Lucide icons** (see Icons) with `aria-label` and a tooltip on hover
+- [x] Bottom bar, in this order: Text, Image, Shapes (flyout), Noodle, Sticky note, Delete. Text, Shapes, and Noodle stay enabled (NB-07–09 are done)
+- [x] Shapes stays a flyout of the existing shape kinds
+- [x] Image still uses a hidden file input
+- [x] Delete remains disabled when nothing is selected
+- [x] Keyboard and click targets are at least ~40px; tool does not collide with the MiniMap
+- [x] Active/disabled/hover states are obvious on the frosted surface (coordinate with NB-10)
+- [x] The alignment menu on the text format toolbar uses the Lucide alignment icons below
 
 ## Icons
 

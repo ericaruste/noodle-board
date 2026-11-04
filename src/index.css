@@ -16,6 +16,22 @@ body,
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
+/* Center the tool pill, and keep it clear of the 200px minimap. */
+.board-toolbar {
+  position: absolute;
+  bottom: 1rem;
+  left: clamp(1rem, calc(50% - 11.5rem), calc(100% - 15.5rem - 23rem));
+}
+
+@media (max-width: 39.5rem) {
+  .board-toolbar {
+    /* The pill is wider than the gap beside the map, so it sits above that map. */
+    bottom: calc(200px + 15px + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .react-flow {
   --xy-edge-stroke: #334155;
   --xy-edge-stroke-width: 2;

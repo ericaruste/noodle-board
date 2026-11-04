@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStore, type Edge, type Node, type ReactFlowState } from "@xyflow/react";
 import { FloatingPanel } from "./FloatingPanel";
+import { useChromeLayout } from "./NoodleEdge";
 import { layers } from "./layers";
 import { applyNoodleData, NOODLE_COLORS, readNoodle } from "./noodleData";
 import { useNoodleResizeStyle } from "./NoodleResizer";
@@ -238,6 +239,7 @@ function GroupToolbar({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const host = useStore((state) => state.domNode);
+  useChromeLayout();
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const showFill = model.fills.length > 0;
   const showStroke = model.strokes.length > 0;
@@ -267,6 +269,19 @@ function GroupToolbar({
     if (width > 0 && top + height > boundsH - 8) top = anchor.top - gap - height;
     if (width > 0) left = Math.max(8, Math.min(left, boundsW - width - 8));
     if (height > 0) top = Math.max(8, Math.min(top, boundsH - height - 8));
+    const tools = document.querySelector(".board-toolbar");
+    const layer = document.querySelector("[data-floating-layer]");
+    if (tools instanceof HTMLElement && layer instanceof HTMLElement && width > 0 && height > 0) {
+      const origin = layer.getBoundingClientRect();
+      const pill = tools.getBoundingClientRect();
+      const pillTop = pill.top - origin.top;
+      const hits =
+        left + width > pill.left - origin.left &&
+        left < pill.right - origin.left &&
+        top + height > pillTop &&
+        top < pill.bottom - origin.top;
+      if (hits) top = Math.max(8, pillTop - gap - height);
+    }
     setPos((prev) =>
       prev && Math.abs(prev.left - left) < 0.5 && Math.abs(prev.top - top) < 0.5 ? prev : { left, top },
     );

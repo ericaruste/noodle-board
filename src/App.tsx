@@ -1795,10 +1795,10 @@ function Board() {
       >
         <div
           data-canvas-chrome
-          className="pointer-events-none absolute inset-x-4 top-4 flex flex-col gap-2 min-[800px]:grid min-[800px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[800px]:items-center min-[800px]:gap-3"
+          className="pointer-events-none absolute inset-x-4 top-4 flex items-start justify-between gap-3"
           style={{ zIndex: layers.selection }}
         >
-          <div className="min-w-0 self-start min-[800px]:justify-self-start">
+          <div className="min-w-0">
             <SaveToolbar
               documentName={documentName}
               recents={recents}
@@ -1808,26 +1808,14 @@ function Board() {
               onSaveAs={() => void saveProject("save-as")}
             />
           </div>
-          <div className="flex min-w-0 justify-center">
-            <Toolbar
-              tool={tool}
-              onTool={chooseTool}
-              onAddSticky={addSticky}
-              onAddText={addText}
-              onAddShape={addShape}
-              onAddImage={(file) => void addImageAt(file)}
-              onDelete={deleteSelected}
-              canDelete={canDelete}
-            />
-          </div>
-          <div className="absolute right-0 top-0 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow min-[800px]:static min-[800px]:justify-self-end">
+          <div className="absolute right-0 top-0 rounded-xl bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow min-[800px]:static">
             Noodle Board
           </div>
         </div>
         {fileError ? (
           <div
             role="alert"
-            className="absolute bottom-4 left-4 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
+            className="absolute left-4 top-20 flex max-w-[min(28rem,calc(100%-2rem))] items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900 shadow"
             style={{ zIndex: layers.selection }}
           >
             <span>{fileError}</span>
@@ -1989,6 +1977,16 @@ function Board() {
           />
           <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
+        <Toolbar
+          tool={tool}
+          onTool={chooseTool}
+          onAddSticky={addSticky}
+          onAddText={addText}
+          onAddShape={addShape}
+          onAddImage={(file) => void addImageAt(file)}
+          onDelete={deleteSelected}
+          canDelete={canDelete}
+        />
         <FloatingLayer />
       </div>
   );

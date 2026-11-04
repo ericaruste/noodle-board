@@ -60,12 +60,21 @@ let chromeWatch: ResizeObserver | null = null;
 const chromeWatched = new Set<Element>();
 
 function attachChromeWatch(observer: ResizeObserver) {
-  for (const selector of ["[data-canvas-chrome]", ".react-flow__minimap", ".react-flow"]) {
+  let attached = false;
+  for (const selector of ["[data-canvas-chrome]", ".board-toolbar", ".react-flow__minimap", ".react-flow"]) {
     const element = document.querySelector(selector);
     if (!element || chromeWatched.has(element)) continue;
     chromeWatched.add(element);
     observer.observe(element);
+    attached = true;
   }
+  return attached;
+}
+
+function noteChromeAttached() {
+  frameCacheKey = "";
+  chromeVersion += 1;
+  chromeListeners.forEach((listener) => listener());
 }
 
 function ensureChromeWatch() {
@@ -77,8 +86,9 @@ function ensureChromeWatch() {
     chromeListeners.forEach((listener) => listener());
   });
   attachChromeWatch(chromeWatch);
+  // The tool pill portals after the first layout, so watch again on the next frame.
   requestAnimationFrame(() => {
-    if (chromeWatch) attachChromeWatch(chromeWatch);
+    if (chromeWatch && attachChromeWatch(chromeWatch)) noteChromeAttached();
   });
 }
 
@@ -101,7 +111,7 @@ function chromeKey() {
     if (!rect || rect.width <= 0 || rect.height <= 0) return "0";
     return `${rect.left.toFixed(0)},${rect.top.toFixed(0)},${rect.width.toFixed(0)},${rect.height.toFixed(0)}`;
   };
-  return `${box("[data-canvas-chrome]")}|${box(".react-flow__minimap")}`;
+  return `${box("[data-canvas-chrome]")}|${box(".board-toolbar")}|${box(".react-flow__minimap")}`;
 }
 
 export function routeFrame(transform: [number, number, number], width: number, height: number) {
@@ -112,7 +122,7 @@ export function routeFrame(transform: [number, number, number], width: number, h
   return frameCache;
 }
 
-/** Visible canvas minus the top toolbars, with the minimap kept as an obstacle. */
+/** Visible canvas minus the top bar. The minimap and the bottom tool pill are obstacles. */
 function measureFrame(transform: [number, number, number]): RouteFrame | null {
   const pane = document.querySelector(".react-flow")?.getBoundingClientRect();
   const zoom = transform[2];
@@ -128,9 +138,11 @@ function measureFrame(transform: [number, number, number]): RouteFrame | null {
   }
   const viewMin = screenToFlow(pane, tx, ty, zoom, left, top);
   const viewMax = screenToFlow(pane, tx, ty, zoom, right, bottom);
-  const map = document.querySelector(".react-flow__minimap")?.getBoundingClientRect();
-  const obstacles =
-    map && map.width > 0 && map.height > 0 ? [flowRect(pane, tx, ty, zoom, map, VIEW_MARGIN)] : [];
+  const obstacles: FlowRect[] = [];
+  for (const selector of [".react-flow__minimap", ".board-toolbar"]) {
+    const rect = document.querySelector(selector)?.getBoundingClientRect();
+    if (rect && rect.width > 0 && rect.height > 0) obstacles.push(flowRect(pane, tx, ty, zoom, rect, VIEW_MARGIN));
+  }
   return {
     view: { minX: viewMin.x, minY: viewMin.y, maxX: viewMax.x, maxY: viewMax.y },
     obstacles,
@@ -194,8 +206,8 @@ function EndKnob({
 
 function ClampedToolbar({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const shiftRef = useRef(0);
-  const [shift, setShift] = useState(0);
+  const shiftRef = useRef({ x: 0, y: 0 });
+  const [shift, setShift] = useState({ x: 0, y: 0 });
   useLayoutEffect(() => {
     const el = ref.current;
     const pane = document.querySelector(".react-flow");
@@ -203,17 +215,30 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
     const box = el.getBoundingClientRect();
     const bounds = pane.getBoundingClientRect();
     const pad = 8;
-    const left = box.left - shiftRef.current;
-    const right = box.right - shiftRef.current;
-    let next = 0;
-    if (left < bounds.left + pad) next = bounds.left + pad - left;
-    if (right + next > bounds.right - pad) next += bounds.right - pad - (right + next);
-    if (Math.abs(shiftRef.current - next) <= 0.5) return;
-    shiftRef.current = next;
-    setShift(next);
+    const left = box.left - shiftRef.current.x;
+    const right = box.right - shiftRef.current.x;
+    let x = 0;
+    if (left < bounds.left + pad) x = bounds.left + pad - left;
+    if (right + x > bounds.right - pad) x += bounds.right - pad - (right + x);
+    let y = 0;
+    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    if (tools && tools.width > 0 && tools.height > 0) {
+      const top = box.top - shiftRef.current.y;
+      const bottom = box.bottom - shiftRef.current.y;
+      const movedLeft = left + x;
+      const movedRight = right + x;
+      const hits = movedRight > tools.left && movedLeft < tools.right && bottom > tools.top && top < tools.bottom;
+      if (hits) y = tools.top - pad - bottom;
+    }
+    const movedTop = box.top - shiftRef.current.y + y;
+    if (movedTop < bounds.top + pad) y += bounds.top + pad - movedTop;
+    if (Math.abs(shiftRef.current.x - x) <= 0.5 && Math.abs(shiftRef.current.y - y) <= 0.5) return;
+    shiftRef.current = { x, y };
+    setShift({ x, y });
   });
+  const transform = shift.x || shift.y ? `translate(${shift.x}px, ${shift.y}px)` : undefined;
   return (
-    <div ref={ref} style={{ pointerEvents: "auto", transform: shift ? `translateX(${shift}px)` : undefined }}>
+    <div ref={ref} style={{ pointerEvents: "auto", transform }}>
       {children}
     </div>
   );
@@ -265,6 +290,28 @@ function NoodleLabelEditor({
   const dataRef = useRef(data);
   dataRef.current = data;
   const historyRef = useRef(false);
+  const zoom = useStore((state) => state.transform[2]);
+  const [lift, setLift] = useState(0);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    const z = zoom || 1;
+    if (!input || !tools || tools.width <= 0) {
+      if (lift !== 0) setLift(0);
+      return;
+    }
+    const box = input.getBoundingClientRect();
+    const baseBottom = box.bottom - lift * z;
+    const baseTop = box.top - lift * z;
+    const hits =
+      box.right > tools.left &&
+      box.left < tools.right &&
+      baseBottom > tools.top &&
+      baseTop < tools.bottom;
+    const next = hits ? (tools.top - 8 - baseBottom) / z : 0;
+    if (Math.abs(next - lift) > 0.5) setLift(next);
+  });
 
   const write = (label: string, history: boolean) => {
     const next = { ...dataRef.current, label };
@@ -307,6 +354,7 @@ function NoodleLabelEditor({
   }, []);
 
   const shown = data.label.length > 0 ? data.label : "Label";
+  const place = labelStyle(x, y);
   return (
     <EdgeLabelRenderer>
       <input
@@ -341,7 +389,8 @@ function NoodleLabelEditor({
         }}
         className="noodle-edge-label noodle-edge-label-input nodrag nopan nowheel"
         style={{
-          ...labelStyle(x, y),
+          ...place,
+          transform: `${place.transform} translateY(${lift}px)`,
           color: data.color,
           width: `${Math.min(Math.max(shown.length, 1), 32) + 1}ch`,
         }}
