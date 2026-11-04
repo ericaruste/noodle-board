@@ -230,6 +230,8 @@ function ClampedToolbar({ children }: { children: ReactNode }) {
       const hits = movedRight > tools.left && movedLeft < tools.right && bottom > tools.top && top < tools.bottom;
       if (hits) y = tools.top - pad - bottom;
     }
+    const movedTop = box.top - shiftRef.current.y + y;
+    if (movedTop < bounds.top + pad) y += bounds.top + pad - movedTop;
     if (Math.abs(shiftRef.current.x - x) <= 0.5 && Math.abs(shiftRef.current.y - y) <= 0.5) return;
     shiftRef.current = { x, y };
     setShift({ x, y });
