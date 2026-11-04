@@ -140,6 +140,11 @@
       "id": "aad87336-1d56-480d-8346-4a3ee478c4c7",
       "identifier": "ERI-31",
       "url": "https://linear.app/ericar/issue/ERI-31/split-pan-and-select-into-hand-and-select-tools"
+    },
+    "NB-21": {
+      "id": "4fb42e54-95ff-4ef2-a743-be6f4531eba3",
+      "identifier": "ERI-32",
+      "url": "https://linear.app/ericar/issue/ERI-32/add-shape-swap-on-the-shapes-floating-toolbar"
     }
   }
 }

@@ -1,14 +1,14 @@
 ---
 id: NB-21
 title: Add shape swap on the shape's floating toolbar
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E3
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-32
+linear_url: https://linear.app/ericar/issue/ERI-32/add-shape-swap-on-the-shapes-floating-toolbar
 ---
 
 ## Context
@@ -31,17 +31,17 @@ The kind is chosen once, when the shape is created. Turning a rectangle into an 
 
 ## Acceptance criteria
 
-- [ ] The selected shape’s floating toolbar shows the five kinds — Rectangle, Ellipse, Rounded rectangle, Triangle, Diamond — in that order, with the same icons as Add Shape
-- [ ] The kind the shape already has is pressed
-- [ ] Choosing a different kind changes that shape in place. It keeps the same id, position, width, fill, stroke, text, and attached noodles
-- [ ] Choosing the kind that is already pressed does not change the shape and does not add an undo step
-- [ ] The label moves into the new kind’s text band. Height stays, unless the existing text-fit grows it so the label still fits. That growth belongs to the same edit
-- [ ] One undo restores the previous kind together with the size, fill, stroke, and text from before the swap. One redo applies the swap again
-- [ ] Reload, and a round-trip through `.noodle.json`, keep the new kind
-- [ ] The hit target and the shape’s accessible name follow the new kind
-- [ ] The shape stays selected and the toolbar stays open
-- [ ] A click on a kind button does not start text editing, drag the shape, or pan the board
-- [ ] Add Shape still creates a new shape and does not change the selected one
+- [x] The selected shape’s floating toolbar shows the five kinds — Rectangle, Ellipse, Rounded rectangle, Triangle, Diamond — in that order, with the same icons as Add Shape
+- [x] The kind the shape already has is pressed
+- [x] Choosing a different kind changes that shape in place. It keeps the same id, position, width, fill, stroke, text, and attached noodles
+- [x] Choosing the kind that is already pressed does not change the shape and does not add an undo step
+- [x] The label moves into the new kind’s text band. Height stays, unless the existing text-fit grows it so the label still fits. That growth belongs to the same edit
+- [x] One undo restores the previous kind together with the size, fill, stroke, and text from before the swap. One redo applies the swap again
+- [x] Reload, and a round-trip through `.noodle.json`, keep the new kind
+- [x] The hit target and the shape’s accessible name follow the new kind
+- [x] The shape stays selected and the toolbar stays open
+- [x] A click on a kind button does not start text editing, drag the shape, or pan the board
+- [x] Add Shape still creates a new shape and does not change the selected one
 
 ## Technical notes
 
