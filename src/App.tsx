@@ -658,18 +658,16 @@ function Board() {
       const createdId =
         withNew.find((edge) => !edgesRef.current.some((item) => item.id === edge.id))?.id ?? null;
       gestureEdgeRef.current = createdId;
-      // Click-to-connect never reaches onConnectEnd. Drop the guard before the next gesture.
-      if (createdId) {
-        queueMicrotask(() => {
-          if (gestureEdgeRef.current === createdId) gestureEdgeRef.current = null;
-        });
-      }
       const next = reflowAttachments(withNew);
       takeSnapshot();
       edgesRef.current = next;
       setEdges(next);
+      const live = store.getState().connection.inProgress;
+      // A drag still has connection.inProgress, and onConnectEnd reads this guard.
+      // A click never reaches onConnectEnd, so the guard must not outlive this call.
+      if (!live) gestureEdgeRef.current = null;
     },
-    [takeSnapshot],
+    [store, takeSnapshot],
   );
 
   const alignGestureEdge = useCallback(
