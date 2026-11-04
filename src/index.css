@@ -43,8 +43,10 @@ body,
   .board-toolbar {
     /* The pill is wider than the gap beside the map, so it sits above that map. */
     bottom: calc(200px + 15px + 1rem);
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    width: max-content;
+    margin-inline: auto;
   }
 }
 
