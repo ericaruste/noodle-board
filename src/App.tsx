@@ -26,6 +26,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import AlignmentGuides from "./AlignmentGuides";
+import GroupSelection, { applyGroupStyle, GROUP_STYLE_EVENT, type GroupStyleDetail } from "./GroupSelection";
 import {
   alignNodeChanges,
   sameOverlay,
@@ -36,7 +37,7 @@ import {
 import { FloatingLayer } from "./FloatingPanel";
 import { layers } from "./layers";
 import SaveToolbar from "./SaveToolbar";
-import Toolbar from "./Toolbar";
+import Toolbar, { type BoardTool } from "./Toolbar";
 import {
   ensureReadWritePermission,
   isMissingFileError,
@@ -85,6 +86,8 @@ import {
   pruneEndpoints,
   sameEnds,
 } from "./noodleEnds";
+import { carryDraggedNoodles } from "./selectionMove";
+import { selectedObjectCount } from "./selectionScope";
 import {
   NODE_CLIPBOARD_MARKER,
   appendMissing,
@@ -213,6 +216,31 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return target instanceof Element && Boolean(target.closest("[data-noodle-toolbar]"));
 }
 
+function selectedEdgeIds(edges: readonly Edge[]) {
+  const ids = new Set<string>();
+  for (const edge of edges) {
+    if (edge.selected) ids.add(edge.id);
+  }
+  return ids;
+}
+
+function selectionIds(nodes: readonly Node[], edges: readonly Edge[]) {
+  return {
+    nodes: nodes.filter((node) => node.selected).map((node) => node.id),
+    edges: edges.filter((edge) => edge.selected).map((edge) => edge.id),
+  };
+}
+
+function sameSelection(
+  a: { nodes: string[]; edges: string[] },
+  b: { nodes: string[]; edges: string[] },
+) {
+  if (a.nodes.length !== b.nodes.length || a.edges.length !== b.edges.length) return false;
+  const nodes = new Set(a.nodes);
+  const edges = new Set(a.edges);
+  return b.nodes.every((id) => nodes.has(id)) && b.edges.every((id) => edges.has(id));
+}
+
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -283,7 +311,12 @@ function Board() {
   const autosaveErrorRef = useRef<string | null>(null);
   const fileErrorRef = useRef<string | null>(null);
   const flushAutosaveRef = useRef<() => void>(() => {});
-  const [connectMode, setConnectMode] = useState(false);
+  const [tool, setTool] = useState<BoardTool>("select");
+  const toolRef = useRef<BoardTool>("select");
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  const spaceHeldRef = useRef(false);
+  const spaceSelectionRef = useRef<{ nodes: string[]; edges: string[] } | null>(null);
+  const connectMode = tool === "arrow";
   const connectModeRef = useRef(false);
   const suppressConnectRef = useRef(false);
   const gestureEdgeRef = useRef<string | null>(null);
@@ -298,8 +331,9 @@ function Board() {
   }, [nodes, edges]);
 
   useEffect(() => {
+    toolRef.current = tool;
     connectModeRef.current = connectMode;
-  }, [connectMode]);
+  }, [tool, connectMode]);
 
   useEffect(() => {
     fileErrorRef.current = fileError;
@@ -334,6 +368,62 @@ function Board() {
   const takeSnapshot = useCallback(() => {
     rememberBoard();
   }, [rememberBoard]);
+
+  const removalSnapRef = useRef(false);
+  const snapshotRemoval = useCallback(() => {
+    if (removalSnapRef.current) return;
+    removalSnapRef.current = true;
+    takeSnapshot();
+    queueMicrotask(() => {
+      removalSnapRef.current = false;
+    });
+  }, [takeSnapshot]);
+
+  const clearSelection = useCallback(() => {
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+    if (!currentNodes.some((node) => node.selected) && !currentEdges.some((edge) => edge.selected)) return;
+    const nextNodes = currentNodes.map((node) => (node.selected ? { ...node, selected: false } : node));
+    const nextEdges = currentEdges.map((edge) => (edge.selected ? { ...edge, selected: false } : edge));
+    nodesRef.current = nextNodes;
+    edgesRef.current = nextEdges;
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+  }, []);
+
+  const chooseTool = useCallback(
+    (next: BoardTool) => {
+      if (next === "hand") clearSelection();
+      clearConnectionOrigin();
+      setHotPort(null);
+      toolRef.current = next;
+      setTool(next);
+    },
+    [clearSelection],
+  );
+
+  const restoreSpaceSelection = useCallback(() => {
+    const saved = spaceSelectionRef.current;
+    spaceSelectionRef.current = null;
+    if (!saved) return;
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+    if (sameSelection(saved, selectionIds(currentNodes, currentEdges))) return;
+    const nodeIds = new Set(saved.nodes);
+    const edgeIds = new Set(saved.edges);
+    const nextNodes = currentNodes.map((node) => {
+      const selected = nodeIds.has(node.id);
+      return node.selected === selected ? node : { ...node, selected };
+    });
+    const nextEdges = currentEdges.map((edge) => {
+      const selected = edgeIds.has(edge.id);
+      return edge.selected === selected ? edge : { ...edge, selected };
+    });
+    nodesRef.current = nextNodes;
+    edgesRef.current = nextEdges;
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+  }, []);
 
   const placeViewport = useCallback(
     (viewport: NoodleViewport) => {
@@ -421,7 +511,7 @@ function Board() {
     (changes) => {
       const applied = selectionHeld() ? changes.filter((change) => change.type !== "select") : changes;
       if (applied.length === 0) return;
-      if (applied.some((change) => change.type === "remove")) takeSnapshot();
+      if (applied.some((change) => change.type === "remove")) snapshotRemoval();
       const dragEnded = applied.some((change) => change.type === "position" && change.dragging === false);
       const parkedNodes = parkedCopiesRef.current?.nodes;
       const alt = dragEnded ? altDragRef.current : null;
@@ -439,6 +529,8 @@ function Board() {
         }
         if (raw.size > 0) rawDragRef.current = raw;
       }
+      const edgesAtDrag = edgesRef.current;
+      let carriedEdges: Edge[] | null = null;
       setNodes((current) => {
         const base = appendMissing(current, parkedNodes);
         const aligned = alignNodeChanges(
@@ -454,16 +546,23 @@ function Board() {
           if (!sameOverlay(guidesRef.current, next)) guidesRef.current = next;
         }
         const next = applyNodeChanges(aligned.changes, base);
-        nodesRef.current = next;
+        const carried = dragNodeIdRef.current ? carryDraggedNoodles(base, next, edgesAtDrag) : null;
+        const nodesOut = carried?.nodes ?? next;
+        if (carried && carried.edges !== edgesAtDrag) carriedEdges = carried.edges;
+        nodesRef.current = nodesOut;
         if (alt && (altDragRef.current === null || altDragRef.current === alt)) {
           alt.settled = true;
-          const memory = repeatFromDrag(next, alt.nodeId, alt.origin, alt.ids);
+          const memory = repeatFromDrag(nodesOut, alt.nodeId, alt.origin, alt.ids);
           repeatRef.current = memory ?? alt.previous;
         }
-        return next;
+        return nodesOut;
       });
+      if (carriedEdges) {
+        edgesRef.current = carriedEdges;
+        setEdges(carriedEdges);
+      }
     },
-    [takeSnapshot],
+    [snapshotRemoval],
   );
 
   useEffect(() => {
@@ -502,7 +601,7 @@ function Board() {
   const onEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
       const removed = changes.some((change) => change.type === "remove");
-      if (removed) takeSnapshot();
+      if (removed) snapshotRemoval();
       const parkedEdges = parkedCopiesRef.current?.edges;
       const base = appendMissing(edgesRef.current, parkedEdges);
       const changed = applyEdgeChanges(changes, base);
@@ -511,7 +610,7 @@ function Board() {
       setEdges(next);
       if (removed) setNodes((current) => pruneEndpoints(current, next));
     },
-    [takeSnapshot],
+    [snapshotRemoval],
   );
 
   const onConnect = useCallback(
@@ -950,7 +1049,7 @@ function Board() {
   }, [getViewport]);
 
   const addSticky = useCallback(() => {
-    setConnectMode(false);
+    chooseTool("select");
     takeSnapshot();
     const colors: StickyColor[] = ["yellow", "pink", "blue", "green"];
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -967,7 +1066,7 @@ function Board() {
   }, [canvasCenter, takeSnapshot]);
 
   const addText = useCallback(() => {
-    setConnectMode(false);
+    chooseTool("select");
     takeSnapshot();
     setNodes((current) => [
       ...current,
@@ -983,7 +1082,7 @@ function Board() {
 
   const addShape = useCallback(
     (kind: ShapeKind) => {
-      setConnectMode(false);
+      chooseTool("select");
       takeSnapshot();
       const { x, y, zoom } = getViewport();
       const width = SHAPE_DEFAULT_WIDTH;
@@ -1013,7 +1112,7 @@ function Board() {
   const addImageAt = useCallback(
     async (file: File, position?: { x: number; y: number }) => {
       if (!file.type.startsWith("image/")) return;
-      setConnectMode(false);
+      chooseTool("select");
       const src = await fileToDataUrl(file);
       const size = await imageSize(src);
       takeSnapshot();
@@ -1368,9 +1467,10 @@ function Board() {
     const selectedIds = new Set(
       currentNodes.filter((node) => node.selected && node.type !== ENDPOINT_TYPE).map((node) => node.id),
     );
-    if (selectedIds.size === 0) return;
+    const edgeIds = selectedEdgeIds(currentEdges);
+    if (selectedIds.size === 0 && edgeIds.size === 0) return;
     const step = nextDuplicateStep(currentNodes, selectedIds, repeatRef.current);
-    const result = duplicateGraph(currentNodes, currentEdges, selectedIds, step, true);
+    const result = duplicateGraph(currentNodes, currentEdges, selectedIds, step, true, edgeIds);
     if (!result) return;
     takeSnapshot();
     const nextNodes = [
@@ -1425,6 +1525,19 @@ function Board() {
       const inNoodleField = event.target instanceof Element && Boolean(event.target.closest("[data-noodle-toolbar]"));
       if (isTypingTarget(event.target) && !inNoodleField) return;
       if (inNoodleField && event.key !== "Escape" && !((event.ctrlKey || event.metaKey) && key === "z")) return;
+      if ((event.key === " " || event.code === "Space") && !event.repeat) {
+        if (spaceHeldRef.current) return;
+        event.preventDefault();
+        spaceSelectionRef.current = selectionIds(nodesRef.current, edgesRef.current);
+        spaceHeldRef.current = true;
+        setSpaceHeld(true);
+        return;
+      }
+      if (key === "v" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        chooseTool("select");
+        return;
+      }
       if (event.key === "Escape") {
         if (document.querySelector("[data-noodle-menu]")) return;
         const dragging = store.getState().connection.inProgress || reconnectRef.current;
@@ -1460,7 +1573,7 @@ function Board() {
         setHotPort(null);
         document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
         suppressConnectRef.current = false;
-        setConnectMode(false);
+        chooseTool("select");
         return;
       }
       if ((event.ctrlKey || event.metaKey) && key === "z") {
@@ -1476,7 +1589,7 @@ function Board() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [duplicateSelection, openProject, redo, saveProject, store, undo]);
+  }, [chooseTool, duplicateSelection, openProject, redo, saveProject, store, undo]);
 
   useEffect(() => {
     const onCopy = (event: ClipboardEvent) => {
@@ -1485,7 +1598,9 @@ function Board() {
       const selectedIds = new Set(
         currentNodes.filter((node) => node.selected && node.type !== ENDPOINT_TYPE).map((node) => node.id),
       );
-      const taken = takeClipboard(currentNodes, edgesRef.current, selectedIds);
+      const edgeIds = selectedEdgeIds(edgesRef.current);
+      if (selectedIds.size === 0 && edgeIds.size === 0) return;
+      const taken = takeClipboard(currentNodes, edgesRef.current, selectedIds, edgeIds);
       if (!taken) return;
       clipboardRef.current = taken;
       event.preventDefault();
@@ -1518,6 +1633,88 @@ function Board() {
       window.removeEventListener("paste", onPaste, true);
     };
   }, [addImageAt, pasteSelection]);
+
+  useEffect(() => {
+    const release = () => {
+      if (!spaceHeldRef.current) return;
+      spaceHeldRef.current = false;
+      setSpaceHeld(false);
+      if (toolRef.current !== "hand") restoreSpaceSelection();
+      else spaceSelectionRef.current = null;
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key !== " " && event.code !== "Space") return;
+      release();
+    };
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", release);
+    return () => {
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", release);
+    };
+  }, [restoreSpaceSelection]);
+
+  useEffect(() => {
+    let pan: { pointerId: number; x: number; y: number } | null = null;
+    const blockedTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return null;
+      if (!target.closest(".react-flow")) return null;
+      if (target.closest(".react-flow__minimap, .react-flow__controls, [data-floating-panel], [data-canvas-chrome]")) return null;
+      return target.closest(".nopan");
+    };
+    const onDown = (event: PointerEvent) => {
+      if (pan || (event.button !== 0 && event.button !== 1)) return;
+      const blocked = blockedTarget(event.target);
+      if (!blocked) return;
+      const left = event.button === 0;
+      if (left && toolRef.current !== "hand" && !spaceHeldRef.current) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pan = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    };
+    const onMove = (event: PointerEvent) => {
+      if (!pan || event.pointerId !== pan.pointerId) return;
+      const dx = event.clientX - pan.x;
+      const dy = event.clientY - pan.y;
+      pan = { pointerId: pan.pointerId, x: event.clientX, y: event.clientY };
+      if (dx === 0 && dy === 0) return;
+      void store.getState().panBy({ x: dx, y: dy });
+    };
+    const onUp = (event: PointerEvent) => {
+      if (!pan || event.pointerId !== pan.pointerId) return;
+      pan = null;
+    };
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("pointermove", onMove, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("pointercancel", onUp, true);
+    return () => {
+      window.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("pointermove", onMove, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+    };
+  }, [store]);
+
+  useEffect(() => {
+    const onStyle = (event: Event) => {
+      const detail = (event as CustomEvent<GroupStyleDetail>).detail;
+      if (!detail) return;
+      const next = applyGroupStyle(nodesRef.current, edgesRef.current, detail);
+      if (!next) return;
+      if (detail.history !== false) takeSnapshot();
+      if (next.nodes !== nodesRef.current) {
+        nodesRef.current = next.nodes;
+        setNodes(next.nodes);
+      }
+      if (next.edges !== edgesRef.current) {
+        edgesRef.current = next.edges;
+        setEdges(next.edges);
+      }
+    };
+    window.addEventListener(GROUP_STYLE_EVENT, onStyle);
+    return () => window.removeEventListener(GROUP_STYLE_EVENT, onStyle);
+  }, [takeSnapshot]);
 
   const canDelete =
     nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
@@ -1570,14 +1767,8 @@ function Board() {
           </div>
           <div className="flex min-w-0 justify-center">
             <Toolbar
-              connectMode={connectMode}
-              onToggleConnect={() =>
-                setConnectMode((current) => {
-                  clearConnectionOrigin();
-                  setHotPort(null);
-                  return !current;
-                })
-              }
+              tool={tool}
+              onTool={chooseTool}
               onAddSticky={addSticky}
               onAddText={addText}
               onAddShape={addShape}
@@ -1608,7 +1799,7 @@ function Board() {
         ) : null}
         <PortMagnet connectMode={connectMode} />
         <ReactFlow
-          className={connectMode ? "noodle-connect" : undefined}
+          className={[connectMode ? "noodle-connect" : "", tool === "hand" || spaceHeld ? "noodle-hand" : "", selectedObjectCount(nodes, edges) === 1 ? "noodle-solo" : ""].filter(Boolean).join(" ") || undefined}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
@@ -1648,8 +1839,10 @@ function Board() {
           connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
           connectOnClick={connectMode}
-          nodesDraggable={!connectMode}
-          panOnDrag={connectMode ? [1, 2] : true}
+          nodesDraggable={tool === "select" && !spaceHeld}
+          elementsSelectable={tool !== "hand" && !spaceHeld}
+          panOnDrag={tool === "hand" || spaceHeld ? [0, 1] : [1]}
+          panActivationKeyCode={null}
           fitView={stored.nodes.length > 0}
           minZoom={0.15}
           maxZoom={3}
@@ -1678,7 +1871,14 @@ function Board() {
             }
             if (present.length === 0) return;
             const ids = new Set(present.map((item) => item.id));
-            const result = duplicateGraph(nodesRef.current, edgesRef.current, ids, { x: 0, y: 0 }, false);
+            const result = duplicateGraph(
+              nodesRef.current,
+              edgesRef.current,
+              ids,
+              { x: 0, y: 0 },
+              false,
+              selectedEdgeIds(edgesRef.current),
+            );
             if (!result) return;
             const source = present.find((item) => item.id === node.id) ?? present[0];
             altDragRef.current = {
@@ -1726,6 +1926,7 @@ function Board() {
           proOptions={{ hideAttribution: true }}
         >
           <AlignmentGuides lines={guides.lines} brackets={guides.brackets} />
+          <GroupSelection />
           <Background
             id="dots"
             variant={BackgroundVariant.Dots}

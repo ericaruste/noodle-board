@@ -256,17 +256,34 @@ body,
   pointer-events: auto;
 }
 
-.noodle-node.selected .react-flow__handle {
-  opacity: 1;
-}
-
-.react-flow__handle {
+.react-flow .react-flow__handle,
+.react-flow .react-flow__handle.connectionindicator {
   opacity: 0;
+  pointer-events: none;
 }
 
-.react-flow__node:hover .react-flow__handle,
-.react-flow__node.selected .react-flow__handle {
+.noodle-solo .react-flow__node.selected .react-flow__handle,
+.noodle-solo .react-flow__node.selected .react-flow__handle.connectionindicator {
   opacity: 1;
+  pointer-events: all;
+}
+
+.noodle-connect .react-flow__handle,
+.noodle-connect .react-flow__handle.connectionindicator {
+  pointer-events: all;
+}
+
+.noodle-hand .react-flow__pane,
+.noodle-hand .react-flow__node,
+.noodle-hand .react-flow__edge,
+.noodle-hand .noodle-shape-hit {
+  cursor: grab;
+}
+
+.noodle-hand .react-flow__pane.dragging,
+.noodle-hand .react-flow__pane.dragging .react-flow__node,
+.noodle-hand .react-flow__pane.dragging .noodle-shape-hit {
+  cursor: grabbing;
 }
 
 .noodle-end {
@@ -339,7 +356,6 @@ body,
   transform: translate(-50%, -50%) !important;
 }
 
-.noodle-node:has(.react-flow__handle.noodle-port-hot) .react-flow__handle,
 .noodle-node:has(.react-flow__handle.clickconnecting) .react-flow__handle {
   opacity: 1;
 }

@@ -2,6 +2,7 @@ import { memo } from "react";
 import { type Node, type NodeProps } from "@xyflow/react";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
+import { useSelectedObjectCount } from "./selectionScope";
 
 export type ImageData = {
   src: string;
@@ -11,6 +12,8 @@ export type ImageNodeType = Node<ImageData, "image">;
 
 function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
+  const soloSelection = useSelectedObjectCount() === 1;
+  const showChrome = selected && soloSelection;
 
   return (
     <div
@@ -20,7 +23,7 @@ function ImageNode({ id, data, selected }: NodeProps<ImageNodeType>) {
       style={resizeStyle}
     >
       <NoodleResizer
-        selected={selected}
+        selected={showChrome}
         keepAspectRatio
         minWidth={1}
         minHeight={1}
