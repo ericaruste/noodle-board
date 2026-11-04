@@ -1,7 +1,7 @@
 ---
 id: NB-26
 title: Zoom the board while element text is highlighted
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
