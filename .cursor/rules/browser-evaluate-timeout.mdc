@@ -1,0 +1,20 @@
+---
+description: Bound browser page evaluation and stop after a timeout
+alwaysApply: true
+---
+
+When using the browser tool, never call `Runtime.evaluate` or `page.evaluate` without a 5-second timeout. If it times out, do not retry the same call. Take a screenshot, check for a paused debugger or an open dialog, reload the page, and report what happened before continuing.
+
+Pass the timeout on the call itself:
+
+```json
+{
+  "method": "Runtime.evaluate",
+  "params": {
+    "expression": "...",
+    "timeout": 5000
+  }
+}
+```
+
+A timeout means the page is stuck, not that the expression needs another attempt. After reporting the screenshot, debugger or dialog state, and reload, choose a different check or stop.
