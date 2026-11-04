@@ -1,7 +1,7 @@
 ---
 id: NB-11
 title: Bottom-center icon toolbar
-status: In Progress
+status: Done
 priority: 2
 labels: [UX, Toolbar]
 parent: NB-E4
