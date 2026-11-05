@@ -1,7 +1,7 @@
 ---
 id: NB-33
 title: Keep a gap between the noodle toolbar and the arrow
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas, Toolbar]
 parent: NB-E1
