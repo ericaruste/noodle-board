@@ -1,5 +1,4 @@
 import { useStore, type ConnectionLineComponentProps, type Node } from "@xyflow/react";
-import { routeFrame, useChromeLayout } from "./NoodleEdge";
 import { landingGeometry } from "./PortMagnet";
 import { layoutNoodle } from "./noodleRoute";
 import { getHoverTarget, useHoverTarget } from "./portHot";
@@ -13,7 +12,6 @@ export default function NoodleConnectionLine({
   toY,
   toPosition,
 }: ConnectionLineComponentProps<Node>) {
-  useChromeLayout();
   const hover = useHoverTarget();
   const landing = useStore((state) => {
     const current = getHoverTarget();
@@ -31,9 +29,6 @@ export default function NoodleConnectionLine({
     targetY = Number(y);
     targetPosition = position as typeof toPosition;
   }
-  const frame = useStore((state) =>
-    routeFrame(state.transform as [number, number, number], state.width, state.height),
-  );
   const path = layoutNoodle({
     shape: "elbow",
     source: { x: fromX, y: fromY },
@@ -42,7 +37,6 @@ export default function NoodleConnectionLine({
     targetPosition,
     bends: [],
     curveOffset: 0,
-    frame,
   }).path;
   return (
     <>
