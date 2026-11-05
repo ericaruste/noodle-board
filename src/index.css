@@ -296,14 +296,15 @@ body,
   pointer-events: none;
 }
 
-.noodle-solo .react-flow__node.selected .react-flow__handle,
-.noodle-solo .react-flow__node.selected .react-flow__handle.connectionindicator {
+.noodle-solo:not(.noodle-connect) .react-flow__node.selected .react-flow__handle,
+.noodle-solo:not(.noodle-connect) .react-flow__node.selected .react-flow__handle.connectionindicator {
   opacity: 1;
   pointer-events: all;
 }
 
-.noodle-connect .react-flow__handle,
-.noodle-connect .react-flow__handle.connectionindicator {
+/* Arrow-tool ports: only the element under the pointer. Selection ports stay off. */
+.noodle-node .react-flow__handle.noodle-ports-show,
+.noodle-node .react-flow__handle.noodle-ports-show.connectionindicator {
   opacity: 1;
   pointer-events: all;
 }
@@ -389,10 +390,6 @@ body,
   right: auto;
   bottom: auto;
   transform: translate(-50%, -50%) !important;
-}
-
-.noodle-node:has(.react-flow__handle.clickconnecting) .react-flow__handle {
-  opacity: 1;
 }
 
 .noodle-node .react-flow__handle.noodle-port-hot {

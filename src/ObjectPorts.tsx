@@ -1,6 +1,6 @@
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useStore } from "@xyflow/react";
 import type { SideId } from "./attachment";
-import { useHandlePlacement, useHoverTarget } from "./portHot";
+import { useHandlePlacement, useHoverTarget, usePortsElement } from "./portHot";
 
 const SIDES = ["Top", "Right", "Bottom", "Left"] as const;
 
@@ -13,10 +13,22 @@ function offsetStyle(side: SideId, fraction: number) {
 function ObjectPort({ nodeId, side }: { nodeId: string; side: (typeof SIDES)[number] }) {
   const handleId = side.toLowerCase() as SideId;
   const hover = useHoverTarget();
+  const portsElementId = usePortsElement();
   const placement = useHandlePlacement(nodeId, handleId);
+  const connecting = useStore((state) => state.connection.inProgress || state.connectionClickStartHandle != null);
   const landing = hover?.elementId === nodeId;
   const filled = landing && hover.mode === "port" && hover.side === handleId;
-  const className = landing ? (filled ? "noodle-port-fill" : "noodle-port-outline") : placement?.hot ? "noodle-port-hot" : undefined;
+  const originPort = connecting && placement != null && !placement.hot;
+  const showPorts = portsElementId === nodeId || originPort;
+  const className = landing
+    ? filled
+      ? "noodle-port-fill"
+      : "noodle-port-outline"
+    : placement?.hot
+      ? "noodle-port-hot"
+      : showPorts
+        ? "noodle-ports-show"
+        : undefined;
   return (
     <Handle
       id={handleId}
