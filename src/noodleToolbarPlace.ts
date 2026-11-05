@@ -148,16 +148,6 @@ function fits(rect: ScreenRect, input: PlaceInput) {
   return clearance(rect, input) >= input.gap - 0.5;
 }
 
-function rangeOnCross(rect: ScreenRect, axis: Vec): [number, number] {
-  const values = [
-    rect.left * axis.x + rect.top * axis.y,
-    rect.right * axis.x + rect.top * axis.y,
-    rect.right * axis.x + rect.bottom * axis.y,
-    rect.left * axis.x + rect.bottom * axis.y,
-  ];
-  return [Math.min(...values), Math.max(...values)];
-}
-
 function tightBox(input: PlaceInput, side: Vec, crossShift: number, extra: number): ScreenRect | null {
   const touch = halfExtent(side, input.width, input.height);
   const cap = touch + extra;
@@ -192,47 +182,38 @@ function crossExtentFits(rect: ScreenRect, input: PlaceInput, side: Vec) {
   return rect.bottom - rect.top <= input.pane.bottom - input.pane.top - input.pad * 2 + 1;
 }
 
-function crossShifts(rect: ScreenRect, input: PlaceInput, side: Vec) {
-  const axis = crossAxis(side);
-  const shifts: number[] = [];
-  const correction = paneCorrection(rect, input.pane, input.pad);
-  const along = correction.x * side.x + correction.y * side.y;
-  if (along >= -0.5) {
-    const cx = correction.x - side.x * along;
-    const cy = correction.y - side.y * along;
-    const shift = cx * axis.x + cy * axis.y;
-    if (Math.abs(shift) > 0.5) shifts.push(shift);
-  }
+function crossPositions(input: PlaceInput, side: Vec) {
+  const horizontal = Math.abs(side.y) === 1;
+  const extent = horizontal ? input.width : input.height;
+  const origin = horizontal ? input.mid.x : input.mid.y;
+  const paneStart = (horizontal ? input.pane.left : input.pane.top) + input.pad;
+  const paneEnd = (horizontal ? input.pane.right : input.pane.bottom) - input.pad;
+  const shifts = [0, paneStart + extent / 2 - origin, paneEnd - extent / 2 - origin];
   for (const block of input.blocked) {
     const expanded = expand(block, input.pad);
-    if (!rectsOverlap(rect, expanded)) continue;
-    const [r0, r1] = rangeOnCross(rect, axis);
-    const [b0, b1] = rangeOnCross(expanded, axis);
-    shifts.push(b0 - r1, b1 - r0);
+    const blockStart = horizontal ? expanded.left : expanded.top;
+    const blockEnd = horizontal ? expanded.right : expanded.bottom;
+    shifts.push(blockStart - extent / 2 - origin, blockEnd + extent / 2 - origin);
   }
   return shifts;
 }
 
 function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | null {
-  const tried = new Set<number>();
-  const queue = [0];
-  let attempts = 0;
-  while (queue.length > 0 && attempts < 32) {
-    const crossShift = queue.shift() ?? 0;
-    const key = Math.round(crossShift);
-    if (tried.has(key)) continue;
-    tried.add(key);
-    attempts += 1;
-    const rect = tightBox(input, side, crossShift, extra);
-    if (!rect || !crossExtentFits(rect, input, side)) continue;
+  let best: ScreenRect | null = null;
+  let bestDist = Infinity;
+  for (const shift of crossPositions(input, side)) {
+    const rect = tightBox(input, side, shift, extra);
+    if (!rect || !crossExtentFits(rect, input, side) || !fits(rect, input)) continue;
     const correction = paneCorrection(rect, input.pane, input.pad);
     const along = correction.x * side.x + correction.y * side.y;
     // Sliding back along this side would lay the pill on the arrow.
     if (along < -0.5) continue;
-    if (fits(rect, input)) return rect;
-    for (const delta of crossShifts(rect, input, side)) queue.push(crossShift + delta);
+    if (Math.abs(shift) < bestDist) {
+      best = rect;
+      bestDist = Math.abs(shift);
+    }
   }
-  return null;
+  return best;
 }
 
 function insidePane(rect: ScreenRect, input: PlaceInput) {
@@ -253,10 +234,14 @@ function fallback(input: PlaceInput): ScreenRect {
       if (placed) return placed;
     }
   }
+  for (const side of SIDES) {
+    const placed = placeOnSide({ ...input, gap: 0 }, side, 2400);
+    if (placed) return placed;
+  }
   let best: ScreenRect | null = null;
   let bestClear = -Infinity;
   for (const side of SIDES) {
-    for (const shift of [0, -320, 320, -640, 640]) {
+    for (const shift of crossPositions(input, side)) {
       const rect = tightBox(input, side, shift, 2400);
       if (!rect || !insidePane(rect, input) || !missesChrome(rect, input)) continue;
       const score = clearance(rect, input);
@@ -267,18 +252,10 @@ function fallback(input: PlaceInput): ScreenRect {
     }
   }
   if (best) return best;
-  const relaxed = { ...input, gap: 0 };
-  for (const side of SIDES) {
-    const placed = placeOnSide(relaxed, side, 2400);
-    if (placed) return placed;
-  }
-  return boxAt(
-    input.mid,
-    { x: 0, y: 1 },
-    halfExtent({ x: 0, y: 1 }, input.width, input.height) + input.gap,
-    input.width,
-    input.height,
-  );
+  const below = { x: 0, y: 1 };
+  const parked = tightBox({ ...input, gap: 0 }, below, 0, 2400);
+  if (parked && missesChrome(parked, input)) return parked;
+  return boxAt(input.mid, below, halfExtent(below, input.width, input.height) + input.gap, input.width, input.height);
 }
 
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
