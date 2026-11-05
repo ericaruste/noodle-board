@@ -27,43 +27,20 @@ export type PinchWatch = { until: number };
 const PINCH_PIXEL = 0.026;
 const PINCH_EVENT_CAP = 0.62;
 const NOTCH_EXPONENT = 0.38;
-const PINCH_HOLD_MS = 90;
+/** Covers the gap between sparse pinch events so a slow pinch does not pan in between. */
+const PINCH_HOLD_MS = 160;
 
-/** A pinch sets ctrlKey. Cmd+wheel on a Mac sets metaKey, and Chromium often sets ctrlKey too. */
+/**
+ * A pinch sets ctrlKey. Cmd+wheel on a Mac sets metaKey, and Chromium often
+ * sets ctrlKey for that gesture too. A two-finger scroll uses both axes when
+ * it is diagonal, so axis size is not a pinch signal.
+ */
 export function isMarkedZoomGesture(event: Pick<WheelEvent, "ctrlKey" | "metaKey">, mac = isMacOs()) {
   return event.ctrlKey || (mac && event.metaKey);
 }
 
-export function isEditorZoomGesture(event: WheelSample, mac = isMacOs()) {
-  return isMarkedZoomGesture(event, mac) || isUnmarkedPinch(event);
-}
-
-/**
- * A swipe along one axis. Drift on the quiet axis still counts as that swipe,
- * so a two-finger scroll is not treated as a pinch.
- */
-export function isOneAxisSwipe(event: Pick<WheelSample, "deltaX" | "deltaY">) {
-  const absX = Math.abs(event.deltaX);
-  const absY = Math.abs(event.deltaY);
-  const major = Math.max(absX, absY);
-  const minor = Math.min(absX, absY);
-  if (major < 0.5) return false;
-  return minor <= Math.max(1, major * 0.45);
-}
-
-/**
- * A pinch some trackpads deliver as a wheel without ctrlKey. It moves both
- * axes together. A one-axis swipe, a mouse notch, and a normal diagonal scroll
- * stay pans.
- */
-export function isUnmarkedPinch(event: WheelSample) {
-  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return false;
-  if (event.deltaMode !== 0) return false;
-  if (isOneAxisSwipe(event)) return false;
-  const absX = Math.abs(event.deltaX);
-  const absY = Math.abs(event.deltaY);
-  if (absX < 0.75 || absY < 0.75 || absX > 24 || absY > 24) return false;
-  return Math.min(absX, absY) / Math.max(absX, absY) >= 0.85;
+export function isEditorZoomGesture(event: Pick<WheelEvent, "ctrlKey" | "metaKey">, mac = isMacOs()) {
+  return isMarkedZoomGesture(event, mac);
 }
 
 function isDiscreteModifierWheel(event: WheelSample) {
@@ -97,7 +74,7 @@ export function classifyBoardWheel(
   now: number,
   mac = isMacOs(),
 ): "zoom" | "drop" | "pass" {
-  if (isMarkedZoomGesture(event, mac) || isUnmarkedPinch(event)) {
+  if (isMarkedZoomGesture(event, mac)) {
     watch.until = now + PINCH_HOLD_MS;
     return "zoom";
   }
@@ -162,11 +139,15 @@ export function bindBoardZoom(
   const watch: PinchWatch = { until: 0 };
   const onWheel = (event: WheelEvent) => {
     if (boardWheelSkipsCanvas(event)) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest(".react-flow__renderer")) return;
+    const state = getState();
+    if (!state.panZoom) return;
     const action = classifyBoardWheel(event, watch, performance.now());
     if (action === "pass") return;
     if (event.cancelable) event.preventDefault();
     event.stopPropagation();
-    if (action === "zoom") zoomBoardFromWheel(getState(), event);
+    if (action === "zoom") zoomBoardFromWheel(state, event);
   };
   root.addEventListener("wheel", onWheel, { capture: true, passive: false });
   return () => root.removeEventListener("wheel", onWheel, { capture: true });
