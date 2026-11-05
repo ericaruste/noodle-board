@@ -1,7 +1,7 @@
 ---
 id: NB-27
 title: Make trackpad pinch zoom easier
-status: In Progress
+status: Done
 priority: 3
 labels: [UX, Canvas]
 parent: NB-E1
