@@ -8,7 +8,7 @@ parent: NB-E1
 blockedBy: []
 estimate: 3
 linear_id: ERI-38
-linear_url: https://linear.app/ericar/issue/ERI-38/hide-noodles-with-both-ends-off-screen-and-bend-a-drag-back-inside-the
+linear_url: https://linear.app/ericar/issue/ERI-38/keep-noodles-on-their-path-instead-of-bending-them-into-the-screen
 ---
 
 ## Context

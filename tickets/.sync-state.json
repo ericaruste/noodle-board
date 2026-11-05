@@ -174,7 +174,7 @@
     "NB-29": {
       "id": "5bde5345-1164-427b-a6de-d7f14a4c9802",
       "identifier": "ERI-38",
-      "url": "https://linear.app/ericar/issue/ERI-38/hide-noodles-with-both-ends-off-screen-and-bend-a-drag-back-inside-the"
+      "url": "https://linear.app/ericar/issue/ERI-38/keep-noodles-on-their-path-instead-of-bending-them-into-the-screen"
     },
     "NB-30": {
       "id": "6ed62ec9-165c-465a-96fa-fbbe2c7c5df6",
@@ -200,6 +200,11 @@
       "id": "bf226243-6c02-4cc6-a57f-c4dc6b940deb",
       "identifier": "ERI-43",
       "url": "https://linear.app/ericar/issue/ERI-43/keep-a-gap-between-the-noodle-toolbar-and-the-arrow"
+    },
+    "NB-34": {
+      "id": "76dae208-1737-46b3-86ba-4741e79f204b",
+      "identifier": "ERI-44",
+      "url": "https://linear.app/ericar/issue/ERI-44/hide-the-leftover-marquee-and-scale-a-group-from-its-box"
     }
   }
 }

@@ -50,6 +50,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 22. **Project file management** — NB-31 (New starts an empty project, a new canvas change saves immediately with no interval, a green dot pulses beside the name while a save is in progress, and clicking the name renames the project including its Recent row). High priority. Follows the current file bar from NB-04, NB-05, and NB-06.
 23. **LF line endings** — NB-32 (an always-applied Cursor rule writes LF, `.gitattributes` sets `* text=auto eol=lf`, and one renormalizing commit stops finished tickets from showing as modified). Follows the current ticket files and Cursor rules.
 24. **Noodle toolbar gap** — NB-33 (selecting a noodle keeps a screen gap between its toolbar and the arrow at every zoom, so segment anchors and end knobs stay easy to grab). Follows the current noodle toolbar.
+25. **Group scale** — NB-34 (the marquee rectangle hides once the selection commits; a group of stickies or shapes shows that type’s text toolbar above the box and its color toolbar below, and a group of noodles shows the noodle toolbar; a mixed group shows the box and no toolbar; Shift-dragging a handle scales one element or the group in proportion). Follows the marquee from NB-30.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

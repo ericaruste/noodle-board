@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 
 The MVP canvas in [`src/App.tsx`](../../src/App.tsx) is a controlled React Flow board with sticky and image nodes. Noodles are smoothstep edges with arrow markers. Selection, keyboard delete, and a top-nav Delete button exist; resize and edge editing are incomplete.
 
-Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md), [NB-29](../NB-29-edge-drag-bend.md), [NB-30](../NB-30-marquee-select.md), [NB-33](../NB-33-noodle-toolbar-gap.md).
+Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md), [NB-29](../NB-29-edge-drag-bend.md), [NB-30](../NB-30-marquee-select.md), [NB-33](../NB-33-noodle-toolbar-gap.md), [NB-34](../NB-34-group-scale-and-toolbar.md).
 
 ## Goal
 
@@ -37,6 +37,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-29 Hide noodles with both ends off-screen and bend a drag back inside the edge
 - NB-30 Marquee-select from an empty-canvas drag
 - NB-33 Keep a gap between the noodle toolbar and the arrow
+- NB-34 Hide the leftover marquee and scale a group from its box
 
 ## Success looks like
 
@@ -56,6 +57,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - [ ] Zooming until both elements a noodle connects are outside the pane hides that noodle, unless it is selected or linked to the element under the pointer. An arrow stays visible while one of its ends is dragged, even if the other end is off-screen. While a noodle is dragged onto an element near or past the screen edge, the preview bends back inside the pane. Settled noodles keep their current path
 - [ ] A Select-tool drag from empty canvas draws a marquee and selects what it overlaps, so the set can be dragged, copied, duplicated, or deleted. Escape, or a Select-tool click on the marquee, cancels it
 - [ ] Selecting a noodle places its toolbar with a screen gap over the arrow at every zoom, so segment anchors and end knobs stay easy to grab
+- [ ] After a marquee commits, its rectangle is hidden. A group of stickies or shapes shows that type’s text toolbar above the box and its color toolbar below, and a group of noodles shows the noodle toolbar, with scale handles on the box. A mixed group shows the box and handles and no toolbar. Shift-dragging a handle scales one element or the group in proportion
 
 ## Out of scope
 
