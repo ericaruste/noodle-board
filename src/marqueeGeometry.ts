@@ -115,16 +115,25 @@ export function pathHitsRect(path: SVGGeometryElement, rect: FlowRect, pad: numb
   return false;
 }
 
-export function nodesTouchingRect(nodes: Iterable<NodeBox>, rect: FlowRect) {
+function storedBox(node: NodeBox): FlowRect | null {
+  const width = node.measured?.width ?? node.width ?? 0;
+  const height = node.measured?.height ?? node.height ?? 0;
+  const origin = node.internals?.positionAbsolute;
+  if (!origin || !width || !height) return null;
+  return { x: origin.x, y: origin.y, width, height };
+}
+
+export function nodesTouchingRect(
+  nodes: Iterable<NodeBox>,
+  rect: FlowRect,
+  boxFor?: (id: string) => FlowRect | null,
+) {
   const ids = new Set<string>();
   for (const node of nodes) {
     if (node.hidden || node.type === ENDPOINT_TYPE) continue;
-    const width = node.measured?.width ?? node.width ?? 0;
-    const height = node.measured?.height ?? node.height ?? 0;
-    if (!width || !height) continue;
-    const origin = node.internals?.positionAbsolute;
-    if (!origin) continue;
-    if (rectsTouch(rect, { x: origin.x, y: origin.y, width, height })) ids.add(node.id);
+    const box = storedBox(node) ?? boxFor?.(node.id) ?? null;
+    if (!box) continue;
+    if (rectsTouch(rect, box)) ids.add(node.id);
   }
   return ids;
 }

@@ -11,6 +11,8 @@ const DRAG_PX = 4;
 const BLOCKS_MARQUEE =
   ".react-flow__node, .react-flow__edge, .react-flow__handle, .react-flow__resize-control, .react-flow__nodesselection, .react-flow__minimap, .react-flow__controls, .react-flow__panel, .noodle-anchor, .noodle-end, .noodle-edge-label, [data-noodle-label], [data-marquee-hit], [data-floating-panel], [data-canvas-chrome], [data-shapes-menu], .board-toolbar, [role='alert']";
 
+const CHROME = "[data-floating-panel], [data-canvas-chrome], .board-toolbar, [data-shapes-menu], button, a, input, textarea, select";
+
 type Phase = "idle" | "drawing" | "committed";
 
 type Visual = { rect: FlowRect; hit: boolean };
@@ -183,6 +185,7 @@ export default function Marquee({
       if (!swallowClickRef.current) return;
       swallowClickRef.current = false;
       cancelAnimationFrame(swallowFrameRef.current);
+      if (event.target instanceof Element && event.target.closest(CHROME)) return;
       event.preventDefault();
       event.stopPropagation();
     };
@@ -254,7 +257,20 @@ export default function Marquee({
         const point = screenToFlowRef.current({ x: upEvent.clientX, y: upEvent.clientY });
         const rect = normalizeRect(drag.startFlowX, drag.startFlowY, point.x - drag.startFlowX, point.y - drag.startFlowY);
         const latest = store.getState();
-        const pickedNodes = nodesTouchingRect(latest.nodeLookup.values(), rect);
+        const pickedNodes = nodesTouchingRect(latest.nodeLookup.values(), rect, (id) => {
+          const el = document.querySelector(`.react-flow__node[data-id="${CSS.escape(id)}"]`);
+          if (!(el instanceof HTMLElement)) return null;
+          const bounds = el.getBoundingClientRect();
+          if (bounds.width < 1 || bounds.height < 1) return null;
+          const topLeft = screenToFlowRef.current({ x: bounds.left, y: bounds.top });
+          const bottomRight = screenToFlowRef.current({ x: bounds.right, y: bounds.bottom });
+          return {
+            x: Math.min(topLeft.x, bottomRight.x),
+            y: Math.min(topLeft.y, bottomRight.y),
+            width: Math.abs(bottomRight.x - topLeft.x),
+            height: Math.abs(bottomRight.y - topLeft.y),
+          };
+        });
         const pickedEdges = edgesTouchingRect(latest.edges, rect);
         const additive = upEvent.shiftKey;
         if (additive && pickedNodes.size === 0 && pickedEdges.size === 0) {
