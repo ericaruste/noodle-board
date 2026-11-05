@@ -411,7 +411,9 @@ export function RichText({
     const editor = editorRef.current;
     if (!editing || !editor) return;
     // nowheel blocks the board gesture. A pinch or Ctrl+wheel sets ctrlKey, and
-    // Cmd+wheel on a Mac sets metaKey. Let those through; a plain wheel still scrolls.
+    // Cmd+wheel on a Mac sets metaKey. The board zooms those with the trackpad
+    // scale. This covers the same gesture if it reaches the editor. A plain
+    // wheel still scrolls.
     const onWheel = (event: WheelEvent) => {
       if (!isEditorZoomGesture(event)) return;
       event.preventDefault();
