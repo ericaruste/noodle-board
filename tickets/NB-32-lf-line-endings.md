@@ -1,7 +1,7 @@
 ---
 id: NB-32
 title: Keep repository files on LF line endings
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug]
 parent: NB-E5
