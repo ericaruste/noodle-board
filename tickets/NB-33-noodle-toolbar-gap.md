@@ -1,7 +1,7 @@
 ---
 id: NB-33
 title: Keep a gap between the noodle toolbar and the arrow
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas, Toolbar]
 parent: NB-E1
@@ -31,13 +31,13 @@ In some layouts the toolbar opens on top of the arrow. A short noodle, an elbow 
 
 ## Acceptance criteria
 
-- [ ] Selecting a noodle places its toolbar with a visible gap between the toolbar and the arrow. The toolbar does not cover the stroke, a segment anchor, or an end knob
-- [ ] That gap is a fixed screen distance. It stays the same at minimum zoom (0.15), at 100%, and at maximum zoom (3), and it stays the same while the board pans
-- [ ] A segment anchor and an end knob that sit beside the toolbar can be pressed and dragged. The press does not land on the toolbar
-- [ ] The gap holds for a short noodle, a straight noodle, an elbow, and a curve, including when the path rises through the area above the midpoint
-- [ ] Near the top of the pane, or where the toolbar would meet the bottom board toolbar, the pill moves so it stays on screen and still keeps the gap over the arrow
-- [ ] Color, line style, thickness, shape, the Text button, and the arrowhead menus still edit the selected noodle. Pointer and wheel events on the toolbar do not pan the board or drag the noodle
-- [ ] The label on the line stays at its current point. Opening the toolbar does not move the resting label or the on-line text field
+- [x] Selecting a noodle places its toolbar with a visible gap between the toolbar and the arrow. The toolbar does not cover the stroke, a segment anchor, or an end knob
+- [x] That gap is a fixed screen distance. It stays the same at minimum zoom (0.15), at 100%, and at maximum zoom (3), and it stays the same while the board pans
+- [x] A segment anchor and an end knob that sit beside the toolbar can be pressed and dragged. The press does not land on the toolbar
+- [x] The gap holds for a short noodle, a straight noodle, an elbow, and a curve, including when the path rises through the area above the midpoint
+- [x] Near the top of the pane, or where the toolbar would meet the bottom board toolbar, the pill moves so it stays on screen and still keeps the gap over the arrow
+- [x] Color, line style, thickness, shape, the Text button, and the arrowhead menus still edit the selected noodle. Pointer and wheel events on the toolbar do not pan the board or drag the noodle
+- [x] The label on the line stays at its current point. Opening the toolbar does not move the resting label or the on-line text field
 
 ## Technical notes
 
