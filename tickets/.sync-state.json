@@ -205,6 +205,11 @@
       "id": "76dae208-1737-46b3-86ba-4741e79f204b",
       "identifier": "ERI-44",
       "url": "https://linear.app/ericar/issue/ERI-44/hide-the-leftover-marquee-and-scale-a-group-from-its-box"
+    },
+    "NB-35": {
+      "id": "4784e6ec-e7d8-4d62-a708-d105ac5c2de1",
+      "identifier": "ERI-45",
+      "url": "https://linear.app/ericar/issue/ERI-45/keep-text-and-color-toolbars-on-a-zoomed-in-element"
     }
   }
 }

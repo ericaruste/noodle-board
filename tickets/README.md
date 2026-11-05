@@ -51,6 +51,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 23. **LF line endings** — NB-32 (an always-applied Cursor rule writes LF, `.gitattributes` sets `* text=auto eol=lf`, and one renormalizing commit stops finished tickets from showing as modified). Follows the current ticket files and Cursor rules.
 24. **Noodle toolbar gap** — NB-33 (selecting a noodle keeps a screen gap between its toolbar and the arrow at every zoom, so segment anchors and end knobs stay easy to grab). Follows the current noodle toolbar.
 25. **Group scale** — NB-34 (the marquee rectangle hides once the selection commits; a group of stickies or shapes shows that type’s text toolbar above the box and its color toolbar below, and a group of noodles shows the noodle toolbar; a mixed group shows the box and no toolbar; Shift-dragging a handle scales one element or the group in proportion). Follows the marquee from NB-30.
+26. **Zoomed element toolbars** — NB-35 (when an element’s top edge is on screen the text toolbar sits above it, and when that edge is off screen the toolbar pins inside at the top center of the visible area, under the file bar and the logo; the color toolbar does the same at the bottom, above the main toolbar; both stay a constant screen size). Follows the screen-space selection chrome from NB-14.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
