@@ -34,6 +34,7 @@ import {
   type FlowBox,
   type GuideOverlay,
 } from "./alignSnap";
+import { bindBoardZoom } from "./editorZoom";
 import { FloatingLayer } from "./FloatingPanel";
 import { layers } from "./layers";
 import PlacementGhost from "./PlacementGhost";
@@ -343,6 +344,26 @@ function Board() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
+
+  useEffect(() => {
+    let detach = () => {};
+    let seen: HTMLElement | null = null;
+    const attach = () => {
+      const root = store.getState().domNode;
+      if (root === seen) return;
+      detach();
+      seen = root;
+      detach = () => {};
+      if (!root) return;
+      detach = bindBoardZoom(root, () => store.getState());
+    };
+    attach();
+    const unsubscribe = store.subscribe(attach);
+    return () => {
+      unsubscribe();
+      detach();
+    };
+  }, [store]);
 
   useEffect(() => {
     const id = noodleLabelEditingId();

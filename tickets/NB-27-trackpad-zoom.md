@@ -1,7 +1,7 @@
 ---
 id: NB-27
 title: Make trackpad pinch zoom easier
-status: Todo
+status: In Progress
 priority: 3
 labels: [UX, Canvas]
 parent: NB-E1
@@ -30,14 +30,14 @@ Trackpad zoom takes more effort than it does in FigJam. A pinch that should zoom
 
 ## Acceptance criteria
 
-- [ ] A trackpad pinch zooms in and out toward the pointer, including a small pinch. The same gesture does not pan
-- [ ] One modest pinch changes the zoom by a clearly visible step, closer to FigJam than to the current wheel scale, and does not jump from the minimum to the maximum
-- [ ] A two-finger scroll still pans and does not zoom
-- [ ] Ctrl+wheel on Windows and Cmd+wheel on a Mac still zoom toward the pointer
-- [ ] Zoom stays inside 0.15–3
-- [ ] The gesture works over empty canvas and over an element that is not being edited, with Select, Hand, or the Arrow tool active
-- [ ] A pinch or Ctrl/Cmd+wheel that starts over highlighted element text still zooms, as in NB-26
-- [ ] Space+drag, middle-button drag, and the Hand tool still pan. Double-click zoom and the minimap are unchanged
+- [x] A trackpad pinch zooms in and out toward the pointer, including a small pinch. The same gesture does not pan
+- [x] One modest pinch changes the zoom by a clearly visible step, closer to FigJam than to the current wheel scale, and does not jump from the minimum to the maximum
+- [x] A two-finger scroll still pans and does not zoom
+- [x] Ctrl+wheel on Windows and Cmd+wheel on a Mac still zoom toward the pointer
+- [x] Zoom stays inside 0.15–3
+- [x] The gesture works over empty canvas and over an element that is not being edited, with Select, Hand, or the Arrow tool active
+- [x] A pinch or Ctrl/Cmd+wheel that starts over highlighted element text still zooms, as in NB-26
+- [x] Space+drag, middle-button drag, and the Hand tool still pan. Double-click zoom and the minimap are unchanged
 
 ## Technical notes
 
