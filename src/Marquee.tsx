@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useReactFlow, useStore, useStoreApi, type Edge, type Node } from "@xyflow/react";
+import { drawnNoodle } from "./drawnNoodle";
 import { layers } from "./layers";
 import { nodesTouchingRect, normalizeRect, pathHitsRect, selectionIds, type FlowRect } from "./marqueeGeometry";
 import { ENDPOINT_TYPE } from "./noodleEnds";
@@ -52,13 +53,35 @@ function edgePath(id: string) {
   return path instanceof SVGGeometryElement ? path : null;
 }
 
+let probe: SVGPathElement | null = null;
+
+function pathFromData(d: string) {
+  if (!probe) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    probe = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    svg.appendChild(probe);
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.style.position = "absolute";
+    svg.style.left = "-9999px";
+    document.body.appendChild(svg);
+  }
+  probe.setAttribute("d", d);
+  return probe;
+}
+
 function edgesTouchingRect(edges: readonly Edge[], rect: FlowRect) {
   const ids = new Set<string>();
   for (const edge of edges) {
     if (edge.hidden) continue;
     const path = edgePath(edge.id);
-    if (!path) continue;
-    if (pathHitsRect(path, rect, strokePad(path))) ids.add(edge.id);
+    if (path) {
+      if (pathHitsRect(path, rect, strokePad(path))) ids.add(edge.id);
+      continue;
+    }
+    const drawn = drawnNoodle(edge.id);
+    if (!drawn) continue;
+    if (pathHitsRect(pathFromData(drawn.d), rect, drawn.width / 2)) ids.add(edge.id);
   }
   return ids;
 }
@@ -67,7 +90,9 @@ function edgesTouchingRect(edges: readonly Edge[], rect: FlowRect) {
  * Select-tool marquee. The rectangle is drag feedback on the selection layer.
  * Pointer-up commits. The click that pointer-up fires is swallowed. A later
  * click on the rectangle border restores the selection from when the drag
- * started. Escape aborts before that commit.
+ * started. The interior stays open: a click on an element selects that
+ * element, and a click on empty canvas still clears. Escape aborts before
+ * that commit.
  */
 export default function Marquee({
   active,
@@ -88,6 +113,7 @@ export default function Marquee({
   const phaseRef = useRef<Phase>("idle");
   const abortedRef = useRef(false);
   const swallowClickRef = useRef(false);
+  const swallowFrameRef = useRef(0);
   const baseRef = useRef<{ nodes: Set<string>; edges: Set<string> } | null>(null);
   const committedKeyRef = useRef("");
   const matchedRef = useRef(false);
@@ -145,10 +171,18 @@ export default function Marquee({
   useEffect(() => {
     const armSwallow = () => {
       swallowClickRef.current = true;
+      cancelAnimationFrame(swallowFrameRef.current);
+      // The click from this pointer-up is dispatched in this turn. A pointerdown
+      // must not retire the swallow before that click. The next frame does, so a
+      // click that never arrives cannot swallow a later one.
+      swallowFrameRef.current = requestAnimationFrame(() => {
+        swallowClickRef.current = false;
+      });
     };
     const onClick = (event: MouseEvent) => {
       if (!swallowClickRef.current) return;
       swallowClickRef.current = false;
+      cancelAnimationFrame(swallowFrameRef.current);
       event.preventDefault();
       event.stopPropagation();
     };
@@ -161,7 +195,6 @@ export default function Marquee({
       setVisual(null);
     };
     const onPointerDown = (event: PointerEvent) => {
-      if (swallowClickRef.current && event.button === 0) swallowClickRef.current = false;
       if (event.button !== 0 || !event.isPrimary) return;
       const target = event.target;
       if (target instanceof Element && target.closest("[data-marquee-hit]")) return;
@@ -172,6 +205,7 @@ export default function Marquee({
       }
       if (!activeRef.current || abortedRef.current || dragRef.current) return;
       if (!isEmptyCanvas(target)) return;
+      event.stopPropagation();
       const flow = screenToFlowRef.current({ x: event.clientX, y: event.clientY });
       const state = store.getState();
       const baseNodes = new Set<string>();
@@ -260,6 +294,7 @@ export default function Marquee({
       window.removeEventListener("click", onClick, true);
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
+      cancelAnimationFrame(swallowFrameRef.current);
       detachDrag();
     };
   }, [store]);
