@@ -499,7 +499,6 @@ function SegmentAnchor({
 }
 
 export default function NoodleEdge(props: EdgeProps) {
-  useChromeLayout();
   const sourceNode = useStore((state) => state.nodeLookup.get(props.source));
   const targetNode = useStore((state) => state.nodeLookup.get(props.target));
   const attachment = useStore((state) => {
@@ -522,9 +521,6 @@ export default function NoodleEdge(props: EdgeProps) {
   const targetPosition = targetType === ENDPOINT_TYPE ? outward(props.targetX, props.targetY, props.sourceX, props.sourceY) : targetSide ? sidePosition(targetSide) : props.targetPosition;
   const source = sourceType === ENDPOINT_TYPE ? { x: props.sourceX, y: props.sourceY } : sourceOnSide;
   const target = targetType === ENDPOINT_TYPE ? { x: props.targetX, y: props.targetY } : targetOnSide;
-  const frame = useStore((state) =>
-    routeFrame(state.transform as [number, number, number], state.width, state.height),
-  );
   const route = layoutNoodle({
     shape: data.shape,
     source,
@@ -533,7 +529,6 @@ export default function NoodleEdge(props: EdgeProps) {
     targetPosition,
     bends: data.bends,
     curveOffset: data.curveOffset,
-    frame,
   });
   const startId = markerId(props.id, "start");
   const endId = markerId(props.id, "end");

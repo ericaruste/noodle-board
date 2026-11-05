@@ -1,7 +1,7 @@
 ---
 id: NB-29
-title: Hide noodles with both ends off-screen and bend a drag back inside the edge
-status: Todo
+title: Keep noodles on their path instead of bending them into the screen edge
+status: In Progress
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
@@ -27,46 +27,34 @@ Dragging an end does not hide the arrow. While that end is in the air, the previ
 
 In Figma, dragging a connector onto an object that sits against or past the screen edge folds the line back into the visible area. The fold has rounded corners and a small margin, so the stroke does not cross the edge. That fold applies only while a noodle end is dragged onto an element near or past the screen edge. A settled noodle never takes it and keeps the path it has now. The moment the drag ends, the noodle that was in the air uses that same settled path.
 
+## Edge bend removed
+
+The edge bend is not part of the board.
+
+Panning was pulling settled noodles into the pane, so a route that belonged at the top of the canvas ran across the middle. Hiding a noodle once both elements left the pane made those lines disappear while the elements were still drawn. The drag fold only redrew the line while an end was in the air, and the noodle you released did not keep it.
+
+Settled noodles stay on the path between their elements. They scroll off the screen with those elements, and they stay drawn when both ends leave the pane. A noodle end that is still in the air uses that same elbow. The preview does not fold back inside the screen edge.
+
+Dragging a noodle until the pointer reaches the screen edge still pans the canvas. That pan is separate from the bend. It is what brings an element past the edge into view.
+
+`NoodleEdge`, `NoodleConnectionLine`, and `ConnectPreview` call `layoutNoodle` without a viewport frame, so `fitElbowToView` does not run for them. Stored bends, attachment side, and target fraction are unchanged.
+
 ## Repro
 
-1. Connect two stickies or shapes, then zoom in until both are outside the pane. The noodle stacks on the screen edge with any others in the same situation. It should disappear. Zoom or pan until one element is in the pane again. The noodle returns on the path it had before.
-2. Leave one element in the pane and the other outside it. That noodle stays visible. Repeat for the left, right, top, and bottom edges, including under the top chrome.
-3. Select a noodle, then zoom until both of its elements are outside the pane. The selected noodle stays visible. A noodle that is not selected, and whose elements are both outside, stays hidden.
-4. Hover an element that a noodle is linked to. That noodle stays visible while the pointer is over the element, including when the other element is outside the pane.
-5. Place a sticky or shape against the right edge of the pane, or pan until part of it is off-screen. With the Arrow tool, drag a noodle from another element onto it. Include the side that faces the screen edge, and a point between a corner and the midpoint. The preview bends back into the visible area. Release. The attached noodle uses the settled path it would have today.
-6. Drag a noodle onto an element that sits well inside the pane. That preview keeps today's route. Drag an existing noodle end onto the near-edge element. The same inward bend appears, and releasing returns that noodle to its settled path.
-7. Pan so one element is outside the pane, then drag the other end of the noodle that joins them. The arrow stays visible for the whole drag. It does not vanish because the anchored end is off-screen. Release, and the hide rule applies again.
-8. Other settled noodles do not take the bend. An elbow near the edge, a curve, and a manually bent segment keep the path each has now.
+1. Connect two elements and pan until they meet or pass the top of the screen. The noodle stays on the path between them and scrolls off with them. It is not pulled down into the pane, and it does not disappear.
+2. With the Noodle tool, drag from one element toward another that sits past a screen edge. The preview is the normal elbow. It does not fold back inside the edge. The canvas still pans when the pointer reaches the edge.
+3. Release. The attached noodle uses the settled path. Stored bends, origin side, and target fraction are unchanged.
 
 ## Acceptance criteria
 
-- [ ] When both elements a noodle connects are outside the visible pane, that noodle is hidden, including after zooming in, so it does not pile up along a screen edge
-- [ ] A noodle stays visible when at least one of its elements meets the pane
-- [ ] A selected noodle stays visible even when both of its elements are outside the pane
-- [ ] A noodle linked to the element under the pointer stays visible while that element is hovered
-- [ ] While an arrow end is being dragged, that arrow stays visible even if its other end is off-screen. It does not vanish for the duration of the drag
-- [ ] Hiding follows the pane on every edge, including under the top chrome, and updates as the view pans or zooms. Bringing an element back into the pane shows the noodle again
-- [ ] While a noodle end is dragged onto an element that is near a screen edge, or past one, the preview bends back into the visible area
-- [ ] The bend stays inside the pane with a small margin and rounded corners. The stroke does not cross the screen edge or run along it
-- [ ] The same bend applies when the landing side faces the screen edge and the outward stub would leave the pane
-- [ ] The bend applies on every edge of the pane: left, right, top, and bottom, including under the top chrome
-- [ ] The bend applies to a new noodle from the Arrow tool and to dragging an existing noodle end
-- [ ] The preview still meets the landing point from outside the element. The line and arrowhead do not enter the interior, and releasing still attaches at the projected point
-- [ ] A drag onto an element that is not near the screen edge keeps the current preview path
-- [ ] Settled noodles never take this bend and keep the path they have now, including elbows near the edge, curves, and manually bent segments
-- [ ] The moment the drag ends, that noodle uses the settled path it would have today
-- [ ] Origin side, target fraction, and stored bends are unchanged by hiding or by the drag bend, including after undo, redo, localStorage, and `.noodle.json`
-- [ ] Panning or zooming during the drag recomputes the bend from the visible area at that moment
+- [x] Panning does not pull a settled noodle into the pane. The noodle stays on the path between its elements, including when those elements meet or pass a screen edge
+- [x] A noodle stays drawn when both of its elements move past the top of the screen. It scrolls off with the elements
+- [x] While a noodle end is in the air, the preview is the normal elbow. It does not fold back inside the screen edge
+- [x] Releasing the drag stores that same settled path. Origin side, target fraction, and stored bends are unchanged
 
 ## Technical notes
 
-Hiding is draw-only, on the settled noodle in `NoodleEdge`. Do not delete the edge or rewrite its data. An element is visible when its box meets the pane. Both ends outside that pane hides the stroke, unless the noodle is selected or either end is the element under the pointer. The hover target is the one [`PortMagnet`](../src/PortMagnet.tsx) already resolves. A loose `endpoint` node counts as a connected element. The path a hidden noodle would draw is unchanged, so showing it again uses the route it has today. `fitElbowToView` still clamps waypoints for noodles that remain drawn. Hiding is what stops the both-off-screen pile-up. It is not a new route.
-
-The in-progress arrow is not part of that hide. `NoodleConnectionLine` and `ConnectPreview` stay drawn for the whole drag, including when the anchored end's element is outside the pane. Releasing the end lets the settled hide rule apply again.
-
-The fold is also draw-only, and only on the in-progress path (`NoodleConnectionLine` and `ConnectPreview`), and only while the element under the pointer is near the viewport or overlaps it. "Near" means the element, or the approach stub outside the landing side, would leave the inset already measured by `routeFrame`.
-
-Do not send settled edges in `NoodleEdge` through that fold. `fitElbowToView` clamping a waypoint onto the view boundary is not this bend: the route has to turn back inward so the stroke stays inset, including when the attachment point itself is on or past the screen edge. The stored ends remain the real attachment points. The preview may approach the visible part of that landing from inside the pane. Rounded corners stay the elbow radius.
+The edge bend and the both-ends-off-screen hide are not implemented. See **Edge bend removed**. `fitElbowToView` remains in `noodleRoute.ts` and only runs when a caller passes a frame. The settled edge and both previews do not pass one.
 
 Leave NB-18 attachment data alone. A drop still stores the projected side and fraction.
 
@@ -76,4 +64,4 @@ No new panel. The landing outline, port fill, and edge marker stay as NB-20 and 
 
 ## Out of scope
 
-Changing the path, stored bends, or attachment points of a settled noodle. Giving the drag bend to any noodle that is not being dragged onto an element near or past the screen edge. Attachment rules and stored data (NB-18). Landing chrome from NB-20 and NB-28. The drag bend on curves. Editing a bend by hand. Per-noodle style (NB-09).
+Hiding a noodle because both elements are outside the pane. Folding a drag preview back inside the screen edge. Attachment rules and stored data (NB-18). Landing chrome from NB-20 and NB-28. Editing a bend by hand. Per-noodle style (NB-09). The canvas pan that runs when a noodle drag reaches the screen edge.
