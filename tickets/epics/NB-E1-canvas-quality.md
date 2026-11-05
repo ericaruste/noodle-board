@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 
 The MVP canvas in [`src/App.tsx`](../../src/App.tsx) is a controlled React Flow board with sticky and image nodes. Noodles are smoothstep edges with arrow markers. Selection, keyboard delete, and a top-nav Delete button exist; resize and edge editing are incomplete.
 
-Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md).
+Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md), [NB-29](../NB-29-edge-drag-bend.md).
 
 ## Goal
 
@@ -34,6 +34,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-26 Zoom the board while element text is highlighted
 - NB-27 Make trackpad pinch zoom easier
 - NB-28 Show Arrow-tool ports only on the hovered element
+- NB-29 Bend a dragged noodle back inside the screen edge
 
 ## Success looks like
 
@@ -50,6 +51,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - [ ] A pinch or Ctrl/Cmd+wheel zooms the board while text on a sticky, text object, or shape is highlighted
 - [ ] A trackpad pinch zooms toward the pointer as readily as in FigJam, and a two-finger scroll still pans
 - [ ] With the Arrow tool on, ports show only on the element under the pointer
+- [ ] While a noodle is dragged onto an element near or over the screen edge, the preview bends back inside the pane. Every other noodle keeps its current path
 
 ## Out of scope
 

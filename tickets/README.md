@@ -45,6 +45,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 17. **Zoom while editing** — NB-26 (a pinch or Ctrl/Cmd+wheel still zooms while text on a sticky, text object, or shape is highlighted). Follows the current text editor.
 18. **Trackpad zoom** — NB-27 (a pinch zooms toward the pointer more like FigJam; a two-finger scroll still pans). Follows the current `panOnScroll` board.
 19. **Arrow ports on hover** — NB-28 (the Arrow tool shows the four ports of the element under the pointer only). Follows the current connect-mode ports.
+20. **Edge drag bend** — NB-29 (while a noodle is dragged onto an element near or over the screen edge, the preview bends back inside the pane). Follows the current drag preview. Settled noodles stay as they are.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
