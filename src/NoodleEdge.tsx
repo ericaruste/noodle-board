@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BaseEdge, EdgeLabelRenderer, Position, useReactFlow, useStore, useStoreApi, type EdgeProps } from "@xyflow/react";
-import { FloatingPanel } from "./FloatingPanel";
+import { FloatingPanel, floatingSlot } from "./FloatingPanel";
 import { layers } from "./layers";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
 import { isSide, nodeBox, outlineRadius, resolveAttachments, routeEnd, sidePosition, type SideId } from "./attachment";
@@ -19,6 +19,7 @@ import { closeNoodleLabel, useNoodleLabelEditing } from "./noodleLabel";
 import { bendsFromPoints, layoutNoodle, moveSegment, ROUTE_GAP, type FlowRect, type NoodleAnchor, type RouteFrame } from "./noodleRoute";
 import NoodleToolbar from "./NoodleToolbar";
 import { dropDrawnNoodle, publishDrawnNoodle } from "./drawnNoodle";
+import { NOODLE_TOOLBAR_GAP, placeNoodleToolbar, type ScreenRect } from "./noodleToolbarPlace";
 import { useSelectedObjectCount } from "./selectionScope";
 
 type FlowNode = {
@@ -205,67 +206,189 @@ function EndKnob({
   );
 }
 
-function ClampedToolbar({ children }: { children: ReactNode }) {
+type FlowCircle = { x: number; y: number; radius: number };
+
+function sampleFlowPath(d: string, fallback: { x: number; y: number }[]) {
+  if (!d || typeof document === "undefined") return fallback;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  svg.appendChild(path);
+  const length = path.getTotalLength();
+  if (!(length > 0)) return fallback;
+  const count = Math.max(8, Math.min(96, Math.ceil(length / 8)));
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i <= count; i += 1) {
+    const point = path.getPointAtLength((length * i) / count);
+    points.push({ x: point.x, y: point.y });
+  }
+  return points;
+}
+
+function clientRect(rect: DOMRect): ScreenRect {
+  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+}
+
+function measureHandleCircles() {
+  const circles: { c: { x: number; y: number }; radius: number }[] = [];
+  for (const node of document.querySelectorAll("[data-noodle-anchor], .noodle-end-dot")) {
+    if (!(node instanceof Element)) continue;
+    const box = node.getBoundingClientRect();
+    if (box.width <= 0 || box.height <= 0) continue;
+    circles.push({
+      c: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
+      radius: Math.max(box.width, box.height) / 2,
+    });
+  }
+  return circles;
+}
+
+function measureAvoidRects() {
+  const rects: ScreenRect[] = [];
+  for (const node of document.querySelectorAll("[data-noodle-rest], [data-noodle-label]")) {
+    if (!(node instanceof Element)) continue;
+    const box = node.getBoundingClientRect();
+    if (box.width <= 0 || box.height <= 0) continue;
+    rects.push(clientRect(box));
+  }
+  return rects;
+}
+
+function PlacedNoodleToolbar({
+  path,
+  points,
+  midX,
+  midY,
+  strokeWidth,
+  handles,
+  zoom,
+  flowToScreenPosition,
+  children,
+}: {
+  path: string;
+  points: { x: number; y: number }[];
+  midX: number;
+  midY: number;
+  strokeWidth: number;
+  handles: FlowCircle[];
+  zoom: number;
+  flowToScreenPosition: (point: { x: number; y: number }) => { x: number; y: number };
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const shiftRef = useRef({ x: 0, y: 0 });
-  const [shift, setShift] = useState({ x: 0, y: 0 });
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
     const el = ref.current;
     const pane = document.querySelector(".react-flow");
-    if (!el || !pane) return;
-    const box = el.getBoundingClientRect();
-    const bounds = pane.getBoundingClientRect();
-    const pad = 8;
-    const left = box.left - shiftRef.current.x;
-    const right = box.right - shiftRef.current.x;
-    let x = 0;
-    if (left < bounds.left + pad) x = bounds.left + pad - left;
-    if (right + x > bounds.right - pad) x += bounds.right - pad - (right + x);
-    let y = 0;
-    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
-    if (tools && tools.width > 0 && tools.height > 0) {
-      const top = box.top - shiftRef.current.y;
-      const bottom = box.bottom - shiftRef.current.y;
-      const movedLeft = left + x;
-      const movedRight = right + x;
-      const hits = movedRight > tools.left && movedLeft < tools.right && bottom > tools.top && top < tools.bottom;
-      if (hits) y = tools.top - pad - bottom;
+    const layer = floatingSlot("toolbar");
+    if (!el || !(pane instanceof Element) || !layer) return;
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+    if (width < 1 || height < 1) return;
+    const safeZoom = zoom || 1;
+    const samples = sampleFlowPath(path, points);
+    const screen = samples.map((point) => flowToScreenPosition(point));
+    const paintRadius = ((strokeWidth + 6) / 2) * safeZoom;
+    const segments: { a: { x: number; y: number }; b: { x: number; y: number }; radius: number }[] = [];
+    for (let i = 0; i < screen.length - 1; i += 1) {
+      segments.push({ a: screen[i], b: screen[i + 1], radius: paintRadius });
     }
-    const movedTop = box.top - shiftRef.current.y + y;
-    if (movedTop < bounds.top + pad) y += bounds.top + pad - movedTop;
-    if (Math.abs(shiftRef.current.x - x) <= 0.5 && Math.abs(shiftRef.current.y - y) <= 0.5) return;
-    shiftRef.current = { x, y };
-    setShift({ x, y });
+    const measured = measureHandleCircles();
+    const circles =
+      measured.length > 0
+        ? measured
+        : handles.map((handle) => ({
+            c: flowToScreenPosition(handle),
+            radius: handle.radius * safeZoom,
+          }));
+    if (measured.length === 0 && screen.length > 0) {
+      for (const end of [screen[0], screen[screen.length - 1]]) {
+        circles.push({ c: end, radius: 8 * safeZoom });
+      }
+    }
+    const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    const placed = placeNoodleToolbar({
+      width,
+      height,
+      mid: flowToScreenPosition({ x: midX, y: midY }),
+      obstacles: { segments, circles },
+      pane: clientRect(pane.getBoundingClientRect()),
+      blocked: tools && tools.width > 0 && tools.height > 0 ? [clientRect(tools)] : [],
+      avoid: measureAvoidRects(),
+      gap: NOODLE_TOOLBAR_GAP,
+      pad: 8,
+    });
+    const layerBox = layer.getBoundingClientRect();
+    const next = { left: placed.left - layerBox.left, top: placed.top - layerBox.top };
+    setPos((prev) =>
+      prev && Math.abs(prev.left - next.left) < 0.5 && Math.abs(prev.top - next.top) < 0.5 ? prev : next,
+    );
   });
   return (
     <div
       ref={ref}
-      className="w-max -translate-x-1/2 -translate-y-full rounded-xl border border-white/50 bg-white/40 shadow-lg backdrop-blur-xl"
-      style={{ pointerEvents: "auto", marginLeft: shift.x, marginTop: shift.y }}
+      className="w-max rounded-xl border border-white/50 bg-white/40 shadow-lg backdrop-blur-xl"
+      style={{
+        position: "absolute",
+        left: pos?.left ?? 0,
+        top: pos?.top ?? 0,
+        visibility: pos ? "visible" : "hidden",
+        pointerEvents: "auto",
+      }}
     >
       {children}
     </div>
   );
 }
 
-function ScreenEdgeToolbar({ x, y, children }: { x: number; y: number; children: ReactNode }) {
-  const [panX, panY, zoom] = useStore(
+function ScreenEdgeToolbar({
+  path,
+  points,
+  midX,
+  midY,
+  strokeWidth,
+  handles,
+  children,
+}: {
+  path: string;
+  points: { x: number; y: number }[];
+  midX: number;
+  midY: number;
+  strokeWidth: number;
+  handles: FlowCircle[];
+  children: ReactNode;
+}) {
+  useChromeLayout();
+  const { flowToScreenPosition } = useReactFlow();
+  const [, , zoom] = useStore(
     (state) => state.transform,
     (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2],
   );
-  const safeZoom = zoom || 1;
   return (
     <FloatingPanel
       layer="toolbar"
       style={{
         position: "absolute",
-        left: x * safeZoom + panX,
-        top: y * safeZoom + panY,
-        width: "max-content",
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        overflow: "visible",
         pointerEvents: "none",
       }}
     >
-      <ClampedToolbar>{children}</ClampedToolbar>
+      <PlacedNoodleToolbar
+        path={path}
+        points={points}
+        midX={midX}
+        midY={midY}
+        strokeWidth={strokeWidth}
+        handles={handles}
+        zoom={zoom}
+        flowToScreenPosition={flowToScreenPosition}
+      >
+        {children}
+      </PlacedNoodleToolbar>
     </FloatingPanel>
   );
 }
@@ -545,7 +668,6 @@ export default function NoodleEdge(props: EdgeProps) {
     wasSelected.current = Boolean(props.selected);
     if (editing && was && !props.selected) closeNoodleLabel(props.id);
   }, [editing, props.selected]);
-  const zoom = useStore((state) => state.transform[2] || 1);
   const connecting = useStore((state) => state.connection.inProgress || state.connectionClickStartHandle != null);
   // Board units. Dividing by zoom holds a screen gap, so zooming out lifts the text off the stroke.
   const lift = 18;
@@ -560,6 +682,15 @@ export default function NoodleEdge(props: EdgeProps) {
         };
   const labelX = route.labelX + labelShift.x;
   const labelY = route.labelY + labelShift.y;
+  const toolbarHandles: FlowCircle[] = route.anchors.map((anchor) => ({ x: anchor.x, y: anchor.y, radius: 6 }));
+  if (sourceType !== ENDPOINT_TYPE) {
+    const knob = knobOnRim(source.x, source.y, sourcePosition, 7);
+    toolbarHandles.push({ x: knob.cx, y: knob.cy, radius: 7 });
+  }
+  if (targetType !== ENDPOINT_TYPE) {
+    const knob = knobOnRim(target.x, target.y, targetPosition, 7);
+    toolbarHandles.push({ x: knob.cx, y: knob.cy, radius: 7 });
+  }
 
   return (
     <>
@@ -650,7 +781,14 @@ export default function NoodleEdge(props: EdgeProps) {
         </EdgeLabelRenderer>
       ) : null}
       {showChrome && !connecting ? (
-        <ScreenEdgeToolbar x={labelX} y={labelY - 28 / zoom}>
+        <ScreenEdgeToolbar
+          path={route.path}
+          points={route.points}
+          midX={route.labelX}
+          midY={route.labelY}
+          strokeWidth={width}
+          handles={toolbarHandles}
+        >
           <NoodleToolbar edgeId={props.id} data={data} />
         </ScreenEdgeToolbar>
       ) : null}
