@@ -55,21 +55,21 @@ function edgePath(id: string) {
   return path instanceof SVGGeometryElement ? path : null;
 }
 
-let probe: SVGPathElement | null = null;
-
-function pathFromData(d: string) {
-  if (!probe) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    probe = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    svg.appendChild(probe);
-    svg.setAttribute("width", "0");
-    svg.setAttribute("height", "0");
-    svg.style.position = "absolute";
-    svg.style.left = "-9999px";
-    document.body.appendChild(svg);
+function hitsDrawnPath(d: string, rect: FlowRect, pad: number) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  svg.appendChild(path);
+  svg.setAttribute("width", "0");
+  svg.setAttribute("height", "0");
+  svg.style.position = "absolute";
+  svg.style.left = "-9999px";
+  document.body.appendChild(svg);
+  try {
+    return pathHitsRect(path, rect, pad);
+  } finally {
+    svg.remove();
   }
-  probe.setAttribute("d", d);
-  return probe;
 }
 
 function edgesTouchingRect(edges: readonly Edge[], rect: FlowRect) {
@@ -83,7 +83,7 @@ function edgesTouchingRect(edges: readonly Edge[], rect: FlowRect) {
     }
     const drawn = drawnNoodle(edge.id);
     if (!drawn) continue;
-    if (pathHitsRect(pathFromData(drawn.d), rect, drawn.width / 2)) ids.add(edge.id);
+    if (hitsDrawnPath(drawn.d, rect, drawn.width / 2)) ids.add(edge.id);
   }
   return ids;
 }
@@ -208,7 +208,6 @@ export default function Marquee({
       }
       if (!activeRef.current || abortedRef.current || dragRef.current) return;
       if (!isEmptyCanvas(target)) return;
-      event.stopPropagation();
       const flow = screenToFlowRef.current({ x: event.clientX, y: event.clientY });
       const state = store.getState();
       const baseNodes = new Set<string>();
@@ -231,6 +230,7 @@ export default function Marquee({
           if (distance <= DRAG_PX) return;
           drag.moved = true;
         }
+        moveEvent.stopPropagation();
         moveEvent.preventDefault();
         const point = screenToFlowRef.current({ x: moveEvent.clientX, y: moveEvent.clientY });
         setVisual({
