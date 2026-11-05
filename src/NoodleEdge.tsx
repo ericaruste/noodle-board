@@ -216,7 +216,7 @@ function sampleFlowPath(d: string, fallback: { x: number; y: number }[]) {
   svg.appendChild(path);
   const length = path.getTotalLength();
   if (!(length > 0)) return fallback;
-  const count = Math.max(12, Math.min(160, Math.ceil(length / 4)));
+  const count = Math.max(16, Math.min(200, Math.ceil(length / 2)));
   const points: { x: number; y: number }[] = [];
   for (let i = 0; i <= count; i += 1) {
     const point = path.getPointAtLength((length * i) / count);

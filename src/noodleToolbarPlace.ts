@@ -235,6 +235,17 @@ function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | 
   return null;
 }
 
+function insidePane(rect: ScreenRect, input: PlaceInput) {
+  const correction = paneCorrection(rect, input.pane, input.pad);
+  return Math.abs(correction.x) <= 0.5 && Math.abs(correction.y) <= 0.5;
+}
+
+function missesChrome(rect: ScreenRect, input: PlaceInput) {
+  if (input.blocked.some((block) => rectsOverlap(rect, expand(block, input.pad)))) return false;
+  if (input.avoid.some((keep) => rectsOverlap(rect, keep))) return false;
+  return true;
+}
+
 function fallback(input: PlaceInput): ScreenRect {
   for (const extra of [480, 2400]) {
     for (const side of SIDES) {
@@ -245,21 +256,29 @@ function fallback(input: PlaceInput): ScreenRect {
   let best: ScreenRect | null = null;
   let bestClear = -Infinity;
   for (const side of SIDES) {
-    const rect = tightBox(input, side, 0, 2400);
-    if (!rect) continue;
-    if (input.blocked.some((block) => rectsOverlap(rect, expand(block, input.pad)))) continue;
-    if (input.avoid.some((keep) => rectsOverlap(rect, keep))) continue;
-    const score = clearance(rect, input);
-    if (score > bestClear) {
-      best = rect;
-      bestClear = score;
+    for (const shift of [0, -320, 320, -640, 640]) {
+      const rect = tightBox(input, side, shift, 2400);
+      if (!rect || !insidePane(rect, input) || !missesChrome(rect, input)) continue;
+      const score = clearance(rect, input);
+      if (score > bestClear) {
+        best = rect;
+        bestClear = score;
+      }
     }
   }
   if (best) return best;
-  const parked =
-    tightBox(input, ABOVE, 0, 2400) ??
-    boxAt(input.mid, ABOVE, halfExtent(ABOVE, input.width, input.height) + input.gap + 48, input.width, input.height);
-  return parked;
+  const relaxed = { ...input, gap: 0 };
+  for (const side of SIDES) {
+    const placed = placeOnSide(relaxed, side, 2400);
+    if (placed) return placed;
+  }
+  return boxAt(
+    input.mid,
+    { x: 0, y: 1 },
+    halfExtent({ x: 0, y: 1 }, input.width, input.height) + input.gap,
+    input.width,
+    input.height,
+  );
 }
 
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
