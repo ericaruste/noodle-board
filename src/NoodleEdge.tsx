@@ -18,6 +18,7 @@ import {
 import { closeNoodleLabel, useNoodleLabelEditing } from "./noodleLabel";
 import { bendsFromPoints, layoutNoodle, moveSegment, ROUTE_GAP, type FlowRect, type NoodleAnchor, type RouteFrame } from "./noodleRoute";
 import NoodleToolbar from "./NoodleToolbar";
+import { dropDrawnNoodle, publishDrawnNoodle } from "./drawnNoodle";
 import { useSelectedObjectCount } from "./selectionScope";
 
 type FlowNode = {
@@ -533,6 +534,8 @@ export default function NoodleEdge(props: EdgeProps) {
   const startId = markerId(props.id, "start");
   const endId = markerId(props.id, "end");
   const width = thicknessPx(data.thickness);
+  publishDrawnNoodle(props.id, route.path, width);
+  useEffect(() => () => dropDrawnNoodle(props.id), [props.id]);
   const label = data.label.trim();
   const editing = useNoodleLabelEditing(props.id);
   const store = useStoreApi();

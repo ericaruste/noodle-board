@@ -27,6 +27,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import AlignmentGuides from "./AlignmentGuides";
 import GroupSelection, { applyGroupStyle, GROUP_STYLE_EVENT, type GroupStyleDetail } from "./GroupSelection";
+import Marquee from "./Marquee";
 import {
   alignNodeChanges,
   sameOverlay,
@@ -431,6 +432,34 @@ function Board() {
     edgesRef.current = nextEdges;
     setNodes(nextNodes);
     setEdges(nextEdges);
+  }, []);
+
+  const selectIds = useCallback((nodeIds: ReadonlySet<string>, edgeIds: ReadonlySet<string>) => {
+    const currentNodes = nodesRef.current;
+    const currentEdges = edgesRef.current;
+    let nodesChanged = false;
+    let edgesChanged = false;
+    const nextNodes = currentNodes.map((node) => {
+      const selected = node.type !== ENDPOINT_TYPE && nodeIds.has(node.id);
+      if (Boolean(node.selected) === selected) return node;
+      nodesChanged = true;
+      return { ...node, selected };
+    });
+    const nextEdges = currentEdges.map((edge) => {
+      const selected = edgeIds.has(edge.id);
+      if (Boolean(edge.selected) === selected) return edge;
+      edgesChanged = true;
+      return { ...edge, selected };
+    });
+    if (!nodesChanged && !edgesChanged) return;
+    if (nodesChanged) {
+      nodesRef.current = nextNodes;
+      setNodes(nextNodes);
+    }
+    if (edgesChanged) {
+      edgesRef.current = nextEdges;
+      setEdges(nextEdges);
+    }
   }, []);
 
   const clearPlacement = useCallback(() => {
@@ -2047,7 +2076,7 @@ function Board() {
           minZoom={0.15}
           maxZoom={3}
           panOnScroll
-          selectionKeyCode="Shift"
+          selectionKeyCode={null}
           multiSelectionKeyCode="Shift"
           deleteKeyCode={["Delete", "Backspace"]}
           onNodeDragStart={(event, node, dragged) => {
@@ -2128,6 +2157,7 @@ function Board() {
           <AlignmentGuides lines={guides.lines} brackets={guides.brackets} />
           {placement ? <PlacementGhost placement={placement} /> : null}
           <GroupSelection />
+          <Marquee active={tool === "select" && !spaceHeld && !placement} onSelect={selectIds} />
           <Background
             id="dots"
             variant={BackgroundVariant.Dots}
