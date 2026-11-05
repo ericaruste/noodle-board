@@ -1,7 +1,7 @@
 ---
 id: NB-E4
 title: UI/UX chrome
-status: Todo
+status: Done
 priority: 2
 labels: [Epic, UX, Toolbar]
 estimate: 8
@@ -32,13 +32,13 @@ Move primary actions to a bottom-center icon pill, frost navigation surfaces, an
 
 ## Success looks like
 
-- [ ] Toolbar, title, and minimap read as frosted glass on the dotted canvas
-- [ ] Primary tools are icons at the bottom center, with labels as tooltips/`aria-label`
-- [ ] Dragging a node shows and snaps to edge/center guides of other nodes
-- [ ] Dragging a node snaps to an equal gap on its row or column and draws a bracket in each matching gap
-- [ ] Every toolbar, dropdown, and popover paints from one shared layer, above selected and mid-drag canvas elements and below modals
-- [ ] Noodle text paints above the stroke, and it is edited on the line from a Text button or a double-click, not from a field in the floating toolbar
-- [ ] Sticky, text, shape, and image arm a cursor ghost and create one element on the next canvas click
+- [x] Toolbar, title, and minimap read as frosted glass on the dotted canvas
+- [x] Primary tools are icons at the bottom center, with labels as tooltips/`aria-label`
+- [x] Dragging a node shows and snaps to edge/center guides of other nodes
+- [x] Dragging a node snaps to an equal gap on its row or column and draws a bracket in each matching gap
+- [x] Every toolbar, dropdown, and popover paints from one shared layer, above selected and mid-drag canvas elements and below modals
+- [x] Noodle text paints above the stroke, and it is edited on the line from a Text button or a double-click, not from a field in the floating toolbar
+- [x] Sticky, text, shape, and image arm a cursor ghost and create one element on the next canvas click
 
 ## Out of scope
 

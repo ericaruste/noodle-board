@@ -170,6 +170,21 @@
       "id": "07896a84-c900-4c38-bce5-911bf0f7b3c9",
       "identifier": "ERI-37",
       "url": "https://linear.app/ericar/issue/ERI-37/show-arrow-tool-ports-only-on-the-hovered-element"
+    },
+    "NB-29": {
+      "id": "5bde5345-1164-427b-a6de-d7f14a4c9802",
+      "identifier": "ERI-38",
+      "url": "https://linear.app/ericar/issue/ERI-38/bend-a-dragged-noodle-back-inside-the-screen-edge"
+    },
+    "NB-30": {
+      "id": "6ed62ec9-165c-465a-96fa-fbbe2c7c5df6",
+      "identifier": "ERI-39",
+      "url": "https://linear.app/ericar/issue/ERI-39/marquee-select-from-an-empty-canvas-drag"
+    },
+    "NB-31": {
+      "id": "f4fcdd64-fd05-4298-ac62-1bc940158c2a",
+      "identifier": "ERI-40",
+      "url": "https://linear.app/ericar/issue/ERI-40/new-project-autosave-and-rename"
     }
   }
 }

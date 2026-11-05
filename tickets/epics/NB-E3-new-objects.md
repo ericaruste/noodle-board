@@ -1,7 +1,7 @@
 ---
 id: NB-E3
 title: New canvas objects
-status: Todo
+status: Done
 priority: 3
 labels: [Epic, Canvas, Feature]
 estimate: 13
@@ -28,10 +28,10 @@ Add Text, Shapes, and an Arrow/connector tool so the board matches a FigJam-styl
 
 ## Success looks like
 
-- [ ] Toolbar (or the bottom icon bar from NB-11) can add text, a small set of shapes, and enter connector mode
-- [ ] New objects resize, connect, delete, undo, and persist in the same snapshot as stickies and images
-- [ ] Arrows are noodles created via an explicit tool, not a second edge type unless a visual gap requires it
-- [ ] A selected shape can change to another of the five kinds from its floating toolbar, without creating a second shape
+- [x] Toolbar (or the bottom icon bar from NB-11) can add text, a small set of shapes, and enter connector mode
+- [x] New objects resize, connect, delete, undo, and persist in the same snapshot as stickies and images
+- [x] Arrows are noodles created via an explicit tool, not a second edge type unless a visual gap requires it
+- [x] A selected shape can change to another of the five kinds from its floating toolbar, without creating a second shape
 
 ## Out of scope
 

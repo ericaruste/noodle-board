@@ -7,8 +7,8 @@ labels: [Bug, Canvas]
 parent: NB-E1
 blockedBy: []
 estimate: 3
-linear_id:
-linear_url:
+linear_id: ERI-38
+linear_url: https://linear.app/ericar/issue/ERI-38/bend-a-dragged-noodle-back-inside-the-screen-edge
 ---
 
 ## Context
