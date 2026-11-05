@@ -1,7 +1,7 @@
 ---
 id: NB-29
 title: Keep noodles on their path instead of bending them into the screen edge
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E1
