@@ -227,39 +227,45 @@ function missesChrome(rect: ScreenRect, input: PlaceInput) {
   return true;
 }
 
-function fallback(input: PlaceInput): ScreenRect {
+function clearest(
+  input: PlaceInput,
+  minClearance: number,
+  requirePane: boolean,
+): ScreenRect | null {
+  let best: ScreenRect | null = null;
+  let bestClear = -Infinity;
+  for (const side of SIDES) {
+    for (const shift of crossPositions(input, side)) {
+      const rect = tightBox({ ...input, gap: minClearance }, side, shift, 2400);
+      if (!rect || (requirePane && !insidePane(rect, input)) || !missesChrome(rect, input)) continue;
+      const score = clearance(rect, input);
+      if (score < minClearance || score <= bestClear) continue;
+      best = rect;
+      bestClear = score;
+    }
+  }
+  return best;
+}
+
+function fallback(input: PlaceInput): ScreenRect | null {
   for (const extra of [480, 2400]) {
     for (const side of SIDES) {
       const placed = placeOnSide(input, side, extra);
       if (placed) return placed;
     }
   }
-  for (const side of SIDES) {
-    const placed = placeOnSide({ ...input, gap: 0 }, side, 2400);
-    if (placed) return placed;
-  }
-  let best: ScreenRect | null = null;
-  let bestClear = -Infinity;
-  for (const side of SIDES) {
-    for (const shift of crossPositions(input, side)) {
-      const rect = tightBox(input, side, shift, 2400);
-      if (!rect || !insidePane(rect, input) || !missesChrome(rect, input)) continue;
-      const score = clearance(rect, input);
-      if (score > bestClear) {
-        best = rect;
-        bestClear = score;
-      }
-    }
-  }
-  if (best) return best;
-  const below = { x: 0, y: 1 };
-  const parked = tightBox({ ...input, gap: 0 }, below, 0, 2400);
-  if (parked && missesChrome(parked, input)) return parked;
-  return boxAt(input.mid, below, halfExtent(below, input.width, input.height) + input.gap, input.width, input.height);
+  // Every short placement missed. Keep the full gap when any listed shift
+  // can, including one that meets the pane edge, before accepting a closer box.
+  return (
+    clearest(input, input.gap, true) ??
+    clearest(input, input.gap, false) ??
+    clearest(input, 0.5, true) ??
+    clearest(input, 0.5, false)
+  );
 }
 
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
-export function placeNoodleToolbar(input: PlaceInput): ScreenRect {
+export function placeNoodleToolbar(input: PlaceInput): ScreenRect | null {
   for (const side of SIDES) {
     const placed = placeOnSide(input, side);
     if (placed) return placed;

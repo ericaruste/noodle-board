@@ -318,6 +318,10 @@ function PlacedNoodleToolbar({
       gap: NOODLE_TOOLBAR_GAP,
       pad: 8,
     });
+    if (!placed) {
+      setPos(null);
+      return;
+    }
     const layerBox = layer.getBoundingClientRect();
     const next = { left: placed.left - layerBox.left, top: placed.top - layerBox.top };
     setPos((prev) =>
