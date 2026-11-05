@@ -243,9 +243,10 @@ export default function Marquee({
         if (!drag || upEvent.pointerId !== drag.pointerId) return;
         detachDrag();
         if (abortedRef.current || phaseRef.current !== "drawing") {
+          const moved = drag.moved;
           abortedRef.current = false;
           phaseRef.current = "idle";
-          armSwallow();
+          if (moved) armSwallow();
           setVisual(null);
           return;
         }
