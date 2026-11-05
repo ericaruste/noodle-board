@@ -195,6 +195,11 @@
       "id": "d7cec47e-560c-4c62-87c0-203e4ff64270",
       "identifier": "ERI-42",
       "url": "https://linear.app/ericar/issue/ERI-42/keep-repository-files-on-lf-line-endings"
+    },
+    "NB-33": {
+      "id": "bf226243-6c02-4cc6-a57f-c4dc6b940deb",
+      "identifier": "ERI-43",
+      "url": "https://linear.app/ericar/issue/ERI-43/keep-a-gap-between-the-noodle-toolbar-and-the-arrow"
     }
   }
 }
