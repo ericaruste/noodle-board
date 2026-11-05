@@ -34,7 +34,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-26 Zoom the board while element text is highlighted
 - NB-27 Make trackpad pinch zoom easier
 - NB-28 Show Arrow-tool ports only on the hovered element
-- NB-29 Bend a dragged noodle back inside the screen edge
+- NB-29 Hide noodles with both ends off-screen and bend a drag back inside the edge
 - NB-30 Marquee-select from an empty-canvas drag
 
 ## Success looks like
@@ -52,7 +52,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - [ ] A pinch or Ctrl/Cmd+wheel zooms the board while text on a sticky, text object, or shape is highlighted
 - [ ] A trackpad pinch zooms toward the pointer as readily as in FigJam, and a two-finger scroll still pans
 - [ ] With the Arrow tool on, ports show only on the element under the pointer
-- [ ] While a noodle is dragged onto an element near or over the screen edge, the preview bends back inside the pane. Every other noodle keeps its current path
+- [ ] Zooming until both elements a noodle connects are outside the pane hides that noodle, unless it is selected or linked to the element under the pointer. An arrow stays visible while one of its ends is dragged, even if the other end is off-screen. While a noodle is dragged onto an element near or past the screen edge, the preview bends back inside the pane. Settled noodles keep their current path
 - [ ] A Select-tool drag from empty canvas draws a marquee and selects what it overlaps, so the set can be dragged, copied, duplicated, or deleted. Escape, or a Select-tool click on the marquee, cancels it
 
 ## Out of scope
