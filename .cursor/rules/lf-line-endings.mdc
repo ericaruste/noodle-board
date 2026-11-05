@@ -1,0 +1,6 @@
+---
+description: Write repository files with LF line endings
+alwaysApply: true
+---
+
+All files you create or edit, especially ticket files, must use LF line endings, never CRLF.

@@ -1,7 +1,7 @@
 ---
 id: NB-32
 title: Keep repository files on LF line endings
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug]
 parent: NB-E5
@@ -27,11 +27,11 @@ Line endings do not match. Files created or edited here, especially ticket files
 
 ## Acceptance criteria
 
-- [ ] `.cursor/rules` has an always-applied rule that says all files you create or edit, especially ticket files, must use LF line endings, never CRLF
-- [ ] The repo root has a `.gitattributes` file with `* text=auto eol=lf`
-- [ ] Existing files are renormalized once so Git stores them with LF
-- [ ] That renormalization is committed, and the commit diff is line endings plus the new rule and `.gitattributes`
-- [ ] After that commit, a finished ticket whose text did not change does not show up as modified in source control
+- [x] `.cursor/rules` has an always-applied rule that says all files you create or edit, especially ticket files, must use LF line endings, never CRLF
+- [x] The repo root has a `.gitattributes` file with `* text=auto eol=lf`
+- [x] Existing files are renormalized once so Git stores them with LF
+- [x] That renormalization is committed, and the commit diff is line endings plus the new rule and `.gitattributes`
+- [x] After that commit, a finished ticket whose text did not change does not show up as modified in source control
 
 ## Technical notes
 
