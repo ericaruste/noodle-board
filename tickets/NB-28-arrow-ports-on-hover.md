@@ -1,7 +1,7 @@
 ---
 id: NB-28
 title: Show Arrow-tool ports only on the hovered element
-status: In Progress
+status: Done
 priority: 2
 labels: [UX, Canvas]
 parent: NB-E1
