@@ -1,7 +1,7 @@
 ---
 id: NB-30
 title: Marquee-select from an empty-canvas drag
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, Canvas]
 parent: NB-E1
@@ -31,16 +31,16 @@ With the Select tool, dragging from empty canvas should draw a marquee and selec
 
 ## Acceptance criteria
 
-- [ ] With the Select tool, a left drag that starts on empty canvas draws a marquee rectangle that follows the pointer
-- [ ] Releasing that drag selects every element and every noodle the rectangle overlaps, including one only partly inside, as one selection
-- [ ] That selection drags, copies, duplicates, and deletes the same way as a Shift multi-selection: one group box, one toolbar, and one undo step for each gesture
-- [ ] Pressing Escape while the marquee is being drawn cancels it. The rectangle disappears, nothing it covered becomes selected, and the selection stays as it was when the drag started. Releasing the pointer after Escape does not select
-- [ ] A click with the Select tool on the marquee rectangle cancels it the same way. The rectangle disappears and the marquee does not leave a selection
-- [ ] A drag that starts on an element, a noodle, a port, or a handle still moves or edits that object and does not draw a marquee
-- [ ] The Hand tool, the Arrow tool, Space+left-drag, and the mouse-wheel drag do not draw a marquee
-- [ ] Holding Shift while drawing the marquee adds what it covers to the current selection. Without Shift, the marquee replaces the selection
-- [ ] A marquee that covers nothing selects nothing. With Shift held, that empty marquee leaves the current selection as it is
-- [ ] An `endpoint` node is not selected as its own object. A loose noodle is selected when its stroke overlaps the marquee
+- [x] With the Select tool, a left drag that starts on empty canvas draws a marquee rectangle that follows the pointer
+- [x] Releasing that drag selects every element and every noodle the rectangle overlaps, including one only partly inside, as one selection
+- [x] That selection drags, copies, duplicates, and deletes the same way as a Shift multi-selection: one group box, one toolbar, and one undo step for each gesture
+- [x] Pressing Escape while the marquee is being drawn cancels it. The rectangle disappears, nothing it covered becomes selected, and the selection stays as it was when the drag started. Releasing the pointer after Escape does not select
+- [x] A click with the Select tool on the marquee rectangle cancels it the same way. The rectangle disappears and the marquee does not leave a selection
+- [x] A drag that starts on an element, a noodle, a port, or a handle still moves or edits that object and does not draw a marquee
+- [x] The Hand tool, the Arrow tool, Space+left-drag, and the mouse-wheel drag do not draw a marquee
+- [x] Holding Shift while drawing the marquee adds what it covers to the current selection. Without Shift, the marquee replaces the selection
+- [x] A marquee that covers nothing selects nothing. With Shift held, that empty marquee leaves the current selection as it is
+- [x] An `endpoint` node is not selected as its own object. A loose noodle is selected when its stroke overlaps the marquee
 
 ## Technical notes
 
