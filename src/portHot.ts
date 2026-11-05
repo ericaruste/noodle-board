@@ -17,6 +17,8 @@ export type HandlePlacement = { fraction: number; hot: boolean };
 
 let current: HotPort | null = null;
 let hover: HoverTarget | null = null;
+/** Element whose four side ports are visible. Null hides every idle port. */
+let portsElementId: string | null = null;
 let origin: ConnectionOrigin | null = null;
 let swallowUntil = 0;
 let portGesture = false;
@@ -69,6 +71,13 @@ export function setDragFeedback(nextHover: HoverTarget | null, nextHot: HotPort 
   if (sameHover(hover, nextHover) && sameHot(current, nextHot)) return;
   hover = nextHover;
   current = nextHot;
+  emit();
+}
+
+/** Four side ports for the element under the pointer. `null` hides them. */
+export function setPortsElement(next: string | null) {
+  if (portsElementId === next) return;
+  portsElementId = next;
   emit();
 }
 
@@ -203,6 +212,21 @@ export function useHoverTarget() {
 
   useEffect(() => {
     const sync = () => setValue((prev) => (sameHover(prev, hover) ? prev : hover));
+    listeners.add(sync);
+    sync();
+    return () => {
+      listeners.delete(sync);
+    };
+  }, []);
+
+  return value;
+}
+
+export function usePortsElement() {
+  const [value, setValue] = useState<string | null>(() => portsElementId);
+
+  useEffect(() => {
+    const sync = () => setValue((prev) => (prev === portsElementId ? prev : portsElementId));
     listeners.add(sync);
     sync();
     return () => {

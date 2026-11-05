@@ -32,6 +32,7 @@ import {
   setConnectionOrigin,
   setDragFeedback,
   setHotPort,
+  setPortsElement,
   swallowsClick,
   useHotPort,
   useHoverTarget,
@@ -543,6 +544,14 @@ function DragLanding() {
   );
 }
 
+const CHROME_SELECTOR = ".react-flow__minimap, .board-toolbar, [data-floating-panel], [data-canvas-chrome]";
+
+/** Toolbar, minimap, and other chrome sit above the element underneath. */
+function pointerOverChrome(clientX: number, clientY: number) {
+  const hit = document.elementFromPoint(clientX, clientY);
+  return hit instanceof Element && Boolean(hit.closest(CHROME_SELECTOR));
+}
+
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
@@ -571,23 +580,28 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
   }, [store]);
 
   useEffect(() => {
+    if (!connectMode) setPortsElement(null);
     const placeAt = (clientX: number, clientY: number) => {
       const state = store.getState();
       const armed = connectMode && state.connectionClickStartHandle;
+      const flow = clientToFlow(state, clientX, clientY);
+      const kind = dragKind(state);
+      const hover = flow && !pointerOverChrome(clientX, clientY) ? resolveHover(state, flow, kind) : null;
       if (state.connection.inProgress || armed) {
-        const flow = clientToFlow(state, clientX, clientY);
-        const kind = dragKind(state);
-        const hover = flow ? resolveHover(state, flow, kind) : null;
         setDragFeedback(hover, hover ? portFromHover(hover, kind) : null);
+        setPortsElement(connectMode ? (hover?.elementId ?? null) : null);
         syncPlacedHandles(state);
         return;
       }
       if (connectMode) {
-        setDragFeedback(null, portAtClient(state, clientX, clientY));
+        // Same element resolveHover uses mid-drag. Landing chrome stays off until a noodle is moving.
+        setPortsElement(hover?.elementId ?? null);
+        setDragFeedback(null, hover ? portAtClient(state, clientX, clientY) : null);
         syncPlacedHandles(state);
         return;
       }
-      // A port stays hidden until the element is selected or the Arrow tool is on.
+      // A port stays hidden until the element is selected, or the pointer is over it with the Arrow tool.
+      setPortsElement(null);
       setDragFeedback(null, null);
       syncPlacedHandles(state);
     };

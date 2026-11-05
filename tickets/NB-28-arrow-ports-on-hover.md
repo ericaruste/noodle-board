@@ -1,7 +1,7 @@
 ---
 id: NB-28
 title: Show Arrow-tool ports only on the hovered element
-status: Todo
+status: In Progress
 priority: 2
 labels: [UX, Canvas]
 parent: NB-E1
@@ -34,14 +34,14 @@ Turning on the Arrow tool covers the board with every element’s four ports. Th
 
 ## Acceptance criteria
 
-- [ ] With the Arrow tool on and the pointer over empty canvas, no element shows its ports
-- [ ] Hovering an element shows that element’s four side ports only. Every other element stays bare
-- [ ] Moving onto a different element hides the previous ports and shows the new element’s four
-- [ ] Leaving an element, or entering the toolbar or the minimap, hides its ports
-- [ ] A selected element does not keep its ports visible under the Arrow tool unless the pointer is over it
-- [ ] While a noodle end is dragged, only the element under the pointer shows the NB-20 landing: outline, four outlined ports, fill on the port under the pointer. The element the drag started on hides its other ports once the pointer has left it
-- [ ] Clicking or dragging from a hovered element still starts one noodle, and dropping on a hovered element still attaches it
-- [ ] With the Arrow tool off, a single selected element still shows its ports as it does today. Hand and Select are otherwise unchanged
+- [x] With the Arrow tool on and the pointer over empty canvas, no element shows its ports
+- [x] Hovering an element shows that element’s four side ports only. Every other element stays bare
+- [x] Moving onto a different element hides the previous ports and shows the new element’s four
+- [x] Leaving an element, or entering the toolbar or the minimap, hides its ports
+- [x] A selected element does not keep its ports visible under the Arrow tool unless the pointer is over it
+- [x] While a noodle end is dragged, only the element under the pointer shows the NB-20 landing: outline, four outlined ports, fill on the port under the pointer. The element the drag started on hides its other ports once the pointer has left it
+- [x] Clicking or dragging from a hovered element still starts one noodle, and dropping on a hovered element still attaches it
+- [x] With the Arrow tool off, a single selected element still shows its ports as it does today. Hand and Select are otherwise unchanged
 
 ## Technical notes
 
