@@ -185,6 +185,16 @@
       "id": "f4fcdd64-fd05-4298-ac62-1bc940158c2a",
       "identifier": "ERI-40",
       "url": "https://linear.app/ericar/issue/ERI-40/new-project-autosave-and-rename"
+    },
+    "NB-E5": {
+      "id": "f5ff1cc7-718c-46c1-b1d8-5b3f3d9ff375",
+      "identifier": "ERI-41",
+      "url": "https://linear.app/ericar/issue/ERI-41/workflow"
+    },
+    "NB-32": {
+      "id": "d7cec47e-560c-4c62-87c0-203e4ff64270",
+      "identifier": "ERI-42",
+      "url": "https://linear.app/ericar/issue/ERI-42/keep-repository-files-on-lf-line-endings"
     }
   }
 }

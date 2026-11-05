@@ -48,6 +48,7 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 20. **Off-screen noodles and edge drag bend** — NB-29 (zoom hides a noodle when both of its elements are outside the pane, unless it is selected, linked to the element under the pointer, or an end of it is being dragged; the inward bend applies only while a noodle is dragged onto an element near or past the screen edge). Follows the current drag preview. Settled noodles keep their current path.
 21. **Marquee select** — NB-30 (a Select-tool drag from empty canvas draws a marquee and selects what it overlaps, ready to drag, copy, duplicate, or delete). Escape or a Select-tool click on the marquee cancels it. Follows the Select tool from NB-23.
 22. **Project file management** — NB-31 (New starts an empty project, changes save on their own, a green dot pulses beside the name while a save is in progress, and clicking the name renames the project including its Recent row). High priority. Follows the current file bar from NB-04, NB-05, and NB-06.
+23. **LF line endings** — NB-32 (an always-applied Cursor rule writes LF, `.gitattributes` sets `* text=auto eol=lf`, and one renormalizing commit stops finished tickets from showing as modified). Follows the current ticket files and Cursor rules.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
