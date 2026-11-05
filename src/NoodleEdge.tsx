@@ -208,7 +208,7 @@ function EndKnob({
 
 type FlowCircle = { x: number; y: number; radius: number };
 
-function sampleFlowPath(d: string, fallback: { x: number; y: number }[]) {
+function sampleFlowPath(d: string, fallback: { x: number; y: number }[], zoom: number) {
   if (!d || typeof document === "undefined") return fallback;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -216,7 +216,8 @@ function sampleFlowPath(d: string, fallback: { x: number; y: number }[]) {
   svg.appendChild(path);
   const length = path.getTotalLength();
   if (!(length > 0)) return fallback;
-  const count = Math.max(16, Math.min(200, Math.ceil(length / 2)));
+  // Two screen pixels per sample, so a tight curve cannot bulge through the gap.
+  const count = Math.max(16, Math.min(720, Math.ceil((length * (zoom || 1)) / 2)));
   const points: { x: number; y: number }[] = [];
   for (let i = 0; i <= count; i += 1) {
     const point = path.getPointAtLength((length * i) / count);
@@ -286,7 +287,7 @@ function PlacedNoodleToolbar({
     const height = el.offsetHeight;
     if (width < 1 || height < 1) return;
     const safeZoom = zoom || 1;
-    const samples = sampleFlowPath(path, points);
+    const samples = sampleFlowPath(path, points, safeZoom);
     const screen = samples.map((point) => flowToScreenPosition(point));
     const paintRadius = ((strokeWidth + 6) / 2) * safeZoom;
     const segments: { a: { x: number; y: number }; b: { x: number; y: number }; radius: number }[] = [];
@@ -307,13 +308,17 @@ function PlacedNoodleToolbar({
       }
     }
     const tools = document.querySelector(".board-toolbar")?.getBoundingClientRect();
+    if (!tools || tools.width < 1 || tools.height < 1) {
+      setPos(null);
+      return;
+    }
     const placed = placeNoodleToolbar({
       width,
       height,
       mid: flowToScreenPosition({ x: midX, y: midY }),
       obstacles: { segments, circles },
       pane: clientRect(pane.getBoundingClientRect()),
-      blocked: tools && tools.width > 0 && tools.height > 0 ? [clientRect(tools)] : [],
+      blocked: [clientRect(tools)],
       avoid: measureAvoidRects(),
       gap: NOODLE_TOOLBAR_GAP,
       pad: 8,

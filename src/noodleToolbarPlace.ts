@@ -216,37 +216,6 @@ function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | 
   return best;
 }
 
-function insidePane(rect: ScreenRect, input: PlaceInput) {
-  const correction = paneCorrection(rect, input.pane, input.pad);
-  return Math.abs(correction.x) <= 0.5 && Math.abs(correction.y) <= 0.5;
-}
-
-function missesChrome(rect: ScreenRect, input: PlaceInput) {
-  if (input.blocked.some((block) => rectsOverlap(rect, expand(block, input.pad)))) return false;
-  if (input.avoid.some((keep) => rectsOverlap(rect, keep))) return false;
-  return true;
-}
-
-function clearest(
-  input: PlaceInput,
-  minClearance: number,
-  requirePane: boolean,
-): ScreenRect | null {
-  let best: ScreenRect | null = null;
-  let bestClear = -Infinity;
-  for (const side of SIDES) {
-    for (const shift of crossPositions(input, side)) {
-      const rect = tightBox({ ...input, gap: minClearance }, side, shift, 2400);
-      if (!rect || (requirePane && !insidePane(rect, input)) || !missesChrome(rect, input)) continue;
-      const score = clearance(rect, input);
-      if (score < minClearance || score <= bestClear) continue;
-      best = rect;
-      bestClear = score;
-    }
-  }
-  return best;
-}
-
 function fallback(input: PlaceInput): ScreenRect | null {
   for (const extra of [480, 2400]) {
     for (const side of SIDES) {
@@ -254,14 +223,8 @@ function fallback(input: PlaceInput): ScreenRect | null {
       if (placed) return placed;
     }
   }
-  // Every short placement missed. Keep the full gap when any listed shift
-  // can, including one that meets the pane edge, before accepting a closer box.
-  return (
-    clearest(input, input.gap, true) ??
-    clearest(input, input.gap, false) ??
-    clearest(input, 0.5, true) ??
-    clearest(input, 0.5, false)
-  );
+  // No listed shift keeps the gap inside the pane and off the board toolbar.
+  return null;
 }
 
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
