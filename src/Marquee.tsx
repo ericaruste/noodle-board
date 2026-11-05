@@ -6,7 +6,7 @@ import { layers } from "./layers";
 import { nodesTouchingRect, normalizeRect, pathHitsRect, selectionIds, type FlowRect } from "./marqueeGeometry";
 import { ENDPOINT_TYPE } from "./noodleEnds";
 
-const DRAG_PX = 4;
+const DRAG_PX = 8;
 
 const BLOCKS_MARQUEE =
   ".react-flow__node, .react-flow__edge, .react-flow__handle, .react-flow__resize-control, .react-flow__nodesselection, .react-flow__minimap, .react-flow__controls, .react-flow__panel, .noodle-anchor, .noodle-end, .noodle-edge-label, [data-noodle-label], [data-marquee-hit], [data-floating-panel], [data-canvas-chrome], [data-shapes-menu], .board-toolbar, [role='alert']";

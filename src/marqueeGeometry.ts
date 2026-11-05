@@ -95,7 +95,7 @@ export function pathHitsRect(path: SVGGeometryElement, rect: FlowRect, pad: numb
     return false;
   }
   if (!Number.isFinite(length) || length <= 0) return false;
-  const steps = Math.max(1, Math.ceil(length / 4));
+  const steps = Math.max(1, Math.ceil(length));
   let prev: Point;
   try {
     prev = path.getPointAtLength(0);
