@@ -188,19 +188,26 @@ function rendererOf(state: { domNode: HTMLElement | null }) {
   return node instanceof HTMLElement ? node : null;
 }
 
+type FlowBox = { x: number; y: number; width: number; height: number };
+
 type SelectionChromeProps = {
   side: ChromeSide;
   /** Lower numbers sit closer to the object on the preferred side. */
   order?: number;
   children: ReactNode;
+  /** Flow-space box. When set, chrome anchors here instead of the current node. */
+  box?: FlowBox;
+  /** Slot group. Defaults to the node id, or "group" when `box` is set. */
+  scope?: string;
 };
 
-export default function SelectionChrome({ side, order = 0, children }: SelectionChromeProps) {
+export default function SelectionChrome({ side, order = 0, children, box, scope: scopeProp }: SelectionChromeProps) {
   const nodeId = useNodeId();
-  const slotId = `${nodeId ?? "node"}:${side}:${order}`;
+  const scope = scopeProp ?? nodeId ?? (box ? "group" : null);
+  const slotId = `${scope ?? "node"}:${side}:${order}`;
   const host = useStore(rendererOf);
-  const anchor = useStore((state): Anchor | null => {
-    if (!nodeId) return null;
+  const nodeAnchor = useStore((state): Anchor | null => {
+    if (box || !nodeId) return null;
     const node = state.nodeLookup.get(nodeId);
     const width = node?.measured.width;
     const height = node?.measured.height;
@@ -215,6 +222,19 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
       zoom,
     };
   }, sameAnchor);
+  const boxAnchor = useStore((state): Anchor | null => {
+    if (!box) return null;
+    const [panX, panY, zoom] = state.transform;
+    if (!(zoom > 0)) return null;
+    return {
+      left: box.x * zoom + panX,
+      top: box.y * zoom + panY,
+      width: box.width * zoom,
+      height: box.height * zoom,
+      zoom,
+    };
+  }, sameAnchor);
+  const anchor = box ? boxAnchor : nodeAnchor;
   const layoutTick = useSyncExternalStore(subscribe, getTick, getTick);
   const chrome = useChromeLayout();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -259,9 +279,9 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
 
   useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || !nodeId) return;
+    if (!root || !scope) return;
     const rect = root.getBoundingClientRect();
-    setSlot(slotId, { nodeId, side, order, width: rect.width, height: rect.height });
+    setSlot(slotId, { nodeId: scope, side, order, width: rect.width, height: rect.height });
   });
 
   const placed =
@@ -269,14 +289,14 @@ export default function SelectionChrome({ side, order = 0, children }: Selection
       ? placeSelectionChrome(
           { left: anchor.left, top: anchor.top, width: anchor.width, height: anchor.height },
           safe,
-          slotsFor(nodeId ?? ""),
+          slotsFor(scope ?? ""),
           selectionClearance(anchor.zoom),
           safe.obstacles,
         ).get(slotId)
       : undefined;
   void layoutTick;
 
-  if (!host || !nodeId) return null;
+  if (!host || !scope) return null;
 
   return (
     <FloatingPanel

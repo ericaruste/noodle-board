@@ -1,4 +1,5 @@
 import type { Node, NodeChange } from "@xyflow/react";
+import { shiftAspectFor } from "./shiftAspect";
 
 /**
  * Custom alignment and equal-spacing snap. The xyflow helper-lines example is
@@ -587,7 +588,9 @@ function snapResize(
   const xAnchors = anchorsFor(sides.left, sides.right);
   const yAnchors = anchorsFor(sides.top, sides.bottom);
   const others = otherBoxes(nodes, new Set([id]));
-  const aspect = node.type === "image" && origin.h > 0 ? origin.w / origin.h : null;
+  const shiftAspect = shiftAspectFor(id);
+  const aspect =
+    shiftAspect != null ? shiftAspect : node.type === "image" && origin.h > 0 ? origin.w / origin.h : null;
 
   let box = next;
   const guides: GuideLine[] = [];

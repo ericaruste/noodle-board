@@ -1,7 +1,9 @@
-import { type CSSProperties } from "react";
+import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { NodeResizer, useNodeId, useStore } from "@xyflow/react";
+import { NodeResizer, useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 import { layers } from "./layers";
+import { RESIZE_HANDLES, resizeNodeBox, type ResizeHandle } from "./resizeMath";
+import { setShiftAspect } from "./shiftAspect";
 
 /** Sizes at zoom 1. Zoom-out only partly cancels the viewport scale, so chrome
  *  shrinks a little instead of staying this large on screen. */
@@ -55,6 +57,42 @@ function sameBox(a: Box | null, b: Box | null) {
   return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
+const CORNER_HANDLES = new Set<ResizeHandle>(["top-left", "top-right", "bottom-left", "bottom-right"]);
+
+export function ResizeHandles({
+  onPointerDown,
+}: {
+  onPointerDown: (handle: ResizeHandle, event: ReactPointerEvent<HTMLDivElement>) => void;
+}) {
+  return (
+    <>
+      {RESIZE_HANDLES.map((handle) => {
+        const corner = CORNER_HANDLES.has(handle);
+        return (
+          <div
+            key={handle}
+            role="slider"
+            aria-label={`Resize ${handle}`}
+            aria-orientation={handle === "left" || handle === "right" ? "horizontal" : handle === "top" || handle === "bottom" ? "vertical" : undefined}
+            className={[
+              "react-flow__resize-control",
+              "nodrag",
+              "nopan",
+              corner ? "handle" : "line",
+              ...handle.split("-"),
+              corner ? "noodle-resize-handle" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            style={{ touchAction: "none" }}
+            onPointerDown={(event) => onPointerDown(handle, event)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 type NoodleResizerProps = {
   selected?: boolean;
   minWidth: number;
@@ -63,6 +101,118 @@ type NoodleResizerProps = {
   onResizeStart?: () => void;
   onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void;
 };
+
+function useShiftResize(
+  minWidth: number,
+  minHeight: number,
+  onResizeStart?: () => void,
+  onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void,
+) {
+  const nodeId = useNodeId();
+  const store = useStoreApi();
+  const { screenToFlowPosition } = useReactFlow();
+  const screenToFlowRef = useRef(screenToFlowPosition);
+  const startRef = useRef(onResizeStart);
+  const endRef = useRef(onResizeEnd);
+  screenToFlowRef.current = screenToFlowPosition;
+  startRef.current = onResizeStart;
+  endRef.current = onResizeEnd;
+
+  return (handle: ResizeHandle, event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !nodeId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const node = store.getState().nodeLookup.get(nodeId);
+    const width = node?.measured.width;
+    const height = node?.measured.height;
+    if (!node || !width || !height) return;
+    const pointer = screenToFlowRef.current({ x: event.clientX, y: event.clientY }, { snapToGrid: false });
+    const origin = node.internals.positionAbsolute;
+    const start = {
+      x: node.position.x,
+      y: node.position.y,
+      absX: origin.x,
+      absY: origin.y,
+      width,
+      height,
+      pointer,
+    };
+    startRef.current?.();
+    const drag: {
+      pointerId: number;
+      lastX: number;
+      lastY: number;
+      size: { x: number; y: number; width: number; height: number };
+    } = {
+      pointerId: event.pointerId,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      size: { x: start.x, y: start.y, width, height },
+    };
+    const apply = (clientX: number, clientY: number, shift: boolean) => {
+      const point = screenToFlowRef.current({ x: clientX, y: clientY }, { snapToGrid: false });
+      const next = resizeNodeBox(
+        { x: start.absX, y: start.absY, width: start.width, height: start.height },
+        start.pointer,
+        handle,
+        point,
+        shift,
+        minWidth,
+        minHeight,
+      );
+      const position = { x: start.x + (next.x - start.absX), y: start.y + (next.y - start.absY) };
+      drag.size = { ...position, width: next.width, height: next.height };
+      setShiftAspect(shift ? nodeId : null, start.width / Math.max(start.height, 1));
+      store.getState().triggerNodeChanges([
+        { id: nodeId, type: "position", position },
+        {
+          id: nodeId,
+          type: "dimensions",
+          resizing: true,
+          setAttributes: true,
+          dimensions: { width: next.width, height: next.height },
+        },
+      ]);
+    };
+    const onMove = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== drag.pointerId) return;
+      moveEvent.preventDefault();
+      moveEvent.stopPropagation();
+      drag.lastX = moveEvent.clientX;
+      drag.lastY = moveEvent.clientY;
+      apply(moveEvent.clientX, moveEvent.clientY, moveEvent.shiftKey);
+    };
+    const onKey = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key !== "Shift") return;
+      apply(drag.lastX, drag.lastY, keyEvent.type === "keydown");
+    };
+    const finish = (upEvent: PointerEvent) => {
+      if (upEvent.pointerId !== drag.pointerId) return;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKey);
+      setShiftAspect(null);
+      store.getState().triggerNodeChanges([
+        { id: nodeId, type: "position", position: { x: drag.size.x, y: drag.size.y } },
+        {
+          id: nodeId,
+          type: "dimensions",
+          resizing: false,
+          setAttributes: true,
+          dimensions: { width: drag.size.width, height: drag.size.height },
+        },
+      ]);
+      endRef.current?.(upEvent, { width: drag.size.width, height: drag.size.height });
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", finish);
+    window.addEventListener("pointercancel", finish);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKey);
+  };
+}
 
 export function NoodleResizer({
   selected,
@@ -73,6 +223,7 @@ export function NoodleResizer({
   onResizeEnd,
 }: NoodleResizerProps) {
   const resizeStyle = useNoodleResizeStyle();
+  const onHandleDown = useShiftResize(minWidth, minHeight, onResizeStart, onResizeEnd);
   const nodeId = useNodeId();
   const box = useStore((state) => {
     const node = nodeId ? state.nodeLookup.get(nodeId) : undefined;
@@ -105,16 +256,20 @@ export function NoodleResizer({
       <svg className="noodle-selection-stroke" width="100%" height="100%" aria-hidden>
         <rect width="100%" height="100%" />
       </svg>
-      <NodeResizer
-        minWidth={minWidth}
-        minHeight={minHeight}
-        keepAspectRatio={keepAspectRatio}
-        onResizeStart={onResizeStart}
-        onResizeEnd={onResizeEnd}
-        autoScale={false}
-        lineClassName="noodle-resize-line"
-        handleClassName="noodle-resize-handle"
-      />
+      {keepAspectRatio ? (
+        <NodeResizer
+          minWidth={minWidth}
+          minHeight={minHeight}
+          keepAspectRatio
+          onResizeStart={onResizeStart}
+          onResizeEnd={onResizeEnd}
+          autoScale={false}
+          lineClassName="noodle-resize-line"
+          handleClassName="noodle-resize-handle"
+        />
+      ) : (
+        <ResizeHandles onPointerDown={onHandleDown} />
+      )}
     </div>,
     viewport,
   );

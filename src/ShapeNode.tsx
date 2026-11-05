@@ -279,7 +279,7 @@ function PaintNone({
   );
 }
 
-function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: ShapeKind) => void }) {
+export function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind | null; onPick: (kind: ShapeKind) => void }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
@@ -307,7 +307,7 @@ function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: Shape
       <button
         ref={buttonRef}
         type="button"
-        aria-label={`Shape, ${SHAPE_LABELS[kind]}`}
+        aria-label={`Shape, ${kind ? SHAPE_LABELS[kind] : "Mixed"}`}
         aria-expanded={open}
         aria-haspopup="menu"
         onMouseDown={(event) => event.preventDefault()}
@@ -317,8 +317,8 @@ function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: Shape
         }}
         className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
       >
-        <ShapeKindIcon kind={kind} />
-        <span className="whitespace-nowrap text-left">{SHAPE_LABELS[kind]}</span>
+        {kind ? <ShapeKindIcon kind={kind} /> : null}
+        <span className="whitespace-nowrap text-left">{kind ? SHAPE_LABELS[kind] : "Mixed"}</span>
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
           <path d="M2 3.5 5 7l3-3.5" />
         </svg>
@@ -340,7 +340,7 @@ function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: Shape
           }}
         >
           {SHAPE_KINDS.map((option) => {
-            const current = option === kind;
+            const current = kind != null && option === kind;
             return (
               <button
                 key={option}
@@ -371,12 +371,14 @@ function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind; onPick: (kind: Shape
 function PaintRow({
   label,
   value,
+  mixed = false,
   swatches,
   noneLabel,
   onChange,
 }: {
   label: string;
   value: string | null;
+  mixed?: boolean;
   swatches: readonly { name: string; value: string }[];
   noneLabel: string;
   onChange: (value: string | null) => void;
@@ -389,11 +391,54 @@ function PaintRow({
           key={swatch.value}
           name={`${swatch.name} ${label.toLowerCase()}`}
           value={swatch.value}
-          active={value === swatch.value}
+          active={!mixed && value === swatch.value}
           onPick={onChange}
         />
       ))}
-      <PaintNone label={noneLabel} active={value === null} onPick={() => onChange(null)} />
+      <PaintNone label={noneLabel} active={!mixed && value === null} onPick={() => onChange(null)} />
+    </div>
+  );
+}
+
+export function ShapeColorBar({
+  fill,
+  stroke,
+  fillMixed = false,
+  strokeMixed = false,
+  onFill,
+  onStroke,
+}: {
+  fill: string | null;
+  stroke: string | null;
+  fillMixed?: boolean;
+  strokeMixed?: boolean;
+  onFill: (value: string | null) => void;
+  onStroke: (value: string | null) => void;
+}) {
+  return (
+    <div
+      data-shape-colors
+      className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow backdrop-blur-xl"
+      onMouseDown={(event) => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => event.stopPropagation()}
+    >
+      <PaintRow
+        label="Fill"
+        value={fill}
+        mixed={fillMixed}
+        swatches={FILL_SWATCHES}
+        noneLabel="No fill"
+        onChange={onFill}
+      />
+      <PaintRow
+        label="Stroke"
+        value={stroke}
+        mixed={strokeMixed}
+        swatches={STROKE_SWATCHES}
+        noneLabel="No stroke"
+        onChange={onStroke}
+      />
     </div>
   );
 }
@@ -605,28 +650,12 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       <ObjectPorts nodeId={id} />
       {showChrome ? (
         <SelectionChrome side="below">
-          <div
-            data-shape-colors
-            className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow backdrop-blur-xl"
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={(event) => event.stopPropagation()}
-            onDoubleClick={(event) => event.stopPropagation()}
-          >
-            <PaintRow
-              label="Fill"
-              value={fill}
-              swatches={FILL_SWATCHES}
-              noneLabel="No fill"
-              onChange={(value) => commitPaint({ fill: value })}
-            />
-            <PaintRow
-              label="Stroke"
-              value={stroke}
-              swatches={STROKE_SWATCHES}
-              noneLabel="No stroke"
-              onChange={(value) => commitPaint({ stroke: value })}
-            />
-          </div>
+          <ShapeColorBar
+            fill={fill}
+            stroke={stroke}
+            onFill={(value) => commitPaint({ fill: value })}
+            onStroke={(value) => commitPaint({ stroke: value })}
+          />
         </SelectionChrome>
       ) : null}
     </div>

@@ -27,6 +27,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import AlignmentGuides from "./AlignmentGuides";
 import GroupSelection, { applyGroupStyle, GROUP_STYLE_EVENT, type GroupStyleDetail } from "./GroupSelection";
+import { GROUP_GEOMETRY_EVENT, type GroupGeometryDetail } from "./groupScale";
 import Marquee from "./Marquee";
 import {
   alignNodeChanges,
@@ -1952,6 +1953,19 @@ function Board() {
     window.addEventListener(GROUP_STYLE_EVENT, onStyle);
     return () => window.removeEventListener(GROUP_STYLE_EVENT, onStyle);
   }, [takeSnapshot]);
+
+  useEffect(() => {
+    const onGeometry = (event: Event) => {
+      const detail = (event as CustomEvent<GroupGeometryDetail>).detail;
+      if (!detail) return;
+      nodesRef.current = detail.nodes;
+      edgesRef.current = detail.edges;
+      setNodes(detail.nodes);
+      setEdges(detail.edges);
+    };
+    window.addEventListener(GROUP_GEOMETRY_EVENT, onGeometry);
+    return () => window.removeEventListener(GROUP_GEOMETRY_EVENT, onGeometry);
+  }, []);
 
   const canDelete =
     nodes.some((node) => node.selected) || edges.some((edge) => edge.selected);
