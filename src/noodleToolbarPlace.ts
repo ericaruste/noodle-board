@@ -130,10 +130,6 @@ function expand(rect: ScreenRect, pad: number): ScreenRect {
   return { left: rect.left - pad, top: rect.top - pad, right: rect.right + pad, bottom: rect.bottom + pad };
 }
 
-function translate(rect: ScreenRect, dx: number, dy: number): ScreenRect {
-  return { left: rect.left + dx, top: rect.top + dy, right: rect.right + dx, bottom: rect.bottom + dy };
-}
-
 function paneCorrection(rect: ScreenRect, pane: ScreenRect, pad: number) {
   let x = 0;
   let y = 0;
@@ -217,15 +213,17 @@ function crossShifts(rect: ScreenRect, input: PlaceInput, side: Vec) {
   return shifts;
 }
 
-function placeOnSide(input: PlaceInput, side: Vec): ScreenRect | null {
+function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | null {
   const tried = new Set<number>();
   const queue = [0];
-  for (let attempt = 0; attempt < 8 && queue.length > 0; attempt += 1) {
+  let attempts = 0;
+  while (queue.length > 0 && attempts < 32) {
     const crossShift = queue.shift() ?? 0;
     const key = Math.round(crossShift);
     if (tried.has(key)) continue;
     tried.add(key);
-    const rect = tightBox(input, side, crossShift, EXTRA);
+    attempts += 1;
+    const rect = tightBox(input, side, crossShift, extra);
     if (!rect || !crossExtentFits(rect, input, side)) continue;
     const correction = paneCorrection(rect, input.pane, input.pad);
     const along = correction.x * side.x + correction.y * side.y;
@@ -237,35 +235,31 @@ function placeOnSide(input: PlaceInput, side: Vec): ScreenRect | null {
   return null;
 }
 
-function clampIntoPane(rect: ScreenRect, pane: ScreenRect, pad: number): ScreenRect {
-  let dx = 0;
-  let dy = 0;
-  if (rect.left < pane.left + pad) dx = pane.left + pad - rect.left;
-  if (rect.right + dx > pane.right - pad) dx += pane.right - pad - (rect.right + dx);
-  if (rect.top < pane.top + pad) dy = pane.top + pad - rect.top;
-  if (rect.bottom + dy > pane.bottom - pad) dy += pane.bottom - pad - (rect.bottom + dy);
-  return translate(rect, dx, dy);
-}
-
 function fallback(input: PlaceInput): ScreenRect {
+  for (const extra of [480, 2400]) {
+    for (const side of SIDES) {
+      const placed = placeOnSide(input, side, extra);
+      if (placed) return placed;
+    }
+  }
   let best: ScreenRect | null = null;
   let bestClear = -Infinity;
   for (const side of SIDES) {
-    const rect = tightBox(input, side, 0, 4000);
+    const rect = tightBox(input, side, 0, 2400);
     if (!rect) continue;
-    const fitted = clampIntoPane(rect, input.pane, input.pad);
-    const score = clearance(fitted, input);
+    if (input.blocked.some((block) => rectsOverlap(rect, expand(block, input.pad)))) continue;
+    if (input.avoid.some((keep) => rectsOverlap(rect, keep))) continue;
+    const score = clearance(rect, input);
     if (score > bestClear) {
-      best = fitted;
+      best = rect;
       bestClear = score;
     }
   }
   if (best) return best;
-  return clampIntoPane(
-    boxAt(input.mid, ABOVE, halfExtent(ABOVE, input.width, input.height), input.width, input.height),
-    input.pane,
-    input.pad,
-  );
+  const parked =
+    tightBox(input, ABOVE, 0, 2400) ??
+    boxAt(input.mid, ABOVE, halfExtent(ABOVE, input.width, input.height) + input.gap + 48, input.width, input.height);
+  return parked;
 }
 
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
