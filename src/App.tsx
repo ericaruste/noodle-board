@@ -358,6 +358,7 @@ function Board() {
   const savingRef = useRef(false);
   const openingRef = useRef(false);
   const newProjectRef = useRef(false);
+  const transitionRef = useRef(false);
   const recentsRef = useRef<RecentProject[]>([]);
   const suppressAutosaveRef = useRef(false);
   const blockMoveAutosaveRef = useRef(false);
@@ -1723,13 +1724,18 @@ function Board() {
     [getViewport, holdMoveAutosave, placeViewport, recordRecent, rememberBoard],
   );
 
+  const takeTransition = useCallback(() => {
+    if (transitionRef.current || savingRef.current || openingRef.current || newProjectRef.current) return false;
+    transitionRef.current = true;
+    return true;
+  }, []);
+
   const openProject = useCallback(async () => {
-    if (savingRef.current || openingRef.current) return;
-    if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
-    if (savingRef.current || openingRef.current) return;
-    openingRef.current = true;
+    if (!takeTransition()) return;
     setFileError(null);
     try {
+      if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
+      openingRef.current = true;
       const picked = await pickNoodleProjectFile();
       if (!picked.ok) {
         if (!picked.aborted) setFileError(picked.message);
@@ -1738,16 +1744,17 @@ function Board() {
       await openProjectFile(picked.file, picked.handle);
     } finally {
       openingRef.current = false;
+      transitionRef.current = false;
     }
-  }, [openProjectFile, whenAutosaveIdle]);
+  }, [openProjectFile, takeTransition, whenAutosaveIdle]);
 
   const saveProject = useCallback(
     async (mode: "save" | "save-as") => {
-      if (savingRef.current || openingRef.current) return;
-      if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
-      if (savingRef.current || openingRef.current) return;
-      savingRef.current = true;
+      if (!takeTransition()) return;
       setFileError(null);
+      try {
+      if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
+      savingRef.current = true;
       const viewport = getViewport();
       const nodes = nodesRef.current;
       const edges = edgesRef.current;
@@ -1792,8 +1799,11 @@ function Board() {
         }
         if (dirty) void flushAutosaveRef.current();
       }
+      } finally {
+        transitionRef.current = false;
+      }
     },
-    [getViewport, recordRecent, releaseMissingFile, stampNow, whenAutosaveIdle],
+    [getViewport, recordRecent, releaseMissingFile, stampNow, takeTransition, whenAutosaveIdle],
   );
 
   const renameProject = useCallback(
@@ -1809,7 +1819,6 @@ function Board() {
   );
 
   const newProject = useCallback(async () => {
-    if (savingRef.current || openingRef.current || newProjectRef.current) return;
     const dirtyUntitled =
       documentNameRef.current === "Untitled" &&
       (nodesRef.current.length > 0 || edgesRef.current.length > 0);
@@ -1819,13 +1828,16 @@ function Board() {
     ) {
       return;
     }
+    if (!takeTransition()) return;
     newProjectRef.current = true;
     try {
       if (fileHandleRef.current) {
         autosavePendingRef.current = true;
         await flushAutosaveRef.current();
         await whenAutosaveIdle();
+        if (openingRef.current || savingRef.current) return;
         if (fileHandleRef.current && autosaveErrorRef.current) return;
+        // The file went missing during the flush. Keep this board on screen with the error.
         if (!fileHandleRef.current) return;
       }
       rememberBoard({
@@ -1858,16 +1870,17 @@ function Board() {
       placeViewport(DEFAULT_VIEWPORT);
     } finally {
       newProjectRef.current = false;
+      transitionRef.current = false;
     }
-  }, [getViewport, placeViewport, rememberBoard, whenAutosaveIdle]);
+  }, [getViewport, placeViewport, rememberBoard, takeTransition, whenAutosaveIdle]);
 
   const reopenRecent = useCallback(
     async (id: string) => {
-      if (savingRef.current || openingRef.current) return;
       const recent = recentsRef.current.find((item) => item.id === id);
       if (!recent) return;
+      if (!takeTransition()) return;
+      try {
       if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
-      if (savingRef.current || openingRef.current) return;
       openingRef.current = true;
       setFileError(null);
       try {
@@ -1904,8 +1917,11 @@ function Board() {
       } finally {
         openingRef.current = false;
       }
+      } finally {
+        transitionRef.current = false;
+      }
     },
-    [openProjectFile, whenAutosaveIdle],
+    [openProjectFile, takeTransition, whenAutosaveIdle],
   );
 
   const duplicateSelection = useCallback(() => {
@@ -2278,17 +2294,20 @@ function Board() {
         onDrop={(event) => {
           event.preventDefault();
           const file = event.dataTransfer.files[0];
-          if (!file || openingRef.current) return;
+          if (!file || openingRef.current || transitionRef.current || newProjectRef.current || savingRef.current) return;
           if (isNoodleProjectFile(file)) {
-            if (savingRef.current) return;
+            if (!takeTransition()) return;
             void (async () => {
-              if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
-              if (savingRef.current || openingRef.current) return;
-              openingRef.current = true;
               try {
-                await openProjectFile(file, null);
+                if (autosaveRunningRef.current || autosavePendingRef.current) await whenAutosaveIdle();
+                openingRef.current = true;
+                try {
+                  await openProjectFile(file, null);
+                } finally {
+                  openingRef.current = false;
+                }
               } finally {
-                openingRef.current = false;
+                transitionRef.current = false;
               }
             })();
             return;
