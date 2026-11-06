@@ -1,7 +1,7 @@
 ---
 id: NB-31
 title: New project, autosave, and rename
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, Persistence, UX]
 parent: NB-E2
