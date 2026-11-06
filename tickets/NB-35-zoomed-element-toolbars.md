@@ -1,7 +1,7 @@
 ---
 id: NB-35
 title: Keep text and color toolbars on a zoomed-in element
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E1
