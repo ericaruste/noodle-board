@@ -1,7 +1,7 @@
 ---
 id: NB-E5
 title: Workflow
-status: Todo
+status: Done
 priority: 2
 labels: [Epic]
 estimate: 1
@@ -25,8 +25,8 @@ Keep repository text on LF so a finished ticket stays clean in source control af
 
 ## Success looks like
 
-- [ ] Files created or edited for this repo, especially tickets, stay LF
-- [ ] A finished ticket whose text did not change does not show up as modified in source control
+- [x] Files created or edited for this repo, especially tickets, stay LF
+- [x] A finished ticket whose text did not change does not show up as modified in source control
 
 ## Out of scope
 
