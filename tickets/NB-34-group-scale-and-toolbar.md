@@ -1,7 +1,7 @@
 ---
 id: NB-34
 title: Hide the leftover marquee and scale a group from its box
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas, Toolbar]
 parent: NB-E1
@@ -45,24 +45,24 @@ Holding Shift while dragging a handle should scale proportionally, for one eleme
 
 ## Acceptance criteria
 
-- [ ] When a marquee drag is released, its rectangle is hidden. No fill and no stroke from that drag remain. The objects it covered stay selected
-- [ ] While the marquee is still being drawn, the rectangle follows the pointer. Escape during that drag still cancels it, and releasing after Escape still selects nothing new
-- [ ] A selection of two or more objects shows one bounding box around their union, with edge and corner handles. The handles use the same visible size and resize cursors as a single element’s handles
-- [ ] Dragging a group handle scales the whole selection about the opposite edge or corner. Each selected element’s position and size change together, and each selected noodle’s bends and ends take the same scale. One undo restores the group. One redo applies the scale again
-- [ ] A group handle drag does not drop a member below that member’s existing minimum size
-- [ ] Per-element resize handles stay hidden while the group box is showing. A single selected object still shows its own box and handles
-- [ ] Holding Shift while dragging a handle on a sticky, a text object, or a shape keeps that element’s aspect ratio from the start of the drag. Without Shift, that drag still resizes freely
+- [x] When a marquee drag is released, its rectangle is hidden. No fill and no stroke from that drag remain. The objects it covered stay selected
+- [x] While the marquee is still being drawn, the rectangle follows the pointer. Escape during that drag still cancels it, and releasing after Escape still selects nothing new
+- [x] A selection of two or more objects shows one bounding box around their union, with edge and corner handles. The handles use the same visible size and resize cursors as a single element’s handles
+- [x] Dragging a group handle scales the whole selection about the opposite edge or corner. Each selected element’s position and size change together, and each selected noodle’s bends and ends take the same scale. One undo restores the group. One redo applies the scale again
+- [x] A group handle drag does not drop a member below that member’s existing minimum size
+- [x] Per-element resize handles stay hidden while the group box is showing. A single selected object still shows its own box and handles
+- [x] Holding Shift while dragging a handle on a sticky, a text object, or a shape keeps that element’s aspect ratio from the start of the drag. Without Shift, that drag still resizes freely
 - [ ] An image keeps its aspect ratio on every resize, with or without Shift
-- [ ] Holding Shift while dragging a group handle keeps the group box’s aspect ratio from the start of the drag, including a drag that starts on an edge handle. Without Shift, the box’s width and height scale independently
-- [ ] Shift during a handle drag does not add or remove objects from the selection. Shift during a marquee still adds to the selection
-- [ ] A group of stickies shows the same toolbars as one sticky, once for the group. The text toolbar sits above the group box. The color toolbar sits below it. A control applies to every selected sticky, in one undo step. Values that disagree show the neutral state
-- [ ] A group of shapes shows the same toolbars as one shape, once for the group. The text toolbar, including the shape kind menu, sits above the group box. The fill and stroke toolbar sits below it. A control applies to every selected shape, in one undo step. Values that disagree show the neutral state
-- [ ] A group of noodles shows the same noodle toolbar as one noodle, once for the group. A control on it applies to every selected noodle, in one undo step. Values that disagree show the neutral state
-- [ ] A group of text objects shows the text toolbar once, above the group box. A control applies to every selected text object, in one undo step
-- [ ] A selection that mixes types shows no toolbar above or below the box. The group box and its handles still show, and drag, copy, duplicate, and delete still apply to the whole selection as one edit
-- [ ] A group of only images shows the box and handles and no toolbar
-- [ ] One selected object still shows its own toolbars, text above and colors below where that object has them
-- [ ] The text toolbar prefers the side above the group box, and the color toolbar prefers the side below it, matching one sticky or one shape. Near the pane edge each one stays on screen and returns to its preferred side when there is room. The noodle toolbar keeps the screen gap it has for one noodle. Pointer and wheel events on these toolbars do not pan the board or scale the selection, and they stay above the box and above a handle that is being dragged
+- [x] Holding Shift while dragging a group handle keeps the group box’s aspect ratio from the start of the drag, including a drag that starts on an edge handle. Without Shift, the box’s width and height scale independently
+- [x] Shift during a handle drag does not add or remove objects from the selection. Shift during a marquee still adds to the selection
+- [x] A group of stickies shows the same toolbars as one sticky, once for the group. The text toolbar sits above the group box. The color toolbar sits below it. A control applies to every selected sticky, in one undo step. Values that disagree show the neutral state
+- [x] A group of shapes shows the same toolbars as one shape, once for the group. The text toolbar, including the shape kind menu, sits above the group box. The fill and stroke toolbar sits below it. A control applies to every selected shape, in one undo step. Values that disagree show the neutral state
+- [x] A group of noodles shows the same noodle toolbar as one noodle, once for the group. A control on it applies to every selected noodle, in one undo step. Values that disagree show the neutral state
+- [x] A group of text objects shows the text toolbar once, above the group box. A control applies to every selected text object, in one undo step
+- [x] A selection that mixes types shows no toolbar above or below the box. The group box and its handles still show, and drag, copy, duplicate, and delete still apply to the whole selection as one edit
+- [x] A group of only images shows the box and handles and no toolbar
+- [x] One selected object still shows its own toolbars, text above and colors below where that object has them
+- [x] The text toolbar prefers the side above the group box, and the color toolbar prefers the side below it, matching one sticky or one shape. Near the pane edge each one stays on screen and returns to its preferred side when there is room. The noodle toolbar keeps the screen gap it has for one noodle. Pointer and wheel events on these toolbars do not pan the board or scale the selection, and they stay above the box and above a handle that is being dragged
 
 ## Technical notes
 

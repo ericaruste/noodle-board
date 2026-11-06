@@ -1,23 +1,31 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { useStore, type Edge, type Node, type ReactFlowState } from "@xyflow/react";
-import { FloatingPanel } from "./FloatingPanel";
-import { useChromeLayout } from "./NoodleEdge";
+import { useReactFlow, useStore, useStoreApi, type Edge, type Node, type ReactFlowState } from "@xyflow/react";
+import GroupChrome, { type SameKind } from "./GroupChrome";
+import { applyGroupScale, captureGroupScale, publishGroupGeometry, type GroupScaleSnapshot } from "./groupScale";
 import { layers } from "./layers";
-import { applyNoodleData, NOODLE_COLORS, readNoodle } from "./noodleData";
-import { useNoodleResizeStyle } from "./NoodleResizer";
+import { applyNoodleData, readNoodle, type NoodleData } from "./noodleData";
+import { ResizeHandles, useNoodleResizeStyle } from "./NoodleResizer";
+import { useConnectChromeHidden } from "./portHot";
+import { type ResizeHandle } from "./resizeMath";
 import { selectedObjectCount } from "./selectionScope";
-import { FILL_SWATCHES, isShapeColor, STROKE_SWATCHES, type ShapeData } from "./shapeData";
-import { STICKY_COLORS, type StickyColor, type StickyData } from "./StickyNode";
+import { isShapeColor, isShapeKind, type ShapeData, type ShapeKind } from "./shapeData";
+import { type StickyColor, type StickyData } from "./StickyNode";
+import { coerceBody, sameBody, type TextBody } from "./textBody";
 import { ENDPOINT_TYPE } from "./noodleEnds";
 
 export const GROUP_STYLE_EVENT = "noodle-group-style";
+
+export type GroupKind = SameKind | "image" | "mixed";
 
 export type GroupStyleDetail = (
   | { property: "fill"; value: string | null }
   | { property: "stroke"; value: string | null }
   | { property: "sticky"; value: StickyColor }
+  | { property: "kind"; value: ShapeKind }
   | { property: "noodle"; value: string }
+  | { property: "noodlePatch"; patch: Partial<NoodleData> }
+  | { property: "text"; type: "sticky" | "text" | "shape"; map: (body: TextBody) => TextBody }
 ) & { history?: boolean };
 
 export function publishGroupStyle(detail: GroupStyleDetail) {
@@ -29,10 +37,7 @@ type Box = { x: number; y: number; width: number; height: number };
 type GroupModel = {
   count: number;
   box: Box | null;
-  fills: (string | null)[];
-  strokes: (string | null)[];
-  stickies: StickyColor[];
-  noodles: string[];
+  kind: GroupKind | null;
 };
 
 function union(rects: Box[]): Box | null {
@@ -69,19 +74,16 @@ function sameBox(a: Box | null, b: Box | null) {
   return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-function sameList<T>(a: readonly T[], b: readonly T[]) {
-  return a.length === b.length && a.every((value, index) => Object.is(value, b[index]));
+function sameModel(a: GroupModel, b: GroupModel) {
+  return a.count === b.count && a.kind === b.kind && sameBox(a.box, b.box);
 }
 
-function sameModel(a: GroupModel, b: GroupModel) {
-  return (
-    a.count === b.count &&
-    sameBox(a.box, b.box) &&
-    sameList(a.fills, b.fills) &&
-    sameList(a.strokes, b.strokes) &&
-    sameList(a.stickies, b.stickies) &&
-    sameList(a.noodles, b.noodles)
-  );
+function groupKind(kinds: ReadonlySet<string>): GroupKind | null {
+  if (kinds.size === 0) return null;
+  if (kinds.size > 1) return "mixed";
+  const only = [...kinds][0];
+  if (only === "sticky" || only === "text" || only === "shape" || only === "image" || only === "noodle") return only;
+  return "mixed";
 }
 
 function pushNodeBox(rects: Box[], node: Node, lookup: ReactFlowState["nodeLookup"]) {
@@ -94,32 +96,21 @@ function pushNodeBox(rects: Box[], node: Node, lookup: ReactFlowState["nodeLooku
 }
 
 function readGroup(state: ReactFlowState): GroupModel {
-  const fills: (string | null)[] = [];
-  const strokes: (string | null)[] = [];
-  const stickies: StickyColor[] = [];
-  const noodles: string[] = [];
   const rects: Box[] = [];
   const selectedNodes = new Set<string>();
+  const kinds = new Set<string>();
 
   for (const node of state.nodes) {
     if (!node.selected || node.type === ENDPOINT_TYPE) continue;
     selectedNodes.add(node.id);
+    if (node.type) kinds.add(node.type);
     pushNodeBox(rects, node, state.nodeLookup);
-    if (node.type === "shape" && node.data && typeof node.data === "object") {
-      const data = node.data as ShapeData;
-      fills.push(isShapeColor(data.fill) ? data.fill : null);
-      strokes.push(isShapeColor(data.stroke) ? data.stroke : null);
-    }
-    if (node.type === "sticky" && node.data && typeof node.data === "object") {
-      const color = (node.data as StickyData).color;
-      if (typeof color === "string" && color in STICKY_COLORS) stickies.push(color as StickyColor);
-    }
   }
 
   for (const edge of state.edges) {
     if (!edge.selected) continue;
+    kinds.add("noodle");
     const data = readNoodle(edge.data);
-    noodles.push(data.color);
     for (const bend of data.bends) rects.push({ x: bend.x, y: bend.y, width: 0, height: 0 });
     for (const id of [edge.source, edge.target]) {
       if (selectedNodes.has(id)) continue;
@@ -135,277 +126,120 @@ function readGroup(state: ReactFlowState): GroupModel {
   return {
     count: selectedObjectCount(state.nodes, state.edges),
     box: union(rects),
-    fills,
-    strokes,
-    stickies,
-    noodles,
+    kind: groupKind(kinds),
   };
 }
 
-function consensus<T>(values: readonly T[]): { mixed: boolean; value: T | null } {
-  if (values.length === 0) return { mixed: false, value: null };
-  const first = values[0];
-  if (values.every((value) => Object.is(value, first))) return { mixed: false, value: first };
-  return { mixed: true, value: null };
-}
-
-function Swatch({
-  name,
-  value,
-  active,
-  onPick,
-}: {
-  name: string;
-  value: string;
-  active: boolean;
-  onPick: (value: string) => void;
-}) {
-  return (
-    <button
-      type="button"
-      title={name}
-      aria-label={name}
-      aria-pressed={active}
-      className={`h-4 w-4 rounded-full border border-black/10 ${active ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}
-      style={{ background: value }}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={() => onPick(value)}
-    />
-  );
-}
-
-function NoneSwatch({ active, label, onPick }: { active: boolean; label: string; onPick: () => void }) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      aria-pressed={active}
-      className={`relative h-4 w-4 rounded-full border border-slate-300 bg-white ${active ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onPick}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-px w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-slate-500"
-      />
-    </button>
-  );
-}
-
-function PaintGroup({
-  label,
-  values,
-  swatches,
-  noneLabel,
-  onPick,
-}: {
-  label: string;
-  values: readonly (string | null)[];
-  swatches: readonly { name: string; value: string }[];
-  noneLabel: string;
-  onPick: (value: string | null) => void;
-}) {
-  const agreed = consensus(values);
-  return (
-    <div role="group" aria-label={label} className="flex items-center gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</span>
-      {swatches.map((swatch) => (
-        <Swatch
-          key={swatch.value}
-          name={`${swatch.name} ${label.toLowerCase()}`}
-          value={swatch.value}
-          active={!agreed.mixed && agreed.value === swatch.value}
-          onPick={(value) => onPick(value)}
-        />
-      ))}
-      <NoneSwatch label={noneLabel} active={!agreed.mixed && agreed.value === null} onPick={() => onPick(null)} />
-    </div>
-  );
-}
-
-function GroupToolbar({
-  box,
-  panX,
-  panY,
-  zoom,
-  model,
-}: {
-  box: Box;
-  panX: number;
-  panY: number;
-  zoom: number;
-  model: GroupModel;
-}) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const host = useStore((state) => state.domNode);
-  useChromeLayout();
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-  const showFill = model.fills.length > 0;
-  const showStroke = model.strokes.length > 0;
-  const showSticky = model.stickies.length > 0;
-  const showNoodle = model.noodles.length > 0;
-  const colorHistory = useRef(false);
-  const noodle = consensus(model.noodles);
-  const sticky = consensus(model.stickies);
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    const renderer = host?.querySelector(".react-flow__renderer");
-    if (!root || !(renderer instanceof HTMLElement)) return;
-    const width = root.offsetWidth;
-    const height = root.offsetHeight;
-    const anchor = {
-      left: box.x * zoom + panX,
-      top: box.y * zoom + panY,
-      width: box.width * zoom,
-      height: box.height * zoom,
-    };
-    const gap = 10;
-    let left = anchor.left + anchor.width / 2 - width / 2;
-    let top = anchor.top + anchor.height + gap;
-    const boundsW = renderer.clientWidth;
-    const boundsH = renderer.clientHeight;
-    if (width > 0 && top + height > boundsH - 8) top = anchor.top - gap - height;
-    if (width > 0) left = Math.max(8, Math.min(left, boundsW - width - 8));
-    if (height > 0) top = Math.max(8, Math.min(top, boundsH - height - 8));
-    const tools = document.querySelector(".board-toolbar");
-    const layer = document.querySelector("[data-floating-layer]");
-    if (tools instanceof HTMLElement && layer instanceof HTMLElement && width > 0 && height > 0) {
-      const origin = layer.getBoundingClientRect();
-      const pill = tools.getBoundingClientRect();
-      const pillTop = pill.top - origin.top;
-      const hits =
-        left + width > pill.left - origin.left &&
-        left < pill.right - origin.left &&
-        top + height > pillTop &&
-        top < pill.bottom - origin.top;
-      if (hits) top = Math.max(8, pillTop - gap - height);
-    }
-    setPos((prev) =>
-      prev && Math.abs(prev.left - left) < 0.5 && Math.abs(prev.top - top) < 0.5 ? prev : { left, top },
-    );
-  });
-
-  if (!showFill && !showStroke && !showSticky && !showNoodle) return null;
-
-  return (
-    <FloatingPanel
-      layer="toolbar"
-      panelRef={rootRef}
-      ariaLabel="Selection"
-      data-group-toolbar=""
-      className="flex max-w-[36rem] flex-wrap items-center gap-2 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow-lg backdrop-blur-xl"
-      style={{
-        position: "absolute",
-        left: pos?.left ?? -9999,
-        top: pos?.top ?? -9999,
-        width: "max-content",
-        visibility: pos ? "visible" : "hidden",
-      }}
-    >
-      {showFill ? (
-        <PaintGroup
-          label="Fill"
-          values={model.fills}
-          swatches={FILL_SWATCHES}
-          noneLabel="No fill"
-          onPick={(value) => publishGroupStyle({ property: "fill", value })}
-        />
-      ) : null}
-      {showStroke ? (
-        <PaintGroup
-          label="Stroke"
-          values={model.strokes}
-          swatches={STROKE_SWATCHES}
-          noneLabel="No stroke"
-          onPick={(value) => publishGroupStyle({ property: "stroke", value })}
-        />
-      ) : null}
-      {showSticky ? (
-        <div role="group" aria-label="Sticky color" className="flex items-center gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Color</span>
-          {(Object.keys(STICKY_COLORS) as StickyColor[]).map((color) => (
-            <Swatch
-              key={color}
-              name={color}
-              value={STICKY_COLORS[color]}
-              active={!sticky.mixed && sticky.value === color}
-              onPick={() => publishGroupStyle({ property: "sticky", value: color })}
-            />
-          ))}
-        </div>
-      ) : null}
-      {showNoodle ? (
-        <div role="group" aria-label="Noodle color" className="flex items-center gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Noodle</span>
-          {NOODLE_COLORS.map((swatch) => (
-            <Swatch
-              key={swatch.value}
-              name={swatch.name}
-              value={swatch.value}
-              active={!noodle.mixed && noodle.value === swatch.value}
-              onPick={(value) => publishGroupStyle({ property: "noodle", value })}
-            />
-          ))}
-          {noodle.mixed ? null : (
-            <label className="flex items-center gap-1 text-[11px] font-medium text-slate-600">
-              Custom
-              <input
-                type="color"
-                aria-label="Custom noodle color"
-                value={noodle.value ?? "#334155"}
-                className="h-6 w-8 cursor-pointer border-0 bg-transparent p-0"
-                onFocus={() => {
-                  colorHistory.current = false;
-                }}
-                onChange={(event) => {
-                  const history = !colorHistory.current;
-                  colorHistory.current = true;
-                  publishGroupStyle({ property: "noodle", value: event.target.value, history });
-                }}
-                onBlur={() => {
-                  colorHistory.current = false;
-                }}
-              />
-            </label>
-          )}
-        </div>
-      ) : null}
-    </FloatingPanel>
-  );
-}
-
-/** One box and one toolbar around every selected element and noodle. */
+/** One box, its handles, and one set of toolbars around every selected element and noodle. */
 export default function GroupSelection() {
   const resizeStyle = useNoodleResizeStyle();
   const model = useStore(readGroup, sameModel);
-  const transform = useStore((state) => state.transform);
   const flowRoot = useStore((state) => state.domNode);
+  const store = useStoreApi();
+  const { screenToFlowPosition } = useReactFlow();
+  const hideChrome = useConnectChromeHidden();
+  const [dragBox, setDragBox] = useState<Box | null>(null);
+  const screenRef = useRef(screenToFlowPosition);
+  screenRef.current = screenToFlowPosition;
+  const dragRef = useRef<{
+    pointerId: number;
+    handle: ResizeHandle;
+    snap: GroupScaleSnapshot;
+    moved: boolean;
+    lastX: number;
+    lastY: number;
+  } | null>(null);
+
+  const onHandleDown = (handle: ResizeHandle, event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !model.box) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const state = store.getState();
+    const drag = {
+      pointerId: event.pointerId,
+      handle,
+      snap: captureGroupScale(state.nodes, state.edges, state.nodeLookup, model.box),
+      moved: false,
+      lastX: event.clientX,
+      lastY: event.clientY,
+    };
+    dragRef.current = drag;
+    const apply = (clientX: number, clientY: number, shift: boolean, resizing: boolean) => {
+      const current = dragRef.current;
+      if (!current) return;
+      const pointer = screenRef.current({ x: clientX, y: clientY }, { snapToGrid: false });
+      const latest = store.getState();
+      const next = applyGroupScale(latest.nodes, latest.edges, current.snap, pointer, current.handle, shift, resizing);
+      publishGroupGeometry({ nodes: next.nodes, edges: next.edges });
+      setDragBox(resizing ? next.box : null);
+    };
+    const onMove = (moveEvent: PointerEvent) => {
+      const current = dragRef.current;
+      if (!current || moveEvent.pointerId !== current.pointerId) return;
+      moveEvent.preventDefault();
+      moveEvent.stopPropagation();
+      current.lastX = moveEvent.clientX;
+      current.lastY = moveEvent.clientY;
+      if (!current.moved) {
+        current.moved = true;
+        window.dispatchEvent(new Event("noodle-snapshot"));
+      }
+      apply(moveEvent.clientX, moveEvent.clientY, moveEvent.shiftKey, true);
+    };
+    const onKey = (keyEvent: KeyboardEvent) => {
+      const current = dragRef.current;
+      if (!current?.moved || keyEvent.key !== "Shift") return;
+      apply(current.lastX, current.lastY, keyEvent.type === "keydown", true);
+    };
+    const finish = (upEvent: PointerEvent) => {
+      const current = dragRef.current;
+      if (!current || upEvent.pointerId !== current.pointerId) return;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKey);
+      if (current.moved) apply(upEvent.clientX, upEvent.clientY, upEvent.shiftKey, false);
+      dragRef.current = null;
+      setDragBox(null);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", finish);
+    window.addEventListener("pointercancel", finish);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKey);
+  };
+
   const viewport = flowRoot?.querySelector(".react-flow__viewport");
-  if (model.count < 2 || !model.box || !viewport) return null;
-  const [panX, panY, zoom] = transform;
+  const box = dragBox ?? model.box;
+  if (model.count < 2 || !box || !viewport) return null;
+  const showTools =
+    !hideChrome &&
+    (model.kind === "sticky" || model.kind === "text" || model.kind === "shape" || model.kind === "noodle");
 
   return (
     <>
       {createPortal(
         <div
-          className="noodle-resize-layer"
+          className="noodle-resize-layer noodle-group-box"
           style={{
             ...resizeStyle,
-            transform: `translate(${model.box.x}px, ${model.box.y}px)`,
-            width: model.box.width,
-            height: model.box.height,
+            transform: `translate(${box.x}px, ${box.y}px)`,
+            width: box.width,
+            height: box.height,
             zIndex: layers.selection,
           }}
         >
           <svg className="noodle-selection-stroke" width="100%" height="100%" aria-hidden>
             <rect width="100%" height="100%" />
           </svg>
+          {hideChrome ? null : <ResizeHandles onPointerDown={onHandleDown} />}
         </div>,
         viewport,
       )}
-      <GroupToolbar box={model.box} panX={panX} panY={panY} zoom={zoom || 1} model={model} />
+      {showTools && model.kind && model.kind !== "image" && model.kind !== "mixed" ? (
+        <GroupChrome kind={model.kind} box={box} />
+      ) : null}
     </>
   );
 }
@@ -432,16 +266,45 @@ export function applyGroupStyle(
       nodesChanged = true;
       return { ...node, data: { ...data, color: detail.value } };
     }
+    if (detail.property === "kind" && node.type === "shape") {
+      const data = node.data as ShapeData;
+      const current = isShapeKind(data.kind) ? data.kind : "rect";
+      if (current === detail.value) return node;
+      nodesChanged = true;
+      return { ...node, data: { ...data, kind: detail.value } };
+    }
+    if (detail.property === "text" && node.type === detail.type) {
+      const data = node.data as StickyData & { paragraphs?: unknown; text?: string };
+      const body = node.type === "sticky" ? coerceBody(data.paragraphs, data.text) : coerceBody(data.paragraphs);
+      const nextBody = detail.map(body);
+      if (sameBody(nextBody, body)) return node;
+      nodesChanged = true;
+      if (node.type === "sticky") return { ...node, data: { color: data.color, paragraphs: nextBody } };
+      return { ...node, data: { ...data, paragraphs: nextBody } };
+    }
     return node;
   });
   const nextEdges =
-    detail.property === "noodle"
+    detail.property === "noodle" || detail.property === "noodlePatch"
       ? edges.map((edge) => {
           if (!edge.selected) return edge;
           const data = readNoodle(edge.data);
-          if (data.color === detail.value) return edge;
+          if (detail.property === "noodle") {
+            if (data.color === detail.value) return edge;
+            edgesChanged = true;
+            return applyNoodleData(edge, { ...data, color: detail.value });
+          }
+          let changed = false;
+          const next = { ...data };
+          for (const key of Object.keys(detail.patch) as (keyof NoodleData)[]) {
+            const value = detail.patch[key];
+            if (value === undefined || data[key] === value) continue;
+            changed = true;
+            Object.assign(next, { [key]: value });
+          }
+          if (!changed) return edge;
           edgesChanged = true;
-          return applyNoodleData(edge, { ...data, color: detail.value });
+          return applyNoodleData(edge, next);
         })
       : edges;
   if (!nodesChanged && !edgesChanged) return null;

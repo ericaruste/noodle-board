@@ -256,8 +256,7 @@ function measureAvoidRects() {
 }
 
 function PlacedNoodleToolbar({
-  path,
-  points,
+  paths,
   midX,
   midY,
   strokeWidth,
@@ -266,8 +265,7 @@ function PlacedNoodleToolbar({
   flowToScreenPosition,
   children,
 }: {
-  path: string;
-  points: { x: number; y: number }[];
+  paths: { path: string; points: { x: number; y: number }[] }[];
   midX: number;
   midY: number;
   strokeWidth: number;
@@ -278,6 +276,7 @@ function PlacedNoodleToolbar({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const pathKey = paths.map((item) => item.path).join("|");
   useLayoutEffect(() => {
     const el = ref.current;
     const pane = document.querySelector(".react-flow");
@@ -287,7 +286,7 @@ function PlacedNoodleToolbar({
     const height = el.offsetHeight;
     if (width < 1 || height < 1) return;
     const safeZoom = zoom || 1;
-    const samples = sampleFlowPath(path, points, safeZoom);
+    const samples = paths.flatMap((item) => sampleFlowPath(item.path, item.points, safeZoom));
     const screen = samples.map((point) => flowToScreenPosition(point));
     const paintRadius = ((strokeWidth + 6) / 2) * safeZoom;
     const segments: { a: { x: number; y: number }; b: { x: number; y: number }; radius: number }[] = [];
@@ -332,7 +331,7 @@ function PlacedNoodleToolbar({
     setPos((prev) =>
       prev && Math.abs(prev.left - next.left) < 0.5 && Math.abs(prev.top - next.top) < 0.5 ? prev : next,
     );
-  });
+  }, [pathKey, midX, midY, zoom, strokeWidth, handles.length, paths]);
   return (
     <div
       ref={ref}
@@ -350,21 +349,19 @@ function PlacedNoodleToolbar({
   );
 }
 
-function ScreenEdgeToolbar({
-  path,
-  points,
+export function NoodleToolbarSlot({
+  paths,
   midX,
   midY,
   strokeWidth,
-  handles,
+  handles = [],
   children,
 }: {
-  path: string;
-  points: { x: number; y: number }[];
+  paths: { path: string; points: { x: number; y: number }[] }[];
   midX: number;
   midY: number;
   strokeWidth: number;
-  handles: FlowCircle[];
+  handles?: FlowCircle[];
   children: ReactNode;
 }) {
   useChromeLayout();
@@ -387,8 +384,7 @@ function ScreenEdgeToolbar({
       }}
     >
       <PlacedNoodleToolbar
-        path={path}
-        points={points}
+        paths={paths}
         midX={midX}
         midY={midY}
         strokeWidth={strokeWidth}
@@ -790,16 +786,15 @@ export default function NoodleEdge(props: EdgeProps) {
         </EdgeLabelRenderer>
       ) : null}
       {showChrome && !connecting ? (
-        <ScreenEdgeToolbar
-          path={route.path}
-          points={route.points}
+        <NoodleToolbarSlot
+          paths={[{ path: route.path, points: route.points }]}
           midX={route.labelX}
           midY={route.labelY}
           strokeWidth={width}
           handles={toolbarHandles}
         >
           <NoodleToolbar edgeId={props.id} data={data} />
-        </ScreenEdgeToolbar>
+        </NoodleToolbarSlot>
       ) : null}
     </>
   );

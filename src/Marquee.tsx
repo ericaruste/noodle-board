@@ -37,10 +37,6 @@ function selectionKey(nodes: Node[], edges: Edge[]) {
   return `${nodeIds.join("\n")}|${edgeIds.join("\n")}`;
 }
 
-function keyOf(nodes: ReadonlySet<string>, edges: ReadonlySet<string>) {
-  return `${[...nodes].sort().join("\n")}|${[...edges].sort().join("\n")}`;
-}
-
 function strokePad(path: SVGGeometryElement) {
   const styled = Number.parseFloat(path.style.strokeWidth || "");
   if (Number.isFinite(styled) && styled > 0) return styled / 2;
@@ -89,12 +85,9 @@ function edgesTouchingRect(edges: readonly Edge[], rect: FlowRect) {
 }
 
 /**
- * Select-tool marquee. The rectangle is drag feedback on the selection layer.
- * Pointer-up commits. The click that pointer-up fires is swallowed. A later
- * click on the rectangle border restores the selection from when the drag
- * started. The interior stays open: a click on an element selects that
- * element, and a click on empty canvas still clears. Escape aborts before
- * that commit.
+ * Select-tool marquee. The rectangle is drag feedback on the selection layer
+ * and is cleared on the pointer-up that commits. The click from that pointer-up
+ * is swallowed so it does not clear the selection. Escape aborts before commit.
  */
 export default function Marquee({
   active,
@@ -274,20 +267,12 @@ export default function Marquee({
         });
         const pickedEdges = edgesTouchingRect(latest.edges, rect);
         const additive = upEvent.shiftKey;
-        if (additive && pickedNodes.size === 0 && pickedEdges.size === 0) {
-          phaseRef.current = "committed";
-          committedKeyRef.current = keyOf(baseNodes, baseEdges);
-          matchedRef.current = false;
-          setVisual({ rect, hit: true });
-          armSwallow();
-          return;
+        phaseRef.current = "idle";
+        setVisual(null);
+        if (!(additive && pickedNodes.size === 0 && pickedEdges.size === 0)) {
+          const next = selectionIds(pickedNodes, pickedEdges, baseNodes, baseEdges, additive);
+          onSelectRef.current(next.nodes, next.edges);
         }
-        const next = selectionIds(pickedNodes, pickedEdges, baseNodes, baseEdges, additive);
-        phaseRef.current = "committed";
-        committedKeyRef.current = keyOf(next.nodes, next.edges);
-        matchedRef.current = false;
-        setVisual({ rect, hit: true });
-        onSelectRef.current(next.nodes, next.edges);
         armSwallow();
       };
       dragRef.current = {
@@ -316,17 +301,6 @@ export default function Marquee({
     };
   }, [store]);
 
-  const cancelHit = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const base = baseRef.current;
-    phaseRef.current = "idle";
-    matchedRef.current = false;
-    setVisual(null);
-    if (!base) return;
-    onSelectRef.current(base.nodes, base.edges);
-  };
-
   const viewport = root?.querySelector(".react-flow__viewport");
   if (!visual || !(viewport instanceof HTMLElement)) return null;
   const { rect } = visual;
@@ -352,19 +326,6 @@ export default function Marquee({
           strokeDasharray={`${6 / zoom} ${5 / zoom}`}
           style={{ pointerEvents: "none" }}
         />
-        {visual.hit ? (
-          <rect
-            data-marquee-hit=""
-            width="100%"
-            height="100%"
-            fill="none"
-            stroke="transparent"
-            strokeWidth={16 / zoom}
-            style={{ pointerEvents: "stroke" }}
-            onPointerDown={cancelHit}
-            onClick={cancelHit}
-          />
-        ) : null}
       </svg>
     </div>,
     viewport,

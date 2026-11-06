@@ -99,13 +99,19 @@ body,
 
 /* Wide invisible edge strips with a thin visible stroke. Thickness tracks zoom
    via --noodle-resize-* so the grab target stays about 16px on screen. */
-.noodle-node .react-flow__resize-control.line {
+.noodle-node .react-flow__resize-control.line,
+.noodle-group-box .react-flow__resize-control.line {
   border-width: 0;
+}
+
+.noodle-node .react-flow__resize-control.line {
   z-index: 1;
 }
 
 .noodle-node .react-flow__resize-control.line.left,
-.noodle-node .react-flow__resize-control.line.right {
+.noodle-node .react-flow__resize-control.line.right,
+.noodle-group-box .react-flow__resize-control.line.left,
+.noodle-group-box .react-flow__resize-control.line.right {
   width: var(--noodle-resize-thickness, 16px);
   border-left-width: 0;
   border-right-width: 0;
@@ -113,7 +119,9 @@ body,
 }
 
 .noodle-node .react-flow__resize-control.line.top,
-.noodle-node .react-flow__resize-control.line.bottom {
+.noodle-node .react-flow__resize-control.line.bottom,
+.noodle-group-box .react-flow__resize-control.line.top,
+.noodle-group-box .react-flow__resize-control.line.bottom {
   height: var(--noodle-resize-thickness, 16px);
   border-top-width: 0;
   border-bottom-width: 0;
@@ -134,13 +142,17 @@ body,
   stroke-dasharray: var(--noodle-dash, 6px) var(--noodle-dash-gap, 5px);
 }
 
-.noodle-node .react-flow__resize-control.handle {
-  z-index: 2;
+.noodle-node .react-flow__resize-control.handle,
+.noodle-group-box .react-flow__resize-control.handle {
   width: var(--noodle-handle-size, 20px);
   height: var(--noodle-handle-size, 20px);
   border: 1px solid #475569;
   border-radius: 2px;
   background: #fff;
+}
+
+.noodle-node .react-flow__resize-control.handle {
+  z-index: 2;
 }
 
 /* Ports sit outside the resize strip so they do not cover the border. */

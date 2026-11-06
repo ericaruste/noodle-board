@@ -18,6 +18,10 @@ import { releaseNoodleLabel, retainNoodleLabel, toggleNoodleLabel, useNoodleLabe
 type NoodleToolbarProps = {
   edgeId: string;
   data: NoodleData;
+  /** When set, only the changed fields are handed here instead of publishing to `edgeId` alone. */
+  onWrite?: (patch: Partial<NoodleData>, history: boolean) => void;
+  /** Keys whose values disagree across the selection. Those controls stay neutral. */
+  mixed?: ReadonlySet<string>;
 };
 
 function ArrowGlyph({ kind }: { kind: NoodleArrow }) {
@@ -66,19 +70,26 @@ function TextGlyph() {
   );
 }
 
-export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
+export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleToolbarProps) {
   const dataRef = useRef(data);
   dataRef.current = data;
   const [menu, setMenu] = useState<"color" | "start" | "end" | null>(null);
   const editing = useNoodleLabelEditing(edgeId);
   const colorHistory = useRef(false);
 
-  const write = (next: NoodleData, history: boolean) => {
+  const write = (next: NoodleData, history: boolean, patch?: Partial<NoodleData>) => {
+    if (onWrite) {
+      dataRef.current = next;
+      onWrite(patch ?? {}, history);
+      return;
+    }
     if (sameNoodle(dataRef.current, next)) return;
     dataRef.current = next;
     if (history) snapshotBoard();
     publishNoodle(edgeId, next);
   };
+
+  const on = (key: keyof NoodleData, value: NoodleData[keyof NoodleData]) => !mixed?.has(key) && data[key] === value;
 
   useEffect(() => {
     if (!menu) return;
@@ -104,7 +115,7 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
     <K extends keyof NoodleData>(key: K, value: NoodleData[K]) =>
     () => {
       setMenu(null);
-      write({ ...dataRef.current, [key]: value }, true);
+      write({ ...dataRef.current, [key]: value }, true, { [key]: value });
     };
 
   return (
@@ -127,11 +138,11 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
                 key={swatch.value}
                 type="button"
                 role="menuitemradio"
-                aria-checked={data.color === swatch.value}
+                aria-checked={on("color", swatch.value)}
                 aria-label={swatch.name}
                 title={swatch.name}
                 onClick={pick("color", swatch.value)}
-                className={`h-6 w-6 rounded-full border ${data.color === swatch.value ? "border-slate-900 ring-2 ring-slate-300" : "border-slate-300"}`}
+                className={`h-6 w-6 rounded-full border ${on("color", swatch.value) ? "border-slate-900 ring-2 ring-slate-300" : "border-slate-300"}`}
                 style={{ background: swatch.value }}
               />
             ))}
@@ -148,7 +159,7 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
                 onChange={(event) => {
                   const history = !colorHistory.current;
                   colorHistory.current = true;
-                  write({ ...dataRef.current, color: event.target.value }, history);
+                  write({ ...dataRef.current, color: event.target.value }, history, { color: event.target.value });
                 }}
                 onBlur={() => {
                   colorHistory.current = false;
@@ -165,10 +176,10 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
           key={style}
           type="button"
           aria-label={style === "solid" ? "Solid line" : "Dashed line"}
-          aria-pressed={data.lineStyle === style}
+          aria-pressed={on("lineStyle", style)}
           title={style === "solid" ? "Solid" : "Dashed"}
           onClick={pick("lineStyle", style)}
-          className={`rounded-lg px-1.5 py-1 ${data.lineStyle === style ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+          className={`rounded-lg px-1.5 py-1 ${on("lineStyle", style) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
         >
           <LineGlyph dashed={style === "dashed"} weight={1.6} />
         </button>
@@ -187,10 +198,10 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
           key={thickness}
           type="button"
           aria-label={`${label} line`}
-          aria-pressed={data.thickness === thickness}
+          aria-pressed={on("thickness", thickness)}
           title={label}
           onClick={pick("thickness", thickness as NoodleThickness)}
-          className={`rounded-lg px-1.5 py-1 ${data.thickness === thickness ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+          className={`rounded-lg px-1.5 py-1 ${on("thickness", thickness) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
         >
           <LineGlyph weight={thickness === "thin" ? 1 : thickness === "medium" ? 2 : 3.2} />
         </button>
@@ -209,10 +220,10 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
           key={shape}
           type="button"
           aria-label={`${label} line`}
-          aria-pressed={data.shape === shape}
+          aria-pressed={on("shape", shape)}
           title={label}
           onClick={pick("shape", shape)}
-          className={`rounded-lg px-1.5 py-1 ${data.shape === shape ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+          className={`rounded-lg px-1.5 py-1 ${on("shape", shape) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
         >
           <ShapeGlyph shape={shape} />
         </button>
@@ -239,21 +250,23 @@ export default function NoodleToolbar({ edgeId, data }: NoodleToolbarProps) {
       <ArrowMenu
         label="Start arrowhead"
         value={data.markerStart}
+        neutral={mixed?.has("markerStart")}
         open={menu === "start"}
         onToggle={() => setMenu((current) => (current === "start" ? null : "start"))}
         onPick={(value) => {
           setMenu(null);
-          write({ ...dataRef.current, markerStart: value }, true);
+          write({ ...dataRef.current, markerStart: value }, true, { markerStart: value });
         }}
       />
       <ArrowMenu
         label="End arrowhead"
         value={data.markerEnd}
+        neutral={mixed?.has("markerEnd")}
         open={menu === "end"}
         onToggle={() => setMenu((current) => (current === "end" ? null : "end"))}
         onPick={(value) => {
           setMenu(null);
-          write({ ...dataRef.current, markerEnd: value }, true);
+          write({ ...dataRef.current, markerEnd: value }, true, { markerEnd: value });
         }}
       />
     </div>
@@ -335,12 +348,14 @@ function ColorMenu({
 function ArrowMenu({
   label,
   value,
+  neutral = false,
   open,
   onToggle,
   onPick,
 }: {
   label: string;
   value: NoodleArrow;
+  neutral?: boolean;
   open: boolean;
   onToggle: () => void;
   onPick: (value: NoodleArrow) => void;
@@ -368,21 +383,24 @@ function ArrowMenu({
         label={label}
         className="w-36 rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
       >
-        {NOODLE_ARROWS.map((kind) => (
+        {NOODLE_ARROWS.map((kind) => {
+          const checked = !neutral && value === kind;
+          return (
           <button
             key={kind}
             type="button"
             role="menuitemradio"
-            aria-checked={value === kind}
+            aria-checked={checked}
             onClick={() => onPick(kind)}
             className={`flex w-full items-center gap-2 px-2 py-1 text-left text-xs ${
-              value === kind ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
+              checked ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
             }`}
           >
             <ArrowGlyph kind={kind} />
             {NOODLE_ARROW_LABELS[kind]}
           </button>
-        ))}
+          );
+        })}
       </AnchoredMenu>
     </div>
   );
