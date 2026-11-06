@@ -5,3 +5,4 @@ dist
 noodle-board-backup.json
 .env
 .cursor/mcp.json
+docs/design-system.md
