@@ -576,3 +576,32 @@ body,
   overflow: visible;
   pointer-events: none;
 }
+
+.save-dot {
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 9999px;
+  background-color: #16a34a;
+}
+
+.save-dot-active {
+  animation: save-dot-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes save-dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-dot-active {
+    animation: none;
+  }
+}
