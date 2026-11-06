@@ -115,7 +115,8 @@ import {
 const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;
 const DEFAULT_VIEWPORT: NoodleViewport = { x: 0, y: 0, zoom: 1 };
-const SAVE_PULSE_FALLBACK_MS = 1600;
+const SAVE_PULSE_MIN_LOOPS = 3;
+const SAVE_PULSE_FALLBACK_MS = 4000;
 
 /** Interaction flags are not a new canvas. Selection and measurement stay out of the compare. */
 const TRANSIENT_CANVAS_KEYS = new Set(["selected", "dragging", "resizing", "measured", "internals"]);
@@ -372,6 +373,7 @@ function Board() {
   const saveIdleResolvers = useRef<Array<() => void>>([]);
   const savePulseRef = useRef(false);
   const savePulseGen = useRef(0);
+  const savePulseLoopsRef = useRef(0);
   const stopPulseAfterLoopRef = useRef(false);
   const flushAutosaveRef = useRef<() => Promise<boolean>>(async () => true);
   const [tool, setTool] = useState<BoardTool>("select");
@@ -1470,13 +1472,17 @@ function Board() {
   const beginSavePulse = useCallback(() => {
     savePulseGen.current += 1;
     stopPulseAfterLoopRef.current = false;
+    savePulseLoopsRef.current = 0;
     if (savePulseRef.current) return;
     savePulseRef.current = true;
     setSavePulse(true);
   }, []);
 
   const onSavePulseIteration = useCallback(() => {
+    if (!savePulseRef.current) return;
+    savePulseLoopsRef.current += 1;
     if (!stopPulseAfterLoopRef.current) return;
+    if (savePulseLoopsRef.current < SAVE_PULSE_MIN_LOOPS) return;
     if (autosaveRunningRef.current || autosavePendingRef.current || savingRef.current) {
       stopPulseAfterLoopRef.current = false;
       return;

@@ -41,7 +41,7 @@ A bound file also waits on a timer. `scheduleAutosave` restarts a 700ms timeout 
 - [x] Autosave runs only when the canvas has a new change: nodes, edges, or the viewport. A change that leaves that canvas the same does not write
 - [x] Each new canvas change starts the save immediately. A bound file does not wait on `AUTOSAVE_MS` or any other interval. An unbound board still writes the localStorage draft on that same change
 - [x] A newer canvas change that arrives while a write is still running is kept and written as soon as the current write finishes, still with no interval
-- [x] A small green dot sits next to the project name. While a save is in progress it gently grows and shrinks in a soft pulse. When the save finishes it settles at its resting size and stays visible
+- [x] A small green dot sits next to the project name. It keeps a small pulse while nothing is saving. While a save is in progress it pulses larger, and that larger pulse lasts at least three cycles even when the write finishes sooner. It then returns to the small pulse and stays visible
 - [x] Clicking the project name turns it into a text input showing the current title. Enter or clicking away confirms the title
 - [x] The confirmed title replaces the name in the file bar, in the Recent list when that project is listed, and in the `name` stored with the project
 - [x] A title that is empty or only spaces is stored as Untitled
@@ -53,7 +53,7 @@ New belongs on the existing file bar, next to Open. It is a button, not a new pa
 
 Drop `AUTOSAVE_MS` and the timer inside `scheduleAutosave`. Detect a new canvas by comparing nodes, edges, and viewport with the last canvas that was written. On a difference, call `flushAutosave` immediately, including from `onMoveEnd`. If a write is already running, do not start a second write and do not arm a timer; remember the newer canvas and write it once the current write returns.
 
-Drive the dot from that same save: show the pulse from the moment the write starts through the end of the write (bound file or localStorage draft), including a rename and a follow-up write. Leave the dot at rest when nothing is pending. A second change during a write keeps the pulse going until that follow-up write finishes too. Honor `prefers-reduced-motion` by showing the resting dot with no scale animation.
+Drive the dot from that same save. At rest it keeps a small pulse (scale 1 to 1.18 over 2s). From the moment a write starts, including a rename and a follow-up write, it pulses larger (scale 1 to 1.55 over 0.9s) and holds that larger pulse for at least three cycles, longer if the write is still running. A second change during a write keeps the larger pulse going until that follow-up write finishes and the three cycles are done. Honor `prefers-reduced-motion` by showing the resting dot with no scale animation.
 
 The rename field is an inline input in the file bar, not a popover. Commit on Enter and on blur. Escape restores the previous title and does not write it. After a confirmed rename, update `documentName` and the matching recents row (`rememberRecent` with the same id), and let the normal autosave write the new `name` into the bound file. Do not rename the file on disk.
 

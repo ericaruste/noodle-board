@@ -584,10 +584,21 @@ body,
   flex: none;
   border-radius: 9999px;
   background-color: #16a34a;
+  animation: save-dot-rest 2s ease-in-out infinite;
 }
 
 .save-dot-active {
   animation: save-dot-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes save-dot-rest {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
 }
 
 @keyframes save-dot-pulse {
@@ -596,11 +607,12 @@ body,
     transform: scale(1);
   }
   50% {
-    transform: scale(1.45);
+    transform: scale(1.55);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .save-dot,
   .save-dot-active {
     animation: none;
   }
