@@ -105,27 +105,29 @@ export function placeSelectionChrome(
   let aboveTop = topVisible ? node.top - clearance - aboveH : (span?.top ?? node.top - clearance - aboveH);
   let belowTop = bottomVisible ? nodeBottom + clearance : span ? span.top + span.height - belowH : nodeBottom + clearance;
 
-  if (above.length > 0 && aboveTop < viewport.top) aboveTop = viewport.top;
-  if (below.length > 0 && belowTop + belowH > viewport.bottom) {
-    belowTop = Math.max(viewport.top, viewport.bottom - belowH);
+  const room = viewport.bottom - viewport.top;
+  if (above.length > 0) {
+    if (aboveH <= room) aboveTop = Math.min(Math.max(aboveTop, viewport.top), viewport.bottom - aboveH);
+    else if (aboveTop < viewport.top) aboveTop = viewport.top;
+  }
+  if (below.length > 0) {
+    if (belowH <= room) belowTop = Math.min(Math.max(belowTop, viewport.top), viewport.bottom - belowH);
+    else if (belowTop < viewport.top) belowTop = viewport.top;
   }
 
-  if (above.length > 0 && below.length > 0 && belowTop < aboveTop + aboveH + STACK_GAP) {
+  if (above.length > 0 && below.length > 0 && belowTop < aboveTop + aboveH) {
     const bothPinned = !topVisible && !bottomVisible && span != null;
     if (bothPinned) {
-      const room = viewport.bottom - aboveTop;
+      // The pins would overlap. Text keeps the top. Color sits beneath it, even when
+      // the pair is taller than the safe area and the color bar meets the main toolbar.
       const gap = Math.max(0, Math.min(STACK_GAP, room - aboveH - belowH));
+      aboveTop = viewport.top;
       belowTop = aboveTop + aboveH + gap;
-    } else {
-      const floor = aboveTop + aboveH + STACK_GAP;
-      const maxTop = viewport.bottom - belowH;
-      if (floor <= maxTop) {
-        belowTop = floor;
-      } else {
-        belowTop = Math.max(viewport.top, maxTop);
-        aboveTop = Math.max(viewport.top, Math.min(aboveTop, belowTop - STACK_GAP - aboveH));
-        if (belowTop < aboveTop + aboveH) belowTop = aboveTop + aboveH;
-      }
+    } else if (aboveTop + aboveH + STACK_GAP + belowH <= viewport.bottom && aboveTop >= viewport.top) {
+      belowTop = aboveTop + aboveH + STACK_GAP;
+    } else if (belowH <= room) {
+      belowTop = viewport.bottom - belowH;
+      aboveTop = Math.max(viewport.top, Math.min(aboveTop, belowTop - aboveH));
     }
   }
 
