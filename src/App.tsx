@@ -1840,6 +1840,16 @@ function Board() {
         // The file went missing during the flush. Keep this board on screen with the error.
         if (!fileHandleRef.current) return;
       }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ nodes: [], edges: [] }));
+      } catch {
+        const message = "Could not save this board.";
+        if (autosaveErrorRef.current !== message) {
+          autosaveErrorRef.current = message;
+          setFileError(message);
+        }
+        return;
+      }
       rememberBoard({
         viewport: getViewport(),
         documentName: documentNameRef.current,
