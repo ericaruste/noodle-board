@@ -1,6 +1,6 @@
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { NodeResizer, useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
+import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 import { layers } from "./layers";
 import { RESIZE_HANDLES, resizeNodeBox, type ResizeHandle } from "./resizeMath";
 import { setShiftAspect } from "./shiftAspect";
@@ -107,6 +107,7 @@ function useShiftResize(
   minHeight: number,
   onResizeStart?: () => void,
   onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void,
+  lockAspect = false,
 ) {
   const nodeId = useNodeId();
   const store = useStoreApi();
@@ -150,19 +151,20 @@ function useShiftResize(
       size: { x: start.x, y: start.y, width, height },
     };
     const apply = (clientX: number, clientY: number, shift: boolean) => {
+      const aspectLock = lockAspect || shift;
       const point = screenToFlowRef.current({ x: clientX, y: clientY }, { snapToGrid: false });
       const next = resizeNodeBox(
         { x: start.absX, y: start.absY, width: start.width, height: start.height },
         start.pointer,
         handle,
         point,
-        shift,
+        aspectLock,
         minWidth,
         minHeight,
       );
       const position = { x: start.x + (next.x - start.absX), y: start.y + (next.y - start.absY) };
       drag.size = { ...position, width: next.width, height: next.height };
-      setShiftAspect(shift ? nodeId : null, start.width / Math.max(start.height, 1));
+      setShiftAspect(aspectLock ? nodeId : null, start.width / Math.max(start.height, 1));
       store.getState().triggerNodeChanges([
         { id: nodeId, type: "position", position },
         {
@@ -223,7 +225,7 @@ export function NoodleResizer({
   onResizeEnd,
 }: NoodleResizerProps) {
   const resizeStyle = useNoodleResizeStyle();
-  const onHandleDown = useShiftResize(minWidth, minHeight, onResizeStart, onResizeEnd);
+  const onHandleDown = useShiftResize(minWidth, minHeight, onResizeStart, onResizeEnd, keepAspectRatio);
   const nodeId = useNodeId();
   const box = useStore((state) => {
     const node = nodeId ? state.nodeLookup.get(nodeId) : undefined;
@@ -256,20 +258,7 @@ export function NoodleResizer({
       <svg className="noodle-selection-stroke" width="100%" height="100%" aria-hidden>
         <rect width="100%" height="100%" />
       </svg>
-      {keepAspectRatio ? (
-        <NodeResizer
-          minWidth={minWidth}
-          minHeight={minHeight}
-          keepAspectRatio
-          onResizeStart={onResizeStart}
-          onResizeEnd={onResizeEnd}
-          autoScale={false}
-          lineClassName="noodle-resize-line"
-          handleClassName="noodle-resize-handle"
-        />
-      ) : (
-        <ResizeHandles onPointerDown={onHandleDown} />
-      )}
+      <ResizeHandles onPointerDown={onHandleDown} />
     </div>,
     viewport,
   );

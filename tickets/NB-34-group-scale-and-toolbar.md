@@ -1,7 +1,7 @@
 ---
 id: NB-34
 title: Hide the leftover marquee and scale a group from its box
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas, Toolbar]
 parent: NB-E1
@@ -52,7 +52,7 @@ Holding Shift while dragging a handle should scale proportionally, for one eleme
 - [x] A group handle drag does not drop a member below that member’s existing minimum size
 - [x] Per-element resize handles stay hidden while the group box is showing. A single selected object still shows its own box and handles
 - [x] Holding Shift while dragging a handle on a sticky, a text object, or a shape keeps that element’s aspect ratio from the start of the drag. Without Shift, that drag still resizes freely
-- [ ] An image keeps its aspect ratio on every resize, with or without Shift
+- [x] An image keeps its aspect ratio on every resize, with or without Shift
 - [x] Holding Shift while dragging a group handle keeps the group box’s aspect ratio from the start of the drag, including a drag that starts on an edge handle. Without Shift, the box’s width and height scale independently
 - [x] Shift during a handle drag does not add or remove objects from the selection. Shift during a marquee still adds to the selection
 - [x] A group of stickies shows the same toolbars as one sticky, once for the group. The text toolbar sits above the group box. The color toolbar sits below it. A control applies to every selected sticky, in one undo step. Values that disagree show the neutral state
