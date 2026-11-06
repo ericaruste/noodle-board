@@ -1,7 +1,7 @@
 ---
 id: NB-35
 title: Keep text and color toolbars on a zoomed-in element
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, UX, Toolbar]
 parent: NB-E1
@@ -38,20 +38,20 @@ If the element’s top edge is on screen, the text toolbar sits above that edge.
 
 ## Acceptance criteria
 
-- [ ] While a sticky, text object, or shape is selected and its top edge is inside the safe area, the text toolbar sits above that edge, centered on the element. A shape’s kind menu stays in that toolbar
-- [ ] While the top edge is above the safe area, the text toolbar pins inside the element. It is centered on the part of the element that is on screen, and the top of that above stack sits just below the file bar and the Noodle Board logo
-- [ ] While the bottom edge is inside the safe area, the color toolbar sits below that edge, centered on the element. A sticky shows its color swatches. A shape shows fill and stroke. A text object has no color toolbar
-- [ ] While the bottom edge is below the safe area, the color toolbar pins inside the element, centered on the on-screen part, with its bottom just above the main toolbar
-- [ ] The text toolbar stays the top bar and the color toolbar stays the bottom bar. An element larger than the pane does not move either bar onto the other side, and does not stack them on one side
-- [ ] Neither bar is placed to the left or the right of the main toolbar. Overlap with that toolbar is resolved by sitting above it
-- [ ] Horizontal center is the center of the element’s on-screen span. An element that runs off the left or right of the pane does not pin a bar to the pane’s left or right edge
-- [ ] Both bars keep a constant screen size at minimum zoom (0.15), at 100%, and at maximum zoom (3). They never scale with the canvas or with the element
-- [ ] The bars follow pan, zoom, and moving the element. Panning or zooming an edge back into the safe area puts that bar back outside the edge. Panning the edge off screen pins it again
-- [ ] An open link field stays in the above stack, farther from the object than the text toolbar, and pins with that stack
-- [ ] Font, alignment, list, link, shape kind, fill, stroke, and sticky color still edit the object. A menu opened from a pinned bar stays on screen at the same screen size
-- [ ] Pointer and wheel events on the bars do not pan the board or drag the element
-- [ ] A pinned bar may cover the element’s handles and ports. It stays clear of the file bar, the logo, and the main toolbar
-- [ ] If the safe area is too short for both pinned bars, they do not overlap. The text toolbar keeps the top pin, and the color toolbar sits beneath it, still on screen
+- [x] While a sticky, text object, or shape is selected and its top edge is inside the safe area, the text toolbar sits above that edge, centered on the element. A shape’s kind menu stays in that toolbar
+- [x] While the top edge is above the safe area, the text toolbar pins inside the element. It is centered on the part of the element that is on screen, and the top of that above stack sits just below the file bar and the Noodle Board logo
+- [x] While the bottom edge is inside the safe area, the color toolbar sits below that edge, centered on the element. A sticky shows its color swatches. A shape shows fill and stroke. A text object has no color toolbar
+- [x] While the bottom edge is below the safe area, the color toolbar pins inside the element, centered on the on-screen part, with its bottom just above the main toolbar
+- [x] The text toolbar stays the top bar and the color toolbar stays the bottom bar. An element larger than the pane does not move either bar onto the other side, and does not stack them on one side
+- [x] Neither bar is placed to the left or the right of the main toolbar. Overlap with that toolbar is resolved by sitting above it
+- [x] Horizontal center is the center of the element’s on-screen span. An element that runs off the left or right of the pane does not pin a bar to the pane’s left or right edge
+- [x] Both bars keep a constant screen size at minimum zoom (0.15), at 100%, and at maximum zoom (3). They never scale with the canvas or with the element
+- [x] The bars follow pan, zoom, and moving the element. Panning or zooming an edge back into the safe area puts that bar back outside the edge. Panning the edge off screen pins it again
+- [x] An open link field stays in the above stack, farther from the object than the text toolbar, and pins with that stack
+- [x] Font, alignment, list, link, shape kind, fill, stroke, and sticky color still edit the object. A menu opened from a pinned bar stays on screen at the same screen size
+- [x] Pointer and wheel events on the bars do not pan the board or drag the element
+- [x] A pinned bar may cover the element’s handles and ports. It stays clear of the file bar, the logo, and the main toolbar
+- [x] If the safe area is too short for both pinned bars, they do not overlap. The text toolbar keeps the top pin, and the color toolbar sits beneath it, still on screen
 
 ## Technical notes
 
