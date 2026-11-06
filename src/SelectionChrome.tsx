@@ -151,7 +151,13 @@ function readSafeArea(renderer: HTMLElement): SafeArea {
         rect.top < flowRect.bottom &&
         rect.right > flowRect.left &&
         rect.left < flowRect.right;
-      if (overlaps) pushOverlay(rect);
+      if (!overlaps) continue;
+      // The pill is the bottom of the safe area, same as the file strip is the top.
+      if (child.classList.contains("board-toolbar")) {
+        bottom = Math.min(bottom, rect.top - flowRect.top - 8);
+        continue;
+      }
+      pushOverlay(rect);
     }
   }
 
@@ -171,7 +177,14 @@ function readSafeArea(renderer: HTMLElement): SafeArea {
   const tools = document.querySelector(".board-toolbar");
   if (tools instanceof HTMLElement) {
     const rect = tools.getBoundingClientRect();
-    if (rect.width > 8 && rect.height > 8) pushOverlay(rect);
+    const overlaps =
+      rect.bottom > flowRect.top &&
+      rect.top < flowRect.bottom &&
+      rect.right > flowRect.left &&
+      rect.left < flowRect.right;
+    if (rect.width > 8 && rect.height > 8 && overlaps) {
+      bottom = Math.min(bottom, rect.top - flowRect.top - 8);
+    }
   }
 
   return {
@@ -291,7 +304,6 @@ export default function SelectionChrome({ side, order = 0, children, box, scope:
           safe,
           slotsFor(scope ?? ""),
           selectionClearance(anchor.zoom),
-          safe.obstacles,
         ).get(slotId)
       : undefined;
   void layoutTick;
