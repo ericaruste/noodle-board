@@ -116,19 +116,12 @@ export function placeSelectionChrome(
   }
 
   if (above.length > 0 && below.length > 0 && belowTop < aboveTop + aboveH) {
-    const bothPinned = !topVisible && !bottomVisible && span != null;
-    if (bothPinned) {
-      // The pins would overlap. Text keeps the top. Color sits beneath it, even when
-      // the pair is taller than the safe area and the color bar meets the main toolbar.
-      const gap = Math.max(0, Math.min(STACK_GAP, room - aboveH - belowH));
-      aboveTop = viewport.top;
-      belowTop = aboveTop + aboveH + gap;
-    } else if (aboveTop + aboveH + STACK_GAP + belowH <= viewport.bottom && aboveTop >= viewport.top) {
-      belowTop = aboveTop + aboveH + STACK_GAP;
-    } else if (belowH <= room) {
-      belowTop = viewport.bottom - belowH;
-      aboveTop = Math.max(viewport.top, Math.min(aboveTop, belowTop - aboveH));
-    }
+    // The safe area cannot hold both pins. Text keeps the top. Color sits beneath it
+    // with no overlap. A pair taller than the safe area meets the main toolbar.
+    if (!topVisible && !bottomVisible && span != null) aboveTop = viewport.top;
+    else if (aboveTop < viewport.top) aboveTop = viewport.top;
+    const gap = Math.max(0, Math.min(STACK_GAP, viewport.bottom - aboveTop - aboveH - belowH));
+    belowTop = aboveTop + aboveH + gap;
   }
 
   const placed = new Map<string, { left: number; top: number }>();
