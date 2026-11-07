@@ -65,7 +65,7 @@ let textFitZoomUntil = 0;
 let textFitZoomListeners = 0;
 
 function armTextFitZoomBlock() {
-  textFitZoomUntil = performance.now() + 700;
+  textFitZoomUntil = performance.now() + 50;
 }
 
 function swallowTextFitZoom(event: MouseEvent) {
