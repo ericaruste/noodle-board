@@ -1,11 +1,23 @@
-import { useRef, useState, type ReactNode } from "react";
-import { TextAlignCenter, TextAlignEnd, TextAlignJustify, TextAlignStart, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  CaseSensitive,
+  TextAlignCenter,
+  TextAlignEnd,
+  TextAlignJustify,
+  TextAlignStart,
+  type LucideIcon,
+} from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
   ALIGN_LABELS,
+  FONT_FAMILIES,
+  FONT_FAMILY_STACK,
+  FONT_SIZE_PRESETS,
   FONT_STYLE_LABELS,
   FONT_STYLES,
   TEXT_ALIGNS,
+  parseFontSize,
+  type FontFamily,
   type FontStyle,
   type TextAlign,
 } from "./textBody";
@@ -26,15 +38,21 @@ function AlignGlyph({ align }: { align: TextAlign }) {
 
 type Pressed = boolean | "mixed";
 
+type OpenMenu = "family" | "size" | "style" | "align";
+
 type TextToolbarProps = {
   styleLabel: string;
   alignLabel: string;
   activeStyle: FontStyle | "mixed";
   activeAlign: TextAlign | "mixed";
+  activeFamily: FontFamily | "mixed" | "none";
+  sizeLabel: string;
   bullet: Pressed;
   numbered: Pressed;
   onStyle: (style: FontStyle) => void;
   onAlign: (align: TextAlign) => void;
+  onFamily: (family: FontFamily) => void;
+  onSize: (size: number) => void;
   onBullet: () => void;
   onNumbered: () => void;
   onLink: () => void;
@@ -114,12 +132,14 @@ function MenuItem({
   horizontal = false,
   active,
   onPick,
+  style,
 }: {
   label: string;
   glyph?: ReactNode;
   horizontal?: boolean;
   active: boolean;
   onPick: () => void;
+  style?: CSSProperties;
 }) {
   return (
     <button
@@ -129,6 +149,7 @@ function MenuItem({
       aria-checked={active}
       title={glyph ? label : undefined}
       onClick={onPick}
+      style={style}
       className={
         horizontal
           ? `flex h-10 items-center justify-center rounded-lg px-2 text-slate-700 ${
@@ -141,6 +162,155 @@ function MenuItem({
     >
       {glyph ?? label}
     </button>
+  );
+}
+
+function FontSizeField({
+  value,
+  open,
+  onToggle,
+  onClose,
+  onCommit,
+  onFocusField,
+}: {
+  value: string;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  onCommit: (size: number) => void;
+  onFocusField: () => void;
+}) {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const { menuRef, box } = useAnchoredBox(open, anchorRef, "start");
+  const [text, setText] = useState(value);
+  const focused = useRef(false);
+  const baseline = useRef(value);
+  const commitRef = useRef<() => void>(() => {});
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (focused.current) return;
+    setText(value);
+    baseline.current = value;
+  }, [value]);
+
+  const commit = () => {
+    const parsed = parseFontSize(text);
+    if (parsed === null) {
+      setText(baseline.current);
+      return;
+    }
+    const next = String(parsed);
+    const changed = next !== baseline.current;
+    baseline.current = next;
+    setText(next);
+    if (changed) onCommit(parsed);
+  };
+  commitRef.current = commit;
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!focused.current) return;
+      const target = event.target;
+      if (!(target instanceof Node) || anchorRef.current?.contains(target)) return;
+      if (target instanceof Element) {
+        const panel = target.closest("[data-floating-panel='dropdown']");
+        if (panel?.getAttribute("aria-label") === "Font size") return;
+      }
+      focused.current = false;
+      commitRef.current();
+      onCloseRef.current();
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, []);
+
+  const arm = () => {
+    if (!focused.current) baseline.current = text;
+    focused.current = true;
+    onFocusField();
+  };
+
+  return (
+    <div ref={anchorRef} className="relative">
+      <div className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100">
+        <input
+          aria-label="Font size"
+          inputMode="numeric"
+          autoComplete="off"
+          value={text}
+          onPointerDown={arm}
+          onFocus={arm}
+          onChange={(event) => setText(event.target.value)}
+          onBlur={(event) => {
+            focused.current = false;
+            const next = event.relatedTarget;
+            if (next instanceof Element && next.closest("[data-floating-panel='dropdown']")) return;
+            commit();
+            onClose();
+          }}
+          onKeyDown={(event) => {
+            event.stopPropagation();
+            if (event.key === "Enter") {
+              event.preventDefault();
+              commit();
+              onClose();
+            }
+            if (event.key === "Escape") {
+              event.preventDefault();
+              setText(baseline.current);
+              onClose();
+            }
+          }}
+          className="w-[4.5rem] min-w-[4.5rem] bg-transparent text-left text-xs font-medium text-slate-700 outline-none"
+        />
+        <button
+          type="button"
+          aria-label="Font size presets"
+          aria-expanded={open}
+          aria-haspopup="menu"
+          onClick={onToggle}
+          className="shrink-0"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
+            <path d="M2 3.5 5 7l3-3.5" />
+          </svg>
+        </button>
+      </div>
+      {open ? (
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
+          role="menu"
+          ariaLabel="Font size"
+          data-text-toolbar=""
+          className="rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            minWidth: box?.minWidth,
+            visibility: box ? "visible" : "hidden",
+          }}
+        >
+          {FONT_SIZE_PRESETS.map((preset) => (
+            <MenuItem
+              key={preset}
+              label={String(preset)}
+              active={value === String(preset)}
+              onPick={() => {
+                const next = String(preset);
+                baseline.current = next;
+                setText(next);
+                onCommit(preset);
+                onClose();
+              }}
+            />
+          ))}
+        </FloatingPanel>
+      ) : null}
+    </div>
   );
 }
 
@@ -178,19 +348,23 @@ export default function TextToolbar({
   alignLabel,
   activeStyle,
   activeAlign,
+  activeFamily,
+  sizeLabel,
   bullet,
   numbered,
   onStyle,
   onAlign,
+  onFamily,
+  onSize,
   onBullet,
   onNumbered,
   onLink,
   linkActive,
   extra,
 }: TextToolbarProps) {
-  const [menu, setMenu] = useState<"style" | "align" | null>(null);
+  const [menu, setMenu] = useState<OpenMenu | null>(null);
 
-  const toggle = (next: "style" | "align") => {
+  const toggle = (next: OpenMenu) => {
     setMenu((current) => (current === next ? null : next));
   };
 
@@ -206,15 +380,44 @@ export default function TextToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
+      <Menu
+        label={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
+        menuLabel="Font style"
+        glyph={<CaseSensitive {...alignIconProps} />}
+        open={menu === "family"}
+        onToggle={() => toggle("family")}
+      >
+        {FONT_FAMILIES.map((family) => (
+          <MenuItem
+            key={family}
+            label={family}
+            active={activeFamily === family}
+            style={{ fontFamily: FONT_FAMILY_STACK[family] }}
+            onPick={() => {
+              setMenu(null);
+              onFamily(family);
+            }}
+          />
+        ))}
+      </Menu>
+      <FontSizeField
+        value={sizeLabel}
+        open={menu === "size"}
+        onToggle={() => toggle("size")}
+        onClose={() => setMenu((current) => (current === "size" ? null : current))}
+        onFocusField={() => setMenu((current) => (current === "size" ? current : null))}
+        onCommit={onSize}
+      />
       {extra ? (
         <>
+          <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
           {extra}
           <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
         </>
       ) : null}
       <Menu
         label={styleLabel}
-        menuLabel="Font style"
+        menuLabel="Weight"
         open={menu === "style"}
         onToggle={() => toggle("style")}
       >

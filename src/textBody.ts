@@ -1,6 +1,23 @@
 export const FONT_STYLES = ["regular", "bold", "italic", "bold-italic"] as const;
 export type FontStyle = (typeof FONT_STYLES)[number];
 
+/** Google Fonts, in toolbar order. Coming Soon publishes 400 only. */
+export const FONT_FAMILIES = ["Geist Mono", "Open Sans", "Montserrat", "Coming Soon", "Noto Serif"] as const;
+export type FontFamily = (typeof FONT_FAMILIES)[number];
+
+export const FONT_FAMILY_STACK: Record<FontFamily, string> = {
+  "Geist Mono": '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+  "Open Sans": '"Open Sans", ui-sans-serif, system-ui, sans-serif',
+  Montserrat: '"Montserrat", ui-sans-serif, system-ui, sans-serif',
+  "Coming Soon": '"Coming Soon", cursive',
+  "Noto Serif": '"Noto Serif", ui-serif, Georgia, serif',
+};
+
+export const DEFAULT_FONT_SIZE = 14;
+export const MIN_FONT_SIZE = 1;
+export const MAX_FONT_SIZE = 400;
+export const FONT_SIZE_PRESETS = [10, 12, 14, 16, 18, 24, 32, 36, 48, 64, 72] as const;
+
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export type TextAlign = (typeof TEXT_ALIGNS)[number];
 
@@ -11,6 +28,10 @@ export type TextRun = {
   text: string;
   style: FontStyle;
   href?: string;
+  /** Omitted for the system sans. */
+  family?: FontFamily;
+  /** Omitted to inherit the node size, or 14 when the node has none. */
+  size?: number;
 };
 
 export type TextParagraph = {
@@ -51,8 +72,30 @@ export const ALIGN_LABELS: Record<TextAlign, string> = {
 };
 
 const FONT_STYLE_SET = new Set<string>(FONT_STYLES);
+const FONT_FAMILY_SET = new Set<string>(FONT_FAMILIES);
 const ALIGN_SET = new Set<string>(TEXT_ALIGNS);
 const LIST_SET = new Set<string>(LIST_KINDS);
+
+export function isFontFamily(value: unknown): value is FontFamily {
+  return typeof value === "string" && FONT_FAMILY_SET.has(value);
+}
+
+export function isFontSize(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= MIN_FONT_SIZE && value <= MAX_FONT_SIZE;
+}
+
+export function fallbackFontSize(nodeFontSize?: number): number {
+  return nodeFontSize !== undefined && Number.isFinite(nodeFontSize) && nodeFontSize > 0 ? nodeFontSize : DEFAULT_FONT_SIZE;
+}
+
+/** A typed size in range, or null when the field is not a size. Out-of-range numbers clamp. */
+export function parseFontSize(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) return null;
+  const value = Number(trimmed);
+  if (!Number.isFinite(value)) return null;
+  return Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, Math.round(value)));
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -93,6 +136,8 @@ export function isTextBody(value: unknown): value is TextBody {
     return paragraph.runs.every((run) => {
       if (!isRecord(run) || typeof run.text !== "string") return false;
       if (typeof run.style !== "string" || !FONT_STYLE_SET.has(run.style)) return false;
+      if (run.family !== undefined && !isFontFamily(run.family)) return false;
+      if (run.size !== undefined && !isFontSize(run.size)) return false;
       return run.href === undefined || typeof run.href === "string";
     });
   });
@@ -101,6 +146,15 @@ export function isTextBody(value: unknown): value is TextBody {
 function copyRun(run: TextRun, text = run.text): TextRun {
   const next: TextRun = { text, style: run.style };
   if (run.href && run.href.trim()) next.href = run.href;
+  if (run.family) next.family = run.family;
+  if (run.size !== undefined) next.size = run.size;
+  return next;
+}
+
+function blankRun(source?: Pick<TextRun, "style" | "family" | "size">): TextRun {
+  const next: TextRun = { text: "", style: source?.style ?? "regular" };
+  if (source?.family) next.family = source.family;
+  if (source?.size !== undefined) next.size = source.size;
   return next;
 }
 
@@ -110,18 +164,22 @@ export function normalizeRuns(runs: TextRun[]): TextRun[] {
     const text = run.text.replace(/\u200b/g, "");
     if (text.length === 0) continue;
     const href = run.href?.trim() ? run.href : undefined;
+    const family = run.family;
+    const size = run.size;
     const prev = merged[merged.length - 1];
-    if (prev && prev.style === run.style && prev.href === href) {
+    if (prev && prev.style === run.style && prev.href === href && prev.family === family && prev.size === size) {
       prev.text += text;
       continue;
     }
     const next: TextRun = { text, style: run.style };
     if (href) next.href = href;
+    if (family) next.family = family;
+    if (size !== undefined) next.size = size;
     merged.push(next);
   }
   if (merged.length === 0) {
-    const style = runs.find((run) => FONT_STYLE_SET.has(run.style))?.style ?? "regular";
-    return [{ text: "", style }];
+    const source = runs.find((run) => FONT_STYLE_SET.has(run.style));
+    return [blankRun(source)];
   }
   return merged;
 }
@@ -203,6 +261,14 @@ export function hrefAt(paragraph: TextParagraph, offset: number): string | undef
   return runBeforeCaret(paragraph, offset).href;
 }
 
+export function familyAt(paragraph: TextParagraph, offset: number): FontFamily | undefined {
+  return runBeforeCaret(paragraph, offset).family;
+}
+
+export function sizeAt(paragraph: TextParagraph, offset: number): number | undefined {
+  return runBeforeCaret(paragraph, offset).size;
+}
+
 type RunSpan = { start: number; end: number; run: TextRun };
 
 function runSpans(paragraph: TextParagraph): RunSpan[] {
@@ -258,12 +324,13 @@ function mapRuns(
   return normalizeRuns(next);
 }
 
-export function applyStyle(body: TextBody, range: TextRange, style: FontStyle): TextBody {
+function applyMark(body: TextBody, range: TextRange, mark: (run: TextRun) => TextRun): TextBody {
   const norm = normalizeRange(body, range);
   if (isCollapsed(norm)) {
     return body.map((paragraph, index) => {
       if (index !== norm.start.paragraph || paragraphText(paragraph).length > 0) return paragraph;
-      return { ...paragraph, runs: [{ text: "", style }] };
+      const current = paragraph.runs[0] ?? blankRun();
+      return { ...paragraph, runs: [mark(copyRun(current, ""))] };
     });
   }
   return body.map((paragraph, index) => {
@@ -271,9 +338,23 @@ export function applyStyle(body: TextBody, range: TextRange, style: FontStyle): 
     if (!span || span.from === span.to) return paragraph;
     return {
       ...paragraph,
-      runs: mapRuns(paragraph.runs, span.from, span.to, (run) => ({ ...run, style })),
+      runs: mapRuns(paragraph.runs, span.from, span.to, mark),
     };
   });
+}
+
+export function applyStyle(body: TextBody, range: TextRange, style: FontStyle): TextBody {
+  return applyMark(body, range, (run) => ({ ...run, style }));
+}
+
+export function applyFamily(body: TextBody, range: TextRange, family: FontFamily): TextBody {
+  return applyMark(body, range, (run) => ({ ...run, family }));
+}
+
+export function applySize(body: TextBody, range: TextRange, size: number): TextBody {
+  const next = parseFontSize(String(size));
+  if (next === null) return body;
+  return applyMark(body, range, (run) => ({ ...run, size: next }));
 }
 
 export function applyAlign(body: TextBody, range: TextRange, align: TextAlign): TextBody {
@@ -300,6 +381,8 @@ export function applyHref(body: TextBody, range: TextRange, href: string): TextB
       ...paragraph,
       runs: mapRuns(paragraph.runs, span.from, span.to, (run) => {
         const next: TextRun = { text: run.text, style: run.style };
+        if (run.family) next.family = run.family;
+        if (run.size !== undefined) next.size = run.size;
         if (cleaned) next.href = cleaned;
         return next;
       }),
@@ -307,26 +390,59 @@ export function applyHref(body: TextBody, range: TextRange, href: string): TextB
   });
 }
 
-export function stylesInRange(body: TextBody, range: TextRange): FontStyle[] {
+function marksInRange<T>(body: TextBody, range: TextRange, read: (run: TextRun) => T, atCaret: (paragraph: TextParagraph, offset: number) => T): T[] {
   const norm = normalizeRange(body, range);
   if (isCollapsed(norm)) {
     const paragraph = body[norm.start.paragraph] ?? emptyParagraph();
-    return [styleAt(paragraph, norm.start.offset)];
+    return [atCaret(paragraph, norm.start.offset)];
   }
-  const found: FontStyle[] = [];
+  const found: T[] = [];
   for (const index of paragraphsTouching(body, norm)) {
     const paragraph = body[index];
     const span = spanInParagraph(body, norm, index);
     if (!span) continue;
     if (span.from === span.to) {
-      if (paragraphText(paragraph).length === 0) found.push(styleAt(paragraph, 0));
+      if (paragraphText(paragraph).length === 0) found.push(atCaret(paragraph, 0));
       continue;
     }
     for (const piece of runSpans(paragraph)) {
-      if (piece.end > span.from && piece.start < span.to) found.push(piece.run.style);
+      if (piece.end > span.from && piece.start < span.to) found.push(read(piece.run));
     }
   }
+  return found;
+}
+
+export function stylesInRange(body: TextBody, range: TextRange): FontStyle[] {
+  const found = marksInRange(body, range, (run) => run.style, styleAt);
   return found.length > 0 ? found : ["regular"];
+}
+
+export function familiesInRange(body: TextBody, range: TextRange): Array<FontFamily | undefined> {
+  const found = marksInRange(body, range, (run) => run.family, familyAt);
+  return found.length > 0 ? found : [undefined];
+}
+
+export function sizesInRange(body: TextBody, range: TextRange, nodeFontSize?: number): number[] {
+  const fallback = fallbackFontSize(nodeFontSize);
+  const found = marksInRange(
+    body,
+    range,
+    (run) => run.size ?? fallback,
+    (paragraph, offset) => sizeAt(paragraph, offset) ?? fallback,
+  );
+  return found.length > 0 ? found : [fallback];
+}
+
+export function uniformFamily(values: Array<FontFamily | undefined>): FontFamily | "mixed" | "none" {
+  if (values.length === 0) return "none";
+  const first = values[0];
+  return values.every((value) => value === first) ? (first ?? "none") : "mixed";
+}
+
+export function uniformNumber(values: number[]): number | "mixed" {
+  if (values.length === 0) return DEFAULT_FONT_SIZE;
+  const first = values[0];
+  return values.every((value) => value === first) ? first : "mixed";
 }
 
 export function alignsInRange(body: TextBody, range: TextRange): TextAlign[] {
@@ -398,15 +514,21 @@ function splitRuns(runs: TextRun[], offset: number): { before: TextRun[]; after:
   const after: TextRun[] = [];
   let pos = 0;
   let style: FontStyle = runs[0]?.style ?? "regular";
+  let family = runs[0]?.family;
+  let size = runs[0]?.size;
   for (const run of runs) {
     const end = pos + run.text.length;
     if (run.text.length === 0) {
       style = run.style;
+      family = run.family;
+      size = run.size;
       continue;
     }
     if (end <= offset) {
       before.push(copyRun(run));
       style = run.style;
+      family = run.family;
+      size = run.size;
     } else if (pos >= offset) {
       after.push(copyRun(run));
     } else {
@@ -414,12 +536,14 @@ function splitRuns(runs: TextRun[], offset: number): { before: TextRun[]; after:
       before.push(copyRun(run, run.text.slice(0, cut)));
       after.push(copyRun(run, run.text.slice(cut)));
       style = run.style;
+      family = run.family;
+      size = run.size;
     }
     pos = end;
   }
   return {
-    before: before.length > 0 ? before : [{ text: "", style }],
-    after: after.length > 0 ? after : [{ text: "", style }],
+    before: before.length > 0 ? before : [blankRun({ style, family, size })],
+    after: after.length > 0 ? after : [blankRun({ style, family, size })],
   };
 }
 
@@ -450,12 +574,22 @@ export function deleteRange(body: TextBody, range: TextRange): TextEdit {
   };
 }
 
-function insertIntoParagraph(body: TextBody, caret: Caret, text: string, style: FontStyle, href?: string): TextBody {
+function insertIntoParagraph(
+  body: TextBody,
+  caret: Caret,
+  text: string,
+  style: FontStyle,
+  href?: string,
+  family?: FontFamily,
+  size?: number,
+): TextBody {
   if (!text) return body;
   const paragraph = body[caret.paragraph];
   const { before, after } = splitRuns(paragraph.runs, caret.offset);
   const inserted: TextRun = { text, style };
   if (href) inserted.href = href;
+  if (family) inserted.family = family;
+  if (size !== undefined) inserted.size = size;
   const nextParagraph: TextParagraph = {
     ...paragraph,
     runs: normalizeRuns([...before, inserted, ...after]),
@@ -477,6 +611,8 @@ export function insertText(
   text: string,
   style: FontStyle,
   href?: string,
+  family?: FontFamily,
+  size?: number,
 ): TextEdit {
   const collapsed = isCollapsed(normalizeRange(body, range));
   const cleared = collapsed ? { body, caret: normalizeRange(body, range).start } : deleteRange(body, range);
@@ -489,7 +625,13 @@ export function insertText(
       const clearedParagraph: TextParagraph = {
         align: paragraph.align,
         list: shortcut,
-        runs: [{ text: "", style: styleAt(paragraph, caret.offset) }],
+        runs: [
+          blankRun({
+            style: styleAt(paragraph, caret.offset),
+            family: familyAt(paragraph, caret.offset),
+            size: sizeAt(paragraph, caret.offset),
+          }),
+        ],
       };
       return {
         body: next.map((item, index) => (index === caret.paragraph ? clearedParagraph : item)),
@@ -500,7 +642,7 @@ export function insertText(
   const lines = text.split(/\r\n|\r|\n/);
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
-    next = insertIntoParagraph(next, caret, line, style, href);
+    next = insertIntoParagraph(next, caret, line, style, href, family, size);
     caret = { paragraph: caret.paragraph, offset: caret.offset + line.length };
     if (index < lines.length - 1) {
       const split = splitParagraph(next, caret);
@@ -521,15 +663,17 @@ function splitParagraph(body: TextBody, caret: Caret): TextEdit {
     };
   }
   const style = styleAt(paragraph, caret.offset);
+  const family = familyAt(paragraph, caret.offset);
+  const size = sizeAt(paragraph, caret.offset);
   const { before, after } = splitRuns(paragraph.runs, caret.offset);
   const current: TextParagraph = { ...paragraph, runs: normalizeRuns(before) };
-  if (paragraphText(current).length === 0) current.runs = [{ text: "", style }];
+  if (paragraphText(current).length === 0) current.runs = [blankRun({ style, family, size })];
   const created: TextParagraph = {
     align: paragraph.align,
     list: paragraph.list,
     runs: normalizeRuns(after),
   };
-  if (paragraphText(created).length === 0) created.runs = [{ text: "", style }];
+  if (paragraphText(created).length === 0) created.runs = [blankRun({ style, family, size })];
   return {
     body: [...body.slice(0, caret.paragraph), current, created, ...body.slice(caret.paragraph + 1)],
     caret: { paragraph: caret.paragraph + 1, offset: 0 },
@@ -672,4 +816,20 @@ export function hrefForTyping(body: TextBody, range: TextRange): string | undefi
   const paragraph = body[norm.start.paragraph] ?? emptyParagraph();
   if (!isCollapsed(norm)) return hrefAt(paragraph, norm.start.offset + 1);
   return hrefAt(paragraph, norm.start.offset);
+}
+
+export function familyForTyping(body: TextBody, range: TextRange, pending: FontFamily | null): FontFamily | undefined {
+  if (pending) return pending;
+  const norm = normalizeRange(body, range);
+  const paragraph = body[norm.start.paragraph] ?? emptyParagraph();
+  if (!isCollapsed(norm)) return familyAt(paragraph, norm.start.offset + 1);
+  return familyAt(paragraph, norm.start.offset);
+}
+
+export function sizeForTyping(body: TextBody, range: TextRange, pending: number | null): number | undefined {
+  if (pending !== null) return pending;
+  const norm = normalizeRange(body, range);
+  const paragraph = body[norm.start.paragraph] ?? emptyParagraph();
+  if (!isCollapsed(norm)) return sizeAt(paragraph, norm.start.offset + 1);
+  return sizeAt(paragraph, norm.start.offset);
 }

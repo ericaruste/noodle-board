@@ -18,29 +18,40 @@ import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
 import {
   ALIGN_LABELS,
+  FONT_FAMILY_STACK,
   FONT_STYLE_LABELS,
   FONT_STYLES,
   emptyParagraph,
   normalizeRuns,
   alignsInRange,
   applyAlign,
+  applyFamily,
   applyHref,
   applyList,
+  applySize,
   applyStyle,
   collapsedAt,
   deleteBackward,
   deleteForward,
   deleteRange,
   enterAt,
+  familiesInRange,
+  familyAt,
+  familyForTyping,
   fullRange,
   hrefAt,
   hrefForTyping,
   paragraphText,
+  sizeAt,
+  sizeForTyping,
+  sizesInRange,
   styleAt,
   hrefsInRange,
   insertText,
   isCollapsed,
   isEmptyBody,
+  isFontFamily,
+  isFontSize,
   linkTarget,
   listMarker,
   listsInRange,
@@ -50,8 +61,11 @@ import {
   styleForTyping,
   stylesInRange,
   textInRange,
+  uniformFamily,
+  uniformNumber,
   uniformOf,
   type Caret,
+  type FontFamily,
   type FontStyle,
   type ListKind,
   type TextAlign,
@@ -59,6 +73,7 @@ import {
   type TextParagraph,
   type TextEdit,
   type TextRange,
+  type TextRun,
 } from "./textBody";
 
 export type RichTextProps = {
@@ -82,13 +97,19 @@ type HistoryStep = {
 
 type Pressed = boolean | "mixed";
 
-function runStyle(style: FontStyle): CSSProperties {
-  const bold = style === "bold" || style === "bold-italic";
-  const italic = style === "italic" || style === "bold-italic";
-  return {
+function runPaint(run: TextRun): CSSProperties {
+  const bold = run.style === "bold" || run.style === "bold-italic";
+  const italic = run.style === "italic" || run.style === "bold-italic";
+  const paint: CSSProperties = {
     fontWeight: bold ? 700 : 400,
     fontStyle: italic ? "italic" : "normal",
   };
+  if (run.family) paint.fontFamily = FONT_FAMILY_STACK[run.family];
+  if (run.size !== undefined) {
+    paint.fontSize = run.size;
+    paint.lineHeight = 1.43;
+  }
+  return paint;
 }
 
 function alignClass(align: TextAlign): string {
@@ -125,6 +146,8 @@ function paragraphFromDom(paragraph: TextParagraph, text: string): TextParagraph
     text.slice(start, nextEnd),
     styleAt(paragraph, start),
     hrefAt(paragraph, start),
+    familyAt(paragraph, start),
+    sizeAt(paragraph, start),
   );
   return edit.body[0] ?? paragraph;
 }
@@ -143,11 +166,18 @@ function paragraphFromElement(element: HTMLElement, current: TextParagraph): Tex
       const styleAttr = span.getAttribute("data-style");
       const style = FONT_STYLES.includes(styleAttr as FontStyle) ? (styleAttr as FontStyle) : "regular";
       const href = span.getAttribute("data-href")?.trim();
-      const run: { text: string; style: FontStyle; href?: string } = {
+      const familyAttr = span.getAttribute("data-family");
+      const family = isFontFamily(familyAttr) ? familyAttr : undefined;
+      const sizeAttr = span.getAttribute("data-size");
+      const sizeValue = sizeAttr === null ? undefined : Number(sizeAttr);
+      const size = isFontSize(sizeValue) ? sizeValue : undefined;
+      const run: TextRun = {
         text: (span.textContent ?? "").replace(/\u200b/g, ""),
         style,
       };
       if (href) run.href = href;
+      if (family) run.family = family;
+      if (size !== undefined) run.size = size;
       return run;
     }),
   );
@@ -200,6 +230,8 @@ export function RichText({
   const undoStack = useRef<HistoryStep[]>([]);
   const redoStack = useRef<HistoryStep[]>([]);
   const pendingRef = useRef<FontStyle | null>(null);
+  const pendingFamilyRef = useRef<FontFamily | null>(null);
+  const pendingSizeRef = useRef<number | null>(null);
   const pendingCaret = useRef<Caret | null>(null);
   const composing = useRef(false);
   const compositionRange = useRef<TextRange | null>(null);
@@ -220,6 +252,8 @@ export function RichText({
   const [draft, setDraft] = useState(body);
   const [range, setRange] = useState<TextRange | null>(null);
   const [pendingStyle, setPendingStyle] = useState<FontStyle | null>(null);
+  const [pendingFamily, setPendingFamily] = useState<FontFamily | null>(null);
+  const [pendingSize, setPendingSize] = useState<number | null>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkMixed, setLinkMixed] = useState(false);
@@ -245,8 +279,12 @@ export function RichText({
       undoStack.current = [];
       redoStack.current = [];
       pendingRef.current = null;
+      pendingFamilyRef.current = null;
+      pendingSizeRef.current = null;
       pendingCaret.current = null;
       setPendingStyle(null);
+      setPendingFamily(null);
+      setPendingSize(null);
       const all = fullRange(next);
       rangeRef.current = all;
       setRange(all);
@@ -309,8 +347,12 @@ export function RichText({
     rangeRef.current = step.range;
     restoreRef.current = step.range;
     pendingRef.current = null;
+    pendingFamilyRef.current = null;
+    pendingSizeRef.current = null;
     pendingCaret.current = null;
     setPendingStyle(null);
+    setPendingFamily(null);
+    setPendingSize(null);
     setDraft(step.body);
     setRange(step.range);
   };
@@ -333,10 +375,16 @@ export function RichText({
     const current = at ?? liveRange();
     const style = styleForTyping(draftRef.current, current, pendingRef.current);
     const href = hrefForTyping(draftRef.current, current);
-    const edit: TextEdit = insertText(draftRef.current, current, text, style, href);
+    const family = familyForTyping(draftRef.current, current, pendingFamilyRef.current);
+    const size = sizeForTyping(draftRef.current, current, pendingSizeRef.current);
+    const edit: TextEdit = insertText(draftRef.current, current, text, style, href, family, size);
     pendingRef.current = null;
+    pendingFamilyRef.current = null;
+    pendingSizeRef.current = null;
     pendingCaret.current = null;
     setPendingStyle(null);
+    setPendingFamily(null);
+    setPendingSize(null);
     remember(edit.body, collapsedAt(edit.caret));
     });
   };
@@ -345,8 +393,12 @@ export function RichText({
     guard(() => {
     const edit = enterAt(draftRef.current, liveRange());
     pendingRef.current = null;
+    pendingFamilyRef.current = null;
+    pendingSizeRef.current = null;
     pendingCaret.current = null;
     setPendingStyle(null);
+    setPendingFamily(null);
+    setPendingSize(null);
     remember(edit.body, collapsedAt(edit.caret));
     });
   };
@@ -466,8 +518,12 @@ export function RichText({
           next.start.offset !== pendingCaret.current.offset;
         if (moved) {
           pendingRef.current = null;
+          pendingFamilyRef.current = null;
+          pendingSizeRef.current = null;
           pendingCaret.current = null;
           setPendingStyle(null);
+          setPendingFamily(null);
+          setPendingSize(null);
         }
       }
       if (sameRange(rangeRef.current, next)) return;
@@ -489,11 +545,13 @@ export function RichText({
   }, [linkOpen]);
 
   const toolbarRange = editing && range ? range : fullRange(shown);
+  const caretPending = Boolean(editing && range && isCollapsed(normalizeRange(shown, range)));
   const styleValues = stylesInRange(shown, toolbarRange);
-  const uniformStyle =
-    pendingStyle && editing && range && isCollapsed(normalizeRange(shown, range))
-      ? pendingStyle
-      : uniformOf(styleValues);
+  const uniformStyle = pendingStyle && caretPending ? pendingStyle : uniformOf(styleValues);
+  const familyValues = familiesInRange(shown, toolbarRange);
+  const uniformFamilyValue = pendingFamily && caretPending ? pendingFamily : uniformFamily(familyValues);
+  const sizeValues = sizesInRange(shown, toolbarRange, fontSize);
+  const uniformSize = pendingSize !== null && caretPending ? pendingSize : uniformNumber(sizeValues);
   const alignValues = alignsInRange(shown, toolbarRange);
   const uniformAlign = uniformOf(alignValues);
   const listValues = listsInRange(shown, toolbarRange);
@@ -525,6 +583,44 @@ export function RichText({
     pendingCaret.current = null;
     setPendingStyle(null);
     remember(applyStyle(draftRef.current, current, style), current);
+  };
+
+  const changeFamily = (family: FontFamily) => {
+    if (!editingRef.current) {
+      onFormatRef.current(applyFamily(bodyRef.current, fullRange(bodyRef.current), family));
+      return;
+    }
+    const current = normalizeRange(draftRef.current, liveRange());
+    if (isCollapsed(current)) {
+      pendingFamilyRef.current = family;
+      pendingCaret.current = current.start;
+      setPendingFamily(family);
+      const next = applyFamily(draftRef.current, current, family);
+      if (!sameBody(next, draftRef.current)) remember(next, current);
+      return;
+    }
+    pendingFamilyRef.current = null;
+    setPendingFamily(null);
+    remember(applyFamily(draftRef.current, current, family), current);
+  };
+
+  const changeSize = (size: number) => {
+    if (!editingRef.current) {
+      onFormatRef.current(applySize(bodyRef.current, fullRange(bodyRef.current), size));
+      return;
+    }
+    const current = normalizeRange(draftRef.current, liveRange());
+    if (isCollapsed(current)) {
+      pendingSizeRef.current = size;
+      pendingCaret.current = current.start;
+      setPendingSize(size);
+      const next = applySize(draftRef.current, current, size);
+      if (!sameBody(next, draftRef.current)) remember(next, current);
+      return;
+    }
+    pendingSizeRef.current = null;
+    setPendingSize(null);
+    remember(applySize(draftRef.current, current, size), current);
   };
 
   const changeAlign = (align: TextAlign) => {
@@ -712,7 +808,7 @@ export function RichText({
   };
 
   const showPlaceholder = isEmptyBody(shown);
-  const textStyle = fontSize ? { fontSize } : undefined;
+  const editorStyle = fontSize && fontSize > 0 ? { fontSize, lineHeight: 1.43 } : undefined;
   const hideChrome = useConnectChromeHidden();
   const showChrome = selected && !hideChrome;
 
@@ -725,10 +821,14 @@ export function RichText({
             alignLabel={uniformAlign === "mixed" ? "Mixed" : ALIGN_LABELS[uniformAlign]}
             activeStyle={uniformStyle}
             activeAlign={uniformAlign}
+            activeFamily={uniformFamilyValue}
+            sizeLabel={uniformSize === "mixed" ? "Mixed" : String(uniformSize)}
             bullet={pressFor(listValues, "bullet")}
             numbered={pressFor(listValues, "numbered")}
             linkActive={linkPressed === true}
             onStyle={changeStyle}
+            onFamily={changeFamily}
+            onSize={changeSize}
             onAlign={changeAlign}
             onBullet={() => changeList("bullet")}
             onNumbered={() => changeList("numbered")}
@@ -779,7 +879,6 @@ export function RichText({
       <div
         ref={frameRef}
         className={fill ? "h-full min-h-0 overflow-auto p-3" : "min-h-[1.5rem] overflow-auto px-1 py-0.5"}
-        style={textStyle}
       >
         {!editing && showPlaceholder ? (
           <div className="text-sm leading-5 text-slate-400">{placeholder}</div>
@@ -796,6 +895,7 @@ export function RichText({
               className={`noodle-text-editor relative z-[1] text-sm leading-5 text-slate-800 ${
                 editing ? "nodrag nopan nowheel min-h-[1.25rem]" : ""
               }`}
+              style={editorStyle}
               contentEditable={editing}
               suppressContentEditableWarning
               onBlur={
@@ -888,8 +988,10 @@ export function RichText({
                               href={url ?? undefined}
                               data-style={run.style}
                               data-href={run.href}
+                              data-family={run.family}
+                              data-size={run.size}
                               className="nodrag nopan underline underline-offset-2"
-                              style={runStyle(run.style)}
+                              style={runPaint(run)}
                               onClick={(event) => {
                                 event.preventDefault();
                                 if (!selected) return;
@@ -917,8 +1019,10 @@ export function RichText({
                             key={runIndex}
                             data-style={run.style}
                             data-href={run.href}
+                            data-family={run.family}
+                            data-size={run.size}
                             className={run.href ? "underline underline-offset-2" : undefined}
-                            style={runStyle(run.style)}
+                            style={runPaint(run)}
                           >
                             {run.text || "\u200b"}
                           </span>
