@@ -878,6 +878,7 @@ export function RichText({
       ) : null}
       <div
         ref={frameRef}
+        data-text-frame=""
         className={fill ? "h-full min-h-0 overflow-auto p-3" : "min-h-[1.5rem] overflow-auto px-1 py-0.5"}
       >
         {!editing && showPlaceholder ? (

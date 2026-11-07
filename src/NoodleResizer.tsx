@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 import { layers } from "./layers";
@@ -59,6 +59,48 @@ function sameBox(a: Box | null, b: Box | null) {
 
 const CORNER_HANDLES = new Set<ResizeHandle>(["top-left", "top-right", "bottom-left", "bottom-right"]);
 
+// The hug runs on the second pointerdown and moves the handle before mouseup.
+// The browser then double-clicks whatever is underneath, which is the canvas.
+let textFitZoomUntil = 0;
+let textFitZoomListeners = 0;
+
+function armTextFitZoomBlock() {
+  textFitZoomUntil = performance.now() + 50;
+}
+
+function swallowTextFitZoom(event: MouseEvent) {
+  const armed = performance.now() < textFitZoomUntil;
+  const onTextHandle =
+    event.target instanceof Element &&
+    Boolean(event.target.closest(".react-flow__resize-control")?.closest("[data-text-fit]"));
+  const blockClick = event.type === "click" && armed;
+  const blockDoubleClick = event.type === "dblclick" && (armed || onTextHandle);
+  if (!blockClick && !blockDoubleClick) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.type === "dblclick") textFitZoomUntil = 0;
+  // dblclick is dispatched after click, before the next task. Then drop the block
+  // so a later click is not swallowed when dblclick never arrives.
+  if (event.type === "click") window.setTimeout(() => {
+    textFitZoomUntil = 0;
+  }, 0);
+}
+
+function bindTextFitZoom() {
+  if (textFitZoomListeners === 0) {
+    window.addEventListener("click", swallowTextFitZoom, true);
+    window.addEventListener("dblclick", swallowTextFitZoom, true);
+  }
+  textFitZoomListeners += 1;
+  return () => {
+    textFitZoomListeners -= 1;
+    if (textFitZoomListeners > 0) return;
+    textFitZoomListeners = 0;
+    window.removeEventListener("click", swallowTextFitZoom, true);
+    window.removeEventListener("dblclick", swallowTextFitZoom, true);
+  };
+}
+
 export function ResizeHandles({
   onPointerDown,
 }: {
@@ -100,6 +142,7 @@ type NoodleResizerProps = {
   keepAspectRatio?: boolean;
   onResizeStart?: () => void;
   onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void;
+  onHandleDoubleClick?: () => void;
 };
 
 function useShiftResize(
@@ -108,6 +151,7 @@ function useShiftResize(
   onResizeStart?: () => void,
   onResizeEnd?: (event: unknown, params: { width: number; height: number }) => void,
   lockAspect = false,
+  onDoubleClick?: () => void,
 ) {
   const nodeId = useNodeId();
   const store = useStoreApi();
@@ -115,14 +159,29 @@ function useShiftResize(
   const screenToFlowRef = useRef(screenToFlowPosition);
   const startRef = useRef(onResizeStart);
   const endRef = useRef(onResizeEnd);
+  const doubleRef = useRef(onDoubleClick);
+  const lastClick = useRef<{ handle: ResizeHandle; time: number } | null>(null);
+  const stopDrag = useRef<(() => void) | null>(null);
   screenToFlowRef.current = screenToFlowPosition;
   startRef.current = onResizeStart;
   endRef.current = onResizeEnd;
+  doubleRef.current = onDoubleClick;
 
   return (handle: ResizeHandle, event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || !nodeId) return;
     event.preventDefault();
     event.stopPropagation();
+    const now = performance.now();
+    const last = lastClick.current;
+    const repeated = Boolean(doubleRef.current) && last?.handle === handle && now - last.time < 500;
+    lastClick.current = repeated ? null : { handle, time: now };
+    if (repeated) {
+      armTextFitZoomBlock();
+      stopDrag.current?.();
+      setShiftAspect(null);
+      doubleRef.current?.();
+      return;
+    }
     const node = store.getState().nodeLookup.get(nodeId);
     const width = node?.measured.width;
     const height = node?.measured.height;
@@ -188,13 +247,17 @@ function useShiftResize(
       if (keyEvent.key !== "Shift") return;
       apply(drag.lastX, drag.lastY, keyEvent.type === "keydown");
     };
-    const finish = (upEvent: PointerEvent) => {
-      if (upEvent.pointerId !== drag.pointerId) return;
+    const stop = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", finish);
       window.removeEventListener("pointercancel", finish);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onKey);
+      if (stopDrag.current === stop) stopDrag.current = null;
+    };
+    const finish = (upEvent: PointerEvent) => {
+      if (upEvent.pointerId !== drag.pointerId) return;
+      stop();
       setShiftAspect(null);
       store.getState().triggerNodeChanges([
         { id: nodeId, type: "position", position: { x: drag.size.x, y: drag.size.y } },
@@ -208,6 +271,7 @@ function useShiftResize(
       ]);
       endRef.current?.(upEvent, { width: drag.size.width, height: drag.size.height });
     };
+    stopDrag.current = stop;
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", finish);
     window.addEventListener("pointercancel", finish);
@@ -223,9 +287,17 @@ export function NoodleResizer({
   keepAspectRatio,
   onResizeStart,
   onResizeEnd,
+  onHandleDoubleClick,
 }: NoodleResizerProps) {
   const resizeStyle = useNoodleResizeStyle();
-  const onHandleDown = useShiftResize(minWidth, minHeight, onResizeStart, onResizeEnd, keepAspectRatio);
+  const onHandleDown = useShiftResize(
+    minWidth,
+    minHeight,
+    onResizeStart,
+    onResizeEnd,
+    keepAspectRatio,
+    onHandleDoubleClick,
+  );
   const nodeId = useNodeId();
   const box = useStore((state) => {
     const node = nodeId ? state.nodeLookup.get(nodeId) : undefined;
@@ -242,11 +314,27 @@ export function NoodleResizer({
   const flowRoot = useStore((state) => state.domNode);
   const viewport = flowRoot?.querySelector(".react-flow__viewport");
 
+  // d3 zoom hears dblclick on the renderer before React's handler on this layer.
+  // The fit moves the handle before mouseup, so the click may land on the canvas.
+  useEffect(() => {
+    if (!onHandleDoubleClick) return;
+    return bindTextFitZoom();
+  }, [onHandleDoubleClick]);
+
   if (!selected || !box || !viewport) return null;
 
   return createPortal(
     <div
       className="noodle-node noodle-resize-layer"
+      data-text-fit={onHandleDoubleClick ? "" : undefined}
+      onDoubleClick={
+        onHandleDoubleClick
+          ? (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          : undefined
+      }
       style={{
         ...resizeStyle,
         transform: `translate(${box.x}px, ${box.y}px)`,

@@ -215,6 +215,11 @@
       "id": "576b492f-bc14-4243-b580-7ed596e33093",
       "identifier": "ERI-46",
       "url": "https://linear.app/ericar/issue/ERI-46/add-typeface-and-font-size-to-the-text-toolbar"
+    },
+    "NB-37": {
+      "id": "166d1cba-8914-4d46-9c1e-82fbf4ddad02",
+      "identifier": "ERI-47",
+      "url": "https://linear.app/ericar/issue/ERI-47/hug-a-text-frame-from-its-resize-handles"
     }
   }
 }
