@@ -165,6 +165,13 @@ function MenuItem({
   );
 }
 
+function isFontSizePreset(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    target.closest("[data-floating-panel='dropdown']")?.getAttribute("aria-label") === "Font size"
+  );
+}
+
 function FontSizeField({
   value,
   open,
@@ -214,10 +221,7 @@ function FontSizeField({
       if (!focused.current) return;
       const target = event.target;
       if (!(target instanceof Node) || anchorRef.current?.contains(target)) return;
-      if (target instanceof Element) {
-        const panel = target.closest("[data-floating-panel='dropdown']");
-        if (panel?.getAttribute("aria-label") === "Font size") return;
-      }
+      if (isFontSizePreset(target)) return;
       focused.current = false;
       commitRef.current();
       onCloseRef.current();
@@ -244,9 +248,8 @@ function FontSizeField({
           onFocus={arm}
           onChange={(event) => setText(event.target.value)}
           onBlur={(event) => {
+            if (isFontSizePreset(event.relatedTarget)) return;
             focused.current = false;
-            const next = event.relatedTarget;
-            if (next instanceof Element && next.closest("[data-floating-panel='dropdown']")) return;
             commit();
             onClose();
           }}
