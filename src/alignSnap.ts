@@ -648,10 +648,17 @@ function finishResize(
     if (change.type !== "dimensions" || change.resizing !== false) return change;
     resizeOrigins.delete(change.id);
     const snapped = snappedSizes.get(change.id);
+    const width = change.dimensions?.width;
+    const height = change.dimensions?.height;
     // Keep the snapped size for this id. A second pass of this update still needs it,
     // and the next resize of the node overwrites the entry.
-    if (!snapped) return change;
+    if (!snapped || width == null || height == null) return change;
     // The resizer's pointer size is unsnapped. Keep the size already on screen.
+    // A fit that jumps farther than the snap distance is a new size, not that pointer.
+    if (Math.abs(width - snapped.width) > ALIGN_SNAP || Math.abs(height - snapped.height) > ALIGN_SNAP) {
+      snappedSizes.set(change.id, { width, height });
+      return change;
+    }
     return {
       ...change,
       setAttributes: true,
