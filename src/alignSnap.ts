@@ -639,6 +639,13 @@ function snapResize(
   return { changes: wrote, guides, brackets: [] };
 }
 
+const releaseRawSize = new Set<string>();
+
+/** The next resize-end for this id keeps the size it is given. A text hug uses this. */
+export function keepReleasedSize(id: string) {
+  releaseRawSize.add(id);
+}
+
 function finishResize(
   changes: NodeChange[],
   resizeOrigins: Map<string, FlowBox>,
@@ -647,18 +654,18 @@ function finishResize(
   return changes.map((change) => {
     if (change.type !== "dimensions" || change.resizing !== false) return change;
     resizeOrigins.delete(change.id);
-    const snapped = snappedSizes.get(change.id);
     const width = change.dimensions?.width;
     const height = change.dimensions?.height;
-    // Keep the snapped size for this id. A second pass of this update still needs it,
-    // and the next resize of the node overwrites the entry.
-    if (!snapped || width == null || height == null) return change;
-    // The resizer's pointer size is unsnapped. Keep the size already on screen.
-    // A fit that jumps farther than the snap distance is a new size, not that pointer.
-    if (Math.abs(width - snapped.width) > ALIGN_SNAP || Math.abs(height - snapped.height) > ALIGN_SNAP) {
-      snappedSizes.set(change.id, { width, height });
+    if (releaseRawSize.has(change.id)) {
+      releaseRawSize.delete(change.id);
+      if (width != null && height != null) snappedSizes.set(change.id, { width, height });
       return change;
     }
+    const snapped = snappedSizes.get(change.id);
+    // Keep the snapped size for this id. A second pass of this update still needs it,
+    // and the next resize of the node overwrites the entry.
+    if (!snapped) return change;
+    // The resizer's pointer size is unsnapped. Keep the size already on screen.
     return {
       ...change,
       setAttributes: true,

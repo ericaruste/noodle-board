@@ -62,6 +62,7 @@ const CORNER_HANDLES = new Set<ResizeHandle>(["top-left", "top-right", "bottom-l
 // The hug runs on the second pointerdown and moves the handle before mouseup.
 // The browser then double-clicks whatever is underneath, which is the canvas.
 let textFitZoomUntil = 0;
+let textFitZoomListeners = 0;
 
 function armTextFitZoomBlock() {
   textFitZoomUntil = performance.now() + 700;
@@ -78,6 +79,26 @@ function swallowTextFitZoom(event: MouseEvent) {
   event.preventDefault();
   event.stopPropagation();
   if (event.type === "dblclick") textFitZoomUntil = 0;
+  // dblclick is dispatched after click, before the next task. Then drop the block
+  // so a later click is not swallowed when dblclick never arrives.
+  if (event.type === "click") window.setTimeout(() => {
+    textFitZoomUntil = 0;
+  }, 0);
+}
+
+function bindTextFitZoom() {
+  if (textFitZoomListeners === 0) {
+    window.addEventListener("click", swallowTextFitZoom, true);
+    window.addEventListener("dblclick", swallowTextFitZoom, true);
+  }
+  textFitZoomListeners += 1;
+  return () => {
+    textFitZoomListeners -= 1;
+    if (textFitZoomListeners > 0) return;
+    textFitZoomListeners = 0;
+    window.removeEventListener("click", swallowTextFitZoom, true);
+    window.removeEventListener("dblclick", swallowTextFitZoom, true);
+  };
 }
 
 export function ResizeHandles({
@@ -297,12 +318,7 @@ export function NoodleResizer({
   // The fit moves the handle before mouseup, so the click may land on the canvas.
   useEffect(() => {
     if (!onHandleDoubleClick) return;
-    window.addEventListener("click", swallowTextFitZoom, true);
-    window.addEventListener("dblclick", swallowTextFitZoom, true);
-    return () => {
-      window.removeEventListener("click", swallowTextFitZoom, true);
-      window.removeEventListener("dblclick", swallowTextFitZoom, true);
-    };
+    return bindTextFitZoom();
   }, [onHandleDoubleClick]);
 
   if (!selected || !box || !viewport) return null;

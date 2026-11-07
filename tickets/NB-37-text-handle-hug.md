@@ -37,7 +37,7 @@ Double-clicking a text bounding-box handle should fit the frame to the glyphs, t
 - [x] Undo restores the frame from before the hug, and redo applies the hug again
 - [x] That double-click does not zoom the canvas, including when the hug moves the handle and the pointer is released on empty canvas. The text object stays selected
 - [x] Double-clicking empty canvas still zooms the board
-- [x] A hug that changes width or height by more than the alignment snap distance (5) is kept. Ending a normal resize still uses the snapped size when the pointer is within that distance
+- [x] A hug is kept even when an earlier resize snapped that frame. Ending a normal resize still uses the snapped size
 - [x] After a hug, dragging a handle does not force the frame back to a 120 by 32 minimum. The text resize minimum is 8 by 8
 
 ## Technical notes
@@ -46,7 +46,7 @@ Only a text node passes `onHandleDoubleClick`. The second pointer down on the sa
 
 Arm a short block on that second pointer down. The following click and double-click are swallowed even when they land on the pane, because the handle has already moved. A double-click that is still on the handle is swallowed too. Nothing else cancels canvas zoom.
 
-`finishResize` keeps the snapped size only when the released size is within `ALIGN_SNAP` of it. A jump farther than that, which is what a hug does, replaces the stored size.
+`finishResize` keeps the snapped size when a drag ends. A hug marks that id with `keepReleasedSize` so this one resize-end keeps the fitted size and stores it for the next drag. Other resizes still land on the snapped size.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

@@ -6,6 +6,7 @@ import RichText from "./RichText";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { useSelectedObjectCount } from "./selectionScope";
 import { clearTextEdit, peekTextEdit } from "./textEdit";
+import { keepReleasedSize } from "./alignSnap";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
 function snapshot() {
@@ -140,6 +141,7 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
       return;
     }
     snapshot();
+    keepReleasedSize(id);
     store.getState().triggerNodeChanges([
       { id, type: "position", position },
       {
