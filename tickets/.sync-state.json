@@ -210,6 +210,11 @@
       "id": "4784e6ec-e7d8-4d62-a708-d105ac5c2de1",
       "identifier": "ERI-45",
       "url": "https://linear.app/ericar/issue/ERI-45/keep-text-and-color-toolbars-on-a-zoomed-in-element"
+    },
+    "NB-36": {
+      "id": "576b492f-bc14-4243-b580-7ed596e33093",
+      "identifier": "ERI-46",
+      "url": "https://linear.app/ericar/issue/ERI-46/add-typeface-and-font-size-to-the-text-toolbar"
     }
   }
 }

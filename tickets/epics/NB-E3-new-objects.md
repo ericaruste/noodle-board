@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-7/new-canvas-objects
 
 MVP actions are only sticky, image, and delete ([`src/Toolbar.tsx`](../../src/Toolbar.tsx)). Noodles already exist as React Flow edges (`defaultEdgeOptions` in [`src/App.tsx`](../../src/App.tsx): smoothstep + closed arrow). There is no free text, no geometric shape, and no first-class connector tool (users must drag a hidden handle).
 
-Child tickets: [NB-07](../NB-07-text-objects.md), [NB-08](../NB-08-shape-objects.md), [NB-09](../NB-09-arrow-connector-tool.md), [NB-21](../NB-21-shape-swap.md).
+Child tickets: [NB-07](../NB-07-text-objects.md), [NB-08](../NB-08-shape-objects.md), [NB-09](../NB-09-arrow-connector-tool.md), [NB-21](../NB-21-shape-swap.md), [NB-36](../NB-36-text-font-family-and-size.md).
 
 ## Goal
 
@@ -25,6 +25,7 @@ Add Text, Shapes, and an Arrow/connector tool so the board matches a FigJam-styl
 - NB-08 Add Shape objects
 - NB-09 Add Arrow/connector tool
 - NB-21 Add shape swap on the shape's floating toolbar
+- NB-36 Add typeface and font size to the text toolbar
 
 ## Success looks like
 
