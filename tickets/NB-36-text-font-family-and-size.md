@@ -1,7 +1,7 @@
 ---
 id: NB-36
 title: Add typeface and font size to the text toolbar
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E3
