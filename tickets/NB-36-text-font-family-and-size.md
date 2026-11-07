@@ -1,7 +1,7 @@
 ---
 id: NB-36
 title: Add typeface and font size to the text toolbar
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, Canvas, Toolbar]
 parent: NB-E3
@@ -35,18 +35,18 @@ The font size control sits beside the typeface menu. It is one field at the curr
 
 ## Acceptance criteria
 
-- [ ] On a selected sticky, text object, or shape, and on a same-type group, the text toolbar leads with a typeface menu and a font size field beside it. Weight, alignment, bulleted list, numbered list, and link stay after those two, in today’s order
-- [ ] The typeface button shows the Lucide `CaseSensitive` icon at the alignment button’s size (`h-10`, glyph size 20). Its accessible name is Font style
-- [ ] The typeface menu lists Geist Mono, Open Sans, Montserrat, Coming Soon, and Noto Serif, in that order. Each item is that Google Font. The active family is checked
-- [ ] The font size control is a number field at the weight menu’s text-label metrics: no icon and no `h-10`. It shows the current size. Text that has no stored size shows 14 in that field, and that text still paints at 14px
-- [ ] The field’s dropdown lists 10, 12, 14, 16, 18, 24, 32, 36, 48, 64, and 72, and nothing else. Choosing a preset fills the field and paints that size. Typing a size and pressing Enter, or leaving the field, paints a size from 1 to 400. Escape restores the size the field had when it was focused and closes the dropdown. The typed or chosen size stays in the field
-- [ ] Choosing a family paints the affected text in that family. Choosing a size paints it at that size. Text with no stored family keeps the current system sans
-- [ ] While editing, the choice applies to the highlighted range. With the object selected and no range inside it, the choice applies to all of that text. A range that mixes families checks no single family. A range that mixes sizes shows Mixed in the size field, inside the same field metrics
-- [ ] On a same-type group, the two controls apply to every object in the group. Mixed families and mixed sizes use the same mixed state as a mixed range
-- [ ] Weight, alignment, lists, and links still apply on text set in any of the five families, including Coming Soon
-- [ ] Family and size survive undo, redo, reload from localStorage, and `.noodle.json`. A file written before this ticket still opens, and its text keeps the system sans at 14px until a family or size is chosen
-- [ ] The typeface menu and the font size dropdown open from `FloatingPanel` on the dropdown token, stay on screen, and keep a constant screen size when the text toolbar is pinned inside a zoomed element. Pointer and typing in the field or the menus do not pan the board or drag the element
-- [ ] The typeface menu and the font size dropdown stay above a selected element and above an element mid-drag
+- [x] On a selected sticky, text object, or shape, and on a same-type group, the text toolbar leads with a typeface menu and a font size field beside it. Weight, alignment, bulleted list, numbered list, and link stay after those two, in today’s order
+- [x] The typeface button shows the Lucide `CaseSensitive` icon at the alignment button’s size (`h-10`, glyph size 20). Its accessible name is Font style
+- [x] The typeface menu lists Geist Mono, Open Sans, Montserrat, Coming Soon, and Noto Serif, in that order. Each item is that Google Font. The active family is checked
+- [x] The font size control is a number field at the weight menu’s text-label metrics: no icon and no `h-10`. It shows the current size. Text that has no stored size shows 14 in that field, and that text still paints at 14px
+- [x] The field’s dropdown lists 10, 12, 14, 16, 18, 24, 32, 36, 48, 64, and 72, and nothing else. Choosing a preset fills the field and paints that size. Typing a size and pressing Enter, or leaving the field, paints a size from 1 to 400. Escape restores the size the field had when it was focused and closes the dropdown. The typed or chosen size stays in the field
+- [x] Choosing a family paints the affected text in that family. Choosing a size paints it at that size. Text with no stored family keeps the current system sans
+- [x] While editing, the choice applies to the highlighted range. With the object selected and no range inside it, the choice applies to all of that text. A range that mixes families checks no single family. A range that mixes sizes shows Mixed in the size field, inside the same field metrics
+- [x] On a same-type group, the two controls apply to every object in the group. Mixed families and mixed sizes use the same mixed state as a mixed range
+- [x] Weight, alignment, lists, and links still apply on text set in any of the five families, including Coming Soon
+- [x] Family and size survive undo, redo, reload from localStorage, and `.noodle.json`. A file written before this ticket still opens, and its text keeps the system sans at 14px until a family or size is chosen
+- [x] The typeface menu and the font size dropdown open from `FloatingPanel` on the dropdown token, stay on screen, and keep a constant screen size when the text toolbar is pinned inside a zoomed element. Pointer and typing in the field or the menus do not pan the board or drag the element
+- [x] The typeface menu and the font size dropdown stay above a selected element and above an element mid-drag
 
 ## Technical notes
 

@@ -15,14 +15,21 @@ import {
   FONT_STYLE_LABELS,
   alignsInRange,
   applyAlign,
+  applyFamily,
   applyHref,
+  applySize,
   applyStyle,
   coerceBody,
+  familiesInRange,
   fullRange,
   hrefsInRange,
   listsInRange,
+  sizesInRange,
   stylesInRange,
+  uniformFamily,
+  uniformNumber,
   uniformOf,
+  type FontFamily,
   type FontStyle,
   type ListKind,
   type TextAlign,
@@ -41,27 +48,30 @@ function selectedNodes(nodes: Node[], type: string) {
   return nodes.filter((node) => node.selected && node.type === type);
 }
 
-function textBodies(nodes: Node[], type: "sticky" | "text" | "shape"): TextBody[] {
-  const bodies: TextBody[] = [];
+type TextSource = { body: TextBody; fontSize?: number };
+
+function textSources(nodes: Node[], type: "sticky" | "text" | "shape"): TextSource[] {
+  const sources: TextSource[] = [];
   for (const node of selectedNodes(nodes, type)) {
     if (!node.data || typeof node.data !== "object") continue;
     if (type === "sticky") {
       const data = node.data as StickyData;
-      bodies.push(coerceBody(data.paragraphs, data.text));
+      sources.push({ body: coerceBody(data.paragraphs, data.text) });
     } else {
-      const data = node.data as { paragraphs?: TextBody };
-      bodies.push(coerceBody(data.paragraphs));
+      const data = node.data as { paragraphs?: TextBody; fontSize?: number };
+      const fontSize = typeof data.fontSize === "number" && data.fontSize > 0 ? data.fontSize : undefined;
+      sources.push({ body: coerceBody(data.paragraphs), fontSize });
     }
   }
-  return bodies;
+  return sources;
 }
 
 function setList(body: TextBody, list: ListKind): TextBody {
   return body.map((paragraph) => (paragraph.list === list ? paragraph : { ...paragraph, list }));
 }
 
-function listPressed(bodies: TextBody[], kind: "bullet" | "numbered"): Pressed {
-  const lists = bodies.flatMap((body) => listsInRange(body, fullRange(body)));
+function listPressed(sources: TextSource[], kind: "bullet" | "numbered"): Pressed {
+  const lists = sources.flatMap((source) => listsInRange(source.body, fullRange(source.body)));
   if (lists.length > 0 && lists.every((list) => list === kind)) return true;
   if (lists.some((list) => list === kind)) return "mixed";
   return false;
@@ -76,13 +86,17 @@ function GroupTextBar({
   box: Box;
   extra?: ReactNode;
 }) {
-  const bodies = useStore((state) => textBodies(state.nodes, type));
+  const sources = useStore((state) => textSources(state.nodes, type));
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkMixed, setLinkMixed] = useState(false);
-  const styles = uniformOf(bodies.flatMap((body) => stylesInRange(body, fullRange(body))));
-  const aligns = uniformOf(bodies.flatMap((body) => alignsInRange(body, fullRange(body))));
-  const hrefs = bodies.flatMap((body) => hrefsInRange(body, fullRange(body)));
+  const styles = uniformOf(sources.flatMap((source) => stylesInRange(source.body, fullRange(source.body))));
+  const aligns = uniformOf(sources.flatMap((source) => alignsInRange(source.body, fullRange(source.body))));
+  const families = uniformFamily(sources.flatMap((source) => familiesInRange(source.body, fullRange(source.body))));
+  const sizes = uniformNumber(
+    sources.flatMap((source) => sizesInRange(source.body, fullRange(source.body), source.fontSize)),
+  );
+  const hrefs = sources.flatMap((source) => hrefsInRange(source.body, fullRange(source.body)));
   const linked = hrefs.filter((href) => href).length;
   const linkActive = hrefs.length > 0 && linked === hrefs.length;
 
@@ -98,18 +112,22 @@ function GroupTextBar({
           alignLabel={aligns === "mixed" ? "Mixed" : ALIGN_LABELS[aligns]}
           activeStyle={styles}
           activeAlign={aligns}
-          bullet={listPressed(bodies, "bullet")}
-          numbered={listPressed(bodies, "numbered")}
+          activeFamily={families}
+          sizeLabel={sizes === "mixed" ? "Mixed" : String(sizes)}
+          bullet={listPressed(sources, "bullet")}
+          numbered={listPressed(sources, "numbered")}
           linkActive={linkActive}
           extra={extra}
           onStyle={(style: FontStyle) => publish((body) => applyStyle(body, fullRange(body), style))}
+          onFamily={(family: FontFamily) => publish((body) => applyFamily(body, fullRange(body), family))}
+          onSize={(size: number) => publish((body) => applySize(body, fullRange(body), size))}
           onAlign={(align: TextAlign) => publish((body) => applyAlign(body, fullRange(body), align))}
           onBullet={() => {
-            const on = listPressed(bodies, "bullet") === true;
+            const on = listPressed(sources, "bullet") === true;
             publish((body) => setList(body, on ? "none" : "bullet"));
           }}
           onNumbered={() => {
-            const on = listPressed(bodies, "numbered") === true;
+            const on = listPressed(sources, "numbered") === true;
             publish((body) => setList(body, on ? "none" : "numbered"));
           }}
           onLink={() => {
