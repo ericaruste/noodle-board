@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   CaseSensitive,
+  Link,
+  List,
+  ListOrdered,
   TextAlignCenter,
   TextAlignEnd,
   TextAlignJustify,
   TextAlignStart,
   type LucideIcon,
 } from "lucide-react";
+import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
   ALIGN_LABELS,
@@ -22,19 +26,12 @@ import {
   type TextAlign,
 } from "./textBody";
 
-const alignIconProps = { size: 20, strokeWidth: 2, "aria-hidden": true as const };
-
 const ALIGN_ICONS: Record<TextAlign, LucideIcon> = {
   left: TextAlignStart,
   center: TextAlignCenter,
   right: TextAlignEnd,
   justify: TextAlignJustify,
 };
-
-function AlignGlyph({ align }: { align: TextAlign }) {
-  const Icon = ALIGN_ICONS[align];
-  return <Icon {...alignIconProps} />;
-}
 
 type Pressed = boolean | "mixed";
 
@@ -62,16 +59,18 @@ type TextToolbarProps = {
 
 function Menu({
   label,
+  reserveLabel,
   menuLabel,
-  glyph,
+  icon,
   horizontal = false,
   open,
   onToggle,
   children,
 }: {
   label: string;
+  reserveLabel?: string;
   menuLabel: string;
-  glyph?: ReactNode;
+  icon?: LucideIcon;
   horizontal?: boolean;
   open: boolean;
   onToggle: () => void;
@@ -82,23 +81,21 @@ function Menu({
 
   return (
     <div className="relative">
-      <button
+      <ContextualButton
         ref={buttonRef}
-        type="button"
-        aria-label={menuLabel}
-        title={glyph ? label : undefined}
-        aria-expanded={open}
-        aria-haspopup="menu"
+        ariaLabel={menuLabel}
+        title={icon ? label : undefined}
+        ariaExpanded={open}
+        ariaHasPopup="menu"
         onClick={onToggle}
-        className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 ${
-          glyph ? "h-10" : ""
-        }`}
-      >
-        {glyph ?? <span className="min-w-[4.5rem] text-left">{label}</span>}
-        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
-          <path d="M2 3.5 5 7l3-3.5" />
-        </svg>
-      </button>
+        showLeftIcon={false}
+        showLabel={!icon}
+        label={label}
+        reserveLabel={reserveLabel}
+        showRightIcon={Boolean(icon)}
+        icon={icon}
+        showDropdownIcon
+      />
       {open ? (
         <FloatingPanel
           layer="dropdown"
@@ -238,49 +235,48 @@ function FontSizeField({
 
   return (
     <div ref={anchorRef} className="relative">
-      <div className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100">
-        <input
-          aria-label="Font size"
-          inputMode="numeric"
-          autoComplete="off"
-          value={text}
-          onPointerDown={arm}
-          onFocus={arm}
-          onChange={(event) => setText(event.target.value)}
-          onBlur={(event) => {
-            if (isFontSizePreset(event.relatedTarget)) return;
-            focused.current = false;
-            commit();
-            onClose();
-          }}
-          onKeyDown={(event) => {
-            event.stopPropagation();
-            if (event.key === "Enter") {
-              event.preventDefault();
+      <ContextualButton
+        ariaLabel="Font size presets"
+        ariaExpanded={open}
+        ariaHasPopup="menu"
+        onClick={onToggle}
+        showLeftIcon={false}
+        showRightIcon={false}
+        showLabel
+        showDropdownIcon
+        labelControl={
+          <input
+            aria-label="Font size"
+            inputMode="numeric"
+            autoComplete="off"
+            value={text}
+            onPointerDown={arm}
+            onFocus={arm}
+            onChange={(event) => setText(event.target.value)}
+            onBlur={(event) => {
+              if (isFontSizePreset(event.relatedTarget)) return;
+              focused.current = false;
               commit();
               onClose();
-            }
-            if (event.key === "Escape") {
-              event.preventDefault();
-              setText(baseline.current);
-              onClose();
-            }
-          }}
-          className="w-[4.5rem] min-w-[4.5rem] bg-transparent text-left text-xs font-medium text-slate-700 outline-none"
-        />
-        <button
-          type="button"
-          aria-label="Font size presets"
-          aria-expanded={open}
-          aria-haspopup="menu"
-          onClick={onToggle}
-          className="shrink-0"
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
-            <path d="M2 3.5 5 7l3-3.5" />
-          </svg>
-        </button>
-      </div>
+            }}
+            onKeyDown={(event) => {
+              event.stopPropagation();
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commit();
+                onClose();
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                setText(baseline.current);
+                onClose();
+              }
+            }}
+            style={{ width: `${Math.max(text.length, 2)}ch` }}
+            className="bg-transparent font-alias-font-family-body text-[12px] leading-[1em] text-mapped-text-action outline-none group-hover:text-mapped-text-action-hover"
+          />
+        }
+      />
       {open ? (
         <FloatingPanel
           layer="dropdown"
@@ -320,29 +316,26 @@ function FontSizeField({
 function IconButton({
   label,
   pressed,
+  icon,
   onClick,
-  children,
 }: {
   label: string;
   pressed: Pressed;
+  icon: LucideIcon;
   onClick: () => void;
-  children: ReactNode;
 }) {
-  const on = pressed === true;
-  const mixed = pressed === "mixed";
   return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={mixed ? "mixed" : on}
+    <ContextualButton
+      ariaLabel={label}
       title={label}
+      pressed={pressed}
       onClick={onClick}
-      className={`rounded-lg px-2 py-1 text-slate-700 hover:bg-slate-100 ${
-        on ? "bg-slate-200" : mixed ? "bg-slate-100 ring-1 ring-slate-300" : ""
-      }`}
-    >
-      {children}
-    </button>
+      showLeftIcon={false}
+      showLabel={false}
+      showDropdownIcon={false}
+      showRightIcon
+      icon={icon}
+    />
   );
 }
 
@@ -372,9 +365,11 @@ export default function TextToolbar({
   };
 
   return (
+    // Fill is surface/default (#F0F5FB). Opacity and blur match the existing frost: 40% and backdrop-blur-xl. Figma blur, Figma shadow, and the token's 30% are not applied.
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-0.5 rounded-xl border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
+      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      style={{ backgroundColor: "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)" }}
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();
@@ -383,10 +378,11 @@ export default function TextToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
+      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
       <Menu
         label={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
         menuLabel="Font style"
-        glyph={<CaseSensitive {...alignIconProps} />}
+        icon={CaseSensitive}
         open={menu === "family"}
         onToggle={() => toggle("family")}
       >
@@ -411,15 +407,10 @@ export default function TextToolbar({
         onFocusField={() => setMenu((current) => (current === "size" ? current : null))}
         onCommit={onSize}
       />
-      {extra ? (
-        <>
-          <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
-          {extra}
-          <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
-        </>
-      ) : null}
+      {extra}
       <Menu
         label={styleLabel}
+        reserveLabel={FONT_STYLE_LABELS["bold-italic"]}
         menuLabel="Weight"
         open={menu === "style"}
         onToggle={() => toggle("style")}
@@ -439,18 +430,18 @@ export default function TextToolbar({
       <Menu
         label={alignLabel}
         menuLabel="Alignment"
-        glyph={
-          activeAlign === "mixed" ? undefined : <AlignGlyph align={activeAlign} />
-        }
+        icon={activeAlign === "mixed" ? undefined : ALIGN_ICONS[activeAlign]}
         horizontal
         open={menu === "align"}
         onToggle={() => toggle("align")}
       >
-        {TEXT_ALIGNS.map((align) => (
+        {TEXT_ALIGNS.map((align) => {
+          const Icon = ALIGN_ICONS[align];
+          return (
           <MenuItem
             key={align}
             label={ALIGN_LABELS[align]}
-            glyph={<AlignGlyph align={align} />}
+            glyph={<Icon className="size-brand-scale-400" aria-hidden />}
             horizontal
             active={activeAlign === align}
             onPick={() => {
@@ -458,49 +449,15 @@ export default function TextToolbar({
               onAlign(align);
             }}
           />
-        ))}
+          );
+        })}
       </Menu>
-      <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
-      <IconButton label="Bulleted list" pressed={bullet} onClick={onBullet}>
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="fill-current">
-          <circle cx="3" cy="4" r="1.3" />
-          <circle cx="3" cy="8" r="1.3" />
-          <circle cx="3" cy="12" r="1.3" />
-          <rect x="6" y="3.2" width="8" height="1.4" rx="0.4" />
-          <rect x="6" y="7.2" width="8" height="1.4" rx="0.4" />
-          <rect x="6" y="11.2" width="8" height="1.4" rx="0.4" />
-        </svg>
-      </IconButton>
-      <IconButton label="Numbered list" pressed={numbered} onClick={onNumbered}>
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="fill-current">
-          <text x="0.5" y="5.2" fontSize="5" fontFamily="sans-serif">
-            1
-          </text>
-          <text x="0.5" y="9.4" fontSize="5" fontFamily="sans-serif">
-            2
-          </text>
-          <text x="0.5" y="13.6" fontSize="5" fontFamily="sans-serif">
-            3
-          </text>
-          <rect x="6" y="3.2" width="8" height="1.4" rx="0.4" />
-          <rect x="6" y="7.2" width="8" height="1.4" rx="0.4" />
-          <rect x="6" y="11.2" width="8" height="1.4" rx="0.4" />
-        </svg>
-      </IconButton>
-      <IconButton label="Link" pressed={linkActive} onClick={onLink}>
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="fill-none stroke-current">
-          <path
-            d="M6.6 8.8a2.6 2.6 0 0 0 3.9.2l1.6-1.6a2.6 2.6 0 0 0-3.7-3.7L7.5 4.6"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-          />
-          <path
-            d="M9.4 7.2a2.6 2.6 0 0 0-3.9-.2L3.9 8.6a2.6 2.6 0 0 0 3.7 3.7l.9-.9"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-          />
-        </svg>
-      </IconButton>
+      </div>
+      <div className="flex items-center gap-brand-scale-50">
+      <IconButton label="Bulleted list" pressed={bullet} icon={List} onClick={onBullet} />
+      <IconButton label="Numbered list" pressed={numbered} icon={ListOrdered} onClick={onNumbered} />
+      <IconButton label="Link" pressed={linkActive} icon={Link} onClick={onLink} />
+      </div>
     </div>
   );
 }

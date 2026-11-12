@@ -7,8 +7,8 @@ labels: [Feature, UX]
 parent: NB-E6
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-53
+linear_url: https://linear.app/ericar/issue/ERI-53/contextual-button
 ---
 
 ## Context
@@ -37,7 +37,7 @@ Phase 2 needs one real component built from a Figma spec with design tokens, so 
 
 ## Technical notes
 
-Type size stays at the Figma text style `body/md/tight` (12px, line height 1em, SF Pro body). Responsive type tokens are still 0, so that size is not a mismatch.
+Type size stays at the Figma text style `body/md/tight` (12px, line height 1em). Responsive type tokens are still 0, so that size is not a mismatch. Body, heading, and caption use Geist.
 
 The spec sheet around the button (state names, the red “32px” note, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 

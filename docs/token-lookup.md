@@ -102,9 +102,9 @@ Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.
 | #4C0718 | `var(--alias-error-800)` | `alias.error.800` | color |
 | #26040C | `var(--alias-error-900)` | `alias.error.900` | color |
 | #130206 | `var(--alias-error-950)` | `alias.error.950` | color |
-| SF Pro | `font-alias-font-family-body` | `alias.font-family.body` | font |
-| SF Pro | `font-alias-font-family-caption` | `alias.font-family.caption` | font |
-| SF Pro | `font-alias-font-family-heading` | `alias.font-family.heading` | font |
+| Geist | `font-alias-font-family-body` | `alias.font-family.body` | font |
+| Geist | `font-alias-font-family-caption` | `alias.font-family.caption` | font |
+| Geist | `font-alias-font-family-heading` | `alias.font-family.heading` | font |
 | #DBEAF8 | `var(--alias-primary-100)` | `alias.primary.100` | color |
 | #B7D4F1 | `var(--alias-primary-200)` | `alias.primary.200` | color |
 | #92BFE9 | `var(--alias-primary-300)` | `alias.primary.300` | color |
@@ -296,4 +296,4 @@ These values are shared by more than one token, so a Figma value on its own is a
 | 2px | `alias.border-radius.sm`, `alias.border-width.sm`, `brand.scale.50` |
 | 4px | `alias.border-radius.md`, `alias.border-width.md`, `brand.scale.100` |
 | 8px | `alias.border-radius.lg`, `alias.border-width.lg`, `brand.scale.200` |
-| SF Pro | `alias.font-family.body`, `alias.font-family.caption`, `alias.font-family.heading` |
+| Geist | `alias.font-family.body`, `alias.font-family.caption`, `alias.font-family.heading` |

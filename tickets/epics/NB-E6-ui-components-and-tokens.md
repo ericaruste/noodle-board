@@ -5,8 +5,8 @@ status: In Progress
 priority: 2
 labels: [Epic, UX]
 estimate: 5
-linear_id:
-linear_url:
+linear_id: ERI-52
+linear_url: https://linear.app/ericar/issue/ERI-52/phase-2-ui-components-and-design-tokens
 ---
 
 ## Context
@@ -22,8 +22,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 ## Child issues
 
 - [NB-38 Contextual button](../NB-38-contextual-button.md)
+- [NB-39 Text toolbar](../NB-39-text-toolbar.md)
 
-The next component ticket is the next free id after NB-38, parented to NB-E6, and titled with the component name.
+The next component ticket is the next free id after NB-39, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 

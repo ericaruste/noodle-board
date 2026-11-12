@@ -220,6 +220,21 @@
       "id": "166d1cba-8914-4d46-9c1e-82fbf4ddad02",
       "identifier": "ERI-47",
       "url": "https://linear.app/ericar/issue/ERI-47/hug-a-text-frame-from-its-resize-handles"
+    },
+    "NB-E6": {
+      "id": "7e289ae2-47f5-41bb-ab2b-516a4078f67d",
+      "identifier": "ERI-52",
+      "url": "https://linear.app/ericar/issue/ERI-52/phase-2-ui-components-and-design-tokens"
+    },
+    "NB-38": {
+      "id": "1ea20216-5606-481a-a3e7-fba740955dee",
+      "identifier": "ERI-53",
+      "url": "https://linear.app/ericar/issue/ERI-53/contextual-button"
+    },
+    "NB-39": {
+      "id": "1fe6b9c2-f11c-415e-9423-3186d6b83dc4",
+      "identifier": "ERI-54",
+      "url": "https://linear.app/ericar/issue/ERI-54/text-toolbar"
     }
   }
 }
