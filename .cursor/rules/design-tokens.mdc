@@ -1,0 +1,16 @@
+---
+description: Use design tokens from the lookup table when building UI from Figma
+alwaysApply: true
+---
+
+When building or editing UI from Figma or Framelink data, take colors, spacing, corner radius, border thickness, and fonts from @docs/token-lookup.md. Do not hardcode those values. The token export changes as screens are built. After `tokens/tokens.json` is replaced, run `npm run tokens` before matching values.
+
+Copy the **Use this in code** cell. Prefer a semantic token (`mapped`) over an alias, and an alias over a brand primitive. If several tokens share a value, choose by role and use the Figma layer name as a hint: text → a `mapped.text` token, fills → a `mapped.surface` token, strokes → a `mapped.border` token, icons → a `mapped.icon` token. For a raw color, the lookup shows a CSS variable; in Tailwind use `bg-`, `text-`, or `border-` plus that same name, matching the role.
+
+If no value matches exactly, use the nearest token and add `/* TODO token mismatch: Figma <value> */` beside it. List every mismatch in the reply.
+
+Shadows, backdrop blur, and the dot grid stay as they are. Do not invent tokens for them, and do not flag them as hardcoded or as mismatches. Responsive type (font size, line height, paragraph spacing) is not generated yet, so keep those sizes as given and do not mark them as mismatches.
+
+```tsx
+<div className="rounded-alias-border-radius-lg bg-mapped-surface-page p-brand-scale-400 text-mapped-text-default" />
+```

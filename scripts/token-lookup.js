@@ -1,0 +1,195 @@
+/**
+ * Writes docs/token-lookup.md from the converted token tree.
+ * Semantic tokens come first so a shared Figma value prefers them.
+ */
+import fs from "node:fs";
+import path from "node:path";
+
+function isToken(node) {
+  return !!node && typeof node === "object" && !Array.isArray(node) && "$value" in node;
+}
+
+function tokenAt(tokens, parts) {
+  let node = tokens;
+  for (const part of parts) {
+    if (!node || typeof node !== "object") return undefined;
+    node = node[part];
+  }
+  return isToken(node) ? node : undefined;
+}
+
+function normalizeHex(hex) {
+  const raw = String(hex).trim();
+  const short = raw.match(/^#([0-9a-fA-F]{3})$/);
+  const expanded = short ? `#${short[1].split("").map((char) => char + char).join("")}` : raw;
+  return expanded.toUpperCase();
+}
+
+function resolveValue(value, tokens, stack = []) {
+  if (typeof value === "number") return { kind: "number", value };
+  if (typeof value !== "string") return { kind: "string", value: String(value) };
+
+  const reference = value.match(/^\{([^}]+)\}$/);
+  if (reference) {
+    const refPath = reference[1];
+    if (stack.includes(refPath)) throw new Error(`Circular token reference: ${refPath}`);
+    const token = tokenAt(tokens, refPath.split("."));
+    if (!token) throw new Error(`Missing token reference: ${refPath}`);
+    return resolveValue(token.$value, tokens, [...stack, refPath]);
+  }
+
+  const mix = value.match(/^color-mix\(in srgb,\s*(\{[^}]+\}|#[0-9A-Fa-f]{3,8})\s+(\d+)%\s*,\s*transparent\)$/);
+  if (mix) {
+    const inner = resolveValue(mix[1], tokens, stack);
+    if (inner.kind !== "color") throw new Error(`Opacity was applied to a non-color: ${value}`);
+    return { kind: "color", hex: inner.hex, percent: Number(mix[2]) };
+  }
+
+  if (value.startsWith("#")) return { kind: "color", hex: normalizeHex(value), percent: 100 };
+  return { kind: "string", value };
+}
+
+function figmaValue(resolved) {
+  if (resolved.kind === "color") {
+    return resolved.percent === 100 ? resolved.hex : `${resolved.hex} / ${resolved.percent}%`;
+  }
+  if (resolved.kind === "number") return `${resolved.value}px`;
+  return resolved.value;
+}
+
+function tokenType(parts, type) {
+  const [group, second] = parts;
+  if (type === "color") return "color";
+  if (group === "brand" && second === "scale") return "spacing";
+  if (second === "border-radius") return "radius";
+  if (second === "border-width") return "border width";
+  if (second === "font-family" || second === "typeface") return "font";
+  return type;
+}
+
+function useInCode(parts) {
+  const name = parts.join("-");
+  const [group, second] = parts;
+  if (group === "mapped" && second === "surface") return `bg-${name}`;
+  if (group === "mapped" && (second === "text" || second === "icon")) return `text-${name}`;
+  if (group === "mapped" && second === "border") return `border-${name}`;
+  if (group === "brand" && second === "scale") return `p-${name}`;
+  if (second === "border-radius") return `rounded-${name}`;
+  if (second === "border-width") return `border-${name}`;
+  if (second === "font-family" || second === "typeface") return `font-${name}`;
+  return `var(--${name})`;
+}
+
+function tier(parts) {
+  if (parts[0] === "mapped") return 0;
+  if (parts[0] === "alias") return 1;
+  return 2;
+}
+
+function cell(value) {
+  return String(value).replaceAll("|", "\\|");
+}
+
+function table(rows) {
+  const header = "| Figma value | Use this in code | Token path | Type |";
+  const rule = "| --- | --- | --- | --- |";
+  const body = rows.map(
+    (row) => `| ${cell(row.figma)} | \`${cell(row.code)}\` | \`${cell(row.path)}\` | ${cell(row.type)} |`,
+  );
+  return [header, rule, ...body].join("\n");
+}
+
+export function buildLookup(tokens, flat) {
+  const rows = flat.map((token) => {
+    const parts = token.path.split(".");
+    const resolved = resolveValue(token.value, tokens);
+    return {
+      figma: figmaValue(resolved),
+      code: useInCode(parts),
+      path: token.path,
+      type: tokenType(parts, token.type),
+      tier: tier(parts),
+    };
+  });
+
+  rows.sort((a, b) => a.tier - b.tier || a.path.localeCompare(b.path));
+
+  const byValue = new Map();
+  for (const row of rows) {
+    const group = byValue.get(row.figma) ?? [];
+    group.push(row);
+    byValue.set(row.figma, group);
+  }
+
+  const duplicates = [...byValue.entries()]
+    .filter(([, group]) => group.length > 1)
+    .sort((a, b) => a[0].localeCompare(b[0]));
+
+  return { rows, duplicates };
+}
+
+export function renderLookup({ rows, duplicates }) {
+  const semantic = rows.filter((row) => row.tier === 0);
+  const alias = rows.filter((row) => row.tier === 1);
+  const primitive = rows.filter((row) => row.tier === 2);
+
+  const duplicateTable = [
+    "| Figma value | Token paths |",
+    "| --- | --- |",
+    ...duplicates.map(([figma, group]) => {
+      const paths = group.map((row) => `\`${row.path}\``).join(", ");
+      return `| ${cell(figma)} | ${paths} |`;
+    }),
+  ].join("\n");
+
+  return [
+    "# Token lookup",
+    "",
+    "Generated from `tokens/tokens.json`. Do not edit this file by hand. The token export changes as UI is built from Figma. After each new export, run `npm run tokens`.",
+    "",
+    "Framelink gives raw values, such as a hex color or a pixel size. Find that value here and use the token in the **Use this in code** column. Semantic tokens are listed first, then alias tokens, then the raw brand colors. When a value appears more than once, start with the semantic token and pick by role: text color uses a text token, a fill uses a surface token, and a stroke uses a border token.",
+    "",
+    "A see-through color includes its opacity, for example `#F0F5FB / 30%`. Match the hex and the opacity.",
+    "",
+    "The code column is a Tailwind class when the token has one job:",
+    "",
+    "- Fills (surface): `bg-…`",
+    "- Text and icons: `text-…`",
+    "- Strokes: `border-…`",
+    "- Spacing: `p-…` (the same ending also works as `m-`, `gap-`, `w-`, and `h-`)",
+    "- Corner radius: `rounded-…`",
+    "- Border thickness: `border-…`",
+    "- Font: `font-…`",
+    "",
+    "A raw color that can be a fill, text, or stroke shows a CSS variable, such as `var(--brand-blue-500)`. In Tailwind that same name is `bg-brand-blue-500`, `text-brand-blue-500`, or `border-brand-blue-500`.",
+    "",
+    "Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.",
+    "",
+    "## Semantic tokens",
+    "",
+    table(semantic),
+    "",
+    "## Alias tokens",
+    "",
+    table(alias),
+    "",
+    "## Primitive tokens",
+    "",
+    table(primitive),
+    "",
+    "## Duplicate values",
+    "",
+    "These values are shared by more than one token, so a Figma value on its own is ambiguous. Prefer the semantic token, then the alias, then the brand color. Within the semantic tokens, choose by role.",
+    "",
+    duplicates.length ? duplicateTable : "None.",
+    "",
+  ].join("\n");
+}
+
+export function writeTokenLookup({ tokens, flat, destination }) {
+  const lookup = buildLookup(tokens, flat);
+  const markdown = renderLookup(lookup);
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.writeFileSync(destination, markdown.endsWith("\n") ? markdown : `${markdown}\n`);
+  return { ...lookup, markdown };
+}

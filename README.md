@@ -19,6 +19,10 @@ npm run dev
 
 React 18, TypeScript, Vite, Tailwind CSS, and [@xyflow/react](https://reactflow.dev/) v12. Icons are from Lucide.
 
+## Phase 2
+
+UI components and design tokens are built on the `phase-2` branch. Each component is a ticket under [NB-E6](tickets/epics/NB-E6-ui-components-and-tokens.md). Those tickets merge into `phase-2`. This `main` branch stays the Phase 1 board until Phase 2 is ready to land together.
+
 ## Phase 1
 
 ### Canvas objects

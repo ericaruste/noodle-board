@@ -20,9 +20,17 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 1. Follow **build order** below unless a ticket is blocked.
 2. Open the markdown file. Treat **Acceptance criteria** as the definition of done.
 3. Keep work inside that ticket’s **Out of scope**.
-4. Start from an up-to-date `main` and use a branch named with the ticket id (`NB-08`, `NB-02`). Set `status: In Progress` and, when Linear is connected, push that status.
+4. Phase 1 tickets started from an up-to-date `main`. Phase 2 tickets start from an up-to-date `phase-2`. Use a branch named with the ticket id (`NB-08`, `NB-02`). Set `status: In Progress` and, when Linear is connected, push that status.
 5. Check an acceptance box (`- [x]`) only after that criterion is verified. Then run `npm run tickets:push-one -- NB-08` so that box shows on the Linear issue. Leave unverified boxes open. Do not set `Done` while any acceptance box is still open.
-6. Commit on the ticket branch, open a pull request into `main`, review it, and squash-merge. Then set `status: Done`.
+6. Commit on the ticket branch. Phase 1 pull requests went into `main`. Phase 2 pull requests go into `phase-2` and are squash-merged there. Do not merge a Phase 2 ticket into `main`. Then set `status: Done`.
+
+## Phase 2
+
+UI components and design tokens. Epic [NB-E6](epics/NB-E6-ui-components-and-tokens.md). The integration branch is `phase-2`. `main` stays the finished Phase 1 board until this phase is ready to land together.
+
+Each component is a ticket. The title is the component name, the parent is NB-E6, and the id is the next free `NB-` number. Append that id to `buildOrder` in `linear.config.json`. Commit the ticket on its own branch and merge that branch into `phase-2` only.
+
+`phase-2` merges into `main` once, when every Phase 2 ticket is done.
 
 ### Build order
 

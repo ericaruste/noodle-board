@@ -1,0 +1,12 @@
+---
+description: Phase 2 tickets merge into phase-2, not main
+alwaysApply: true
+---
+
+Phase 2 syncs UI components and design tokens. That work lives on the `phase-2` branch. `main` stays the finished Phase 1 board until Phase 2 is ready to land as a whole.
+
+Each component is its own ticket under epic NB-E6 in `tickets/epics/NB-E6-ui-components-and-tokens.md`. The ticket title is the component name. Use the next free `NB-` id, copy `tickets/_template.md`, and set `parent` to `NB-E6`. Start from an up-to-date `phase-2` and use a branch named with the ticket id.
+
+Commit on the ticket branch. Merge that branch into `phase-2` only. Do not open a pull request into `main`, and do not merge a Phase 2 ticket into `main`.
+
+When every Phase 2 ticket is done, `phase-2` can be merged into `main`.
