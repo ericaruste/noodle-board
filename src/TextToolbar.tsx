@@ -62,7 +62,6 @@ function Menu({
   reserveLabel,
   menuLabel,
   icon,
-  horizontal = false,
   open,
   onToggle,
   children,
@@ -71,7 +70,6 @@ function Menu({
   reserveLabel?: string;
   menuLabel: string;
   icon?: LucideIcon;
-  horizontal?: boolean;
   open: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -103,11 +101,7 @@ function Menu({
           role="menu"
           ariaLabel={menuLabel}
           data-text-toolbar=""
-          className={
-            horizontal
-              ? "flex items-center gap-0.5 rounded-xl border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
-              : "rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
-          }
+          className="rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -125,15 +119,11 @@ function Menu({
 
 function MenuItem({
   label,
-  glyph,
-  horizontal = false,
   active,
   onPick,
   style,
 }: {
   label: string;
-  glyph?: ReactNode;
-  horizontal?: boolean;
   active: boolean;
   onPick: () => void;
   style?: CSSProperties;
@@ -144,21 +134,85 @@ function MenuItem({
       role="menuitemradio"
       aria-label={label}
       aria-checked={active}
-      title={glyph ? label : undefined}
       onClick={onPick}
       style={style}
-      className={
-        horizontal
-          ? `flex h-10 items-center justify-center rounded-lg px-2 text-slate-700 ${
-              active ? "bg-slate-100" : "hover:bg-slate-50"
-            }`
-          : `block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
-              active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-            }`
-      }
+      className={`block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
+        active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
+      }`}
     >
-      {glyph ?? label}
+      {label}
     </button>
+  );
+}
+
+function AlignPopover({
+  label,
+  icon,
+  open,
+  activeAlign,
+  onToggle,
+  onPick,
+}: {
+  label: string;
+  icon?: LucideIcon;
+  open: boolean;
+  activeAlign: TextAlign | "mixed";
+  onToggle: () => void;
+  onPick: (align: TextAlign) => void;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
+
+  return (
+    <div className="relative">
+      <ContextualButton
+        ref={buttonRef}
+        ariaLabel="Alignment"
+        title={icon ? label : undefined}
+        ariaExpanded={open}
+        ariaHasPopup="true"
+        onClick={onToggle}
+        showLeftIcon={false}
+        showLabel={!icon}
+        label={label}
+        showRightIcon={Boolean(icon)}
+        icon={icon}
+        showDropdownIcon
+      />
+      {open ? (
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
+          role="group"
+          ariaLabel="Alignment"
+          data-text-toolbar=""
+          className="flex items-center gap-brand-scale-50 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            visibility: box ? "visible" : "hidden",
+            // Same frost as the text toolbar. Figma blur, Figma shadow, and the token's 30% are not applied.
+            backgroundColor: "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)",
+          }}
+        >
+          {TEXT_ALIGNS.map((align) => (
+            <ContextualButton
+              key={align}
+              ariaLabel={ALIGN_LABELS[align]}
+              title={ALIGN_LABELS[align]}
+              pressed={activeAlign === align}
+              onClick={() => onPick(align)}
+              showLeftIcon={false}
+              showLabel={false}
+              showDropdownIcon={false}
+              showRightIcon
+              icon={ALIGN_ICONS[align]}
+            />
+          ))}
+        </FloatingPanel>
+      ) : null}
+    </div>
   );
 }
 
@@ -427,31 +481,17 @@ export default function TextToolbar({
           />
         ))}
       </Menu>
-      <Menu
+      <AlignPopover
         label={alignLabel}
-        menuLabel="Alignment"
         icon={activeAlign === "mixed" ? undefined : ALIGN_ICONS[activeAlign]}
-        horizontal
+        activeAlign={activeAlign}
         open={menu === "align"}
         onToggle={() => toggle("align")}
-      >
-        {TEXT_ALIGNS.map((align) => {
-          const Icon = ALIGN_ICONS[align];
-          return (
-          <MenuItem
-            key={align}
-            label={ALIGN_LABELS[align]}
-            glyph={<Icon className="size-brand-scale-400" aria-hidden />}
-            horizontal
-            active={activeAlign === align}
-            onPick={() => {
-              setMenu(null);
-              onAlign(align);
-            }}
-          />
-          );
-        })}
-      </Menu>
+        onPick={(align) => {
+          setMenu(null);
+          onAlign(align);
+        }}
+      />
       </div>
       <div className="flex items-center gap-brand-scale-50">
       <IconButton label="Bulleted list" pressed={bullet} icon={List} onClick={onBullet} />

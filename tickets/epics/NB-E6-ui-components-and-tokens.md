@@ -23,8 +23,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 
 - [NB-38 Contextual button](../NB-38-contextual-button.md)
 - [NB-39 Text toolbar](../NB-39-text-toolbar.md)
+- [NB-40 Text align popover](../NB-40-text-align-popover.md)
 
-The next component ticket is the next free id after NB-39, parented to NB-E6, and titled with the component name.
+The next component ticket is the next free id after NB-40, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 
