@@ -45,4 +45,4 @@ This button is not a toolbar or popover. When a later ticket places it in a tool
 
 ## Out of scope
 
-Replacing the current text or selection toolbars. Shadows, frosted glass, the dot grid, and responsive type. A focus ring: the description names focus, and the frame does not paint one.
+Replacing the current text or selection toolbars. Shadows, frosted glass, the dot grid, and responsive type. The contextual button has no focus state. The description that named focus was a mistake.

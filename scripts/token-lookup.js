@@ -149,7 +149,7 @@ export function renderLookup({ rows, duplicates }) {
     "",
     "Framelink gives raw values, such as a hex color or a pixel size. Find that value here and use the token in the **Use this in code** column. Semantic tokens are listed first, then alias tokens, then the raw brand colors. When a value appears more than once, start with the semantic token and pick by role: text color uses a text token, a fill uses a surface token, and a stroke uses a border token.",
     "",
-    "A see-through color includes its opacity, for example `#F0F5FB / 30%`. Match the hex and the opacity.",
+    "A see-through color includes its opacity, for example `#F0F5FB / 40%`. Match the hex and the opacity.",
     "",
     "The code column is a Tailwind class when the token has one job:",
     "",

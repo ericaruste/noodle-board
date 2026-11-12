@@ -37,7 +37,7 @@ The alignment menu still uses the Phase 1 menu rows. The Figma popover is four c
 
 ## Technical notes
 
-The frame measures 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. The stroke, radius, and fill match the text toolbar: `mapped.border.default`, radius xl, and the same 40% frost. Figma blur, the Figma shadow, and the token's 30% opacity are not applied.
+The frame measures 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. The stroke is `mapped.border.default`, the radius is xl, and the fill is `mapped.surface.default` at 40%, with the existing 24px blur. Figma’s blur is ignored.
 
 The popover opens in a FloatingPanel on the dropdown layer.
 

@@ -186,14 +186,12 @@ function AlignPopover({
           role="group"
           ariaLabel="Alignment"
           data-text-toolbar=""
-          className="flex items-center gap-brand-scale-50 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          className="flex items-center gap-brand-scale-50 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
             left: box?.left ?? 0,
             visibility: box ? "visible" : "hidden",
-            // Same frost as the text toolbar. Figma blur, Figma shadow, and the token's 30% are not applied.
-            backgroundColor: "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)",
           }}
         >
           {TEXT_ALIGNS.map((align) => (
@@ -419,11 +417,10 @@ export default function TextToolbar({
   };
 
   return (
-    // Fill is surface/default (#F0F5FB). Opacity and blur match the existing frost: 40% and backdrop-blur-xl. Figma blur, Figma shadow, and the token's 30% are not applied.
+    // Fill is mapped.surface.default at 40%. Blur is the existing 24px frost. Figma blur is ignored.
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
-      style={{ backgroundColor: "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)" }}
+      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();

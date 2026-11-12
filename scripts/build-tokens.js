@@ -170,9 +170,9 @@ for (const banned of ["box-shadow", "backdrop-filter", "backdrop-blur", "drop-sh
   }
 }
 
-const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-400) 30%, transparent)";
+const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)";
 if (!css.includes(surfaceDefault)) {
-  throw new Error("mapped.surface.default was not written as a 30% color.");
+  throw new Error("mapped.surface.default was not written as a 40% color.");
 }
 
 const lookupPath = path.join(ROOT, "docs", "token-lookup.md");
@@ -182,8 +182,8 @@ const lookupText = fs.readFileSync(lookupPath, "utf8");
 if (lookupText.includes("responsive.body") || lookupText.includes("box-shadow") || lookupText.includes("backdrop")) {
   throw new Error("Token lookup includes a group that should be left out.");
 }
-if (!lookupText.includes("#F0F5FB / 30%") || !lookupText.includes("`mapped.surface.default`")) {
-  throw new Error("Token lookup is missing the 30% surface color.");
+if (!lookupText.includes("#F0F5FB / 40%") || !lookupText.includes("`mapped.surface.default`")) {
+  throw new Error("Token lookup is missing the 40% surface color.");
 }
 
 const responsiveAllZero = responsive.length > 0 && responsive.every((token) => token.value === 0);
