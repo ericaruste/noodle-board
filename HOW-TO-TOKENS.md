@@ -32,3 +32,9 @@ Every mismatch is also listed in the reply that built the component.
 Fix it in the token app: add the missing token, or correct the one that should have matched. Export a new JSON, replace `tokens/tokens.json`, and run `npm run tokens`. Then the comment can come off.
 
 Shadows, frosted glass, the dot grid, and type size (font size, line height, paragraph spacing) are not in the token build yet. Those are left as drawn in Figma. They are not mismatches.
+
+## Notes for the design system
+
+Each component and toolbar that gets built is written up in `docs/design-system-notes.md`.
+
+That file is the list to work from when you update Figma or the token app: the tokens that were used, the decisions already made, and the changes that are still open.
