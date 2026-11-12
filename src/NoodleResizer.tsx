@@ -61,11 +61,35 @@ const CORNER_HANDLES = new Set<ResizeHandle>(["top-left", "top-right", "bottom-l
 
 // The hug runs on the second pointerdown and moves the handle before mouseup.
 // The browser then double-clicks whatever is underneath, which is the canvas.
+// click and dblclick are dispatched after pointerup, so a short timer started
+// on the press is already over when the button comes up — especially if the
+// hug render took the main thread. Stay armed through that release.
 let textFitZoomUntil = 0;
 let textFitZoomListeners = 0;
+let releaseTextFitZoom: (() => void) | null = null;
 
 function armTextFitZoomBlock() {
-  textFitZoomUntil = performance.now() + 50;
+  releaseTextFitZoom?.();
+  textFitZoomUntil = Number.POSITIVE_INFINITY;
+  let giveUp = 0;
+  const detach = () => {
+    window.clearTimeout(giveUp);
+    window.removeEventListener("pointerup", onRelease, true);
+    window.removeEventListener("pointercancel", onRelease, true);
+    if (releaseTextFitZoom === detach) releaseTextFitZoom = null;
+  };
+  const onRelease = () => {
+    detach();
+    textFitZoomUntil = performance.now() + 400;
+  };
+  // A release that never arrives must not block canvas zoom forever.
+  giveUp = window.setTimeout(() => {
+    if (textFitZoomUntil === Number.POSITIVE_INFINITY) textFitZoomUntil = 0;
+    detach();
+  }, 2000);
+  releaseTextFitZoom = detach;
+  window.addEventListener("pointerup", onRelease, true);
+  window.addEventListener("pointercancel", onRelease, true);
 }
 
 function swallowTextFitZoom(event: MouseEvent) {
