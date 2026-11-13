@@ -11,8 +11,6 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Resting fill is invisible.** `mapped.surface.action` is `#E5F0F9` at 0%. The default button has no fill. Confirm that is the resting state on purpose.
 - **[Figma] Weight label width.** The weight control is held to the width of the words “Bold Italic”, so Regular, Bold, Italic, and Bold Italic do not resize the toolbar. The Figma component may still hug the label. Give that control a minimum width if the bar should stay still.
 - **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
-- **[token app] Small row height.** Size `sm` is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch. Add a spacing token if small rows should stop using a raw size.
-- **[token app] Icon button medium.** Size `md` is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch. A 16px icon centered in that square leaves 6px. No spacing token is 6px.
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
 
@@ -23,13 +21,13 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
 - `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 80%. The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
 - Desktop font size and line height are tokens under `responsive.desktop`. The text style `body/md/tight` is `responsive.desktop.body.md.size` (12px) and `responsive.desktop.body.md.line-height-tight` (12px). The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
-- The spacing scale includes `brand.scale.800` (36px), `brand.scale.900` (40px), `brand.scale.1000` (44px), and `brand.scale.1100` (48px). 36px was inserted after 32px (`brand.scale.700`), so 40px moved from `brand.scale.800` to `brand.scale.900`, 44px moved to `brand.scale.1000`, and 48px moved to `brand.scale.1100`.
+- 6px is `brand.scale.150` and 28px is `brand.scale.700`. Inserting them moved the later steps: 32px is `brand.scale.800`, 36px is `brand.scale.900`, 40px is `brand.scale.1000`, 44px is `brand.scale.1100`, and 48px is `brand.scale.1200`. Names through `brand.scale.600` (24px) stayed put.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
-- Each font size row is `brand.scale.800` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
+- Each font size row is `brand.scale.900` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 
 ## Contextual button
@@ -38,7 +36,7 @@ Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualBu
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | `brand.scale.700` | 32px |
+| Height | `brand.scale.800` | 32px |
 | Padding | `brand.scale.200` | 8px |
 | Gap | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.lg` | 8px |
@@ -94,7 +92,7 @@ Every control is a contextual button with the unused slots turned off.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.900` |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.1000` |
 | Padding | `brand.scale.100` | 4px |
 | Gap inside a group | `brand.scale.50` | 2px |
 | Gap between groups | `brand.scale.100` | 4px |
@@ -142,7 +140,7 @@ The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.900`), from 4px padding and a 32px button |
+| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
 | Width | none | 142px, from the padding, four buttons, and the gaps |
 | Padding | `brand.scale.100` | 4px |
 | Gap | `brand.scale.50` | 2px |
@@ -176,8 +174,8 @@ A single row for a dropdown. The label sits on the left. The caption and the sub
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height, md | `brand.scale.700` | 32px |
-| Height, sm | none | 28px. TODO token mismatch: Figma 28px |
+| Height, md | `brand.scale.800` | 32px |
+| Height, sm | `brand.scale.700` | 28px |
 | Padding, horizontal | `brand.scale.200` | 8px |
 | Gap between label and the caption group | `brand.scale.200` | 8px, and the row pushes the caption group to the far side |
 | Gap between caption and chevron | `brand.scale.100` | 4px |
@@ -234,7 +232,7 @@ Four small menu items, caption and chevron off. The order is Regular, Bold, Ital
 | Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
 
 The file request was rate limited. Padding, radius, and the stroke were read from the canvas. The first row is painted with the hover fill, `#E5F0F9`. The toolbar above that frame shows Bold Italic, so that row is the hover example. The live menu marks the current weight with the selected fill.
 
@@ -257,7 +255,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
 | Label, Geist Mono | `alias.typeface.geist-mono` | Geist Mono |
 | Label, Open Sans | `alias.typeface.open-sans` | Open Sans |
 | Label, Coming Soon | `alias.typeface.coming-soon` | Coming Soon |
@@ -286,12 +284,12 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 Figma node `212:4004`, on the contextual toolbar sheet. Ticket NB-44. Code `FontSizeField` in `src/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
 
-Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.800` (36px) so the column does not change width with the digits. The labels stay in Geist.
+Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.900` (36px) so the column does not change width with the digits. The labels stay in Geist.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Row width | `brand.scale.800` | 36px. The same width on every row |
-| Width | `brand.scale.1000` | 44px hug. That is 4px padding, the 36px row, and 4px padding. The 1px stroke sits on that box |
+| Row width | `brand.scale.900` | 36px. The same width on every row |
+| Width | `brand.scale.1100` | 44px hug. That is 4px padding, the 36px row, and 4px padding. The 1px stroke sits on that box |
 | Height | hug | 344px |
 | Padding | `brand.scale.100` | 4px |
 | Gap | `brand.scale.0` | 0px |
@@ -300,7 +298,7 @@ Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 1
 | Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | 28px. Caption and chevron are off. TODO token mismatch: Figma 28px |
+| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
 | Font | `alias.font-family.body` | Geist |
 | Label size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. The row still writes 12px. Paragraph spacing is `not a token` |
 | Label, default | `mapped.text.action` | `#303132` |
@@ -315,7 +313,7 @@ There is no icon on this frame. Caption and chevron are off, so the menu item dr
 
 The frame has no divider.
 
-The rows use the menu item properties: size `sm`, caption off, chevron off, and a fixed width of `brand.scale.800`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
+The rows use the menu item properties: size `sm`, caption off, chevron off, and a fixed width of `brand.scale.900`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
 
 Painted: one resting frame. 14 is filled, and the toolbar above shows 14, so that row is the current size. The live menu marks the current size with the selected fill.
 
@@ -329,13 +327,14 @@ A square button whose only content is an icon. It is not a contextual button wit
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size, lg | `brand.scale.700` | 32px square |
-| Size, md | none | 28px square. TODO token mismatch: Figma 28px |
+| Size, lg | `brand.scale.800` | 32px square |
+| Size, md | `brand.scale.700` | 28px square |
 | Size, sm | `brand.scale.500` | 20px square |
 | Padding, lg | `brand.scale.200` | 8px, the space left by a 16px icon in the 32px square |
-| Padding, md | none | 6px. TODO token mismatch: Figma 6px. A 16px icon centered in the 28px square leaves 6px |
+| Padding, md | `brand.scale.150` | 6px, the space left by a 16px icon in the 28px square |
 | Padding, sm | `brand.scale.100` | 4px, the space left by a 12px icon in the 20px square |
-| Corner radius | `alias.border-radius.lg` | 8px |
+| Corner radius, lg and md | `alias.border-radius.lg` | 8px |
+| Corner radius, sm | `alias.border-radius.md` | 4px |
 | Stroke | none | the button has no stroke |
 | Icon, lg and md | `brand.scale.400` | 16px, Lucide |
 | Icon, sm | `brand.scale.300` | 12px, Lucide |

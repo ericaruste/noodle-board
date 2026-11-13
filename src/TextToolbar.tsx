@@ -525,7 +525,7 @@ function FontSizeField({
               size="sm"
               showCaption={false}
               showChevron={false}
-              widthClassName="w-brand-scale-800"
+              widthClassName="w-brand-scale-900"
               selected={value === String(preset)}
               onClick={() => {
                 const next = String(preset);

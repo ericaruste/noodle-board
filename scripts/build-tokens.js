@@ -186,12 +186,15 @@ if (!lookupText.includes("#F0F5FB / 80%") || !lookupText.includes("`mapped.surfa
   throw new Error("Token lookup is missing the 80% surface color.");
 }
 if (
-  !css.includes("--brand-scale-800: 36px") ||
-  !css.includes("--brand-scale-900: 40px") ||
-  !css.includes("--brand-scale-1000: 44px") ||
-  !css.includes("--brand-scale-1100: 48px")
+  !css.includes("--brand-scale-150: 6px") ||
+  !css.includes("--brand-scale-700: 28px") ||
+  !css.includes("--brand-scale-800: 32px") ||
+  !css.includes("--brand-scale-900: 36px") ||
+  !css.includes("--brand-scale-1000: 40px") ||
+  !css.includes("--brand-scale-1100: 44px") ||
+  !css.includes("--brand-scale-1200: 48px")
 ) {
-  throw new Error("Scale 800, 900, 1000, and 1100 were not written.");
+  throw new Error("Scale 150, 700, 800, 900, 1000, 1100, and 1200 were not written.");
 }
 if (!css.includes("--responsive-desktop-body-md-size: 12px") || !css.includes("--responsive-desktop-body-md-line-height: 14.4px")) {
   throw new Error("Desktop body font size and line height were not written.");

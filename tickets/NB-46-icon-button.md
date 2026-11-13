@@ -7,15 +7,15 @@ labels: [Feature, UX]
 parent: NB-E6
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-61
+linear_url: https://linear.app/ericar/issue/ERI-61/icon-button
 ---
 
 ## Context
 
 Building block for an icon with no label, caption, or chevron. Figma component `button/icon`, on the spec frame `button icon` node `193:3525`.
 
-The control is a square. Sizes are `lg` (32px), `md` (28px), and `sm` (20px). Types are `default` and `destructive`. The default type paints default, hover, selected, and disabled. The destructive type paints default, hover, and disabled.
+The control is a square. Sizes are `lg` (32px), `md` (28px), and `sm` (20px). Large and medium use an 8px corner. Small uses a 4px corner. Types are `default` and `destructive`. The default type paints default, hover, selected, and disabled. The destructive type paints default, hover, and disabled.
 
 [`src/IconButton.tsx`](../src/IconButton.tsx) is the component. `?trial=icon-button` shows the sizes, types, and states without changing the board.
 
@@ -31,6 +31,7 @@ Toolbars still invent icon-only controls from the contextual button by turning t
 ## Acceptance criteria
 
 - [x] The button uses semantic tokens for fill, icon color, and corner radius
+- [x] Large and medium corners are 8px, and the small corner is 4px
 - [x] Large is 32px, medium is 28px, and small is 20px
 - [x] Default paints default, hover, selected, and disabled
 - [x] Destructive paints default, hover, and disabled
@@ -41,7 +42,7 @@ Toolbars still invent icon-only controls from the contextual button by turning t
 
 The spec glyph is the case-sensitive icon. The component takes any Lucide icon in that slot. Large and medium draw it at 16px. Small draws it at 12px.
 
-Medium is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch.
+Large is 32px, `brand.scale.800`, with an 8px corner (`alias.border-radius.lg`). Medium is 28px, `brand.scale.700`, with the same 8px corner. Small is 20px, `brand.scale.500`, with a 4px corner (`alias.border-radius.md`). The 6px left around the medium icon is `brand.scale.150`.
 
 The spec sheet around the component (state names, the red size notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 

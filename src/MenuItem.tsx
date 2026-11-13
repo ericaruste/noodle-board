@@ -74,8 +74,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const visual = visualState(state, selected, disabled);
   const isDisabled = disabled || visual === "disabled";
   const hoverClass = visual === "default" ? "enabled:hover:bg-mapped-surface-action-hover" : "";
-  // sm is 28px. No spacing token is 28px. TODO token mismatch: Figma 28px
-  const heightClass = size === "sm" ? "h-[28px]" : "h-brand-scale-700";
+  const heightClass = size === "sm" ? "h-brand-scale-700" : "h-brand-scale-800";
 
   return (
     <button

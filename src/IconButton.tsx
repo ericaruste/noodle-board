@@ -49,9 +49,8 @@ const destructiveIcon: Record<IconButtonState, string> = {
 };
 
 const boxClass: Record<IconButtonSize, string> = {
-  lg: "size-brand-scale-700",
-  // md is 28px. No spacing token is 28px. TODO token mismatch: Figma 28px
-  md: "size-[28px]",
+  lg: "size-brand-scale-800",
+  md: "size-brand-scale-700",
   sm: "size-brand-scale-500",
 };
 
@@ -59,6 +58,12 @@ const iconClass: Record<IconButtonSize, string> = {
   lg: "size-brand-scale-400",
   md: "size-brand-scale-400",
   sm: "size-brand-scale-300",
+};
+
+const radiusClass: Record<IconButtonSize, string> = {
+  lg: "rounded-alias-border-radius-lg",
+  md: "rounded-alias-border-radius-lg",
+  sm: "rounded-alias-border-radius-md",
 };
 
 function visualState(
@@ -112,7 +117,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         type === "destructive" ? undefined : selected === true || state === "selected" ? true : selected === false ? false : undefined
       }
       onClick={onClick}
-      className={`group inline-flex shrink-0 items-center justify-center rounded-alias-border-radius-lg ${boxClass[size]} ${surface[visual]} ${hoverClass}`}
+      className={`group inline-flex shrink-0 items-center justify-center ${radiusClass[size]} ${boxClass[size]} ${surface[visual]} ${hoverClass}`}
     >
       <Icon className={`${iconClass[size]} ${glyph[visual]}`} aria-hidden />
     </button>

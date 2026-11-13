@@ -265,6 +265,11 @@
       "id": "5c9bc031-7cdc-434d-8f0f-49e64d1f0578",
       "identifier": "ERI-60",
       "url": "https://linear.app/ericar/issue/ERI-60/menu-gap"
+    },
+    "NB-46": {
+      "id": "608dcf9b-6c64-4b66-9955-82eae04c56f2",
+      "identifier": "ERI-61",
+      "url": "https://linear.app/ericar/issue/ERI-61/icon-button"
     }
   }
 }

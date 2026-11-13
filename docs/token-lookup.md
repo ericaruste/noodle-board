@@ -203,8 +203,10 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #130206 | `var(--brand-red-950)` | `brand.red.950` | color |
 | 0px | `p-brand-scale-0` | `brand.scale.0` | spacing |
 | 4px | `p-brand-scale-100` | `brand.scale.100` | spacing |
-| 44px | `p-brand-scale-1000` | `brand.scale.1000` | spacing |
-| 48px | `p-brand-scale-1100` | `brand.scale.1100` | spacing |
+| 40px | `p-brand-scale-1000` | `brand.scale.1000` | spacing |
+| 44px | `p-brand-scale-1100` | `brand.scale.1100` | spacing |
+| 48px | `p-brand-scale-1200` | `brand.scale.1200` | spacing |
+| 6px | `p-brand-scale-150` | `brand.scale.150` | spacing |
 | 8px | `p-brand-scale-200` | `brand.scale.200` | spacing |
 | 1px | `p-brand-scale-25` | `brand.scale.25` | spacing |
 | 12px | `p-brand-scale-300` | `brand.scale.300` | spacing |
@@ -212,9 +214,9 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | 2px | `p-brand-scale-50` | `brand.scale.50` | spacing |
 | 20px | `p-brand-scale-500` | `brand.scale.500` | spacing |
 | 24px | `p-brand-scale-600` | `brand.scale.600` | spacing |
-| 32px | `p-brand-scale-700` | `brand.scale.700` | spacing |
-| 36px | `p-brand-scale-800` | `brand.scale.800` | spacing |
-| 40px | `p-brand-scale-900` | `brand.scale.900` | spacing |
+| 28px | `p-brand-scale-700` | `brand.scale.700` | spacing |
+| 32px | `p-brand-scale-800` | `brand.scale.800` | spacing |
+| 36px | `p-brand-scale-900` | `brand.scale.900` | spacing |
 | #CBECFF | `var(--brand-sky-200)` | `brand.sky.200` | color |
 | #66C7FF | `var(--brand-sky-500)` | `brand.sky.500` | color |
 | #FF9E97 | `var(--brand-tomato-200)` | `brand.tomato.200` | color |

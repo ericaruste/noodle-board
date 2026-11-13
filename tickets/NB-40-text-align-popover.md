@@ -37,7 +37,7 @@ The alignment menu still uses the Phase 1 menu rows. The Figma popover is four c
 
 ## Technical notes
 
-The frame measures 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. The 40px height is `brand.scale.900`. The stroke is `mapped.border.default`, the radius is xl, and the fill is `mapped.surface.default` at 80%, with the existing 24px blur. Figma’s blur is ignored. The buttons are icon only. A label would use `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight`.
+The frame measures 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. The 40px height is `brand.scale.1000`. The stroke is `mapped.border.default`, the radius is xl, and the fill is `mapped.surface.default` at 80%, with the existing 24px blur. Figma’s blur is ignored. The buttons are icon only. A label would use `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight`.
 
 The popover opens in a FloatingPanel on the dropdown layer.
 
