@@ -7,8 +7,8 @@ labels: [Feature, UX]
 parent: NB-E6
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-63
+linear_url: https://linear.app/ericar/issue/ERI-63/color-swatch
 ---
 
 ## Context
@@ -27,7 +27,7 @@ Fill, stroke, and sticky-note color will be chosen from a color toolbar later. T
 
 1. Open `?trial=color-swatch`.
 2. Compare none, color, and custom, in default, hover, and selected, with Figma component `color-swatch`.
-3. Hover and click the live row. The action ring sits outside the disc. The disc border does not change width.
+3. Click a fill swatch, a stroke swatch, and the custom swatch. Each selection stays on its own row. The disc border does not change width.
 
 ## Acceptance criteria
 
@@ -42,9 +42,11 @@ Fill, stroke, and sticky-note color will be chosen from a color toolbar later. T
 
 Figma draws the action ring as a drop shadow. A second stroke in that file changes the disc border, so the ring could not be a stroke there. CSS outline is a stroke outside the border box and does not change the disc border. The disc border is an inset stroke, `mapped.border.control` at `alias.border-width.xsm`.
 
-The ring color is `mapped.border.action-ring` on hover and `mapped.border.action-ring-selected` when selected. The painted ring measures 3px. No border-width token is 3px. The nearest widths are 2px and 4px. The code uses 2px, `alias.border-width.sm`.
+The ring color is `mapped.border.action-ring` on hover and `mapped.border.action-ring-focus` when selected. The frame measures 3px. Hover and selected use 4px, `alias.border-width.md`.
 
-The custom wheel is a hue gradient. It is not a token. The white gap and the preview circle use spacing tokens. The preview color on the spec is `alias.swatch.purple.500`.
+The custom wheel is the Figma angular gradient. It is not a token. Stops: 0% `#F43F5E`, 14% `#F59E0B`, 29% `#EAB308`, 43% `#22C55E`, 57% `#06B6D4`, 71% `#6366F1`, 86% `#D946EF`, 100% `#F43F5E`. 0% sits at the left. The white gap and the preview circle use spacing tokens. The Figma specimen paints purple on both the color type and the custom preview. Those are not linked.
+
+Color type reads `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. Custom can be selected on its own. Its color will come from react-colorful. The picker is not part of this ticket.
 
 The spec sheet around the component (state names, the red size notes, the dashed frame, the title, and the description) is documentation. It is not part of the component.
 

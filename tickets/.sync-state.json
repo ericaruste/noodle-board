@@ -275,6 +275,11 @@
       "id": "758991a4-d761-4b0a-91dc-acb36fd12778",
       "identifier": "ERI-62",
       "url": "https://linear.app/ericar/issue/ERI-62/hex-input"
+    },
+    "NB-48": {
+      "id": "a6c166c6-9802-4912-b049-0a250ff528b3",
+      "identifier": "ERI-63",
+      "url": "https://linear.app/ericar/issue/ERI-63/color-swatch"
     }
   }
 }
