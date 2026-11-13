@@ -56,7 +56,7 @@ const boxClass: Record<IconButtonSize, string> = {
 
 const iconClass: Record<IconButtonSize, string> = {
   lg: "size-brand-scale-400",
-  md: "size-brand-scale-400",
+  md: "size-brand-scale-300",
   sm: "size-brand-scale-300",
 };
 

@@ -44,7 +44,7 @@ Both labels use the Figma text style `body/md/tight` (12px, line height 12px). T
 
 The width is fixed at 108px. No spacing token is 108px. Height hugs to 28px, `brand.scale.700`. Padding is 8px, `brand.scale.200`. The gap between `#` and the code is 4px, `brand.scale.100`. The corner is 8px, `alias.border-radius.lg`.
 
-Default has no fill and no stroke. Hover fills with `mapped.surface.action-hover`. Focus fills with `mapped.surface.default` and draws a 2px outside stroke, `mapped.border.action-ring-focus` at `alias.border-width.sm`. The text stays `mapped.text.default` in every state.
+Default has no fill and no stroke. Hover fills with `mapped.surface.action-hover`. Focus fills with `mapped.surface.default` and draws a 2px outside stroke, `mapped.border.action-ring-focus` at `alias.border-width.sm`. The text stays `mapped.text.default` in every state. A click focuses the field and selects the hex code. A click outside the field, including an icon button, blurs it and the field returns to default.
 
 The spec sheet around the component (state names, the red size notes, the dashed frame, the title, and the description) is documentation. It is not part of the component.
 

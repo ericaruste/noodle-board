@@ -14,7 +14,10 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
 - **[Figma] Hex input width.** The frame is 108px wide. No spacing token is 108px. The code keeps 108px and marks the mismatch.
-- **[code] Contextual button and icon button node ids.** Both notes cite node `193:3525`. That node is the color-swatch spec. Their node ids still need a check.
+- **[code] Contextual button and icon button node ids.** Both notes cite node `193:3525`. That node is the color-swatch spec, and it now also holds the color picker toolbar. Their node ids still need a check.
+- **[Figma] Tomato on the color picker toolbar.** The other seven swatches are step 200. Tomato is `#FF7066`, step 500. The toolbar uses one scale for the grid.
+- **[token app] Color picker field height.** The saturation field, including the 12px black band, is 108px. No spacing token is 108px.
+- **[token app] Color picker toolbar width.** The swatch grid is 172px. No spacing token is 172px.
 
 ## Decisions already made
 
@@ -32,7 +35,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Each font size row is `brand.scale.900` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 - The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
-- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`.
+- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Choosing custom does not change a palette color. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open.
 
 ## Contextual button
 
@@ -335,13 +338,13 @@ A square button whose only content is an icon. It is not a contextual button wit
 | Size, md | `brand.scale.700` | 28px square |
 | Size, sm | `brand.scale.500` | 20px square |
 | Padding, lg | `brand.scale.200` | 8px, the space left by a 16px icon in the 32px square |
-| Padding, md | `brand.scale.150` | 6px, the space left by a 16px icon in the 28px square |
+| Padding, md | `brand.scale.200` | 8px, the space left by a 12px icon in the 28px square |
 | Padding, sm | `brand.scale.100` | 4px, the space left by a 12px icon in the 20px square |
 | Corner radius, lg and md | `alias.border-radius.lg` | 8px |
 | Corner radius, sm | `alias.border-radius.md` | 4px |
 | Stroke | none | the button has no stroke |
-| Icon, lg and md | `brand.scale.400` | 16px, Lucide |
-| Icon, sm | `brand.scale.300` | 12px, Lucide |
+| Icon, lg | `brand.scale.400` | 16px, Lucide |
+| Icon, md and sm | `brand.scale.300` | 12px, Lucide |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Fill, default hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, default selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -412,6 +415,8 @@ Figma properties:
 
 Painted states: `default`, `hover`, and `focus`.
 
+A click on the field focuses it and selects the hex code. A click outside the field, including an icon button, blurs it and the field returns to default.
+
 Not painted: disabled, selected, and pressed.
 
 This field is not a toolbar. The color toolbar that places it is its own component.
@@ -428,7 +433,7 @@ A round color choice for the fill and stroke toolbar, and for the color picker t
 | Corner radius | not a token | a full circle. No radius token is fully round |
 | Disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc on every type and state |
 | None fill | `brand.foundation.white` | `#FFFFFF`. No mapped surface is white |
-| Slash color | `mapped.icon.action` | `#303132` |
+| Slash color | `mapped.icon.disabled` | `#909397` |
 | Slash thickness | `alias.border-width.sm` | 2px |
 | Slash length | `brand.scale.600` | 24px, rotated 45 degrees so the ends stay off the disc stroke |
 | Color fill | `alias.swatch` | Fill and sticky notes use step 200. Stroke and noodles use step 500. The Figma specimen is `alias.swatch.purple.500`, `#BF66FF` |
@@ -458,10 +463,64 @@ The fill is not a variant. The spec paints purple on the color type and on the c
 
 Color type reads `alias.swatch`, in token-file order: purple, sky, lime, orange, yellow, coral, tomato, pink. Fill and sticky notes use step 200. Stroke and noodles use step 500.
 
-Custom can be selected. Its inner circle is whatever color the picker returns. The picker is react-colorful, and it is not built yet. Choosing a color swatch does not change the custom swatch. Choosing custom does not change a color swatch.
+Custom can be selected. Its inner circle is whatever color the picker returns. The picker is the color picker toolbar, ticket NB-49. Choosing a color swatch does not change the custom color. Choosing custom does not change a palette color.
 
 Painted states: `default`, `hover`, and `selected`, on `none`, `color`, and `custom`.
 
 Not painted: focus, disabled, and pressed. Keyboard focus uses the hover ring at 4px so the swatch stays visible. That ring is not a Figma state.
 
-This swatch is not a toolbar. The color toolbar that places it is its own component.
+This swatch is not a toolbar. The color picker toolbar that places it is its own component.
+
+## Color picker toolbar
+
+Figma frame titled `color-swatch`, node `193:3525`. Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
+
+The toolbar that will sit below an element. It is not wired into fill, stroke, or sticky chrome. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker under the grid. The picker opens from the custom swatch.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Padding | `brand.scale.200` | 8px |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Shadow | not a token | the same shadow the text toolbar already uses |
+| Blur | not a token | the same 24px frost the text toolbar already uses. Figma’s blur is ignored |
+| Section gap | `brand.scale.400` | 16px between the swatch grid, the picker, and the hex row |
+| Content width | none | 172px. Five 28px discs and four 8px gaps. No spacing token is 172px |
+| Swatch gap | `brand.scale.200` | 8px |
+| Swatch columns | five | none, then `alias.swatch` in token-file order, then custom |
+| Swatch | color swatch | 28px disc. The specimen uses step 200. Tomato on the frame is step 500 |
+| Picker | react-colorful `HexColorPicker` | saturation and hue. No alpha bar |
+| Saturation height | none | 108px, including the black band. No spacing token is 108px |
+| Saturation radius | `alias.border-radius.lg` on the top corners, `alias.border-radius.none` on the bottom | 8px on top. The bottom stays square where the black band meets the hue |
+| Black band | `brand.foundation.black`, `brand.scale.300` | `#000000`, 12px, the bottom border of the saturation field |
+| Hue height | `brand.scale.400` | 16px |
+| Hue radius | `alias.border-radius.none` on the top corners, `alias.border-radius.lg` on the bottom | 0px on top, 8px on the bottom. The picker container’s radius is these two pieces: saturation on top, hue on the bottom |
+| Picker gap | `brand.scale.0` | 0px. The hue sits against the black band |
+| Pointer | `brand.scale.500` | 20px |
+| Pointer stroke | `brand.foundation.white`, `alias.border-width.sm` | `#FFFFFF`, 2px |
+| Pointer shadow | not a token | the small shadow react-colorful paints on the handle |
+| Hex field | hex input | 108 by 28. A click focuses it and selects the code. A click outside, or on copy or pipette, returns it to default. The value is the selected swatch, or the custom color when none or custom is selected |
+| Icon buttons | icon button, `md` | 28px. Copy, then pipette |
+| Icon gap | `brand.scale.100` | 4px |
+| Icon, copy | Lucide `Copy` | 12px, the medium icon button glyph |
+| Icon, pipette | Lucide `Pipette` | 12px, the medium icon button glyph |
+| Dot grid | not a token | excluded from the component |
+
+There is no divider.
+
+The picker container is the frame `react-colorful container`, node `263:2593`. Its outline is one rounded rectangle. The saturation carries the top corners. The hue is square against the black band and carries the bottom corners.
+
+The file request was rate limited, and the property panel was behind the sign-up wall. Sizes were measured from the rendered frame at 78% zoom, using the 28px disc as the scale. The swatch centers are 36px apart, which is the 28px disc plus an 8px gap. The panel padding around the discs is 8px.
+
+The frame does not expose a variant set that could be read. The two states are two instances.
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| state | two instances | collapsed, extended |
+
+Collapsed paints none selected and hides the picker. The hex on that frame is `EBCFFF`. Extended paints the picker. It also paints a ring on none and a ring on custom. The toolbar keeps one selection. Custom is selected while the picker is open.
+
+Not painted on this frame: hover and focus of the toolbar itself. Those belong to the swatch, the hex input, and the icon button.
+
+The toolbar adds no z-index. Selection chrome already uses FloatingPanel. This toolbar is the child that will go in that panel. The trial also places one copy in FloatingPanel over a selected box and a dragging box, both on the selection layer.

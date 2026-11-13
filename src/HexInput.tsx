@@ -1,4 +1,4 @@
-import { forwardRef, useState, type ClipboardEvent } from "react";
+import { forwardRef, useRef, useState, type ClipboardEvent, type FocusEvent, type MouseEvent } from "react";
 
 export type HexInputState = "default" | "hover" | "focus";
 
@@ -33,6 +33,7 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
   const [draft, setDraft] = useState(() => hexDigits(defaultValue));
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  const selectOnFocus = useRef(false);
   const shown = hexDigits(value ?? draft);
 
   function commit(next: string) {
@@ -56,17 +57,37 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
     commit(shown.slice(0, start) + pasted + shown.slice(end));
   }
 
-  function onFocus() {
+  function onFocus(event: FocusEvent<HTMLInputElement>) {
     setFocused(true);
+    if (!selectOnFocus.current) return;
+    event.currentTarget.select();
+  }
+
+  function onFieldMouseDown(event: MouseEvent<HTMLLabelElement>) {
+    event.stopPropagation();
+    const input = event.currentTarget.querySelector("input");
+    if (!(input instanceof HTMLInputElement) || input.readOnly) return;
+    if (document.activeElement === input) return;
+    selectOnFocus.current = true;
+    input.focus();
+  }
+
+  function onInputMouseUp(event: MouseEvent<HTMLInputElement>) {
+    if (!selectOnFocus.current) return;
+    event.preventDefault();
+    event.currentTarget.select();
+    selectOnFocus.current = false;
   }
 
   const visual: HexInputState = state ?? (focused ? "focus" : hovered ? "hover" : "default");
 
   return (
     <label
-      className={`flex h-brand-scale-700 w-[108px] shrink-0 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default ${shellClass[visual]}`}
+      data-hex-input
+      className={`${state ? "" : "noodle-hex-input"} flex h-brand-scale-700 w-[108px] shrink-0 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default ${shellClass[visual]}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onMouseDown={onFieldMouseDown}
     >
       {/* 108px is the frame width. No spacing token is 108px. TODO token mismatch: Figma 108px */}
       <span aria-hidden="true" className="select-none">
@@ -86,8 +107,12 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
         aria-label="Hex code"
         onChange={(event) => commit(event.target.value)}
         onPaste={onPaste}
+        onMouseUp={onInputMouseUp}
         onFocus={onFocus}
-        onBlur={() => setFocused(false)}
+        onBlur={() => {
+          selectOnFocus.current = false;
+          setFocused(false);
+        }}
         className="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default outline-none"
       />
     </label>

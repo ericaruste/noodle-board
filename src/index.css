@@ -617,3 +617,52 @@ body,
     animation: none;
   }
 }
+
+/* Hex field. The ring follows the real focus, including a click that lands on the #. */
+.noodle-hex-input:focus-within {
+  background-color: var(--mapped-surface-default);
+  outline-width: var(--alias-border-width-sm);
+  outline-style: solid;
+  outline-color: var(--mapped-border-action-ring-focus);
+}
+
+/* Color picker toolbar. HexColorPicker has no alpha slider. The rule hides one if it is ever rendered.
+   108px is the saturation field, including the 12px black band. No spacing token is 108px. */
+.noodle-color-picker.react-colorful {
+  width: 100%;
+  height: auto;
+  gap: var(--brand-scale-0);
+}
+
+.noodle-color-picker .react-colorful__saturation {
+  flex: none;
+  height: 108px; /* TODO token mismatch: Figma 108px */
+  border-bottom-width: var(--brand-scale-300);
+  border-bottom-style: solid;
+  border-bottom-color: var(--brand-foundation-black);
+  border-top-left-radius: var(--alias-border-radius-lg);
+  border-top-right-radius: var(--alias-border-radius-lg);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.noodle-color-picker .react-colorful__hue {
+  flex: none;
+  height: var(--brand-scale-400);
+  border-top-left-radius: var(--alias-border-radius-none);
+  border-top-right-radius: var(--alias-border-radius-none);
+  border-bottom-left-radius: var(--alias-border-radius-lg);
+  border-bottom-right-radius: var(--alias-border-radius-lg);
+}
+
+.noodle-color-picker .react-colorful__alpha {
+  display: none;
+}
+
+.noodle-color-picker .react-colorful__pointer {
+  width: var(--brand-scale-500);
+  height: var(--brand-scale-500);
+  border-width: var(--alias-border-width-sm);
+  border-style: solid;
+  border-color: var(--brand-foundation-white);
+}

@@ -46,7 +46,7 @@ The ring color is `mapped.border.action-ring` on hover and `mapped.border.action
 
 The custom wheel is the Figma angular gradient. It is not a token. Stops: 0% `#F43F5E`, 14% `#F59E0B`, 29% `#EAB308`, 43% `#22C55E`, 57% `#06B6D4`, 71% `#6366F1`, 86% `#D946EF`, 100% `#F43F5E`. 0% sits at the left. The white gap and the preview circle use spacing tokens. The Figma specimen paints purple on both the color type and the custom preview. Those are not linked.
 
-Color type reads `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. Custom can be selected on its own. Its color will come from react-colorful. The picker is not part of this ticket.
+Color type reads `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. Custom can be selected on its own. Its color comes from the color picker toolbar. The none slash is `mapped.icon.disabled`.
 
 The spec sheet around the component (state names, the red size notes, the dashed frame, the title, and the description) is documentation. It is not part of the component.
 
