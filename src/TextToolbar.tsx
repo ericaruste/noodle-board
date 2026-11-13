@@ -619,7 +619,7 @@ export default function TextToolbar({
   };
 
   return (
-    // Fill is mapped.surface.default at 40%. Blur is the existing 24px frost. Figma blur is ignored.
+    // Fill is mapped.surface.default at 80%. Blur is the existing 24px frost. Figma blur is ignored.
     <div
       data-text-toolbar
       className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"

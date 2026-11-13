@@ -37,7 +37,7 @@ The weight menu still uses the Phase 1 menu rows. The Figma menu is the shared m
 
 ## Technical notes
 
-The frame measures 104 by 120. That is padding 4, four 28px rows, and no gap. The row size is `sm`. The corner radius measured from the frame is 8px. The stroke is `mapped.border.default` at 1px. The fill matches the text toolbar frost, `alias.cool-neutral.400` at 40%. The surface token for that color is 30%. Figma blur and shadow are not a token.
+The frame measures 104 by 120. That is padding 4, four 28px rows, and no gap. The row size is `sm`. The corner radius measured from the frame is 8px. The stroke is `mapped.border.default` at 1px. The fill matches the text toolbar frost, `mapped.surface.default` at 80%. Figma blur and shadow are not a token.
 
 The file request was rate limited, so the padding, radius, and stroke were read from the canvas. The layer name above the frame was cut off.
 

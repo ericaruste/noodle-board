@@ -41,7 +41,7 @@ The text toolbar still used the Phase 1 colors and its own icon drawings. The Fi
 
 Underline and strikethrough are drawn in the Figma group and left out on purpose. They wait for the text feature that will add them.
 
-The fill is `mapped.surface.default` (`#F0F5FB` at 40%). Blur is the existing `backdrop-blur-xl`. Figma’s 2.6px blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
+The fill is `mapped.surface.default` (`#F0F5FB` at 80%). Blur is the existing `backdrop-blur-xl`. Figma’s 2.6px blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
 
 The size control keeps the number in the label slot. A single click anywhere on the size button opens the presets. A double click edits the number.
 

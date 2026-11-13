@@ -21,9 +21,9 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Heading, body, and caption are Geist. SF Pro is gone from the token export. The Figma text style `body/md/tight` still names SF Pro.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
-- `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 40%. The text toolbar, the align popover, and the font style menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored. The fill stays at 40% so the frost remains.
+- `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 80%. The text toolbar, the align popover, the font style menu, and the typeface menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
 - Desktop font size and line height are tokens under `responsive.desktop`. The text style `body/md/tight` is `responsive.desktop.body.md.size` (12px) and `responsive.desktop.body.md.line-height-tight` (12px). The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
-- The spacing scale now includes `brand.scale.800` (40px), `brand.scale.900` (44px), and `brand.scale.1000` (48px).
+- The spacing scale includes `brand.scale.800` (36px), `brand.scale.900` (40px), `brand.scale.1000` (44px), and `brand.scale.1100` (48px). 36px was inserted after 32px (`brand.scale.700`), so 40px moved from `brand.scale.800` to `brand.scale.900`, 44px moved to `brand.scale.1000`, and 48px moved to `brand.scale.1100`.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
@@ -92,13 +92,13 @@ Every control is a contextual button with the unused slots turned off.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.800` |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.900` |
 | Padding | `brand.scale.100` | 4px |
 | Gap inside a group | `brand.scale.50` | 2px |
 | Gap between groups | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 40% |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Blur | not a token | the existing 24px blur. Figma’s 2.6px blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
@@ -140,13 +140,13 @@ The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.800`), from 4px padding and a 32px button |
+| Height | none | 40px (`brand.scale.900`), from 4px padding and a 32px button |
 | Width | none | 142px, from the padding, four buttons, and the gaps |
 | Padding | `brand.scale.100` | 4px |
 | Gap | `brand.scale.50` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px, outside the 142 by 40 box |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 40% |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -229,7 +229,7 @@ Four small menu items, caption and chevron off. The order is Regular, Bold, Ital
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 40% |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | 28px. Caption and chevron are off |
@@ -252,7 +252,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 40% |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | 28px. Caption and chevron are off |

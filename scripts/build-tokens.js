@@ -170,9 +170,9 @@ for (const banned of ["box-shadow", "backdrop-filter", "backdrop-blur", "drop-sh
   }
 }
 
-const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)";
+const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-400) 80%, transparent)";
 if (!css.includes(surfaceDefault)) {
-  throw new Error("mapped.surface.default was not written as a 40% color.");
+  throw new Error("mapped.surface.default was not written as an 80% color.");
 }
 
 const lookupPath = path.join(ROOT, "docs", "token-lookup.md");
@@ -182,11 +182,16 @@ const lookupText = fs.readFileSync(lookupPath, "utf8");
 if (lookupText.includes("box-shadow") || lookupText.includes("backdrop")) {
   throw new Error("Token lookup includes a group that should be left out.");
 }
-if (!lookupText.includes("#F0F5FB / 40%") || !lookupText.includes("`mapped.surface.default`")) {
-  throw new Error("Token lookup is missing the 40% surface color.");
+if (!lookupText.includes("#F0F5FB / 80%") || !lookupText.includes("`mapped.surface.default`")) {
+  throw new Error("Token lookup is missing the 80% surface color.");
 }
-if (!css.includes("--brand-scale-800: 40px") || !css.includes("--brand-scale-900: 44px") || !css.includes("--brand-scale-1000: 48px")) {
-  throw new Error("Scale 800, 900, and 1000 were not written.");
+if (
+  !css.includes("--brand-scale-800: 36px") ||
+  !css.includes("--brand-scale-900: 40px") ||
+  !css.includes("--brand-scale-1000: 44px") ||
+  !css.includes("--brand-scale-1100: 48px")
+) {
+  throw new Error("Scale 800, 900, 1000, and 1100 were not written.");
 }
 if (!css.includes("--responsive-desktop-body-md-size: 12px") || !css.includes("--responsive-desktop-body-md-line-height: 14.4px")) {
   throw new Error("Desktop body font size and line height were not written.");

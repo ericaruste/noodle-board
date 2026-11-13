@@ -236,6 +236,7 @@ export default {
     "brand-scale-0": "var(--brand-scale-0)",
     "brand-scale-100": "var(--brand-scale-100)",
     "brand-scale-1000": "var(--brand-scale-1000)",
+    "brand-scale-1100": "var(--brand-scale-1100)",
     "brand-scale-200": "var(--brand-scale-200)",
     "brand-scale-25": "var(--brand-scale-25)",
     "brand-scale-300": "var(--brand-scale-300)",

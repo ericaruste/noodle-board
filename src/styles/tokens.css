@@ -50,9 +50,10 @@
   --brand-scale-500: 20px;
   --brand-scale-600: 24px;
   --brand-scale-700: 32px;
-  --brand-scale-800: 40px;
-  --brand-scale-900: 44px;
-  --brand-scale-1000: 48px;
+  --brand-scale-800: 36px;
+  --brand-scale-900: 40px;
+  --brand-scale-1000: 44px;
+  --brand-scale-1100: 48px;
   --brand-red-50: #F1DEE0;
   --brand-red-100: #F0CDD2;
   --brand-red-200: #E49EAC;
@@ -178,7 +179,7 @@
   --mapped-surface-action-strong-selected: var(--alias-primary-500);
   --mapped-surface-error: color-mix(in srgb, var(--alias-error-50) 0%, transparent);
   --mapped-surface-error-hover: var(--alias-error-50);
-  --mapped-surface-default: color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent);
+  --mapped-surface-default: color-mix(in srgb, var(--alias-cool-neutral-400) 80%, transparent);
   --mapped-text-action: var(--alias-cool-neutral-900);
   --mapped-text-action-hover: var(--alias-primary-800);
   --mapped-text-action-selected: var(--alias-primary-800);
