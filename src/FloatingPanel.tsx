@@ -173,13 +173,28 @@ function toolbarMenuGap(): number {
 /** The toolbar the control sits in. The menu clears that box, not the button inside it. */
 function toolbarRect(anchor: HTMLElement): DOMRect {
   const panel = anchor.closest("[data-floating-panel='toolbar']");
-  if (panel instanceof HTMLElement) return panel.getBoundingClientRect();
+  if (panel instanceof HTMLElement) return paintedBox(panel);
   let node: HTMLElement | null = anchor;
   while (node) {
     if (node.parentElement?.hasAttribute("data-canvas-chrome")) return node.getBoundingClientRect();
     node = node.parentElement;
   }
   return anchor.getBoundingClientRect();
+}
+
+/**
+ * The noodle bar is placed inside a zero-size portal host at the top of the
+ * layer. A menu has to clear the painted pill, or the 4px gap lands on the screen edge.
+ */
+function paintedBox(panel: HTMLElement): DOMRect {
+  const box = panel.getBoundingClientRect();
+  if (box.width >= 1 && box.height >= 1) return box;
+  for (const node of panel.querySelectorAll("*")) {
+    if (!(node instanceof HTMLElement)) continue;
+    const child = node.getBoundingClientRect();
+    if (child.width >= 1 && child.height >= 1) return child;
+  }
+  return box;
 }
 
 /** Screen position for a menu under a button, clamped to the floating layer. */

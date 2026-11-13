@@ -590,7 +590,7 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the swatch menu. That open color menu is not painted on the frame.
+The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the swatch menu. That open color menu is not painted on the frame. Each menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 ## Line weight and line type menu
 
