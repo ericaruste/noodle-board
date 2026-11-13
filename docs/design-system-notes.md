@@ -14,6 +14,8 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
 - **[Figma] Hex input width.** The frame is 108px wide. No spacing token is 108px. The code keeps 108px and marks the mismatch.
+- **[token app] Color swatch action ring.** The painted ring is 3px. No border-width token is 3px. The nearest are 2px and 4px. The code uses 2px, `alias.border-width.sm`.
+- **[code] Contextual button and icon button node ids.** Both notes cite node `193:3525`. That node is the color-swatch spec. Their node ids still need a check.
 
 ## Decisions already made
 
@@ -30,6 +32,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
 - Each font size row is `brand.scale.900` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
+- The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone.
 
 ## Contextual button
 
@@ -412,3 +415,49 @@ Painted states: `default`, `hover`, and `focus`.
 Not painted: disabled, selected, and pressed.
 
 This field is not a toolbar. The color toolbar that places it is its own component.
+
+## Color swatch
+
+Figma `color-swatch`, on the spec frame titled `color-swatch`, node `193:3525`. Ticket NB-48. Code `src/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
+
+A round color choice for the fill and stroke toolbar, and for the color picker that comes later. It is not that toolbar. The disc is 28px. The action ring sits outside it.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Size | `brand.scale.700` | 28px circle |
+| Corner radius | not a token | a full circle. No radius token is fully round |
+| Disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc on every type and state |
+| None fill | `brand.foundation.white` | `#FFFFFF`. No mapped surface is white |
+| Slash color | `mapped.icon.action` | `#303132` |
+| Slash thickness | `alias.border-width.sm` | 2px |
+| Slash length | `brand.scale.600` | 24px, rotated 45 degrees so the ends stay off the disc stroke |
+| Color fill | the chosen color | the spec uses `alias.swatch.purple.500`, `#BF66FF` |
+| Custom wheel | not a token | a hue gradient. The note on the frame says the custom swatch is built with a gradient |
+| Custom white gap | `brand.foundation.white`, `brand.scale.50` | `#FFFFFF`, 2px. A `brand.scale.400` (16px) white circle around the preview |
+| Custom preview | the chosen color, `brand.scale.300` | 12px circle. The spec uses `alias.swatch.purple.500` |
+| Custom wheel thickness | `brand.scale.150` | 6px, the space from the disc edge to the white circle |
+| Ring, default | none | the disc has no action ring |
+| Ring, hover | `mapped.border.action-ring`, `alias.border-width.sm` | `#B7D4F1`, 2px, drawn outside the disc. The Figma style is `action-ring`. The painted ring measures 3px |
+| Ring, selected | `mapped.border.action-ring-selected`, `alias.border-width.sm` | `#1E3B58`, 2px, drawn outside the disc. The Figma style is `action-ring-selected`. The painted ring measures 3px |
+| Shadow | not a token | Figma uses a drop shadow for the action ring. The code uses an outline stroke. The frame shadow is excluded |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no text and no divider. The slash is part of the none type, not a separate icon slot.
+
+The file request was rate limited. Sizes and colors were read from the rendered frame at 400%. The property panel was behind the Figma sign-up wall.
+
+Figma properties, read from the variant grid and the spec labels:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| type | variant | `none`, `color`, `custom` |
+| state | variant | `default`, `hover`, `selected` |
+
+The fill is not a variant. The spec paints `alias.swatch.purple.500` on the color type and on the custom preview. The custom note says that circle is a preview of any color from the color picker.
+
+Painted states: `default`, `hover`, and `selected`, on `none`, `color`, and `custom`.
+
+Not painted: focus, disabled, and pressed. Keyboard focus uses the hover ring so the swatch stays visible. That ring is not a Figma state.
+
+This swatch is not a toolbar. The color toolbar that places it is its own component.
