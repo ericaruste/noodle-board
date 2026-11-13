@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Copy, Pipette } from "lucide-react";
-import { ColorSwatch, SWATCH_FAMILIES, swatchColor, type SwatchFamily, type SwatchScale } from "./ColorSwatch";
+import { ColorSwatch, SWATCH_FAMILIES, SWATCH_HEX, swatchColor, type SwatchFamily, type SwatchScale } from "./ColorSwatch";
 import { FloatingLayer, FloatingPanel, floatingSlot } from "./FloatingPanel";
 import { HexInput } from "./HexInput";
 import { IconButton } from "./IconButton";
@@ -27,21 +27,6 @@ type ColorPickerToolbarProps = {
   onChoiceChange?: (choice: ColorPickerChoice) => void;
   onCustomHexChange?: (hex: string) => void;
   onExpandedChange?: (expanded: boolean) => void;
-};
-
-/**
- * Hex digits for `alias.swatch`, copied from the brand colors in tokens.css.
- * The discs themselves paint the CSS variables. The field needs the digits.
- */
-const SWATCH_HEX: Record<SwatchFamily, Record<SwatchScale, string>> = {
-  purple: { 200: "EBCFFF", 500: "BF66FF" },
-  sky: { 200: "CBECFF", 500: "66C7FF" },
-  lime: { 200: "E9FFDB", 500: "A5F075" },
-  orange: { 200: "FFDBA7", 500: "FFC066" },
-  yellow: { 200: "FFF6BF", 500: "F0DE75" },
-  coral: { 200: "FFD4C4", 500: "FF8F66" },
-  tomato: { 200: "FF9E97", 500: "FF7066" },
-  pink: { 200: "FFE4ED", 500: "FF99BB" },
 };
 
 type PickerSide = "left" | "right";

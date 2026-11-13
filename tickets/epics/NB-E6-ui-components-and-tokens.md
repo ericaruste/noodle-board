@@ -33,6 +33,7 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-47 Hex input](../NB-47-hex-input.md)
 - [NB-48 Color swatch](../NB-48-color-swatch.md)
 - [NB-49 Color picker toolbar](../NB-49-color-picker-toolbar.md)
+- [NB-50 Noodle toolbar](../NB-50-noodle-toolbar.md)
 
 The next component ticket is the next free id after NB-49, parented to NB-E6, and titled with the component name.
 

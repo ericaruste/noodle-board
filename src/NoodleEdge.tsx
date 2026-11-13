@@ -335,7 +335,7 @@ function PlacedNoodleToolbar({
   return (
     <div
       ref={ref}
-      className="w-max rounded-xl border border-white/50 bg-white/40 shadow-lg backdrop-blur-xl"
+      className="w-max"
       style={{
         position: "absolute",
         left: pos?.left ?? 0,

@@ -1,5 +1,7 @@
-import { forwardRef, type ReactNode, type Ref } from "react";
-import { CaseSensitive, ChevronDown, type LucideIcon } from "lucide-react";
+import { type ComponentType, forwardRef, type PointerEvent, type ReactNode, type Ref } from "react";
+import { CaseSensitive, ChevronDown } from "lucide-react";
+
+type SlotIcon = ComponentType<{ className?: string }>;
 
 export type ContextualButtonState = "default" | "hover" | "selected" | "disabled";
 
@@ -14,8 +16,8 @@ type ContextualButtonProps = {
   showRightIcon?: boolean;
   showDropdownIcon?: boolean;
   /** Right-hand icon. Defaults to the case-sensitive icon from the component spec. */
-  icon?: LucideIcon;
-  leftIcon?: LucideIcon;
+  icon?: SlotIcon;
+  leftIcon?: SlotIcon;
   /** Painted variant from the spec. Leave unset to follow selected, disabled, and real hover. */
   state?: ContextualButtonState;
   selected?: boolean;
@@ -23,6 +25,8 @@ type ContextualButtonProps = {
   pressed?: boolean | "mixed";
   disabled?: boolean;
   onClick?: () => void;
+  onPointerDown?: (event: PointerEvent<HTMLButtonElement>) => void;
+  onPointerCancel?: (event: PointerEvent<HTMLButtonElement>) => void;
   ariaLabel?: string;
   title?: string;
   ariaExpanded?: boolean;
@@ -77,6 +81,8 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
     pressed,
     disabled = false,
     onClick,
+    onPointerDown,
+    onPointerCancel,
     ariaLabel,
     title,
     ariaExpanded,
@@ -146,6 +152,8 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
       aria-expanded={ariaExpanded}
       aria-haspopup={ariaHasPopup}
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerCancel={onPointerCancel}
       className={classes}
     >
       {icons}

@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
+import { ColorSwatch, SWATCH_FAMILIES, SWATCH_HEX, swatchColor, swatchFamilyForHex } from "./ColorSwatch";
+import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
-  NOODLE_ARROW_LABELS,
+  LineWeightMenuIcon,
+  TypeCurveIcon,
+  TypeDashedIcon,
+  TypeElbowIcon,
+  TypeMediumIcon,
+  TypeStraightIcon,
+  TypeThickIcon,
+  TypeThinIcon,
+} from "./noodleIcons";
+import {
   NOODLE_ARROWS,
-  NOODLE_COLORS,
+  NOODLE_ARROW_LABELS,
   publishNoodle,
   sameNoodle,
   snapshotBoard,
@@ -24,10 +35,41 @@ type NoodleToolbarProps = {
   mixed?: ReadonlySet<string>;
 };
 
-function ArrowGlyph({ kind }: { kind: NoodleArrow }) {
+type OpenMenu = "color" | "weight" | "shape" | "start" | "end";
+
+type SlotIcon = ComponentType<{ className?: string }>;
+
+const SHAPE_ICONS: Record<NoodleShape, SlotIcon> = {
+  straight: TypeStraightIcon,
+  elbow: TypeElbowIcon,
+  curve: TypeCurveIcon,
+};
+
+const THICKNESS_ICONS: Record<NoodleThickness, SlotIcon> = {
+  thin: TypeThinIcon,
+  medium: TypeMediumIcon,
+  thick: TypeThickIcon,
+};
+
+const LINE_STYLE_ICONS: Record<NoodleLineStyle, SlotIcon> = {
+  solid: TypeStraightIcon,
+  dashed: TypeDashedIcon,
+};
+
+const NOODLE_SWATCH_SCALE = 500;
+
+function TypeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 18 14" fill="none" aria-hidden>
+      <path d="M4.5 3.25h9M9 3.25v7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ArrowGlyph({ kind, className }: { kind: NoodleArrow; className?: string }) {
   const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinejoin: "round" as const };
   return (
-    <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden>
+    <svg className={className} viewBox="0 0 18 14" fill="none" aria-hidden>
       <path d="M1 7H11" {...common} />
       {kind === "arrow" ? <path d="M8 3.5 12.5 7 8 10.5 9.4 7Z" fill="currentColor" stroke="none" /> : null}
       {kind === "open" ? <path d="M8 3.5 12.5 7 8 10.5" {...common} /> : null}
@@ -38,44 +80,70 @@ function ArrowGlyph({ kind }: { kind: NoodleArrow }) {
   );
 }
 
-function LineGlyph({ dashed, weight }: { dashed?: boolean; weight: number }) {
+function arrowIcon(kind: NoodleArrow): SlotIcon {
+  return function ArrowIcon({ className }: { className?: string }) {
+    return <ArrowGlyph kind={kind} className={className} />;
+  };
+}
+
+const ARROW_ICONS: Record<NoodleArrow, SlotIcon> = {
+  none: arrowIcon("none"),
+  arrow: arrowIcon("arrow"),
+  open: arrowIcon("open"),
+  triangle: arrowIcon("triangle"),
+  circle: arrowIcon("circle"),
+  diamond: arrowIcon("diamond"),
+};
+
+function ColorMark({ className, color }: { className?: string; color?: string }) {
   return (
-    <svg width="22" height="12" viewBox="0 0 22 12" aria-hidden>
-      <path
-        d="M2 6H20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={weight}
-        strokeDasharray={dashed ? "3 2.5" : undefined}
-        strokeLinecap="round"
-      />
-    </svg>
+    <span
+      className={`inline-block shrink-0 rounded-full border border-alias-border-width-xsm border-mapped-border-control ${className ?? ""}`}
+      style={color ? { background: color } : undefined}
+    />
   );
 }
 
-function ShapeGlyph({ shape }: { shape: NoodleShape }) {
-  const d = shape === "straight" ? "M2 9 L16 3" : shape === "elbow" ? "M2 10 H9 V3 H16" : "M2 9 C6 9 8 3 16 3";
-  return (
-    <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden>
-      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+const menuChrome =
+  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl";
 
-function TextGlyph() {
+function IconChoice({
+  label,
+  pressed,
+  icon,
+  onClick,
+}: {
+  label: string;
+  pressed: boolean;
+  icon: SlotIcon;
+  onClick: () => void;
+}) {
   return (
-    <svg width="18" height="14" viewBox="0 0 18 14" aria-hidden>
-      <path d="M4.5 3.25h9M9 3.25v7.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
+    <ContextualButton
+      ariaLabel={label}
+      title={label}
+      pressed={pressed}
+      onClick={onClick}
+      showLeftIcon={false}
+      showLabel={false}
+      showDropdownIcon={false}
+      showRightIcon
+      icon={icon}
+    />
   );
 }
 
 export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleToolbarProps) {
   const dataRef = useRef(data);
   dataRef.current = data;
-  const [menu, setMenu] = useState<"color" | "start" | "end" | null>(null);
+  const [menu, setMenu] = useState<OpenMenu | null>(null);
   const editing = useNoodleLabelEditing(edgeId);
-  const colorHistory = useRef(false);
+  const colorMixed = mixed?.has("color") ?? false;
+  const colorFamily = colorMixed ? null : swatchFamilyForHex(data.color, NOODLE_SWATCH_SCALE);
+
+  function ColorIcon({ className }: { className?: string }) {
+    return <ColorMark className={className} color={colorMixed ? undefined : data.color} />;
+  }
 
   const write = (next: NoodleData, history: boolean, patch?: Partial<NoodleData>) => {
     if (onWrite) {
@@ -118,157 +186,190 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
       write({ ...dataRef.current, [key]: value }, true, { [key]: value });
     };
 
+  const toggle = (next: OpenMenu) => {
+    setMenu((current) => (current === next ? null : next));
+  };
+
   return (
     <div
       data-noodle-toolbar
       data-noodle-menu={menu ? "" : undefined}
-      className="nodrag nopan nowheel flex max-w-[36rem] flex-wrap items-center gap-0.5 p-1"
+      className="nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
-        if ((event.target as HTMLElement).closest("input")) return;
         event.preventDefault();
         event.stopPropagation();
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      <ColorMenu open={menu === "color"} color={data.color} onToggle={() => setMenu((current) => (current === "color" ? null : "color"))}>
-          <div className="flex w-44 flex-wrap gap-1">
-            {NOODLE_COLORS.map((swatch) => (
-              <button
-                key={swatch.value}
-                type="button"
-                role="menuitemradio"
-                aria-checked={on("color", swatch.value)}
-                aria-label={swatch.name}
-                title={swatch.name}
-                onClick={pick("color", swatch.value)}
-                className={`h-6 w-6 rounded-full border ${on("color", swatch.value) ? "border-slate-900 ring-2 ring-slate-300" : "border-slate-300"}`}
-                style={{ background: swatch.value }}
+      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+        <ContextualButton
+          ariaLabel="Text"
+          title="Text"
+          pressed={editing}
+          onPointerDown={() => retainNoodleLabel()}
+          onPointerCancel={() => releaseNoodleLabel()}
+          onClick={() => {
+            setMenu(null);
+            toggleNoodleLabel(edgeId);
+          }}
+          showLeftIcon={false}
+          showLabel={false}
+          showDropdownIcon={false}
+          showRightIcon
+          icon={TypeIcon}
+        />
+        <MenuButton
+          label="Color"
+          icon={ColorIcon}
+          open={menu === "color"}
+          onToggle={() => toggle("color")}
+        >
+          <div className={`${menuChrome} gap-brand-scale-200`} role="menu" aria-label="Color">
+            {SWATCH_FAMILIES.map((family) => (
+              <ColorSwatch
+                key={family}
+                type="color"
+                color={swatchColor(family, NOODLE_SWATCH_SCALE)}
+                selected={colorFamily === family}
+                ariaLabel={`${family} ${NOODLE_SWATCH_SCALE}`}
+                onClick={() => {
+                  setMenu(null);
+                  write({ ...dataRef.current, color: `#${SWATCH_HEX[family][NOODLE_SWATCH_SCALE]}` }, true, {
+                    color: `#${SWATCH_HEX[family][NOODLE_SWATCH_SCALE]}`,
+                  });
+                }}
               />
             ))}
-            <label className="flex items-center gap-1 text-[11px] font-medium text-slate-600">
-              Custom
-              <input
-                type="color"
-                aria-label="Custom color"
-                value={data.color}
-                className="h-6 w-8 cursor-pointer border-0 bg-transparent p-0"
-                onFocus={() => {
-                  colorHistory.current = false;
-                }}
-                onChange={(event) => {
-                  const history = !colorHistory.current;
-                  colorHistory.current = true;
-                  write({ ...dataRef.current, color: event.target.value }, history, { color: event.target.value });
-                }}
-                onBlur={() => {
-                  colorHistory.current = false;
-                }}
-              />
-            </label>
           </div>
-      </ColorMenu>
-
-      <span className="mx-0.5 h-5 w-px bg-slate-200" />
-
-      {(["solid", "dashed"] as NoodleLineStyle[]).map((style) => (
-        <button
-          key={style}
-          type="button"
-          aria-label={style === "solid" ? "Solid line" : "Dashed line"}
-          aria-pressed={on("lineStyle", style)}
-          title={style === "solid" ? "Solid" : "Dashed"}
-          onClick={pick("lineStyle", style)}
-          className={`rounded-lg px-1.5 py-1 ${on("lineStyle", style) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+        </MenuButton>
+        <MenuButton
+          label="Line weight and line type"
+          icon={LineWeightMenuIcon}
+          open={menu === "weight"}
+          onToggle={() => toggle("weight")}
         >
-          <LineGlyph dashed={style === "dashed"} weight={1.6} />
-        </button>
-      ))}
-
-      <span className="mx-0.5 h-5 w-px bg-slate-200" />
-
-      {(
-        [
-          ["thin", "Thin"],
-          ["medium", "Medium"],
-          ["thick", "Thick"],
-        ] as const
-      ).map(([thickness, label]) => (
-        <button
-          key={thickness}
-          type="button"
-          aria-label={`${label} line`}
-          aria-pressed={on("thickness", thickness)}
-          title={label}
-          onClick={pick("thickness", thickness as NoodleThickness)}
-          className={`rounded-lg px-1.5 py-1 ${on("thickness", thickness) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
+          <div className={`${menuChrome} gap-brand-scale-100`} role="menu" aria-label="Line weight and line type">
+            <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+              {(
+                [
+                  ["thin", "Thin"],
+                  ["medium", "Medium"],
+                  ["thick", "Thick"],
+                ] as const
+              ).map(([thickness, label]) => (
+                <IconChoice
+                  key={thickness}
+                  label={`${label} line`}
+                  pressed={on("thickness", thickness)}
+                  icon={THICKNESS_ICONS[thickness]}
+                  onClick={() => write({ ...dataRef.current, thickness }, true, { thickness })}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-brand-scale-50">
+              {(
+                [
+                  ["solid", "Solid line"],
+                  ["dashed", "Dashed line"],
+                ] as const
+              ).map(([style, label]) => (
+                <IconChoice
+                  key={style}
+                  label={label}
+                  pressed={on("lineStyle", style)}
+                  icon={LINE_STYLE_ICONS[style]}
+                  onClick={() => write({ ...dataRef.current, lineStyle: style }, true, { lineStyle: style })}
+                />
+              ))}
+            </div>
+          </div>
+        </MenuButton>
+        <MenuButton
+          label="Noodle type"
+          icon={mixed?.has("shape") ? TypeStraightIcon : SHAPE_ICONS[data.shape]}
+          open={menu === "shape"}
+          onToggle={() => toggle("shape")}
         >
-          <LineGlyph weight={thickness === "thin" ? 1 : thickness === "medium" ? 2 : 3.2} />
-        </button>
-      ))}
+          <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label="Noodle type">
+            {(
+              [
+                ["straight", "Straight"],
+                ["elbow", "Elbow"],
+                ["curve", "Curve"],
+              ] as const
+            ).map(([shape, label]) => (
+              <IconChoice
+                key={shape}
+                label={`${label} line`}
+                pressed={on("shape", shape)}
+                icon={SHAPE_ICONS[shape]}
+                onClick={pick("shape", shape)}
+              />
+            ))}
+          </div>
+        </MenuButton>
+      </div>
+      <div className="flex items-center gap-brand-scale-50">
+        <ArrowMenu
+          label="Start arrowhead"
+          value={data.markerStart}
+          neutral={mixed?.has("markerStart")}
+          open={menu === "start"}
+          onToggle={() => toggle("start")}
+          onPick={(value) => {
+            setMenu(null);
+            write({ ...dataRef.current, markerStart: value }, true, { markerStart: value });
+          }}
+        />
+        <ArrowMenu
+          label="End arrowhead"
+          value={data.markerEnd}
+          neutral={mixed?.has("markerEnd")}
+          open={menu === "end"}
+          onToggle={() => toggle("end")}
+          onPick={(value) => {
+            setMenu(null);
+            write({ ...dataRef.current, markerEnd: value }, true, { markerEnd: value });
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
-      <span className="mx-0.5 h-5 w-px bg-slate-200" />
-
-      {(
-        [
-          ["straight", "Straight"],
-          ["elbow", "Elbow"],
-          ["curve", "Curve"],
-        ] as const
-      ).map(([shape, label]) => (
-        <button
-          key={shape}
-          type="button"
-          aria-label={`${label} line`}
-          aria-pressed={on("shape", shape)}
-          title={label}
-          onClick={pick("shape", shape)}
-          className={`rounded-lg px-1.5 py-1 ${on("shape", shape) ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
-        >
-          <ShapeGlyph shape={shape} />
-        </button>
-      ))}
-
-      <span className="mx-0.5 h-5 w-px bg-slate-200" />
-
-      <button
-        type="button"
-        aria-label="Text"
-        aria-pressed={editing}
-        title="Text"
-        onPointerDown={() => retainNoodleLabel()}
-        onPointerCancel={() => releaseNoodleLabel()}
-        onClick={() => {
-          setMenu(null);
-          toggleNoodleLabel(edgeId);
-        }}
-        className={`rounded-lg px-1.5 py-1 ${editing ? "bg-slate-200 text-slate-900" : "text-slate-600 hover:bg-slate-100"}`}
-      >
-        <TextGlyph />
-      </button>
-
-      <ArrowMenu
-        label="Start arrowhead"
-        value={data.markerStart}
-        neutral={mixed?.has("markerStart")}
-        open={menu === "start"}
-        onToggle={() => setMenu((current) => (current === "start" ? null : "start"))}
-        onPick={(value) => {
-          setMenu(null);
-          write({ ...dataRef.current, markerStart: value }, true, { markerStart: value });
-        }}
+function MenuButton({
+  label,
+  icon,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  icon: SlotIcon;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  return (
+    <div className="relative">
+      <ContextualButton
+        ref={buttonRef}
+        ariaLabel={label}
+        title={label}
+        ariaExpanded={open}
+        ariaHasPopup="menu"
+        onClick={onToggle}
+        showLeftIcon={false}
+        showLabel={false}
+        showRightIcon
+        showDropdownIcon
+        icon={icon}
       />
-      <ArrowMenu
-        label="End arrowhead"
-        value={data.markerEnd}
-        neutral={mixed?.has("markerEnd")}
-        open={menu === "end"}
-        onToggle={() => setMenu((current) => (current === "end" ? null : "end"))}
-        onPick={(value) => {
-          setMenu(null);
-          write({ ...dataRef.current, markerEnd: value }, true, { markerEnd: value });
-        }}
-      />
+      <AnchoredMenu open={open} anchorRef={buttonRef} label={label}>
+        {children}
+      </AnchoredMenu>
     </div>
   );
 }
@@ -277,13 +378,11 @@ function AnchoredMenu({
   open,
   anchorRef,
   label,
-  className,
   children,
 }: {
   open: boolean;
   anchorRef: RefObject<HTMLButtonElement | null>;
   label: string;
-  className: string;
   children: ReactNode;
 }) {
   const { menuRef, box } = useAnchoredBox(open, anchorRef, "start");
@@ -292,10 +391,8 @@ function AnchoredMenu({
     <FloatingPanel
       layer="dropdown"
       panelRef={menuRef}
-      role="menu"
       ariaLabel={label}
       data-noodle-toolbar=""
-      className={className}
       style={{
         position: "absolute",
         top: box?.top ?? 0,
@@ -305,43 +402,6 @@ function AnchoredMenu({
     >
       {children}
     </FloatingPanel>
-  );
-}
-
-function ColorMenu({
-  open,
-  color,
-  onToggle,
-  children,
-}: {
-  open: boolean;
-  color: string;
-  onToggle: () => void;
-  children: ReactNode;
-}) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  return (
-    <div>
-      <button
-        ref={buttonRef}
-        type="button"
-        aria-label="Color"
-        aria-expanded={open}
-        title="Color"
-        onClick={onToggle}
-        className="flex items-center gap-1 rounded-lg px-1.5 py-1 hover:bg-slate-100"
-      >
-        <span className="h-4 w-4 rounded-full border border-slate-300" style={{ background: color }} />
-      </button>
-      <AnchoredMenu
-        open={open}
-        anchorRef={buttonRef}
-        label="Color"
-        className="flex rounded-lg border border-white/50 bg-white/40 p-2 shadow-lg backdrop-blur-xl"
-      >
-        {children}
-      </AnchoredMenu>
-    </div>
   );
 }
 
@@ -362,45 +422,32 @@ function ArrowMenu({
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
-    <div>
-      <button
+    <div className="relative">
+      <ContextualButton
         ref={buttonRef}
-        type="button"
-        aria-label={label}
-        aria-expanded={open}
+        ariaLabel={label}
         title={label}
+        ariaExpanded={open}
+        ariaHasPopup="menu"
         onClick={onToggle}
-        className="flex items-center gap-0.5 rounded-lg px-1 py-0.5 text-slate-700 hover:bg-slate-100"
-      >
-        <ArrowGlyph kind={value} />
-        <svg width="8" height="8" viewBox="0 0 10 10" aria-hidden className="fill-slate-500">
-          <path d="M2 3.5 5 7l3-3.5" />
-        </svg>
-      </button>
-      <AnchoredMenu
-        open={open}
-        anchorRef={buttonRef}
-        label={label}
-        className="w-36 rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
-      >
-        {NOODLE_ARROWS.map((kind) => {
-          const checked = !neutral && value === kind;
-          return (
-          <button
-            key={kind}
-            type="button"
-            role="menuitemradio"
-            aria-checked={checked}
-            onClick={() => onPick(kind)}
-            className={`flex w-full items-center gap-2 px-2 py-1 text-left text-xs ${
-              checked ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            <ArrowGlyph kind={kind} />
-            {NOODLE_ARROW_LABELS[kind]}
-          </button>
-          );
-        })}
+        showLeftIcon={false}
+        showLabel={false}
+        showRightIcon
+        showDropdownIcon
+        icon={ARROW_ICONS[neutral ? "none" : value]}
+      />
+      <AnchoredMenu open={open} anchorRef={buttonRef} label={label}>
+        <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label={label}>
+          {NOODLE_ARROWS.map((kind) => (
+            <IconChoice
+              key={kind}
+              label={NOODLE_ARROW_LABELS[kind]}
+              pressed={!neutral && value === kind}
+              icon={ARROW_ICONS[kind]}
+              onClick={() => onPick(kind)}
+            />
+          ))}
+        </div>
       </AnchoredMenu>
     </div>
   );

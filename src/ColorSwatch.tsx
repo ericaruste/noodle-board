@@ -27,6 +27,26 @@ export function swatchColor(family: SwatchFamily, scale: SwatchScale) {
   return `var(--alias-swatch-${family}-${scale})`;
 }
 
+/**
+ * Hex digits for `alias.swatch`, copied from the brand colors in tokens.css.
+ * The discs paint the CSS variables. A field or a noodle stroke needs the digits.
+ */
+export const SWATCH_HEX: Record<SwatchFamily, Record<SwatchScale, string>> = {
+  purple: { 200: "EBCFFF", 500: "BF66FF" },
+  sky: { 200: "CBECFF", 500: "66C7FF" },
+  lime: { 200: "E9FFDB", 500: "A5F075" },
+  orange: { 200: "FFDBA7", 500: "FFC066" },
+  yellow: { 200: "FFF6BF", 500: "F0DE75" },
+  coral: { 200: "FFD4C4", 500: "FF8F66" },
+  tomato: { 200: "FF9E97", 500: "FF7066" },
+  pink: { 200: "FFE4ED", 500: "FF99BB" },
+};
+
+export function swatchFamilyForHex(hex: string, scale: SwatchScale): SwatchFamily | null {
+  const digits = hex.replace(/#/g, "").toUpperCase();
+  return SWATCH_FAMILIES.find((family) => SWATCH_HEX[family][scale] === digits) ?? null;
+}
+
 /** Stand-in for the color a react-colorful picker will pass later. Not an alias swatch. */
 const customPickerSample = "#E23D8C";
 

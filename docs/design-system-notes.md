@@ -20,7 +20,9 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Color picker toolbar width.** The swatch grid and the hex row are 152px: five 24px discs and four 8px gaps. No spacing token is 152px. The picker field stays 172px. No spacing token is 172px.
 - **[Figma] Color picker toolbar padding.** The frame is 12px, `brand.scale.300`. The toolbar and the picker panel use 8px, `brand.scale.200`.
 - **[Figma] Color picker placement.** The frame paints the picker under the swatch grid. The app puts it in its own panel beside the toolbar: on the right when that side fits, on the left when the toolbar is against the right edge. Opening it does not move the toolbar.
-- **[code] Color picker on shape fill, stroke, and noodles.** Sticky notes use the toolbar. Those bars still use the Phase 1 swatches.
+- **[code] Color picker on shape fill and stroke.** Sticky notes use the color picker toolbar. Noodles pick from the eight step-500 swatches on the noodle toolbar. Shape fill and stroke still use the Phase 1 bars. The noodle bar does not open the picker.
+- **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
+- **[Figma] Noodle color menu.** The frame does not paint the open color menu. The app opens eight `alias.swatch` step-500 discs. A custom color and the color picker are not on this bar. A noodle that is not one of those swatches keeps that color on the disc until a swatch is chosen.
 
 ## Decisions already made
 
@@ -39,6 +41,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 - The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
 - The custom preview is a 12px circle, `brand.scale.300`, with a 1px white stroke, `brand.foundation.white` at `alias.border-width.xsm`, drawn inside the circle. It is not a separate white circle. The custom swatch has no disc stroke in default, hover, or selected. None and color keep the 1px `mapped.border.control` stroke on default only. Hover and selected drop it. Keyboard focus uses the hover ring, so that stroke is hidden then too.
+- The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open menu uses the 24px color swatch at step 500.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
 ## Contextual button
@@ -535,3 +538,159 @@ Collapsed paints none selected and hides the picker. The hex on that frame is `E
 Not painted on this frame: hover and focus of the toolbar itself. Those belong to the swatch, the hex input, and the icon button.
 
 The toolbar adds no z-index. Selection chrome already uses FloatingPanel. This toolbar is the child that will go in that panel. The trial also places one copy in FloatingPanel over a selected box and a dragging box, both on the selection layer.
+
+## Noodle toolbar
+
+Figma `toolbar/contextual/noodle`. Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, above a selected noodle. The component node id was not in the property panel. The file link is the spec page, node `193:3525`.
+
+Every control is a contextual button with the unused slots turned off.
+
+- First group: text, color, line weight, noodle type. A divider sits on the right of the group.
+- Second group: start arrow and end arrow.
+
+The bar is 40px high and hugs its width. The specimen measures 277px wide. That width is the buttons, the gaps, and the padding. It is not a fixed size.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.1000`. The panel reads H 40 |
+| Padding | `brand.scale.100` | 4px |
+| Gap inside a group | `brand.scale.50` | 2px. The first group and the arrow group both read gap 2 |
+| Gap between groups | `brand.scale.100` | 4px. The bar reads gap 4 |
+| Corner radius | `alias.border-radius.xl` | 12px. The panel reads 12 |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px. The fill style name was not opened. The pill matches the text toolbar beside it, so the bar uses that stroke |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80%. The fill style name was not opened. The pill matches the text toolbar beside it |
+| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
+| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Control text | none on this frame | the label slot is off, so the bar shows no text. A label would use the contextual button text colors |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Color disc | `brand.scale.400` | 16px, the contextual button icon slot. It paints the noodle color. It is not the 24px color swatch |
+| Color disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px |
+
+The component exposes no properties of its own. The buttons inside set the contextual button properties. These were read from the property panel:
+
+| Control | Slots | Instance |
+| --- | --- | --- |
+| Text | left icon off, label off, dropdown off, right icon on | `type` |
+| Color | left icon off, label off, right icon on, dropdown on | name starts with `color` |
+| Line weight | left icon off, label off, right icon on, dropdown on | name starts with `line-w` |
+| Noodle type | left icon off, label off, right icon on, dropdown on | `straight` on the specimen |
+| Start arrow | left icon off, label off, right icon on, dropdown on | the panel was not opened on this one |
+| End arrow | left icon off, label off, right icon on, dropdown on | `open` on the specimen |
+
+Text uses the current T glyph. The asset folder has no type icon. Line weight uses `line-weight-menu`. Noodle type uses `type-straight`, `type-elbow`, or `type-curve` for the current shape. The arrows use the current arrow glyph. `noodle-main` is not a control on this bar.
+
+Painted on the bar: one resting frame. The buttons in that frame are `state=Default`.
+
+Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
+
+The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the swatch menu. That open color menu is not painted on the frame.
+
+## Line weight and line type menu
+
+Figma frame under `toolbar/contextual/noodle`, the menu labeled as the truncated `toolbar/contex...` beside the bar. Ticket NB-50. Code is the weight menu in `src/NoodleToolbar.tsx`.
+
+Three weight icons, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. Choosing one leaves the menu open, so the other group can be set too.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
+| Padding | `brand.scale.100` | 4px |
+| Gap inside a group | `brand.scale.50` | 2px |
+| Gap between groups | `brand.scale.100` | 4px |
+| Corner radius | `alias.border-radius.xl` | 12px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
+| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.100`) of padding before it |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Control text | none on this frame | the label slot is off |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+
+The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
+
+The property list on this menu was not opened. It is not confirmed whether the menu exposes `state`, `type`, or `selected`.
+
+Painted: one resting row. The thick icon reads darker because its stroke is 3.5px. Whether that button is the selected state was not in the property panel. The app paints the current weight and the current line style with the button’s selected state.
+
+Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
+
+## Noodle type menu
+
+Figma frame under `toolbar/contextual/noodle`, the menu on the right of the three open rows. Ticket NB-50. Code is the shape menu in `src/NoodleToolbar.tsx`.
+
+Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `type-elbow`, and `type-curve`. The current shape is the selected button. Choosing one closes the menu. This frame has no divider.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
+| Padding | `brand.scale.100` | 4px |
+| Gap | `brand.scale.50` | 2px |
+| Corner radius | `alias.border-radius.xl` | 12px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
+| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Control text | none on this frame | the label slot is off |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+
+The three buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
+
+The property list on this menu was not opened.
+
+Painted: one resting row of three icon buttons.
+
+Not painted, as far as the frame shows: hover and disabled. The button has no focus state. The app paints the current shape with the button’s selected state.
+
+## Arrow menu
+
+Figma frame under `toolbar/contextual/noodle`, the middle open row. Ticket NB-50. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`.
+
+Six icon buttons, one for each arrowhead the noodle already has: none, arrow, open, triangle, circle, and diamond. The glyphs are the current arrow icons. The current end is the selected button. Choosing one closes the menu. Start and end open the same menu with their own selection. This frame has no divider.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
+| Padding | `brand.scale.100` | 4px |
+| Gap | `brand.scale.50` | 2px |
+| Corner radius | `alias.border-radius.xl` | 12px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
+| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Control text | none on this frame | the label slot is off |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+
+The six buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
+
+The property list on this menu was not opened.
+
+Painted: one resting row of six arrow glyphs.
+
+Not painted, as far as the frame shows: hover and disabled. The button has no focus state. The app paints the current arrowhead with the button’s selected state.
+
+The toolbar and these menus add no z-index. The bar is already in FloatingPanel on the toolbar layer. The menus use FloatingPanel on the dropdown layer.
