@@ -15,7 +15,7 @@ linear_url: https://linear.app/ericar/issue/ERI-64/color-picker-toolbar
 
 The toolbar that will sit below an element when a fill or stroke color is chosen. Figma paints it twice on the frame titled `color-swatch`, node `193:3525`.
 
-Collapsed is the swatch grid, the hex field, and two icon buttons. Extended adds the color picker under the grid. The picker shows when the custom swatch is clicked.
+Collapsed is the swatch grid, the hex field, and two icon buttons. Extended adds the color picker in its own panel beside the toolbar. The picker shows when the custom swatch is clicked. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. Opening it does not move the toolbar.
 
 [`src/ColorPickerToolbar.tsx`](../src/ColorPickerToolbar.tsx) is the component. `?trial=color-picker` shows both states, a live toolbar, and one copy in the floating layer. A selected sticky note uses this toolbar. Shape fill, stroke, and noodles still use the Phase 1 bars.
 
@@ -41,12 +41,14 @@ Fill, stroke, and sticky color still use the Phase 1 swatch rows. Phase 2 needs 
 - [x] The floating copy paints above a selected element and a dragging element
 - [x] A selected sticky uses the toolbar. The picker mounts collapsed, opens from the custom swatch, and the saturation and hue handles can be dragged
 - [x] While a palette swatch or none is selected, the custom disc stays on the default color `EBCFFF`
+- [x] The picker is its own panel beside the toolbar. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. Opening it does not move the toolbar
+- [x] The hex row is the same width as the swatch grid
 
 ## Technical notes
 
 The grid is five columns: none, then `alias.swatch` in token-file order, then custom. Fill and sticky notes use step 200. Stroke and noodles use step 500. The specimen on the frame is step 200. Tomato on that frame is `#FF7066`, which is step 500. The component uses one scale for the whole grid.
 
-The swatch grid is 152px. That is five 24px discs and four 8px gaps. The hex row is 172px, so the column stays 172px. No spacing token is 152px or 172px. The saturation field is 108px tall, including the 12px black band. No spacing token is 108px. The gap between the swatch grid, the picker, and the hex row is 16px, `brand.scale.400`. The panel padding is 12px, `brand.scale.300`. The panel corner is 16px, `alias.border-radius.xxl`.
+The swatch grid is 152px. That is five 24px discs and four 8px gaps. The hex row matches that width. The hex field in this toolbar shrinks below its 108px frame. The hex input component itself stays 108px. No spacing token is 152px. The saturation field is 108px tall, including the 12px black band, and 172px wide. No spacing token is 108px or 172px. The gap between the swatch grid and the hex row is 16px, `brand.scale.400`. The picker panel sits 4px, `brand.scale.100`, off the toolbar, on the right when that side fits and on the left when the toolbar is against the right edge. Opening it does not move the toolbar. The panel padding is 8px, `brand.scale.200`. The Figma frame is 12px. The panel corner is 16px, `alias.border-radius.xxl`.
 
 The black band is the bottom border of the saturation field, `brand.foundation.black` at `brand.scale.300`. react-colorful draws it that way. The hue bar sits against that band. `HexColorPicker` has no alpha slider. The stylesheet also hides `.react-colorful__alpha`.
 

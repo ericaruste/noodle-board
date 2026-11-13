@@ -33,7 +33,7 @@ const customPickerSample = "#E23D8C";
 /**
  * Figma angular gradient on the custom swatch. Not a token.
  * 0% sits at the left, where the stop handles sit on the frame.
- * The circle on top is the color the user picks.
+ * The circle on top is the color the user picks, with a 1px white stroke inside it.
  */
 const customWheel =
   "conic-gradient(from 270deg, #F43F5E 0%, #F59E0B 14%, #EAB308 29%, #22C55E 43%, #06B6D4 57%, #6366F1 71%, #D946EF 86%, #F43F5E 100%)";
@@ -59,10 +59,10 @@ const ringClass: Record<ColorSwatchState, string> = {
 };
 
 const discClass =
-  "relative inline-flex size-brand-scale-600 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
+  "group relative inline-flex size-brand-scale-600 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
 
 const hairlineClass =
-  "pointer-events-none absolute inset-0 rounded-full [box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-control)]";
+  "pointer-events-none absolute inset-0 rounded-full group-focus-visible:hidden [box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-control)]";
 
 function labelFor(type: ColorSwatchType) {
   if (type === "none") return "No color";
@@ -103,14 +103,13 @@ export const ColorSwatch = forwardRef<HTMLButtonElement, ColorSwatchProps>(funct
       {type === "custom" ? (
         <>
           <span className="absolute inset-0 rounded-full" style={{ background: customWheel }} />
-          <span className="absolute left-1/2 top-1/2 size-brand-scale-400 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-foundation-white" />
           <span
-            className="absolute left-1/2 top-1/2 size-brand-scale-300 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute left-1/2 top-1/2 box-border size-brand-scale-300 -translate-x-1/2 -translate-y-1/2 rounded-full border border-alias-border-width-xsm border-brand-foundation-white"
             style={{ background: color }}
           />
         </>
       ) : null}
-      <span className={hairlineClass} />
+      {type !== "custom" && visual === "default" ? <span className={hairlineClass} /> : null}
     </button>
   );
 });

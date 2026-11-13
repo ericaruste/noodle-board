@@ -44,10 +44,29 @@ const SWATCH_HEX: Record<SwatchFamily, Record<SwatchScale, string>> = {
   pink: { 200: "FFE4ED", 500: "FF99BB" },
 };
 
-const fullHex = /^[0-9A-F]{6}$/;
+type PickerSide = "left" | "right";
+
+/** The picker hangs off the toolbar. It stays off the measured box so the centered bar does not shift. */
+function pickerSideFor(toolbar: HTMLElement, picker: HTMLElement): PickerSide {
+  const host = floatingSlot("toolbar")?.getBoundingClientRect();
+  const leftEdge = host?.left ?? 0;
+  const rightEdge = host?.right ?? window.innerWidth;
+  const pad = 8;
+  const gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-100");
+  const gap = Number.parseFloat(gapRaw);
+  const space = Number.isFinite(gap) ? gap : 4;
+  const box = toolbar.getBoundingClientRect();
+  const width = picker.offsetWidth;
+  const roomRight = rightEdge - pad - box.right - space;
+  const roomLeft = box.left - space - (leftEdge + pad);
+  if (roomRight >= width) return "right";
+  return roomLeft > roomRight ? "left" : "right";
+}
 
 /** Resting paint of the custom disc. The picked color shows only while custom is selected. */
 const DEFAULT_CUSTOM_HEX = "EBCFFF";
+
+const fullHex = /^[0-9A-F]{6}$/;
 
 type EyeDropperWindow = Window & {
   EyeDropper?: new () => { open: () => Promise<{ sRGBHex: string }> };
@@ -72,6 +91,9 @@ export default function ColorPickerToolbar({
   const [choiceState, setChoiceState] = useState(defaultChoice);
   const [hexState, setHexState] = useState(() => digitsOf(defaultCustomHex));
   const [expandedState, setExpandedState] = useState(defaultExpanded);
+  const [pickerSide, setPickerSide] = useState<PickerSide>("right");
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const choice = choiceProp ?? choiceState;
   const customHex = digitsOf(customHexProp ?? hexState);
   const expanded = expandedProp ?? expandedState;
@@ -96,6 +118,22 @@ export default function ColorPickerToolbar({
 
   const shown = choice.kind === "swatch" ? SWATCH_HEX[choice.family][scale] : customHex;
   const pickerHex = held.current;
+
+  useLayoutEffect(() => {
+    if (!expanded) return;
+    let frame = 0;
+    const place = () => {
+      const toolbar = toolbarRef.current;
+      const picker = pickerRef.current;
+      if (toolbar && picker) {
+        const next = pickerSideFor(toolbar, picker);
+        setPickerSide((prev) => (prev === next ? prev : next));
+      }
+      frame = requestAnimationFrame(place);
+    };
+    place();
+    return () => cancelAnimationFrame(frame);
+  }, [expanded]);
 
   function onCustomClick() {
     const nextExpanded = choice.kind === "custom" ? !expanded : true;
@@ -130,13 +168,17 @@ export default function ColorPickerToolbar({
     }
   }
 
+  const panelClass =
+    "rounded-alias-border-radius-xxl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-200 shadow-lg backdrop-blur-xl";
+
   return (
     <div
       data-color-toolbar
       data-color-expanded={expanded ? "true" : "false"}
       role="group"
       aria-label="Color picker"
-      className="noodle-color-toolbar flex w-max flex-col gap-brand-scale-400 rounded-alias-border-radius-xxl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-300 shadow-lg backdrop-blur-xl"
+      data-color-picker-side={expanded ? pickerSide : "closed"}
+      className="relative w-max"
       onMouseDown={(event) => {
         const target = event.target as HTMLElement;
         if (target.closest(".react-colorful")) {
@@ -151,9 +193,9 @@ export default function ColorPickerToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
-      {/* The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row is wider, 172px. No spacing token is either width. */}
-      <div className="flex w-[172px] flex-col gap-brand-scale-400">
-        <div className="grid w-max grid-cols-5 gap-brand-scale-200">
+      {/* The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row matches that width. No spacing token is 152px. */}
+      <div ref={toolbarRef} className={`noodle-color-toolbar grid w-max grid-cols-1 gap-brand-scale-400 ${panelClass}`}>
+        <div className="grid grid-cols-5 gap-brand-scale-200">
           <ColorSwatch
             type="none"
             selected={choice.kind === "none"}
@@ -182,21 +224,32 @@ export default function ColorPickerToolbar({
             onClick={onCustomClick}
           />
         </div>
-        {expanded ? (
-          <HexColorPicker
-            className="noodle-color-picker"
-            color={`#${pickerHex}`}
-            onChange={(next) => onHex(digitsOf(next))}
-          />
-        ) : null}
-        <div className="flex items-center justify-between gap-brand-scale-100">
-          <HexInput value={shown} onValueChange={onHex} />
-          <div className="flex items-center gap-brand-scale-100">
+        <div className="flex w-0 min-w-full items-center gap-brand-scale-100">
+          <HexInput className="min-w-0 flex-1" value={shown} onValueChange={onHex} />
+          <div className="flex shrink-0 items-center gap-brand-scale-100">
             <IconButton icon={Copy} size="md" ariaLabel="Copy hex" onClick={onCopy} />
             <IconButton icon={Pipette} size="md" ariaLabel="Pick a color from the screen" onClick={() => void onPipette()} />
           </div>
         </div>
       </div>
+      {expanded ? (
+        <div
+          ref={pickerRef}
+          className={`${panelClass} absolute top-0 ${
+            pickerSide === "left"
+              ? "right-[calc(100%+var(--brand-scale-100))]"
+              : "left-[calc(100%+var(--brand-scale-100))]"
+          }`}
+          role="group"
+          aria-label="Color picker panel"
+        >
+          <HexColorPicker
+            className="noodle-color-picker"
+            color={`#${pickerHex}`}
+            onChange={(next) => onHex(digitsOf(next))}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

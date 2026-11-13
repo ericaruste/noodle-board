@@ -11,6 +11,8 @@ type HexInputProps = {
   state?: HexInputState;
   readOnly?: boolean;
   id?: string;
+  /** Replaces the 108px frame width. The color toolbar uses this so the row matches the swatch grid. */
+  className?: string;
 };
 
 const focusRing =
@@ -27,7 +29,7 @@ function hexDigits(raw: string) {
 }
 
 export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function HexInput(
-  { value, defaultValue = "EBCFFF", onValueChange, state, readOnly = false, id },
+  { value, defaultValue = "EBCFFF", onValueChange, state, readOnly = false, id, className },
   ref,
 ) {
   const [draft, setDraft] = useState(() => hexDigits(defaultValue));
@@ -84,7 +86,7 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
   return (
     <label
       data-hex-input
-      className={`${state ? "" : "noodle-hex-input"} flex h-brand-scale-700 w-[108px] shrink-0 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default ${shellClass[visual]}`}
+      className={`${state ? "" : "noodle-hex-input"} flex h-brand-scale-700 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default ${shellClass[visual]} ${className ?? "w-[108px] shrink-0"}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onMouseDown={onFieldMouseDown}

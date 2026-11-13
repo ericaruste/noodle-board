@@ -629,7 +629,7 @@ body,
 /* Color picker toolbar. HexColorPicker has no alpha slider. The rule hides one if it is ever rendered.
    108px is the saturation field, including the 12px black band. No spacing token is 108px. */
 .noodle-color-picker.react-colorful {
-  width: 100%;
+  width: 172px; /* TODO token mismatch: Figma 172px */
   height: auto;
   gap: var(--brand-scale-0);
 }
