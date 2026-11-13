@@ -285,6 +285,11 @@
       "id": "00a13e7f-9e15-4f9a-b4c6-2c2fb1ff7896",
       "identifier": "ERI-64",
       "url": "https://linear.app/ericar/issue/ERI-64/color-picker-toolbar"
+    },
+    "NB-50": {
+      "id": "6c5b8824-c713-4136-a062-613ad8a6801e",
+      "identifier": "ERI-65",
+      "url": "https://linear.app/ericar/issue/ERI-65/noodle-toolbar"
     }
   }
 }
