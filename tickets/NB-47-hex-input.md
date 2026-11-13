@@ -7,8 +7,8 @@ labels: [Feature, UX]
 parent: NB-E6
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-62
+linear_url: https://linear.app/ericar/issue/ERI-62/hex-input
 ---
 
 ## Context
