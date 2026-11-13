@@ -12,6 +12,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Weight label width.** The weight control is held to the width of the words “Bold Italic”, so Regular, Bold, Italic, and Bold Italic do not resize the toolbar. The Figma component may still hug the label. Give that control a minimum width if the bar should stay still.
 - **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
 - **[token app] Small row height.** Size `sm` is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch. Add a spacing token if small rows should stop using a raw size.
+- **[token app] Icon button medium.** Size `md` is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch. A 16px icon centered in that square leaves 6px. No spacing token is 6px.
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
 
@@ -319,3 +320,52 @@ The rows use the menu item properties: size `sm`, caption off, chevron off, and 
 Painted: one resting frame. 14 is filled, and the toolbar above shows 14, so that row is the current size. The live menu marks the current size with the selected fill.
 
 Not painted on this frame: hover and disabled. Those states belong to the menu item. There is no focus state.
+
+## Icon button
+
+Figma `button/icon`, spec frame `button icon`, node `193:3525`. Ticket NB-46. Code `src/IconButton.tsx`. The trial page is `?trial=icon-button`.
+
+A square button whose only content is an icon. It is not a contextual button with the label turned off. Large is 32px, medium is 28px, and small is 20px. The default type has four states. The destructive type has three.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Size, lg | `brand.scale.700` | 32px square |
+| Size, md | none | 28px square. TODO token mismatch: Figma 28px |
+| Size, sm | `brand.scale.500` | 20px square |
+| Padding, lg | `brand.scale.200` | 8px, the space left by a 16px icon in the 32px square |
+| Padding, md | none | 6px. TODO token mismatch: Figma 6px. A 16px icon centered in the 28px square leaves 6px |
+| Padding, sm | `brand.scale.100` | 4px, the space left by a 12px icon in the 20px square |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | none | the button has no stroke |
+| Icon, lg and md | `brand.scale.400` | 16px, Lucide |
+| Icon, sm | `brand.scale.300` | 12px, Lucide |
+| Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Fill, default hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Fill, default selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
+| Fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
+| Icon, default | `mapped.icon.action` | `#303132` |
+| Icon, default hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Icon, default selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+The file request was rate limited, and the property panel was behind the Figma sign-up wall. Fills were matched to the action and error surface tokens by eye. The icon slot in the spec is the case-sensitive glyph.
+
+Figma properties, read from the variant grid:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| size | variant | `lg`, `md`, `sm` |
+| type | variant | `default`, `destructive` |
+| state | variant | `default`, `hover`, `selected`, `disabled` |
+| Icon | slot | case-sensitive glyph. It is the only content |
+
+Painted states: `default`, `hover`, `selected`, and `disabled` on the default type, in `lg`, `md`, and `sm`. `default`, `hover`, and `disabled` on the destructive type, in all three sizes.
+
+Not painted: focus. Selected is not painted on the destructive type.
+
+This button is not a toolbar. A toolbar that places it is its own component.
