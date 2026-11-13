@@ -30,8 +30,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-44 Font size menu](../NB-44-font-size-menu.md)
 - [NB-45 Menu gap](../NB-45-menu-gap.md)
 - [NB-46 Icon button](../NB-46-icon-button.md)
+- [NB-47 Hex input](../NB-47-hex-input.md)
 
-The next component ticket is the next free id after NB-46, parented to NB-E6, and titled with the component name.
+The next component ticket is the next free id after NB-47, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 

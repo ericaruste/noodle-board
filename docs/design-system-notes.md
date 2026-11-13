@@ -13,6 +13,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
+- **[Figma] Hex input width.** The frame is 108px wide. No spacing token is 108px. The code keeps 108px and marks the mismatch.
 
 ## Decisions already made
 
@@ -368,3 +369,46 @@ Painted states: `default`, `hover`, `selected`, and `disabled` on the default ty
 Not painted: focus. Selected is not painted on the destructive type.
 
 This button is not a toolbar. A toolbar that places it is its own component.
+
+## Hex input
+
+Figma `input/hex`, on the spec frame titled `input`. Ticket NB-47. Code `src/HexInput.tsx`. The trial page is `?trial=hex-input`.
+
+A hex field for the color toolbar that comes later. It is not that toolbar. Two labels sit in the box. `#` is constant. The hex code is the value the user types or pastes.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 108px fixed. No spacing token is 108px |
+| Height | `brand.scale.700` | 28px hug |
+| Padding | `brand.scale.200` | 8px |
+| Gap | `brand.scale.100` | 4px between `#` and the hex code |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Font | `alias.font-family.body` | Geist |
+| Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. Paragraph spacing is `not a token` |
+| Text, every state | `mapped.text.default` | `#303132`. The Figma text style is named `default` |
+| Fill, default | none | the field has no fill |
+| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9`. The Figma style is `action-hover` |
+| Fill, focus | `mapped.surface.default` | `#F0F5FB` at 80%. The Figma style is `default` |
+| Stroke, default and hover | none | those variants have no stroke |
+| Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box. The Figma style is `action-ring-focus` |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no icon and no divider.
+
+The file request was rate limited. Sizes, padding, gap, radius, fills, and the stroke were read from the Figma property panel on the component set.
+
+Figma properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| state | variant | `default`, `hover`, `focus` |
+
+`#` and the hex code are text layers, not variant properties. `#` does not change. The hex layer is the editable value. The spec shows `EBCFFF`.
+
+Painted states: `default`, `hover`, and `focus`.
+
+Not painted: disabled, selected, and pressed.
+
+This field is not a toolbar. The color toolbar that places it is its own component.
