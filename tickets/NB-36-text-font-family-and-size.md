@@ -25,7 +25,7 @@ A selected sticky, text object, or shape cannot change typeface or size. The tex
 
 The typeface menu is the font-style list of Google Fonts, in this order: Geist Mono, Open Sans, Montserrat, Coming Soon, and Noto Serif. Coming Soon is the Google Font of that name. The typeface button uses the Lucide `CaseSensitive` icon.
 
-The font size control sits beside the typeface menu. It is one field at the current text-label menu size, the same metrics as the weight menu today. The field shows the current size, and the user types a new size there. A dropdown on that same field lists preset sizes. The default size stays 14.
+The font size control sits beside the typeface menu. It is one field at the current text-label menu size, the same metrics as the weight menu today. The field shows the current size. A single click anywhere on that button opens the preset list. A double click selects the number so the user can type a size. The default size stays 14.
 
 ## Repro
 
@@ -39,7 +39,7 @@ The font size control sits beside the typeface menu. It is one field at the curr
 - [x] The typeface button shows the Lucide `CaseSensitive` icon at the alignment button’s size (`h-10`, glyph size 20). Its accessible name is Font style
 - [x] The typeface menu lists Geist Mono, Open Sans, Montserrat, Coming Soon, and Noto Serif, in that order. Each item is that Google Font. The active family is checked
 - [x] The font size control is a number field at the weight menu’s text-label metrics: no icon and no `h-10`. It shows the current size. Text that has no stored size shows 14 in that field, and that text still paints at 14px
-- [x] The field’s dropdown lists 10, 12, 14, 16, 18, 24, 32, 36, 48, 64, and 72, and nothing else. Choosing a preset fills the field and paints that size. Typing a size and pressing Enter, or leaving the field, paints a size from 1 to 400. Escape restores the size the field had when it was focused and closes the dropdown. The typed or chosen size stays in the field
+- [x] The field’s dropdown lists 10, 12, 14, 16, 18, 24, 32, 36, 48, 64, and 72, and nothing else. A single click anywhere on the font size button, the number or the chevron, opens that list. Choosing a preset fills the field and paints that size. A double click selects the number so it can be typed. Typing a size and pressing Enter, or leaving the field, paints a size from 1 to 400. Escape restores the size the field had when it was focused and closes the dropdown. The typed or chosen size stays in the field. A single click does not place a caret for typing
 - [x] Choosing a family paints the affected text in that family. Choosing a size paints it at that size. Text with no stored family keeps the current system sans
 - [x] While editing, the choice applies to the highlighted range. With the object selected and no range inside it, the choice applies to all of that text. A range that mixes families checks no single family. A range that mixes sizes shows Mixed in the size field, inside the same field metrics
 - [x] On a same-type group, the two controls apply to every object in the group. Mixed families and mixed sizes use the same mixed state as a mixed range
@@ -58,7 +58,7 @@ Store an optional `family` and an optional `size` on the run, beside `style`, so
 
 Apply family and size with the same selection rule as `onStyle`: the live range while editing, and `fullRange` when the object is only selected. The group bar maps the same change across each body in [`GroupChrome`](../src/GroupChrome.tsx).
 
-The typeface button is the existing glyph menu. The font size control is an input in the existing text-label menu metrics, with a chevron that opens the preset list in a `FloatingPanel`. The open panel is the preset list only. One open menu at a time, matching the weight and alignment menus. Typing in the field uses the toolbar’s existing exception for `input`, so the pointer can focus it.
+The typeface button is the existing glyph menu. The font size control is an input in the existing text-label menu metrics. A single click anywhere on that button opens the preset list in a `FloatingPanel`. A double click selects the number for typing. The open panel is the preset list only. One open menu at a time, matching the weight and alignment menus. Typing starts only after that double click, so a single click does not focus the field.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

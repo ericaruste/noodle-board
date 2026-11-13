@@ -23,6 +23,7 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 
 - [NB-38 Contextual button](../NB-38-contextual-button.md)
 - [NB-39 Text toolbar](../NB-39-text-toolbar.md)
+- [NB-40 Text align popover](../NB-40-text-align-popover.md)
 - [NB-41 Menu item](../NB-41-menu-item.md)
 - [NB-42 Font style menu](../NB-42-font-style-menu.md)
 
@@ -37,4 +38,4 @@ The next component ticket is the next free id after NB-42, parented to NB-E6, an
 
 ## Out of scope
 
-Merging individual tickets into `main`. Changing Phase 1 canvas behavior except where a component ticket requires it. Shadows, frosted glass, the dot grid, and responsive type sizes until those tokens exist.
+Merging individual tickets into `main`. Changing Phase 1 canvas behavior except where a component ticket requires it. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.

@@ -2,7 +2,7 @@
  * Generated from tokens/tokens.json.
  * The token export changes as UI is built from Figma.
  * Do not edit by hand. Run npm run tokens after each new export.
- * Responsive type sizes are left out until they have real values.
+ * Desktop font size and line height are included. Shadows, blur, and the dot grid are left out.
  */
 
 :root {
@@ -50,6 +50,9 @@
   --brand-scale-500: 20px;
   --brand-scale-600: 24px;
   --brand-scale-700: 32px;
+  --brand-scale-800: 40px;
+  --brand-scale-900: 44px;
+  --brand-scale-1000: 48px;
   --brand-red-50: #F1DEE0;
   --brand-red-100: #F0CDD2;
   --brand-red-200: #E49EAC;
@@ -97,6 +100,15 @@
   --alias-typeface-coming-soon: "Coming Soon";
   --alias-typeface-noto-serif: "Noto Serif";
   --alias-typeface-montserrat: "Montserrat";
+  --responsive-desktop-body-lg-size: 14px;
+  --responsive-desktop-body-lg-line-height: 16.8px;
+  --responsive-desktop-body-lg-line-height-tight: 14px;
+  --responsive-desktop-body-md-size: 12px;
+  --responsive-desktop-body-md-line-height: 14.4px;
+  --responsive-desktop-body-md-line-height-tight: 12px;
+  --responsive-desktop-caption-md-size: 10px;
+  --responsive-desktop-caption-md-line-height: 12px;
+  --responsive-desktop-caption-md-line-height-tight: 10px;
   --alias-primary-50: var(--brand-blue-50);
   --alias-primary-100: var(--brand-blue-100);
   --alias-primary-200: var(--brand-blue-200);
@@ -166,7 +178,7 @@
   --mapped-surface-action-strong-selected: var(--alias-primary-500);
   --mapped-surface-error: color-mix(in srgb, var(--alias-error-50) 0%, transparent);
   --mapped-surface-error-hover: var(--alias-error-50);
-  --mapped-surface-default: color-mix(in srgb, var(--alias-cool-neutral-400) 30%, transparent);
+  --mapped-surface-default: color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent);
   --mapped-text-action: var(--alias-cool-neutral-900);
   --mapped-text-action-hover: var(--alias-primary-800);
   --mapped-text-action-selected: var(--alias-primary-800);

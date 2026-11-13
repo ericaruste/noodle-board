@@ -92,7 +92,7 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
   const hoverClass = labelControl
     ? "hover:bg-mapped-surface-action-hover"
     : "enabled:hover:bg-mapped-surface-action-hover";
-  const classes = `group inline-flex h-brand-scale-700 items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-[12px] leading-[1em] ${surfaceClass[visual]} ${visual === "default" ? hoverClass : ""}`;
+  const classes = `group inline-flex h-brand-scale-700 items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight ${surfaceClass[visual]} ${visual === "default" ? hoverClass : ""}`;
   const ariaPressed =
     pressedValue === "mixed" ? "mixed" : pressedValue === true || state === "selected" ? true : pressedValue === false ? false : undefined;
 
@@ -159,7 +159,7 @@ const previewStates: ContextualButtonState[] = ["default", "hover", "selected", 
 export function ContextualButtonPreview() {
   return (
     <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
-      <p className="font-alias-font-family-body text-[12px] leading-[1em]">Contextual button</p>
+      <p className="font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight">Contextual button</p>
       <div className="flex items-center gap-brand-scale-400">
         {previewStates.map((state) => (
           <ContextualButton key={state} state={state} />

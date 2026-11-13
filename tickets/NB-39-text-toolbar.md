@@ -34,14 +34,18 @@ The text toolbar still used the Phase 1 colors and its own icon drawings. The Fi
 - [x] Underline and strikethrough are not on the bar
 - [x] Choosing a font, size, weight, alignment, list, or link still works
 - [x] The weight control stays the width of Bold Italic when the style changes
+- [x] A single click anywhere on the size button opens the presets, and a double click edits the number
+- [x] Label type uses `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight`
 
 ## Technical notes
 
 Underline and strikethrough are drawn in the Figma group and left out on purpose. They wait for the text feature that will add them.
 
-The fill color is `mapped.surface.default` (`#F0F5FB`). Opacity and blur match the existing frost: 40% and `backdrop-blur-xl`. Figma blur, the Figma shadow, and the token's 30% opacity are not applied. Effects from Figma stay out until they are planned.
+The fill is `mapped.surface.default` (`#F0F5FB` at 40%). Blur is the existing `backdrop-blur-xl`. Figma’s 2.6px blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
 
-The size control keeps the typed number in the label slot, with the chevron opening the presets.
+The size control keeps the number in the label slot. A single click anywhere on the size button opens the presets. A double click edits the number.
+
+Label type uses `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight` (12px / 12px, text style `body/md/tight`). Paragraph spacing is not in the export.
 
 The weight label is held to the width of Bold Italic, so Regular, Bold, Italic, and Bold Italic do not resize the bar.
 

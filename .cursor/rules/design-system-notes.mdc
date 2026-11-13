@@ -1,0 +1,14 @@
+---
+description: Record design-system notes for every component and toolbar
+alwaysApply: true
+---
+
+When a component, toolbar, dropdown, or popover is built or changed from Figma, add or update its section in `docs/design-system-notes.md` before the work is called done.
+
+Follow the section shape in `.cursor/rules/design-tokens.mdc`. The section names the Figma component, node id, ticket, and code path. It has its own token table for every piece, including text and icon colors per state and the divider when there is one. A popover does not say that it matches the toolbar. Record the Figma properties and their values, and say which states are painted.
+
+Add each open change to the “Still to update” list and tag it Figma, token app, or code. Move it to “Decisions already made” once it is settled.
+
+Do not invent tokens for shadows, blur, or the dot grid. Mark those as `not a token`. Do not call them a mismatch. Font size and line height use the responsive desktop token. Paragraph spacing is not in the export, so mark that `not a token`. Note the Figma text style.
+
+Mention the new notes in the reply, under the component’s name, so they can be applied in the design system.

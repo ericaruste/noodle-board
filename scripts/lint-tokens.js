@@ -1,7 +1,6 @@
 /**
- * Reports hardcoded colors, spacing, radius, and border thickness.
- * Shadows, backdrop blur, the dot grid, and type size are not checked:
- * those tokens are not in the build yet.
+ * Reports hardcoded colors, spacing, radius, border thickness, font size, and line height.
+ * Shadows, backdrop blur, and the dot grid are not checked. Paragraph spacing is not in the export.
  *
  * The live Tailwind theme still includes Tailwind's defaults, so the current
  * board does not change. This script is the safety net that counts classes
@@ -62,10 +61,10 @@ function utility(className) {
 function classify(className) {
   const name = utility(className);
   if (!name || name.startsWith("shadow") || name.startsWith("backdrop")) return null;
-  if (name.includes("brand-") || name.includes("alias-") || name.includes("mapped-")) {
+  if (name.includes("brand-") || name.includes("alias-") || name.includes("mapped-") || name.includes("responsive-")) {
     if (!name.includes("[")) return null;
   }
-  if (/^text-\[\d/.test(name) || /^leading-\[/.test(name)) return null;
+  if (/^text-\[\d/.test(name) || /^leading-\[/.test(name)) return "type";
   if (ARBITRARY_RE.test(name) || (name.includes("[") && /^(bg|text|border|rounded|p|px|py|m|gap|w|h)-\[/.test(name))) {
     return "arbitrary";
   }
