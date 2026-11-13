@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import {
   CaseSensitive,
   Link,
@@ -191,34 +191,6 @@ function FontStyleMenu({
         </FloatingPanel>
       ) : null}
     </div>
-  );
-}
-
-function MenuRow({
-  label,
-  active,
-  onPick,
-  style,
-}: {
-  label: string;
-  active: boolean;
-  onPick: () => void;
-  style?: CSSProperties;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitemradio"
-      aria-label={label}
-      aria-checked={active}
-      onClick={onPick}
-      style={style}
-      className={`block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs ${
-        active ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -538,21 +510,24 @@ function FontSizeField({
           role="menu"
           ariaLabel="Font size"
           data-text-toolbar=""
-          className="rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
+          className="flex w-max flex-col gap-brand-scale-0 rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
             left: box?.left ?? 0,
-            minWidth: box?.minWidth,
             visibility: box ? "visible" : "hidden",
           }}
         >
           {FONT_SIZE_PRESETS.map((preset) => (
-            <MenuRow
+            <MenuItem
               key={preset}
               label={String(preset)}
-              active={value === String(preset)}
-              onPick={() => {
+              size="sm"
+              showCaption={false}
+              showChevron={false}
+              widthClassName="w-brand-scale-800"
+              selected={value === String(preset)}
+              onClick={() => {
                 const next = String(preset);
                 baseline.current = next;
                 setText(next);

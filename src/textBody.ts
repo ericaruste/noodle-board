@@ -16,7 +16,7 @@ export const FONT_FAMILY_STACK: Record<FontFamily, string> = {
 export const DEFAULT_FONT_SIZE = 14;
 export const MIN_FONT_SIZE = 1;
 export const MAX_FONT_SIZE = 400;
-export const FONT_SIZE_PRESETS = [10, 12, 14, 16, 18, 24, 32, 36, 48, 64, 72] as const;
+export const FONT_SIZE_PRESETS = [10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72] as const;
 
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export type TextAlign = (typeof TEXT_ALIGNS)[number];

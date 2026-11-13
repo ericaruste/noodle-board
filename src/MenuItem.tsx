@@ -12,6 +12,8 @@ type MenuItemProps = {
   showChevron?: boolean;
   /** Extra classes for the label, such as an alias typeface. */
   labelClassName?: string;
+  /** Replaces the full-width row. A scale width keeps every row in one menu the same size. */
+  widthClassName?: string;
   size?: MenuItemSize;
   /** Painted variant from the spec. Leave unset to follow selected, disabled, and real hover. */
   state?: MenuItemState;
@@ -60,6 +62,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     showCaption = true,
     showChevron = true,
     labelClassName,
+    widthClassName = "w-full",
     size = "md",
     state,
     selected,
@@ -81,7 +84,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       role="menuitem"
       disabled={isDisabled}
       onClick={onClick}
-      className={`group flex w-full items-center justify-between gap-brand-scale-200 rounded-alias-border-radius-lg px-brand-scale-200 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
+      className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-200 rounded-alias-border-radius-lg px-brand-scale-200 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
     >
       {showLabel ? (
         <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]} ${labelClassName ?? ""}`}>
