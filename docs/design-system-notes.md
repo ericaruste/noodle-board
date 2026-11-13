@@ -541,7 +541,7 @@ The toolbar adds no z-index. Selection chrome already uses FloatingPanel. This t
 
 ## Noodle toolbar
 
-Figma `toolbar/contextual/noodle`. Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, above a selected noodle. The component node id was not in the property panel. The file link is the spec page, node `193:3525`.
+Figma `toolbar/contextual/noodle`. Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The pill slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar. The component node id was not in the property panel. The file link is the spec page, node `193:3525`.
 
 Every control is a contextual button with the unused slots turned off.
 

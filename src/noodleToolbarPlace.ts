@@ -198,19 +198,43 @@ function crossPositions(input: PlaceInput, side: Vec) {
   return shifts;
 }
 
+function accepted(input: PlaceInput, side: Vec, shift: number, extra: number): ScreenRect | null {
+  const rect = tightBox(input, side, shift, extra);
+  if (!rect || !crossExtentFits(rect, input, side) || !fits(rect, input)) return null;
+  const correction = paneCorrection(rect, input.pane, input.pad);
+  const along = correction.x * side.x + correction.y * side.y;
+  // Sliding back along this side would lay the pill on the arrow.
+  if (along < -0.5) return null;
+  return rect;
+}
+
 function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | null {
+  const centered = accepted(input, side, 0, extra);
+  if (centered) return centered;
+  // The stroke still occupies this side. A pane-edge shift would park the pill across the board.
+  if (!tightBox(input, side, 0, extra)) return null;
   let best: ScreenRect | null = null;
   let bestDist = Infinity;
   for (const shift of crossPositions(input, side)) {
-    const rect = tightBox(input, side, shift, extra);
-    if (!rect || !crossExtentFits(rect, input, side) || !fits(rect, input)) continue;
-    const correction = paneCorrection(rect, input.pane, input.pad);
-    const along = correction.x * side.x + correction.y * side.y;
-    // Sliding back along this side would lay the pill on the arrow.
-    if (along < -0.5) continue;
-    if (Math.abs(shift) < bestDist) {
-      best = rect;
-      bestDist = Math.abs(shift);
+    if (Math.abs(shift) < 0.5) continue;
+    const rect = accepted(input, side, shift, extra);
+    if (!rect || Math.abs(shift) >= bestDist) continue;
+    best = rect;
+    bestDist = Math.abs(shift);
+  }
+  return best;
+}
+
+function closest(input: PlaceInput, extra?: number): ScreenRect | null {
+  let best: ScreenRect | null = null;
+  let bestDist = Infinity;
+  for (const side of SIDES) {
+    const placed = extra == null ? placeOnSide(input, side) : placeOnSide(input, side, extra);
+    if (!placed) continue;
+    const dist = distToMid(placed, input.mid);
+    if (dist < bestDist) {
+      best = placed;
+      bestDist = dist;
     }
   }
   return best;
@@ -218,20 +242,20 @@ function placeOnSide(input: PlaceInput, side: Vec, extra = EXTRA): ScreenRect | 
 
 function fallback(input: PlaceInput): ScreenRect | null {
   for (const extra of [480, 2400]) {
-    for (const side of SIDES) {
-      const placed = placeOnSide(input, side, extra);
-      if (placed) return placed;
-    }
+    const placed = closest(input, extra);
+    if (placed) return placed;
   }
   // No listed shift keeps the gap inside the pane and off the board toolbar.
   return null;
 }
 
+function distToMid(rect: ScreenRect, mid: ScreenPoint) {
+  const cx = (rect.left + rect.right) / 2;
+  const cy = (rect.top + rect.bottom) / 2;
+  return Math.hypot(cx - mid.x, cy - mid.y);
+}
+
 /** Top-left of the toolbar box, in the same screen space as `mid` and `pane`. */
 export function placeNoodleToolbar(input: PlaceInput): ScreenRect | null {
-  for (const side of SIDES) {
-    const placed = placeOnSide(input, side);
-    if (placed) return placed;
-  }
-  return fallback(input);
+  return closest(input) ?? fallback(input);
 }
