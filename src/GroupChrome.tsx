@@ -8,7 +8,14 @@ import { drawnNoodle } from "./drawnNoodle";
 import { NoodleToolbarSlot, useChromeLayout } from "./NoodleEdge";
 import { readNoodle, sameNoodle, thicknessPx } from "./noodleData";
 import NoodleToolbar from "./NoodleToolbar";
-import { STICKY_COLORS, type StickyColor, type StickyData } from "./StickyNode";
+import {
+  StickyColorToolbar,
+  sameStickyChoice,
+  stickyChoice,
+  stickyCustomHex,
+  type StickyData,
+} from "./StickyNode";
+import type { ColorPickerChoice } from "./ColorPickerToolbar";
 import TextToolbar from "./TextToolbar";
 import {
   ALIGN_LABELS,
@@ -181,41 +188,38 @@ function GroupTextBar({
   );
 }
 
+function sameStickyModel(
+  a: { choice: ColorPickerChoice; hex: string } | null,
+  b: { choice: ColorPickerChoice; hex: string } | null,
+) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.hex === b.hex && sameStickyChoice(a.choice, b.choice);
+}
+
 function StickyColors({ box }: { box: Box }) {
-  const active = useStore((state) => {
-    const colors: StickyColor[] = [];
-    for (const node of selectedNodes(state.nodes, "sticky")) {
-      const color = (node.data as StickyData | undefined)?.color;
-      if (typeof color === "string" && color in STICKY_COLORS) colors.push(color as StickyColor);
-    }
-    if (colors.length === 0) return null;
-    return colors.every((color) => color === colors[0]) ? colors[0] : null;
-  });
+  const model = useStore((state) => {
+    const notes = selectedNodes(state.nodes, "sticky");
+    const first = notes[0]?.data as StickyData | undefined;
+    if (!first) return null;
+    const choice = stickyChoice(first);
+    const hex = stickyCustomHex(first);
+    const agreed = notes.every((node) => {
+      const data = node.data as StickyData;
+      return sameStickyChoice(stickyChoice(data), choice) && (choice.kind !== "custom" || stickyCustomHex(data) === hex);
+    });
+    return { choice: agreed ? choice : ({ kind: "mixed" } as const), hex };
+  }, sameStickyModel);
+  if (!model) return null;
   return (
     <SelectionChrome side="below" box={box} scope="group">
-      <div
-        data-sticky-colors
-        className="noodle-sticky-colors nodrag nopan nowheel flex gap-1 rounded-full border border-white/50 bg-white/40 p-1 shadow backdrop-blur-xl"
-        onMouseDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
-        onDoubleClick={(event) => event.stopPropagation()}
-      >
-        {(Object.keys(STICKY_COLORS) as StickyColor[]).map((color) => (
-          <button
-            key={color}
-            type="button"
-            aria-label={color}
-            aria-pressed={active === color}
-            className={`h-5 w-5 rounded-full border border-black/10 ${active === color ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}
-            style={{ background: STICKY_COLORS[color] }}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={(event) => {
-              event.stopPropagation();
-              publishGroupStyle({ property: "sticky", value: color });
-            }}
-          />
-        ))}
-      </div>
+      <StickyColorToolbar
+        choice={model.choice}
+        customHex={model.hex}
+        onApply={(choice, hex, history) => {
+          publishGroupStyle({ property: "sticky", choice, customHex: hex, history });
+        }}
+      />
     </SelectionChrome>
   );
 }

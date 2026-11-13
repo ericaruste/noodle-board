@@ -59,7 +59,7 @@ const ringClass: Record<ColorSwatchState, string> = {
 };
 
 const discClass =
-  "relative inline-flex size-brand-scale-700 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
+  "relative inline-flex size-brand-scale-600 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
 
 const hairlineClass =
   "pointer-events-none absolute inset-0 rounded-full [box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-control)]";
@@ -94,7 +94,7 @@ export const ColorSwatch = forwardRef<HTMLButtonElement, ColorSwatchProps>(funct
     >
       {type === "none" ? (
         <span className="absolute inset-0 rounded-full bg-brand-foundation-white">
-          <span className="absolute left-1/2 top-1/2 h-brand-scale-50 w-brand-scale-600 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
+          <span className="absolute left-1/2 top-1/2 h-brand-scale-50 w-brand-scale-500 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
         </span>
       ) : null}
       {type === "color" ? (

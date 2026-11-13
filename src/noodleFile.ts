@@ -1,6 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import { isShapeColor, isShapeKind } from "./shapeData";
-import { STICKY_COLORS } from "./StickyNode";
+import { STICKY_COLORS, isStickyPaint } from "./StickyNode";
 import { isTextBody } from "./textBody";
 
 /** On-disk project format. See docs/noodle-json.md. */
@@ -176,6 +176,8 @@ function unsupportedVersionMessage(version: number): string {
 function isStickyData(data: unknown): boolean {
   if (!isRecord(data)) return false;
   if (typeof data.color !== "string" || !(data.color in STICKY_COLORS)) return false;
+  if (data.paint !== undefined && !isStickyPaint(data.paint)) return false;
+  if (data.customHex !== undefined && (typeof data.customHex !== "string" || !/^[0-9A-Fa-f]{6}$/.test(data.customHex))) return false;
   const hasText = typeof data.text === "string";
   const hasParagraphs = isTextBody(data.paragraphs);
   if (data.paragraphs !== undefined && !hasParagraphs && !hasText) return false;

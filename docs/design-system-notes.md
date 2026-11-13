@@ -17,7 +17,8 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[code] Contextual button and icon button node ids.** Both notes cite node `193:3525`. That node is the color-swatch spec, and it now also holds the color picker toolbar. Their node ids still need a check.
 - **[Figma] Tomato on the color picker toolbar.** The other seven swatches are step 200. Tomato is `#FF7066`, step 500. The toolbar uses one scale for the grid.
 - **[token app] Color picker field height.** The saturation field, including the 12px black band, is 108px. No spacing token is 108px.
-- **[token app] Color picker toolbar width.** The swatch grid is 172px. No spacing token is 172px.
+- **[token app] Color picker toolbar width.** The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row is 172px, so the column stays 172px. No spacing token is 152px or 172px.
+- **[code] Color picker on shape fill, stroke, and noodles.** Sticky notes use the toolbar. Those bars still use the Phase 1 swatches.
 
 ## Decisions already made
 
@@ -35,7 +36,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Each font size row is `brand.scale.900` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 - The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
-- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Choosing custom does not change a palette color. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open.
+- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open.
 
 ## Contextual button
 
@@ -425,22 +426,22 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 Figma `color-swatch`, on the spec frame titled `color-swatch`, node `193:3525`. Ticket NB-48. Code `src/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
 
-A round color choice for the fill and stroke toolbar, and for the color picker that comes later. It is not that toolbar. The disc is 28px. The action ring sits outside it.
+A round color choice for the fill and stroke toolbar, and for the color picker that comes later. It is not that toolbar. The disc is 24px. The action ring sits outside it.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size | `brand.scale.700` | 28px circle |
+| Size | `brand.scale.600` | 24px circle |
 | Corner radius | not a token | a full circle. No radius token is fully round |
 | Disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc on every type and state |
 | None fill | `brand.foundation.white` | `#FFFFFF`. No mapped surface is white |
 | Slash color | `mapped.icon.disabled` | `#909397` |
 | Slash thickness | `alias.border-width.sm` | 2px |
-| Slash length | `brand.scale.600` | 24px, rotated 45 degrees so the ends stay off the disc stroke |
+| Slash length | `brand.scale.500` | 20px, rotated 45 degrees so the ends stay off the disc stroke |
 | Color fill | `alias.swatch` | Fill and sticky notes use step 200. Stroke and noodles use step 500. The Figma specimen is `alias.swatch.purple.500`, `#BF66FF` |
 | Custom wheel | not a token | Angular gradient. Stops, each at 100% opacity: 0% `#F43F5E`, 14% `#F59E0B`, 29% `#EAB308`, 43% `#22C55E`, 57% `#06B6D4`, 71% `#6366F1`, 86% `#D946EF`, 100% `#F43F5E`. None of these colors are tokens. 0% sits at the left, matching the stop handles on the frame |
 | Custom white gap | `brand.foundation.white`, `brand.scale.50` | `#FFFFFF`, 2px. A `brand.scale.400` (16px) white circle around the preview |
 | Custom preview | the picker color, `brand.scale.300` | 12px circle. The Figma specimen shows purple. That color is not an `alias.swatch`, and it does not follow the color type |
-| Custom wheel thickness | `brand.scale.150` | 6px, the space from the disc edge to the white circle |
+| Custom wheel thickness | `brand.scale.100` | 4px, the space from the 24px disc edge to the 16px white circle |
 | Ring, default | none | the disc has no action ring |
 | Ring, hover | `mapped.border.action-ring`, `alias.border-width.md` | `#B7D4F1`, 4px, drawn outside the disc. The Figma style is `action-ring`. The frame measures 3px |
 | Ring, selected | `mapped.border.action-ring-focus`, `alias.border-width.md` | `#4A94DB`, 4px, drawn outside the disc. The Figma style on the frame is `action-ring-selected`. The swatch uses `action-ring-focus` |
@@ -463,7 +464,7 @@ The fill is not a variant. The spec paints purple on the color type and on the c
 
 Color type reads `alias.swatch`, in token-file order: purple, sky, lime, orange, yellow, coral, tomato, pink. Fill and sticky notes use step 200. Stroke and noodles use step 500.
 
-Custom can be selected. Its inner circle is whatever color the picker returns. The picker is the color picker toolbar, ticket NB-49. Choosing a color swatch does not change the custom color. Choosing custom does not change a palette color.
+Custom can be selected. Its inner circle is the color it is given. On the color picker toolbar, that circle is the picker color while custom is selected, and the default `EBCFFF` while it is not. Choosing a color swatch does not change the custom color. Choosing custom does not change a palette color.
 
 Painted states: `default`, `hover`, and `selected`, on `none`, `color`, and `custom`.
 
@@ -475,21 +476,27 @@ This swatch is not a toolbar. The color picker toolbar that places it is its own
 
 Figma frame titled `color-swatch`, node `193:3525`. Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
 
-The toolbar that will sit below an element. It is not wired into fill, stroke, or sticky chrome. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker under the grid. The picker opens from the custom swatch.
+The toolbar that sits below a selected sticky note. Fill, stroke, and noodle color still use the Phase 1 bars. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker under the grid. The picker opens from the custom swatch.
+
+On a sticky, the open picker is not stored. The toolbar mounts only while the note is selected. A palette swatch or none closes the picker. Clicking the canvas deselects the note. Clicking the note again mounts the toolbar collapsed, including when the note’s color is still the custom swatch.
+
+Opening the custom swatch from a selected palette copies that palette color into the picker. The note keeps that fill. The picker, the hex field, and the custom disc show it. The stored custom color is not applied on that click. While a palette swatch or none is selected, the custom disc stays on the default color `EBCFFF`. It shows the picker color only while custom is selected.
+
+The saturation and hue handles can be dragged. A pointer press on the picker is not canceled, so the mouse moves that follow it still reach the handle.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Padding | `brand.scale.200` | 8px |
-| Corner radius | `alias.border-radius.lg` | 8px |
+| Padding | `brand.scale.300` | 12px |
+| Corner radius | `alias.border-radius.xxl` | 16px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
 | Shadow | not a token | the same shadow the text toolbar already uses |
 | Blur | not a token | the same 24px frost the text toolbar already uses. Figma’s blur is ignored |
 | Section gap | `brand.scale.400` | 16px between the swatch grid, the picker, and the hex row |
-| Content width | none | 172px. Five 28px discs and four 8px gaps. No spacing token is 172px |
+| Content width | none | The column is 172px because the hex row is wider than the grid. The grid is 152px: five 24px discs and four 8px gaps. No spacing token is 152px or 172px |
 | Swatch gap | `brand.scale.200` | 8px |
 | Swatch columns | five | none, then `alias.swatch` in token-file order, then custom |
-| Swatch | color swatch | 28px disc. The specimen uses step 200. Tomato on the frame is step 500 |
+| Swatch | color swatch | 24px disc. The specimen uses step 200. Tomato on the frame is step 500 |
 | Picker | react-colorful `HexColorPicker` | saturation and hue. No alpha bar |
 | Saturation height | none | 108px, including the black band. No spacing token is 108px |
 | Saturation radius | `alias.border-radius.lg` on the top corners, `alias.border-radius.none` on the bottom | 8px on top. The bottom stays square where the black band meets the hue |
@@ -498,7 +505,7 @@ The toolbar that will sit below an element. It is not wired into fill, stroke, o
 | Hue radius | `alias.border-radius.none` on the top corners, `alias.border-radius.lg` on the bottom | 0px on top, 8px on the bottom. The picker container’s radius is these two pieces: saturation on top, hue on the bottom |
 | Picker gap | `brand.scale.0` | 0px. The hue sits against the black band |
 | Pointer | `brand.scale.500` | 20px |
-| Pointer stroke | `brand.foundation.white`, `alias.border-width.sm` | `#FFFFFF`, 2px |
+| Pointer stroke | `brand.foundation.white`, `alias.border-width.xsm` | `#FFFFFF`, 1px |
 | Pointer shadow | not a token | the small shadow react-colorful paints on the handle |
 | Hex field | hex input | 108 by 28. A click focuses it and selects the code. A click outside, or on copy or pipette, returns it to default. The value is the selected swatch, or the custom color when none or custom is selected |
 | Icon buttons | icon button, `md` | 28px. Copy, then pipette |
@@ -511,7 +518,7 @@ There is no divider.
 
 The picker container is the frame `react-colorful container`, node `263:2593`. Its outline is one rounded rectangle. The saturation carries the top corners. The hue is square against the black band and carries the bottom corners.
 
-The file request was rate limited, and the property panel was behind the sign-up wall. Sizes were measured from the rendered frame at 78% zoom, using the 28px disc as the scale. The swatch centers are 36px apart, which is the 28px disc plus an 8px gap. The panel padding around the discs is 8px.
+The disc is 24px, `brand.scale.600`. The panel padding is 12px, `brand.scale.300`. The panel corner is 16px, `alias.border-radius.xxl`, matching the Figma frame. The swatch centers are 32px apart: the 24px disc plus an 8px gap.
 
 The frame does not expose a variant set that could be read. The two states are two instances.
 

@@ -89,7 +89,8 @@ type Blockable = {
 function blockPanelEvent(event: Blockable) {
   event.stopPropagation();
   const target = event.target;
-  if (target instanceof Element && target.closest("input, textarea, select")) return;
+  // Canceling pointerdown suppresses the mouse moves react-colorful uses to drag.
+  if (target instanceof Element && target.closest(".react-colorful, input, textarea, select")) return;
   event.preventDefault();
 }
 

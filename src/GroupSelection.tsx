@@ -10,7 +10,8 @@ import { useConnectChromeHidden } from "./portHot";
 import { type ResizeHandle } from "./resizeMath";
 import { selectedObjectCount } from "./selectionScope";
 import { isShapeColor, isShapeKind, type ShapeData, type ShapeKind } from "./shapeData";
-import { type StickyColor, type StickyData } from "./StickyNode";
+import { applyStickyChoice, sameStickyPaint, type StickyData } from "./StickyNode";
+import type { ColorPickerChoice } from "./ColorPickerToolbar";
 import { coerceBody, sameBody, type TextBody } from "./textBody";
 import { ENDPOINT_TYPE } from "./noodleEnds";
 
@@ -21,7 +22,7 @@ export type GroupKind = SameKind | "image" | "mixed";
 export type GroupStyleDetail = (
   | { property: "fill"; value: string | null }
   | { property: "stroke"; value: string | null }
-  | { property: "sticky"; value: StickyColor }
+  | { property: "sticky"; choice: ColorPickerChoice; customHex: string }
   | { property: "kind"; value: ShapeKind }
   | { property: "noodle"; value: string }
   | { property: "noodlePatch"; patch: Partial<NoodleData> }
@@ -262,9 +263,10 @@ export function applyGroupStyle(
     }
     if (detail.property === "sticky" && node.type === "sticky") {
       const data = node.data as StickyData;
-      if (data.color === detail.value) return node;
+      const next = applyStickyChoice(data, detail.choice, detail.customHex);
+      if (sameStickyPaint(data, next)) return node;
       nodesChanged = true;
-      return { ...node, data: { ...data, color: detail.value } };
+      return { ...node, data: next };
     }
     if (detail.property === "kind" && node.type === "shape") {
       const data = node.data as ShapeData;
@@ -279,7 +281,10 @@ export function applyGroupStyle(
       const nextBody = detail.map(body);
       if (sameBody(nextBody, body)) return node;
       nodesChanged = true;
-      if (node.type === "sticky") return { ...node, data: { color: data.color, paragraphs: nextBody } };
+      if (node.type === "sticky") {
+        const { text: _text, ...rest } = data;
+        return { ...node, data: { ...rest, paragraphs: nextBody } };
+      }
       return { ...node, data: { ...data, paragraphs: nextBody } };
     }
     return node;

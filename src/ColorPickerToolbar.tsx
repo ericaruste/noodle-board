@@ -10,7 +10,8 @@ import { layers } from "./layers";
 export type ColorPickerChoice =
   | { kind: "none" }
   | { kind: "swatch"; family: SwatchFamily }
-  | { kind: "custom" };
+  | { kind: "custom" }
+  | { kind: "mixed" };
 
 type ColorPickerToolbarProps = {
   /** Fill and sticky notes use 200. Stroke and noodles use 500. */
@@ -45,6 +46,9 @@ const SWATCH_HEX: Record<SwatchFamily, Record<SwatchScale, string>> = {
 
 const fullHex = /^[0-9A-F]{6}$/;
 
+/** Resting paint of the custom disc. The picked color shows only while custom is selected. */
+const DEFAULT_CUSTOM_HEX = "EBCFFF";
+
 type EyeDropperWindow = Window & {
   EyeDropper?: new () => { open: () => Promise<{ sRGBHex: string }> };
 };
@@ -58,7 +62,7 @@ export default function ColorPickerToolbar({
   choice: choiceProp,
   defaultChoice = { kind: "none" },
   customHex: customHexProp,
-  defaultCustomHex = "EBCFFF",
+  defaultCustomHex = DEFAULT_CUSTOM_HEX,
   expanded: expandedProp,
   defaultExpanded = false,
   onChoiceChange,
@@ -71,7 +75,7 @@ export default function ColorPickerToolbar({
   const choice = choiceProp ?? choiceState;
   const customHex = digitsOf(customHexProp ?? hexState);
   const expanded = expandedProp ?? expandedState;
-  const held = useRef(fullHex.test(customHex) ? customHex : "EBCFFF");
+  const held = useRef(fullHex.test(customHex) ? customHex : DEFAULT_CUSTOM_HEX);
   if (fullHex.test(customHex)) held.current = customHex;
 
   function setChoice(next: ColorPickerChoice) {
@@ -95,7 +99,10 @@ export default function ColorPickerToolbar({
 
   function onCustomClick() {
     const nextExpanded = choice.kind === "custom" ? !expanded : true;
-    setChoice({ kind: "custom" });
+    // Opening custom from a palette keeps that fill. The picker starts on it
+    // instead of the last custom color.
+    if (choice.kind === "swatch") setCustomHex(SWATCH_HEX[choice.family][scale]);
+    if (choice.kind !== "custom") setChoice({ kind: "custom" });
     setExpanded(nextExpanded);
   }
 
@@ -126,11 +133,16 @@ export default function ColorPickerToolbar({
   return (
     <div
       data-color-toolbar
+      data-color-expanded={expanded ? "true" : "false"}
       role="group"
       aria-label="Color picker"
-      className="noodle-color-toolbar flex w-max flex-col gap-brand-scale-400 rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-200 shadow-lg backdrop-blur-xl"
+      className="noodle-color-toolbar flex w-max flex-col gap-brand-scale-400 rounded-alias-border-radius-xxl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-300 shadow-lg backdrop-blur-xl"
       onMouseDown={(event) => {
         const target = event.target as HTMLElement;
+        if (target.closest(".react-colorful")) {
+          event.stopPropagation();
+          return;
+        }
         if (target.closest("[data-hex-input], input, textarea")) return;
         event.preventDefault();
         event.stopPropagation();
@@ -139,9 +151,9 @@ export default function ColorPickerToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
-      {/* 172px is 5 discs of 28px plus 4 gaps of 8px. No spacing token is 172px. TODO token mismatch: Figma 172px */}
+      {/* The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row is wider, 172px. No spacing token is either width. */}
       <div className="flex w-[172px] flex-col gap-brand-scale-400">
-        <div className="grid grid-cols-5 gap-brand-scale-200">
+        <div className="grid w-max grid-cols-5 gap-brand-scale-200">
           <ColorSwatch
             type="none"
             selected={choice.kind === "none"}
@@ -165,7 +177,7 @@ export default function ColorPickerToolbar({
           ))}
           <ColorSwatch
             type="custom"
-            color={`#${pickerHex}`}
+            color={choice.kind === "custom" ? `#${pickerHex}` : `#${DEFAULT_CUSTOM_HEX}`}
             selected={choice.kind === "custom"}
             onClick={onCustomClick}
           />
@@ -251,7 +263,7 @@ export function ColorPickerToolbarPreview() {
   const [hex, setHex] = useState("EBCFFF");
   const [expanded, setExpanded] = useState(false);
   const choiceLabel =
-    choice.kind === "swatch" ? choice.family : choice.kind === "custom" ? "custom" : "none";
+    choice.kind === "swatch" ? choice.family : choice.kind;
 
   return (
     <main className="relative flex h-full flex-col gap-brand-scale-600 overflow-auto bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">

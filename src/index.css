@@ -662,7 +662,7 @@ body,
 .noodle-color-picker .react-colorful__pointer {
   width: var(--brand-scale-500);
   height: var(--brand-scale-500);
-  border-width: var(--alias-border-width-sm);
+  border-width: var(--alias-border-width-xsm);
   border-style: solid;
   border-color: var(--brand-foundation-white);
 }
