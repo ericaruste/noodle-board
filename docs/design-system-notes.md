@@ -68,3 +68,26 @@ The boolean names for hiding the caption and the chevron were not in the propert
 Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`.
 
 Not painted: focus. A leading icon is not in the painted rows.
+
+## Font style menu
+
+Figma node `165:2949`, on the contextual toolbar sheet. Ticket NB-42. Code `src/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
+
+Four small menu items, caption and chevron off. The order is Regular, Bold, Italic, Bold Italic. The labels stay in Geist. They are not drawn in bold or italic.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 104px. TODO token mismatch: Figma 104px. The label is narrower, and the extra space sits to its right |
+| Height | hug | 120px |
+| Padding | `brand.scale.100` | 4px |
+| Gap | `brand.scale.0` | 0px |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
+| Fill | none | `#F0F5FB` at 40%, the same frost as the text toolbar. `mapped.surface.default` is that color at 30% |
+| Shadow | not a token | the same shadow the other menus already use |
+| Blur | not a token | the same blur the text toolbar already uses |
+| Row | menu item, `sm` | 28px. Caption and chevron are off |
+
+The file request was rate limited. Padding, radius, and the stroke were read from the canvas. The first row is painted with the hover fill, `#E5F0F9`. The toolbar above that frame shows Bold Italic, so that row is the hover example. The live menu marks the current weight with the selected fill.
+
+The layer name above the frame was cut off. It starts with `toolbar/contextual`.

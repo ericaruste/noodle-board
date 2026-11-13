@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
+import { MenuItem } from "./MenuItem";
 import {
   ALIGN_LABELS,
   FONT_FAMILIES,
@@ -123,7 +124,73 @@ function Menu({
   );
 }
 
-function MenuItem({
+function FontStyleMenu({
+  label,
+  activeStyle,
+  open,
+  onToggle,
+  onPick,
+}: {
+  label: string;
+  activeStyle: FontStyle | "mixed";
+  open: boolean;
+  onToggle: () => void;
+  onPick: (style: FontStyle) => void;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
+
+  return (
+    <div className="relative">
+      <ContextualButton
+        ref={buttonRef}
+        ariaLabel="Weight"
+        ariaExpanded={open}
+        ariaHasPopup="menu"
+        onClick={onToggle}
+        showLeftIcon={false}
+        showLabel
+        label={label}
+        reserveLabel={FONT_STYLE_LABELS["bold-italic"]}
+        showRightIcon={false}
+        showDropdownIcon
+      />
+      {open ? (
+        <FloatingPanel
+          layer="dropdown"
+          panelRef={menuRef}
+          role="menu"
+          ariaLabel="Font style"
+          data-text-toolbar=""
+          className="flex w-[104px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          style={{
+            position: "absolute",
+            top: box?.top ?? 0,
+            left: box?.left ?? 0,
+            visibility: box ? "visible" : "hidden",
+            // 104px is the frame width. No spacing token is 104px. TODO token mismatch: Figma 104px
+            // Same frost as the text toolbar. The surface token is 30%. Figma blur and shadow are not a token.
+            backgroundColor: "color-mix(in srgb, var(--alias-cool-neutral-400) 40%, transparent)",
+          }}
+        >
+          {FONT_STYLES.map((style) => (
+            <MenuItem
+              key={style}
+              label={FONT_STYLE_LABELS[style]}
+              size="sm"
+              showCaption={false}
+              showChevron={false}
+              selected={activeStyle === style}
+              onClick={() => onPick(style)}
+            />
+          ))}
+        </FloatingPanel>
+      ) : null}
+    </div>
+  );
+}
+
+function MenuRow({
   label,
   glyph,
   horizontal = false,
@@ -294,7 +361,7 @@ function FontSizeField({
           }}
         >
           {FONT_SIZE_PRESETS.map((preset) => (
-            <MenuItem
+            <MenuRow
               key={preset}
               label={String(preset)}
               active={value === String(preset)}
@@ -387,7 +454,7 @@ export default function TextToolbar({
         onToggle={() => toggle("family")}
       >
         {FONT_FAMILIES.map((family) => (
-          <MenuItem
+          <MenuRow
             key={family}
             label={family}
             active={activeFamily === family}
@@ -408,25 +475,16 @@ export default function TextToolbar({
         onCommit={onSize}
       />
       {extra}
-      <Menu
+      <FontStyleMenu
         label={styleLabel}
-        reserveLabel={FONT_STYLE_LABELS["bold-italic"]}
-        menuLabel="Weight"
+        activeStyle={activeStyle}
         open={menu === "style"}
         onToggle={() => toggle("style")}
-      >
-        {FONT_STYLES.map((style) => (
-          <MenuItem
-            key={style}
-            label={FONT_STYLE_LABELS[style]}
-            active={activeStyle === style}
-            onPick={() => {
-              setMenu(null);
-              onStyle(style);
-            }}
-          />
-        ))}
-      </Menu>
+        onPick={(style) => {
+          setMenu(null);
+          onStyle(style);
+        }}
+      />
       <Menu
         label={alignLabel}
         menuLabel="Alignment"
@@ -438,7 +496,7 @@ export default function TextToolbar({
         {TEXT_ALIGNS.map((align) => {
           const Icon = ALIGN_ICONS[align];
           return (
-          <MenuItem
+          <MenuRow
             key={align}
             label={ALIGN_LABELS[align]}
             glyph={<Icon className="size-brand-scale-400" aria-hidden />}
