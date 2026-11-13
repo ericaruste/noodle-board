@@ -11,7 +11,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Resting fill is invisible.** `mapped.surface.action` is `#E5F0F9` at 0%. The default button has no fill. Confirm that is the resting state on purpose.
 - **[Figma] Weight label width.** The weight control is held to the width of the words “Bold Italic”, so Regular, Bold, Italic, and Bold Italic do not resize the toolbar. The Figma component may still hug the label. Give that control a minimum width if the bar should stay still.
 - **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
-- **[Figma] Typeface and font size menus are still the old rows.** Alignment is the popover. Weight is the font style menu. The typeface list and the size list still use the Phase 1 rows.
+- **[Figma] Font size menu is still the old rows.** Alignment is the popover. Weight is the font style menu. Typeface is the typeface menu. The size list still uses the Phase 1 rows.
 - **[token app] Small row height.** Size `sm` is 28px. No spacing token is 28px. The code keeps 28px and marks the mismatch. Add a spacing token if small rows should stop using a raw size.
 - **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
 - **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
@@ -28,6 +28,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
+- The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
 
 ## Contextual button
 
@@ -129,7 +130,7 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The typeface menu and the font size list still use the Phase 1 rows. The weight control opens the font style menu. The alignment control opens the popover below.
+The typeface control opens the typeface menu. The font size list still uses the Phase 1 rows. The weight control opens the font style menu. The alignment control opens the popover below.
 
 ## Text align popover
 
@@ -234,5 +235,47 @@ Four small menu items, caption and chevron off. The order is Regular, Bold, Ital
 | Row | menu item, `sm` | 28px. Caption and chevron are off |
 
 The file request was rate limited. Padding, radius, and the stroke were read from the canvas. The first row is painted with the hover fill, `#E5F0F9`. The toolbar above that frame shows Bold Italic, so that row is the hover example. The live menu marks the current weight with the selected fill.
+
+The layer name above the frame was cut off. It starts with `toolbar/contextual`.
+
+## Typeface menu
+
+Figma node `168:3116`, on the contextual toolbar sheet. Ticket NB-43. Code `TypefaceMenu` in `src/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
+
+Five small menu items, caption and chevron off. The order is Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label uses its `alias.typeface` token. The menu item body font stays Geist on every other menu.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 128px. TODO token mismatch: Figma 128px. The label is narrower, and the extra space sits to its right |
+| Height | hug | 148px |
+| Padding | `brand.scale.100` | 4px |
+| Gap | `brand.scale.0` | 0px |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 40% |
+| Shadow | not a token | the same shadow the other menus already use |
+| Blur | not a token | the same blur the text toolbar already uses |
+| Row | menu item, `sm` | 28px. Caption and chevron are off |
+| Label, Geist Mono | `alias.typeface.geist-mono` | Geist Mono |
+| Label, Open Sans | `alias.typeface.open-sans` | Open Sans |
+| Label, Coming Soon | `alias.typeface.coming-soon` | Coming Soon |
+| Label, Noto Serif | `alias.typeface.noto-serif` | Noto Serif |
+| Label, Montserrat | `alias.typeface.montserrat` | Montserrat |
+| Label size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. The row still writes 12px |
+| Label, default | `mapped.text.action` | `#303132` |
+| Label, hover | `mapped.text.action-hover` | `#1E3B58` |
+| Label, selected | `mapped.text.action-selected` | `#1E3B58` |
+| Label, disabled | `mapped.text.disabled` | `#909397` |
+| Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+
+The file request was rate limited. Padding, radius, and the stroke were read from the canvas, beside the font style menu. The first row, Geist Mono, is painted with the hover fill, `#E5F0F9`. The live menu marks the current family with the selected fill.
+
+The rows use the menu item properties: size `sm`, caption off, chevron off. The frame itself exposes no properties.
+
+Painted: one resting frame. Geist Mono is the hover example. The other four rows are default.
+
+Not painted on this frame: selected and disabled. Those states belong to the menu item. There is no focus state.
 
 The layer name above the frame was cut off. It starts with `toolbar/contextual`.

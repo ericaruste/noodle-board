@@ -16,7 +16,6 @@ import { MenuItem } from "./MenuItem";
 import {
   ALIGN_LABELS,
   FONT_FAMILIES,
-  FONT_FAMILY_STACK,
   FONT_SIZE_PRESETS,
   FONT_STYLE_LABELS,
   FONT_STYLES,
@@ -58,22 +57,26 @@ type TextToolbarProps = {
   extra?: ReactNode;
 };
 
-function Menu({
-  label,
-  reserveLabel,
-  menuLabel,
-  icon,
+const TYPEFACE_LABEL_CLASS: Record<FontFamily, string> = {
+  "Geist Mono": "font-alias-typeface-geist-mono",
+  "Open Sans": "font-alias-typeface-open-sans",
+  "Coming Soon": "font-alias-typeface-coming-soon",
+  "Noto Serif": "font-alias-typeface-noto-serif",
+  Montserrat: "font-alias-typeface-montserrat",
+};
+
+function TypefaceMenu({
+  title,
+  activeFamily,
   open,
   onToggle,
-  children,
+  onPick,
 }: {
-  label: string;
-  reserveLabel?: string;
-  menuLabel: string;
-  icon?: LucideIcon;
+  title: string;
+  activeFamily: FontFamily | "mixed" | "none";
   open: boolean;
   onToggle: () => void;
-  children: ReactNode;
+  onPick: (family: FontFamily) => void;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
@@ -82,17 +85,15 @@ function Menu({
     <div className="relative">
       <ContextualButton
         ref={buttonRef}
-        ariaLabel={menuLabel}
-        title={icon ? label : undefined}
+        ariaLabel="Font style"
+        title={title}
         ariaExpanded={open}
         ariaHasPopup="menu"
         onClick={onToggle}
         showLeftIcon={false}
-        showLabel={!icon}
-        label={label}
-        reserveLabel={reserveLabel}
-        showRightIcon={Boolean(icon)}
-        icon={icon}
+        showLabel={false}
+        showRightIcon
+        icon={CaseSensitive}
         showDropdownIcon
       />
       {open ? (
@@ -100,18 +101,29 @@ function Menu({
           layer="dropdown"
           panelRef={menuRef}
           role="menu"
-          ariaLabel={menuLabel}
+          ariaLabel="Font style"
           data-text-toolbar=""
-          className="rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
+          className="flex w-[128px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
             left: box?.left ?? 0,
-            minWidth: box?.minWidth,
             visibility: box ? "visible" : "hidden",
+            // 128px is the frame width. No spacing token is 128px. TODO token mismatch: Figma 128px
           }}
         >
-          {children}
+          {FONT_FAMILIES.map((family) => (
+            <MenuItem
+              key={family}
+              label={family}
+              labelClassName={TYPEFACE_LABEL_CLASS[family]}
+              size="sm"
+              showCaption={false}
+              showChevron={false}
+              selected={activeFamily === family}
+              onClick={() => onPick(family)}
+            />
+          ))}
         </FloatingPanel>
       ) : null}
     </div>
@@ -620,26 +632,16 @@ export default function TextToolbar({
       onDoubleClick={(event) => event.stopPropagation()}
     >
       <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
-      <Menu
-        label={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
-        menuLabel="Font style"
-        icon={CaseSensitive}
+      <TypefaceMenu
+        title={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
+        activeFamily={activeFamily}
         open={menu === "family"}
         onToggle={() => toggle("family")}
-      >
-        {FONT_FAMILIES.map((family) => (
-          <MenuRow
-            key={family}
-            label={family}
-            active={activeFamily === family}
-            style={{ fontFamily: FONT_FAMILY_STACK[family] }}
-            onPick={() => {
-              setMenu(null);
-              onFamily(family);
-            }}
-          />
-        ))}
-      </Menu>
+        onPick={(family) => {
+          setMenu(null);
+          onFamily(family);
+        }}
+      />
       <FontSizeField
         value={sizeLabel}
         open={menu === "size"}

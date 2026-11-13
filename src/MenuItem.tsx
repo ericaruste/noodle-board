@@ -10,6 +10,8 @@ type MenuItemProps = {
   showLabel?: boolean;
   showCaption?: boolean;
   showChevron?: boolean;
+  /** Extra classes for the label, such as an alias typeface. */
+  labelClassName?: string;
   size?: MenuItemSize;
   /** Painted variant from the spec. Leave unset to follow selected, disabled, and real hover. */
   state?: MenuItemState;
@@ -57,6 +59,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     showLabel = true,
     showCaption = true,
     showChevron = true,
+    labelClassName,
     size = "md",
     state,
     selected,
@@ -81,7 +84,9 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       className={`group flex w-full items-center justify-between gap-brand-scale-200 rounded-alias-border-radius-lg px-brand-scale-200 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
     >
       {showLabel ? (
-        <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]}`}>{label}</span>
+        <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]} ${labelClassName ?? ""}`}>
+          {label}
+        </span>
       ) : (
         <span />
       )}

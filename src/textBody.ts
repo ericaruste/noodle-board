@@ -1,8 +1,8 @@
 export const FONT_STYLES = ["regular", "bold", "italic", "bold-italic"] as const;
 export type FontStyle = (typeof FONT_STYLES)[number];
 
-/** Google Fonts, in toolbar order. Coming Soon publishes 400 only. */
-export const FONT_FAMILIES = ["Geist Mono", "Open Sans", "Montserrat", "Coming Soon", "Noto Serif"] as const;
+/** Google Fonts, in the typeface menu order from alias.typeface. Coming Soon publishes 400 only. */
+export const FONT_FAMILIES = ["Geist Mono", "Open Sans", "Coming Soon", "Noto Serif", "Montserrat"] as const;
 export type FontFamily = (typeof FONT_FAMILIES)[number];
 
 export const FONT_FAMILY_STACK: Record<FontFamily, string> = {
