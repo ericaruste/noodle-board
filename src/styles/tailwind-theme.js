@@ -2,7 +2,7 @@
  * Generated from tokens/tokens.json.
  * The token export changes as UI is built from Figma.
  * Do not edit by hand. Run npm run tokens after each new export.
- * Responsive type sizes are left out until they have real values.
+ * Desktop font size and line height are included. Shadows, blur, and the dot grid are left out.
  */
 export default {
   "colors": {
@@ -235,6 +235,7 @@ export default {
   "spacing": {
     "brand-scale-0": "var(--brand-scale-0)",
     "brand-scale-100": "var(--brand-scale-100)",
+    "brand-scale-1000": "var(--brand-scale-1000)",
     "brand-scale-200": "var(--brand-scale-200)",
     "brand-scale-25": "var(--brand-scale-25)",
     "brand-scale-300": "var(--brand-scale-300)",
@@ -242,7 +243,9 @@ export default {
     "brand-scale-50": "var(--brand-scale-50)",
     "brand-scale-500": "var(--brand-scale-500)",
     "brand-scale-600": "var(--brand-scale-600)",
-    "brand-scale-700": "var(--brand-scale-700)"
+    "brand-scale-700": "var(--brand-scale-700)",
+    "brand-scale-800": "var(--brand-scale-800)",
+    "brand-scale-900": "var(--brand-scale-900)"
   },
   "borderRadius": {
     "alias-border-radius-lg": "var(--alias-border-radius-lg)",
@@ -269,5 +272,18 @@ export default {
     "alias-typeface-montserrat": "var(--alias-typeface-montserrat)",
     "alias-typeface-noto-serif": "var(--alias-typeface-noto-serif)",
     "alias-typeface-open-sans": "var(--alias-typeface-open-sans)"
+  },
+  "fontSize": {
+    "responsive-desktop-body-lg-size": "var(--responsive-desktop-body-lg-size)",
+    "responsive-desktop-body-md-size": "var(--responsive-desktop-body-md-size)",
+    "responsive-desktop-caption-md-size": "var(--responsive-desktop-caption-md-size)"
+  },
+  "lineHeight": {
+    "responsive-desktop-body-lg-line-height": "var(--responsive-desktop-body-lg-line-height)",
+    "responsive-desktop-body-lg-line-height-tight": "var(--responsive-desktop-body-lg-line-height-tight)",
+    "responsive-desktop-body-md-line-height": "var(--responsive-desktop-body-md-line-height)",
+    "responsive-desktop-body-md-line-height-tight": "var(--responsive-desktop-body-md-line-height-tight)",
+    "responsive-desktop-caption-md-line-height": "var(--responsive-desktop-caption-md-line-height)",
+    "responsive-desktop-caption-md-line-height-tight": "var(--responsive-desktop-caption-md-line-height-tight)"
   }
 };

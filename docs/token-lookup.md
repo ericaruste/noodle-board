@@ -15,10 +15,14 @@ The code column is a Tailwind class when the token has one job:
 - Corner radius: `rounded-…`
 - Border thickness: `border-…`
 - Font: `font-…`
+- Font size: `text-…`
+- Line height: `leading-…`
 
 A raw color that can be a fill, text, or stroke shows a CSS variable, such as `var(--brand-blue-500)`. In Tailwind that same name is `bg-brand-blue-500`, `text-brand-blue-500`, or `border-brand-blue-500`.
 
-Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.
+A pixel size can be spacing, a font size, or a line height. Use the type column. Spacing uses `p-`, font size uses `text-`, and line height uses `leading-`.
+
+Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is not in the export.
 
 ## Semantic tokens
 
@@ -199,6 +203,7 @@ Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.
 | #130206 | `var(--brand-red-950)` | `brand.red.950` | color |
 | 0px | `p-brand-scale-0` | `brand.scale.0` | spacing |
 | 4px | `p-brand-scale-100` | `brand.scale.100` | spacing |
+| 48px | `p-brand-scale-1000` | `brand.scale.1000` | spacing |
 | 8px | `p-brand-scale-200` | `brand.scale.200` | spacing |
 | 1px | `p-brand-scale-25` | `brand.scale.25` | spacing |
 | 12px | `p-brand-scale-300` | `brand.scale.300` | spacing |
@@ -207,6 +212,8 @@ Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.
 | 20px | `p-brand-scale-500` | `brand.scale.500` | spacing |
 | 24px | `p-brand-scale-600` | `brand.scale.600` | spacing |
 | 32px | `p-brand-scale-700` | `brand.scale.700` | spacing |
+| 40px | `p-brand-scale-800` | `brand.scale.800` | spacing |
+| 44px | `p-brand-scale-900` | `brand.scale.900` | spacing |
 | #CBECFF | `var(--brand-sky-200)` | `brand.sky.200` | color |
 | #66C7FF | `var(--brand-sky-500)` | `brand.sky.500` | color |
 | #FF9E97 | `var(--brand-tomato-200)` | `brand.tomato.200` | color |
@@ -223,6 +230,15 @@ Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.
 | #191919 | `var(--brand-warm-gray-950)` | `brand.warm-gray.950` | color |
 | #FFF6BF | `var(--brand-yellow-200)` | `brand.yellow.200` | color |
 | #F0DE75 | `var(--brand-yellow-500)` | `brand.yellow.500` | color |
+| 16.8px | `leading-responsive-desktop-body-lg-line-height` | `responsive.desktop.body.lg.line-height` | line height |
+| 14px | `leading-responsive-desktop-body-lg-line-height-tight` | `responsive.desktop.body.lg.line-height-tight` | line height |
+| 14px | `text-responsive-desktop-body-lg-size` | `responsive.desktop.body.lg.size` | font size |
+| 14.4px | `leading-responsive-desktop-body-md-line-height` | `responsive.desktop.body.md.line-height` | line height |
+| 12px | `leading-responsive-desktop-body-md-line-height-tight` | `responsive.desktop.body.md.line-height-tight` | line height |
+| 12px | `text-responsive-desktop-body-md-size` | `responsive.desktop.body.md.size` | font size |
+| 12px | `leading-responsive-desktop-caption-md-line-height` | `responsive.desktop.caption.md.line-height` | line height |
+| 10px | `leading-responsive-desktop-caption-md-line-height-tight` | `responsive.desktop.caption.md.line-height-tight` | line height |
+| 10px | `text-responsive-desktop-caption-md-size` | `responsive.desktop.caption.md.size` | font size |
 
 ## Duplicate values
 
@@ -290,7 +306,9 @@ These values are shared by more than one token, so a Figma value on its own is a
 | #FFE4ED | `alias.swatch.pink.200`, `brand.pink.200` |
 | #FFF6BF | `alias.swatch.yellow.200`, `brand.yellow.200` |
 | 0px | `alias.border-radius.none`, `alias.border-width.none`, `brand.scale.0` |
-| 12px | `alias.border-radius.xl`, `alias.border-width.xl`, `brand.scale.300` |
+| 10px | `responsive.desktop.caption.md.line-height-tight`, `responsive.desktop.caption.md.size` |
+| 12px | `alias.border-radius.xl`, `alias.border-width.xl`, `brand.scale.300`, `responsive.desktop.body.md.line-height-tight`, `responsive.desktop.body.md.size`, `responsive.desktop.caption.md.line-height` |
+| 14px | `responsive.desktop.body.lg.line-height-tight`, `responsive.desktop.body.lg.size` |
 | 16px | `alias.border-radius.xxl`, `brand.scale.400` |
 | 1px | `alias.border-width.xsm`, `brand.scale.25` |
 | 2px | `alias.border-radius.sm`, `alias.border-width.sm`, `brand.scale.50` |

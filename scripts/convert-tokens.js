@@ -9,8 +9,8 @@
  * carry a separate opacity number (0–100). This unwraps those groups and
  * bakes opacity into the color as a transparent CSS color.
  *
- * Left out of the generated files for now: shadows, blur, the dot grid, and
- * the responsive type group (font size, line height, paragraph spacing).
+ * Left out of the generated files: shadows, blur, and the dot grid.
+ * Desktop font size and line height in the responsive group are included.
  */
 
 const SKIP_KEYS = new Set([
@@ -22,7 +22,6 @@ const SKIP_KEYS = new Set([
   "grid",
   "dot-grid",
   "drop-shadow",
-  "responsive",
 ]);
 
 function isToken(node) {
@@ -103,28 +102,10 @@ function collect(node, trail, acc) {
   }
 }
 
-function collectGroup(node, trail, acc) {
-  if (isToken(node)) {
-    acc.push({ path: trail.join("."), type: node.$type, value: node.$value });
-    return;
-  }
-  if (!node || typeof node !== "object" || Array.isArray(node)) return;
-  const keys = Object.keys(node);
-  if (keys.length === 1 && keys[0] === "value" && node.value && typeof node.value === "object" && !isToken(node.value)) {
-    collectGroup(node.value, trail, acc);
-    return;
-  }
-  for (const [key, value] of Object.entries(node)) {
-    collectGroup(value, [...trail, key], acc);
-  }
-}
-
 export function convertTokens(raw) {
   const report = { skipped: [], opacity: [] };
   const tokens = unwrap(raw, [], report);
   const flat = [];
   collect(tokens, [], flat);
-  const responsive = [];
-  if (raw.responsive) collectGroup(raw.responsive, ["responsive"], responsive);
-  return { tokens, flat, responsive, skipped: report.skipped, opacity: report.opacity };
+  return { tokens, flat, skipped: report.skipped, opacity: report.opacity };
 }

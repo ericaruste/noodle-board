@@ -31,13 +31,14 @@ Phase 2 needs one real component built from a Figma spec with design tokens, so 
 ## Acceptance criteria
 
 - [x] The button uses semantic tokens for fill, text, icons, spacing, and corner radius
+- [x] The label uses `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight` (12px / 12px, text style `body/md/tight`)
 - [x] Default, hover, selected, and disabled match the painted variants
 - [x] Label and each icon can be hidden the way the Figma properties do
 - [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
-Type size stays at the Figma text style `body/md/tight` (12px, line height 1em). Responsive type tokens are still 0, so that size is not a mismatch. Body, heading, and caption use Geist.
+The label uses `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight` (12px / 12px), the Figma text style `body/md/tight`. Paragraph spacing is not in the export, so it stays as drawn. Body, heading, and caption use Geist.
 
 The spec sheet around the button (state names, the red “32px” note, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 
@@ -45,4 +46,4 @@ This button is not a toolbar or popover. When a later ticket places it in a tool
 
 ## Out of scope
 
-Replacing the current text or selection toolbars. Shadows, frosted glass, the dot grid, and responsive type. The contextual button has no focus state. The description that named focus was a mistake.
+Replacing the current text or selection toolbars. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export. The contextual button has no focus state. The description that named focus was a mistake.

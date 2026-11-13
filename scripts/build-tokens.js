@@ -2,7 +2,7 @@
  * Builds CSS variables and a Tailwind theme from tokens/tokens.json.
  * The export changes as UI is built from Figma. Run `npm run tokens` after
  * each new export. Also writes docs/token-lookup.md.
- * Responsive type sizes are left out until they have real values.
+ * Desktop font size and line height are included. Shadows, blur, and the dot grid are left out.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -23,8 +23,8 @@ function bucketFor(token) {
   if (second === "border-radius") return "borderRadius";
   if (second === "border-width") return "borderWidth";
   if (second === "font-family" || second === "typeface") return "fontFamily";
-  if (last === "font-size") return "fontSize";
-  if (last === "line-height") return "lineHeight";
+  if (last === "font-size" || (group === "responsive" && last === "size")) return "fontSize";
+  if (last === "line-height" || last === "line-height-tight") return "lineHeight";
   if (last === "paragraph-spacing") return "spacing";
   return null;
 }
@@ -80,7 +80,7 @@ function formatTheme({ dictionary }) {
     " * Generated from tokens/tokens.json.\n" +
     " * The token export changes as UI is built from Figma.\n" +
     " * Do not edit by hand. Run npm run tokens after each new export.\n" +
-    " * Responsive type sizes are left out until they have real values.\n" +
+    " * Desktop font size and line height are included. Shadows, blur, and the dot grid are left out.\n" +
     " */\n" +
     `export default ${JSON.stringify(theme, null, 2)};\n`
   );
@@ -94,7 +94,7 @@ function ensureLf(filePath) {
 }
 
 const original = fs.readFileSync(SOURCE, "utf8");
-const { tokens, flat, responsive, skipped, opacity } = convertTokens(JSON.parse(original));
+const { tokens, flat, skipped, opacity } = convertTokens(JSON.parse(original));
 
 const sd = new StyleDictionary({
   tokens,
@@ -131,7 +131,7 @@ const sd = new StyleDictionary({
               "Generated from tokens/tokens.json.",
               "The token export changes as UI is built from Figma.",
               "Do not edit by hand. Run npm run tokens after each new export.",
-              "Responsive type sizes are left out until they have real values.",
+              "Desktop font size and line height are included. Shadows, blur, and the dot grid are left out.",
             ],
           },
         },
@@ -164,7 +164,7 @@ ensureLf(path.join(OUT_DIR, "tailwind-theme.js"));
 const css = fs.readFileSync(path.join(OUT_DIR, "tokens.css"), "utf8");
 const theme = fs.readFileSync(path.join(OUT_DIR, "tailwind-theme.js"), "utf8");
 
-for (const banned of ["box-shadow", "backdrop-filter", "backdrop-blur", "drop-shadow", "--responsive-", '"responsive"']) {
+for (const banned of ["box-shadow", "backdrop-filter", "backdrop-blur", "drop-shadow"]) {
   if (css.includes(banned) || theme.includes(banned)) {
     throw new Error(`Generated files include ${banned}, which this setup leaves out.`);
   }
@@ -179,29 +179,28 @@ const lookupPath = path.join(ROOT, "docs", "token-lookup.md");
 const lookup = writeTokenLookup({ tokens, flat, destination: lookupPath });
 ensureLf(lookupPath);
 const lookupText = fs.readFileSync(lookupPath, "utf8");
-if (lookupText.includes("responsive.body") || lookupText.includes("box-shadow") || lookupText.includes("backdrop")) {
+if (lookupText.includes("box-shadow") || lookupText.includes("backdrop")) {
   throw new Error("Token lookup includes a group that should be left out.");
 }
 if (!lookupText.includes("#F0F5FB / 40%") || !lookupText.includes("`mapped.surface.default`")) {
   throw new Error("Token lookup is missing the 40% surface color.");
 }
+if (!css.includes("--brand-scale-800: 40px") || !css.includes("--brand-scale-900: 44px") || !css.includes("--brand-scale-1000: 48px")) {
+  throw new Error("Scale 800, 900, and 1000 were not written.");
+}
+if (!css.includes("--responsive-desktop-body-md-size: 12px") || !css.includes("--responsive-desktop-body-md-line-height: 14.4px")) {
+  throw new Error("Desktop body font size and line height were not written.");
+}
+if (!lookupText.includes("`responsive.desktop.body.md.size`") || !lookupText.includes("`text-responsive-desktop-body-md-size`")) {
+  throw new Error("Token lookup is missing desktop body type.");
+}
 
-const responsiveAllZero = responsive.length > 0 && responsive.every((token) => token.value === 0);
 const declarations = css.split("\n").filter((line) => line.trim().startsWith("--")).length;
 console.log(`Tokens written: ${declarations} CSS variables.`);
 console.log(`Lookup: ${lookup.rows.length} rows, ${lookup.duplicates.length} shared values.`);
 console.log(`Original file left unchanged: ${SOURCE}`);
-console.log(`Skipped (shadow, blur, grid, responsive): ${skipped.length ? skipped.join(", ") : "none"}`);
+console.log(`Skipped (shadow, blur, grid): ${skipped.length ? skipped.join(", ") : "none"}`);
 console.log("Opacity fields converted:");
 for (const item of opacity) {
   console.log(`  ${item.path}: ${item.opacity}`);
 }
-console.log("Responsive tokens (left out of CSS and Tailwind):");
-for (const token of responsive) {
-  console.log(`  ${token.path} = ${token.value}`);
-}
-console.log(
-  responsiveAllZero
-    ? "Responsive tokens are all still 0, so they were left out."
-    : "Responsive tokens are not all 0. They are still left out until that group is turned back on.",
-);

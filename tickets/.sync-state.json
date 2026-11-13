@@ -235,6 +235,11 @@
       "id": "1fe6b9c2-f11c-415e-9423-3186d6b83dc4",
       "identifier": "ERI-54",
       "url": "https://linear.app/ericar/issue/ERI-54/text-toolbar"
+    },
+    "NB-40": {
+      "id": "d95bf8cd-6194-4374-9ec5-af5ff2a99f11",
+      "identifier": "ERI-55",
+      "url": "https://linear.app/ericar/issue/ERI-55/text-align-popover"
     }
   }
 }

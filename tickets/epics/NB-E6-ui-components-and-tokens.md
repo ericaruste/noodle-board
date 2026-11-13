@@ -36,4 +36,4 @@ The next component ticket is the next free id after NB-40, parented to NB-E6, an
 
 ## Out of scope
 
-Merging individual tickets into `main`. Changing Phase 1 canvas behavior except where a component ticket requires it. Shadows, frosted glass, the dot grid, and responsive type sizes until those tokens exist.
+Merging individual tickets into `main`. Changing Phase 1 canvas behavior except where a component ticket requires it. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.

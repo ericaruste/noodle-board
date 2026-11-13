@@ -4,12 +4,11 @@ A running list of what each built piece taught us, so Figma and the token file c
 
 When a component, toolbar, dropdown, or popover is built, its section is added here. Each section names the Figma component, the node id, the ticket, and the code path. It has its own token table. It lists the Figma properties and their values, and it says which states are painted.
 
-Shadow, blur, the dot grid, and type size are left out of the token build. In the table they are marked `not a token`. They are not mismatches.
+Shadow, blur, and the dot grid are left out of the token build. In the table they are marked `not a token`. They are not mismatches. Font size and line height use the responsive desktop tokens. Paragraph spacing is not in the export, so it stays `not a token`.
 
 ## Still to update
 
 - **[Figma] Resting fill is invisible.** `mapped.surface.action` is `#E5F0F9` at 0%. The default button has no fill. Confirm that is the resting state on purpose.
-- **[token app] Type size is not a token yet.** The button uses the Figma text style `body/md/tight`: 12px, line height 1em. Responsive type tokens are still 0, so this size is kept as drawn and marked `not a token`. When type tokens are filled in, point this style at a real token.
 - **[Figma] Weight label width.** The weight control is held to the width of the words “Bold Italic”, so Regular, Bold, Italic, and Bold Italic do not resize the toolbar. The Figma component may still hug the label. Give that control a minimum width if the bar should stay still.
 - **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
 - **[Figma] Font, size, and weight menus are still the old menus.** Only the alignment popover is built from the contextual button. Those three menus still use the Phase 1 rows. They need their own Figma frames, then the same build.
@@ -20,10 +19,12 @@ Shadow, blur, the dot grid, and type size are left out of the token build. In th
 - The spec sheet around a component (state names, the red “32px” note, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
 - `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 40%. The text toolbar and the align popover use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored. The fill stays at 40% so the frost remains.
-- Type size, line height, and paragraph spacing are `not a token` until responsive type tokens exist.
+- Desktop font size and line height are tokens under `responsive.desktop`. The text style `body/md/tight` is `responsive.desktop.body.md.size` (12px) and `responsive.desktop.body.md.line-height-tight` (12px). Paragraph spacing is not in the export, so it stays `not a token`.
+- The spacing scale now includes `brand.scale.800` (40px), `brand.scale.900` (44px), and `brand.scale.1000` (48px).
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. Figma’s own icon components are not imported.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button.
+- The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 
 ## Contextual button
 
@@ -37,7 +38,7 @@ Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualBu
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the button has no stroke |
 | Font | `alias.font-family.body` | Geist |
-| Type size | not a token | 12px / 1em, text style `body/md/tight` |
+| Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight` |
 | Icon | `brand.scale.400` | 16px |
 | Chevron | `brand.scale.200` | 8px |
 | Default fill | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -82,12 +83,12 @@ Every control is a contextual button with the unused slots turned off.
 
 - First group: font, size, weight, alignment. A divider sits on the right of the group.
 - Second group: bulleted list, numbered list, and link. Icon only. Underline and strikethrough are in the Figma group and left out on purpose.
-- Size keeps the typed number in the label slot. The chevron opens the presets.
+- Size keeps the number in the label slot. A single click anywhere on the size button opens the presets. A double click edits the number.
 - The weight label reserves the width of “Bold Italic”.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.800` |
 | Padding | `brand.scale.100` | 4px |
 | Gap inside a group | `brand.scale.50` | 2px |
 | Gap between groups | `brand.scale.100` | 4px |
@@ -108,7 +109,7 @@ Every control is a contextual button with the unused slots turned off.
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
-| Type size on the labels | not a token | 12px / 1em, text style `body/md/tight` |
+| Type size on the labels | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight` |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties:
 
@@ -135,7 +136,7 @@ The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px, from 4px padding and a 32px button |
+| Height | none | 40px (`brand.scale.800`), from 4px padding and a 32px button |
 | Width | none | 142px, from the padding, four buttons, and the gaps |
 | Padding | `brand.scale.100` | 4px |
 | Gap | `brand.scale.50` | 2px |

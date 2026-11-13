@@ -59,8 +59,11 @@ function figmaValue(resolved) {
 
 function tokenType(parts, type) {
   const [group, second] = parts;
+  const last = parts[parts.length - 1];
   if (type === "color") return "color";
   if (group === "brand" && second === "scale") return "spacing";
+  if (group === "responsive" && last === "size") return "font size";
+  if (group === "responsive" && (last === "line-height" || last === "line-height-tight")) return "line height";
   if (second === "border-radius") return "radius";
   if (second === "border-width") return "border width";
   if (second === "font-family" || second === "typeface") return "font";
@@ -70,6 +73,7 @@ function tokenType(parts, type) {
 function useInCode(parts) {
   const name = parts.join("-");
   const [group, second] = parts;
+  const last = parts[parts.length - 1];
   if (group === "mapped" && second === "surface") return `bg-${name}`;
   if (group === "mapped" && (second === "text" || second === "icon")) return `text-${name}`;
   if (group === "mapped" && second === "border") return `border-${name}`;
@@ -77,6 +81,8 @@ function useInCode(parts) {
   if (second === "border-radius") return `rounded-${name}`;
   if (second === "border-width") return `border-${name}`;
   if (second === "font-family" || second === "typeface") return `font-${name}`;
+  if (group === "responsive" && last === "size") return `text-${name}`;
+  if (group === "responsive" && (last === "line-height" || last === "line-height-tight")) return `leading-${name}`;
   return `var(--${name})`;
 }
 
@@ -160,10 +166,14 @@ export function renderLookup({ rows, duplicates }) {
     "- Corner radius: `rounded-…`",
     "- Border thickness: `border-…`",
     "- Font: `font-…`",
+    "- Font size: `text-…`",
+    "- Line height: `leading-…`",
     "",
     "A raw color that can be a fill, text, or stroke shows a CSS variable, such as `var(--brand-blue-500)`. In Tailwind that same name is `bg-brand-blue-500`, `text-brand-blue-500`, or `border-brand-blue-500`.",
     "",
-    "Shadows, frosted glass, the dot grid, and responsive type sizes are not listed.",
+    "A pixel size can be spacing, a font size, or a line height. Use the type column. Spacing uses `p-`, font size uses `text-`, and line height uses `leading-`.",
+    "",
+    "Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is not in the export.",
     "",
     "## Semantic tokens",
     "",
