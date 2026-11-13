@@ -245,6 +245,26 @@
       "id": "2d13bfeb-1433-489b-9776-f4cf9a8fe15b",
       "identifier": "ERI-56",
       "url": "https://linear.app/ericar/issue/ERI-56/typeface-menu"
+    },
+    "NB-41": {
+      "id": "12636ebf-3443-47e3-af39-3a41b7f355ff",
+      "identifier": "ERI-57",
+      "url": "https://linear.app/ericar/issue/ERI-57/menu-item"
+    },
+    "NB-42": {
+      "id": "56c11bb9-8ac9-473b-a660-f2969df9a90e",
+      "identifier": "ERI-58",
+      "url": "https://linear.app/ericar/issue/ERI-58/font-style-menu"
+    },
+    "NB-44": {
+      "id": "3a1715ec-2c10-467e-bdae-112d0a25641d",
+      "identifier": "ERI-59",
+      "url": "https://linear.app/ericar/issue/ERI-59/font-size-menu"
+    },
+    "NB-45": {
+      "id": "5c9bc031-7cdc-434d-8f0f-49e64d1f0578",
+      "identifier": "ERI-60",
+      "url": "https://linear.app/ericar/issue/ERI-60/menu-gap"
     }
   }
 }

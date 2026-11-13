@@ -79,7 +79,7 @@ export default function Toolbar({
   const [shapesOpen, setShapesOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const shapesButtonRef = useRef<HTMLButtonElement>(null);
-  const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center", 8);
+  const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center");
 
   useEffect(() => {
     if (!shapesOpen) return;

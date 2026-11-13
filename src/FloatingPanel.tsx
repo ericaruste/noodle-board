@@ -162,12 +162,30 @@ export type AnchorBox = {
   minWidth: number;
 };
 
+/** `brand.scale.100`. The space between a floating toolbar and the menu that opens from it. */
+function toolbarMenuGap(): number {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-100");
+  const value = Number.parseFloat(raw);
+  return Number.isFinite(value) ? value : 4;
+}
+
+/** The toolbar the control sits in. The menu clears that box, not the button inside it. */
+function toolbarRect(anchor: HTMLElement): DOMRect {
+  const panel = anchor.closest("[data-floating-panel='toolbar']");
+  if (panel instanceof HTMLElement) return panel.getBoundingClientRect();
+  let node: HTMLElement | null = anchor;
+  while (node) {
+    if (node.parentElement?.hasAttribute("data-canvas-chrome")) return node.getBoundingClientRect();
+    node = node.parentElement;
+  }
+  return anchor.getBoundingClientRect();
+}
+
 /** Screen position for a menu under a button, clamped to the floating layer. */
 export function useAnchoredBox(
   open: boolean,
   anchorRef: { readonly current: HTMLElement | null },
   align: AnchorAlign = "start",
-  gap = 4,
 ) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<AnchorBox | null>(null);
@@ -184,13 +202,15 @@ export function useAnchoredBox(
       const layer = floatingSlot("dropdown");
       if (anchor && menu && layer) {
         const rect = anchor.getBoundingClientRect();
+        const host = toolbarRect(anchor);
         const layerRect = layer.getBoundingClientRect();
         const width = menu.offsetWidth;
-        const height = menu.offsetHeight;
+        const height = menu.getBoundingClientRect().height;
         const pad = 8;
-        let top = rect.bottom + gap - layerRect.top;
-        if (height > 0 && rect.bottom + gap + height > layerRect.bottom - pad) {
-          const above = rect.top - gap - height - layerRect.top;
+        const gap = toolbarMenuGap();
+        let top = host.bottom + gap - layerRect.top;
+        if (height > 0 && host.bottom + gap + height > layerRect.bottom - pad) {
+          const above = host.top - gap - height - layerRect.top;
           if (above >= pad) top = above;
         }
         let left = (align === "center" ? rect.left + rect.width / 2 - width / 2 : rect.left) - layerRect.left;
@@ -213,7 +233,7 @@ export function useAnchoredBox(
     };
     place();
     return () => cancelAnimationFrame(frame);
-  }, [open, anchorRef, align, gap]);
+  }, [open, anchorRef, align]);
 
   return { menuRef, box };
 }

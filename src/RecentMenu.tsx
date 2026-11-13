@@ -11,7 +11,7 @@ export default function RecentMenu({ recents, onOpenRecent }: RecentMenuProps) {
   const [open, setOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start", 8);
+  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
 
   useEffect(() => {
     if (!open) return;

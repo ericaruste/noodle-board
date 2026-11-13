@@ -29,6 +29,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
 - Each font size row is `brand.scale.800` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
+- A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 
 ## Contextual button
 
