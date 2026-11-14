@@ -1,7 +1,7 @@
 ---
 id: NB-42
 title: Font style menu
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
