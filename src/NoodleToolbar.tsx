@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
-import { ColorSwatch, SWATCH_FAMILIES, SWATCH_HEX, swatchColor, swatchFamilyForHex } from "./ColorSwatch";
+import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar";
+import { NEUTRAL_SWATCH_HEX, swatchFamilyForHex, swatchHex } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import {
@@ -57,6 +58,26 @@ const LINE_STYLE_ICONS: Record<NoodleLineStyle, SlotIcon> = {
 };
 
 const NOODLE_SWATCH_SCALE = 500;
+const CUSTOM_DISC_HEX = "EBCFFF";
+
+function noodleColorChoice(color: string): ColorPickerChoice {
+  const digits = color.replace(/#/g, "").toUpperCase();
+  if (digits === NEUTRAL_SWATCH_HEX[NOODLE_SWATCH_SCALE]) return { kind: "swatch", family: "neutral" };
+  const family = swatchFamilyForHex(digits, NOODLE_SWATCH_SCALE);
+  return family ? { kind: "swatch", family } : { kind: "custom" };
+}
+
+function noodleCustomHex(color: string, choice: ColorPickerChoice) {
+  if (choice.kind !== "custom" && choice.kind !== "mixed") return CUSTOM_DISC_HEX;
+  const digits = color.replace(/#/g, "").toUpperCase();
+  return /^[0-9A-F]{6}$/.test(digits) ? digits : CUSTOM_DISC_HEX;
+}
+
+function noodleColorValue(choice: ColorPickerChoice, hex: string) {
+  if (choice.kind === "swatch") return `#${swatchHex(choice.family, NOODLE_SWATCH_SCALE)}`;
+  if (choice.kind === "custom" && /^[0-9A-F]{6}$/.test(hex)) return `#${hex}`;
+  return null;
+}
 
 function TypeIcon({ className }: { className?: string }) {
   return (
@@ -139,7 +160,6 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   const editing = useNoodleLabelEditing(edgeId);
   const colorMixed = mixed?.has("color") ?? false;
-  const colorFamily = colorMixed ? null : swatchFamilyForHex(data.color, NOODLE_SWATCH_SCALE);
 
   function ColorIcon({ className }: { className?: string }) {
     return <ColorMark className={className} color={colorMixed ? undefined : data.color} />;
@@ -225,23 +245,13 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
           open={menu === "color"}
           onToggle={() => toggle("color")}
         >
-          <div className={`${menuChrome} gap-brand-scale-200`} role="menu" aria-label="Color">
-            {SWATCH_FAMILIES.map((family) => (
-              <ColorSwatch
-                key={family}
-                type="color"
-                color={swatchColor(family, NOODLE_SWATCH_SCALE)}
-                selected={colorFamily === family}
-                ariaLabel={`${family} ${NOODLE_SWATCH_SCALE}`}
-                onClick={() => {
-                  setMenu(null);
-                  write({ ...dataRef.current, color: `#${SWATCH_HEX[family][NOODLE_SWATCH_SCALE]}` }, true, {
-                    color: `#${SWATCH_HEX[family][NOODLE_SWATCH_SCALE]}`,
-                  });
-                }}
-              />
-            ))}
-          </div>
+          <NoodleColorMenu
+            color={data.color}
+            mixed={colorMixed}
+            onColor={(color, history) => {
+              write({ ...dataRef.current, color }, history, { color });
+            }}
+          />
         </MenuButton>
         <MenuButton
           label="Line weight and line type"
@@ -334,6 +344,94 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
           }}
         />
       </div>
+    </div>
+  );
+}
+
+/**
+ * The open picker lives in this menu. It mounts only while Color is open, so
+ * the next open starts collapsed. A drag is one undo. An outside color change
+ * (undo, a file opening) replaces the selection. A change this menu just wrote
+ * does not, so custom stays selected when the stroke still matches a swatch.
+ */
+function NoodleColorMenu({
+  color,
+  mixed,
+  onColor,
+}: {
+  color: string;
+  mixed: boolean;
+  onColor: (color: string, history: boolean) => void;
+}) {
+  const initial = mixed ? ({ kind: "mixed" } as const) : noodleColorChoice(color);
+  const [choice, setChoice] = useState<ColorPickerChoice>(initial);
+  const [hex, setHex] = useState(() => noodleCustomHex(color, initial));
+  const written = useRef(color);
+  const mixedRef = useRef(mixed);
+  const applied = useRef<string | null>(null);
+  const gesture = useRef(false);
+  const pending = useRef<{ choice: ColorPickerChoice; hex: string } | null>(null);
+  const scheduled = useRef(false);
+  const hexRef = useRef(hex);
+  const onColorRef = useRef(onColor);
+  onColorRef.current = onColor;
+
+  if (color !== written.current || mixed !== mixedRef.current) {
+    const fromUs = applied.current === color;
+    written.current = color;
+    mixedRef.current = mixed;
+    applied.current = null;
+    if (!fromUs) {
+      const nextChoice = mixed ? ({ kind: "mixed" } as const) : noodleColorChoice(color);
+      const nextHex = noodleCustomHex(color, nextChoice);
+      setChoice(nextChoice);
+      setHex(nextHex);
+      hexRef.current = nextHex;
+    }
+  }
+
+  function flush() {
+    scheduled.current = false;
+    const next = pending.current;
+    pending.current = null;
+    if (!next || next.choice.kind === "mixed" || next.choice.kind === "none") return;
+    const value = noodleColorValue(next.choice, next.hex);
+    if (!value) return;
+    const recordHistory = !gesture.current;
+    gesture.current = true;
+    applied.current = value;
+    written.current = value;
+    onColorRef.current(value, recordHistory);
+  }
+
+  function schedule(next: { choice: ColorPickerChoice; hex: string }) {
+    setChoice(next.choice);
+    setHex(next.hex);
+    hexRef.current = next.hex;
+    pending.current = next;
+    if (scheduled.current) return;
+    scheduled.current = true;
+    queueMicrotask(flush);
+  }
+
+  return (
+    <div
+      data-noodle-color-menu
+      onMouseDownCapture={() => {
+        gesture.current = false;
+      }}
+    >
+      <ColorPickerToolbar
+        scale={NOODLE_SWATCH_SCALE}
+        leading="neutral"
+        choice={choice}
+        customHex={hex}
+        onChoiceChange={(next) => schedule({ choice: next, hex: hexRef.current })}
+        onCustomHexChange={(nextHex) => {
+          hexRef.current = nextHex;
+          schedule({ choice: { kind: "custom" }, hex: nextHex });
+        }}
+      />
     </div>
   );
 }

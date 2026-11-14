@@ -20,12 +20,10 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Color picker toolbar width.** The swatch grid and the hex row are 152px: five 24px discs and four 8px gaps. No spacing token is 152px. The picker field stays 172px. No spacing token is 172px.
 - **[Figma] Color picker toolbar padding.** The frame is 12px, `brand.scale.300`. The toolbar and the picker panel use 8px, `brand.scale.200`.
 - **[Figma] Color picker placement.** The frame paints the picker under the swatch grid. The app puts it in its own panel beside the toolbar: on the right when that side fits, on the left when the toolbar is against the right edge. Opening it does not move the toolbar.
-- **[code] Color picker on shape fill and stroke.** Sticky notes use the color picker toolbar. Noodles pick from the eight step-500 swatches on the noodle toolbar. Shape fill and stroke still use the Phase 1 bars. The noodle bar does not open the picker.
+- **[code] Color picker on shape fill and stroke.** Sticky notes and noodles use the color picker toolbar. Shape fill and stroke still use the Phase 1 bars.
 - **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
-- **[Figma] Noodle color menu.** The frame does not paint the open color menu. The app opens eight `alias.swatch` step-500 discs. A custom color and the color picker are not on this bar. A noodle that is not one of those swatches keeps that color on the disc until a swatch is chosen. NB-52 replaces this menu with the color picker toolbar.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
 - **[token app] Placeholder line height sits beside `lg`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.lg.line-height`. `lg` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
-- **[code] Noodle stroke color.** NB-52. The noodle color control is still the eight step-500 discs. Neutral 500 is not the default, and the color picker is not on that control.
 
 ## Decisions already made
 
@@ -45,7 +43,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
 - The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
 - The custom preview is a 12px circle, `brand.scale.300`, with a 1px white stroke, `brand.foundation.white` at `alias.border-width.xsm`, drawn inside the circle. It is not a separate white circle. The custom swatch has no disc stroke in default, hover, or selected. None and color keep the 1px `mapped.border.control` stroke on default only. Hover and selected drop it. Keyboard focus uses the hover ring, so that stroke is hidden then too.
-- The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open menu uses the 24px color swatch at step 500.
+- The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
@@ -503,9 +501,9 @@ This swatch is not a toolbar. The color picker toolbar that places it is its own
 
 Figma frame titled `color-swatch`, node `193:3525`. Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
 
-The toolbar that sits below a selected sticky note. Fill, stroke, and noodle color still use the Phase 1 bars. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker. The picker is its own panel beside the toolbar. It opens from the custom swatch and does not move the toolbar. It sits on the right when that side fits, and on the left when the toolbar is against the right edge.
+The toolbar that sits below a selected sticky note, and the menu the noodle color control opens. Shape fill and stroke still use the Phase 1 bars. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker. The picker is its own panel beside the toolbar. It opens from the custom swatch and does not move the toolbar. It sits on the right when that side fits, and on the left when the toolbar is against the right edge.
 
-The leading disc is chosen by the caller. This trial keeps none. A sticky passes neutral at step 200, so that disc is `alias.swatch.neutral.200` and none is not offered there. Choosing the leading disc closes the picker, the same as a palette swatch.
+The leading disc is chosen by the caller. This trial keeps none. A sticky passes neutral at step 200, so that disc is `alias.swatch.neutral.200` and none is not offered there. A noodle passes neutral at step 500, so that disc is `alias.swatch.neutral.500` and none is not offered there. Choosing the leading disc closes the picker, the same as a palette swatch.
 
 On a sticky, the open picker is not stored. The toolbar mounts only while the note is selected. A palette swatch, the leading disc, or none closes the picker. Clicking the canvas deselects the note. Clicking the note again mounts the toolbar collapsed, including when the note’s color is still the custom swatch.
 
@@ -525,7 +523,7 @@ The saturation and hue handles can be dragged. A pointer press on the picker is 
 | Picker gap | `brand.scale.100` | 4px from the toolbar’s outer edge to the picker panel. The picker is top aligned. Right when that side fits. Left when the toolbar is against the right edge |
 | Content width | none | The column is the swatch grid, 152px: five 24px discs and four 8px gaps. The hex row matches that width. No spacing token is 152px |
 | Swatch gap | `brand.scale.200` | 8px |
-| Swatch columns | five | The leading disc is chosen by the caller. This trial keeps none. Sticky passes neutral at step 200. Then `alias.swatch` in token-file order, then custom |
+| Swatch columns | five | The leading disc is chosen by the caller. This trial keeps none. Sticky passes neutral at step 200. Noodle passes neutral at step 500. Then `alias.swatch` in token-file order, then custom |
 | Swatch | color swatch | 24px disc. The specimen uses step 200. Tomato on the frame is step 500 |
 | Picker | react-colorful `HexColorPicker` | saturation and hue, in its own panel beside the toolbar. No alpha bar |
 | Saturation height | none | 108px, including the black band. No spacing token is 108px |
@@ -639,7 +637,7 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the swatch menu. That open color menu is not painted on the frame. Each menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
+The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 ## Line weight and line type menu
 
@@ -743,3 +741,52 @@ Painted: one resting row of six arrow glyphs.
 Not painted, as far as the frame shows: hover and disabled. The button has no focus state. The app paints the current arrowhead with the button’s selected state.
 
 The toolbar and these menus add no z-index. The bar is already in FloatingPanel on the toolbar layer. The menus use FloatingPanel on the dropdown layer.
+
+## Noodle stroke color
+
+No Figma frame for this pass. Ticket NB-52. Code is `NoodleColorMenu` in `src/NoodleToolbar.tsx`. It opens `src/ColorPickerToolbar.tsx` with `scale={500}` and `leading="neutral"`. A new noodle comes from `defaultNoodleData` in `src/noodleData.ts`. The connect preview in `src/connectionLine.tsx` and `src/ConnectMode.tsx` uses that same color.
+
+The color control on the noodle bar stays a contextual button. Its 16px disc paints the stroke. Opening it shows the color picker toolbar, `brand.scale.100` (4px) under the painted pill. The first disc is `alias.swatch.neutral.500`, which is `alias.cool-neutral.900` (`#303132`). None is not offered. The other discs are `alias.swatch` at step 500, then custom. A new noodle stores `#303132`, and the neutral disc is selected. The connect preview uses that hex.
+
+A saved stroke that matches a step-500 swatch selects that disc. Any other saved hex selects custom and keeps that stroke. Opening custom from a swatch copies that swatch into the picker, so the stroke stays put until a drag, a hex edit, or the pipette. The custom disc stays on `EBCFFF` until custom is the selection. The picker is its own panel, `brand.scale.100` (4px) from this toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. It stays out of the toolbar’s box, so opening it does not move the noodle bar or this toolbar.
+
+The menu mounts only while Color is open. A palette swatch or the neutral disc closes the picker and leaves the menu open. Closing Color, or clicking the canvas, unmounts the menu. The next open starts collapsed.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Default stroke | `alias.swatch.neutral.500` | `alias.cool-neutral.900`, `#303132`. `alias.swatch.neutral` does not use `brand.neutral` |
+| Leading disc | color swatch | 24px, `brand.scale.600`. Step 500. Neutral. None is not offered |
+| Palette | `alias.swatch` step 500 | purple `#BF66FF`, sky `#66C7FF`, lime `#A5F075`, orange `#FFC066`, yellow `#F0DE75`, coral `#FF8F66`, tomato `#FF7066`, pink `#FF99BB` |
+| Custom disc | color swatch, custom | `EBCFFF` until custom is selected, then the picker color |
+| Padding | `brand.scale.200` | 8px on the toolbar and on the picker panel |
+| Corner radius | `alias.border-radius.xxl` | 16px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Shadow | not a token | the same shadow the text toolbar already uses |
+| Blur | not a token | the same 24px frost the text toolbar already uses |
+| Section gap | `brand.scale.400` | 16px between the swatch grid and the hex row |
+| Swatch gap | `brand.scale.200` | 8px |
+| Picker gap | `brand.scale.100` | 4px from this toolbar’s outer edge. Top aligned. Right when that side fits. Left when the toolbar is against the right edge |
+| Hex field | hex input | the selected swatch, or the custom color when custom is selected |
+| Text, every state | `mapped.text.default` | `#303132`. The Figma text style is `body/sm/tight`, 12px / 12px. Paragraph spacing is `not a token` |
+| Icon buttons | icon button, `md` | 28px, `brand.scale.700`. Copy, then pipette. Default type |
+| Icon, default | `mapped.icon.action` | `#303132` |
+| Icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Icon, copy | Lucide `Copy` | 12px, `brand.scale.300` |
+| Icon, pipette | Lucide `Pipette` | 12px, `brand.scale.300` |
+| Divider | none | this toolbar has no divider |
+
+The color picker toolbar’s caller props on this menu:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| scale | caller | 500 |
+| leading | caller | neutral |
+
+Painted: collapsed and extended. The leading disc is neutral at step 500, in default, hover, and selected. Custom, the hex field, copy, and pipette follow the color picker toolbar.
+
+Not painted: a none disc on this menu. A saved hex that matches no step-500 swatch selects custom and keeps that stroke.
+
+The toolbar and the picker sit in the color menu’s FloatingPanel on the dropdown layer. They add no z-index of their own. They stay above a selected noodle and a noodle that is mid-drag. The 16px disc on the bar is the contextual button icon slot, documented on the noodle toolbar.

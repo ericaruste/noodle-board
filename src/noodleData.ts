@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Edge } from "@xyflow/react";
+import { NEUTRAL_SWATCH_HEX } from "./ColorSwatch";
 
 export const NOODLE_SHAPES = ["straight", "elbow", "curve"] as const;
 export const NOODLE_LINE_STYLES = ["solid", "dashed"] as const;
@@ -64,9 +65,12 @@ const ARROW_SET = new Set<string>(NOODLE_ARROWS);
 
 export const NOODLE_EDGE_EVENT = "noodle-update-edge";
 
+/** `alias.swatch.neutral.500`, which is `alias.cool-neutral.900`. */
+export const DEFAULT_NOODLE_COLOR = `#${NEUTRAL_SWATCH_HEX[500]}`;
+
 export function defaultNoodleData(): NoodleData {
   return {
-    color: "#334155",
+    color: DEFAULT_NOODLE_COLOR,
     lineStyle: "solid",
     thickness: "medium",
     shape: "elbow",
@@ -119,7 +123,7 @@ function readBends(value: unknown): NoodlePoint[] {
 
 export function readNoodle(data: unknown): NoodleData {
   const record = isRecord(data) ? data : {};
-  const color = typeof record.color === "string" && /^#[0-9a-fA-F]{6}$/.test(record.color) ? record.color : "#334155";
+  const color = typeof record.color === "string" && /^#[0-9a-fA-F]{6}$/.test(record.color) ? record.color : DEFAULT_NOODLE_COLOR;
   const curveOffset =
     typeof record.curveOffset === "number" && Number.isFinite(record.curveOffset) ? record.curveOffset : 0;
   const label = typeof record.label === "string" ? record.label.slice(0, 160) : "";

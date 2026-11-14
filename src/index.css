@@ -51,16 +51,16 @@ body,
 }
 
 .react-flow {
-  --xy-edge-stroke: #334155;
+  --xy-edge-stroke: var(--alias-swatch-neutral-500);
   --xy-edge-stroke-width: 2;
   --xy-edge-stroke-selected: #0f172a;
-  --xy-connectionline-stroke: #334155;
+  --xy-connectionline-stroke: var(--alias-swatch-neutral-500);
   --xy-connectionline-stroke-width: 2;
 }
 
 .react-flow__edge-path,
 .react-flow__connection-path {
-  stroke: #334155;
+  stroke: var(--alias-swatch-neutral-500);
   stroke-width: 2;
 }
 

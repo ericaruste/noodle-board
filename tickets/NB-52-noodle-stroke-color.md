@@ -1,7 +1,7 @@
 ---
 id: NB-52
 title: Noodle stroke color
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -31,12 +31,12 @@ Noodle color cannot be a custom color, and the default stroke is not neutral 500
 
 ## Acceptance criteria
 
-- [ ] The noodle color control is the color picker toolbar at step 500, with the same custom, hex, copy, and pipette behavior as the sticky toolbar
-- [ ] The toolbar does not offer the none swatch. That disc is `alias.swatch.neutral.500` (`#303132`)
-- [ ] A new noodle starts on that neutral 500 color, including the connect preview
-- [ ] Choosing custom opens the picker beside the toolbar and does not move the toolbar
-- [ ] A noodle saved with another color keeps that color when the file opens
-- [ ] The toolbar and the picker stay above a selected noodle and a noodle that is mid-drag
+- [x] The noodle color control is the color picker toolbar at step 500, with the same custom, hex, copy, and pipette behavior as the sticky toolbar
+- [x] The toolbar does not offer the none swatch. That disc is `alias.swatch.neutral.500` (`#303132`)
+- [x] A new noodle starts on that neutral 500 color, including the connect preview
+- [x] Choosing custom opens the picker beside the toolbar and does not move the toolbar
+- [x] A noodle saved with another color keeps that color when the file opens
+- [x] The toolbar and the picker stay above a selected noodle and a noodle that is mid-drag
 
 ## Technical notes
 

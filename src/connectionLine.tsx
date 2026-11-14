@@ -1,5 +1,6 @@
 import { useStore, type ConnectionLineComponentProps, type Node } from "@xyflow/react";
 import { landingGeometry } from "./PortMagnet";
+import { DEFAULT_NOODLE_COLOR } from "./noodleData";
 import { layoutNoodle } from "./noodleRoute";
 import { getHoverTarget, useHoverTarget } from "./portHot";
 
@@ -51,14 +52,15 @@ export default function NoodleConnectionLine({
           orient="auto"
           markerUnits="userSpaceOnUse"
         >
-          <path d="M2 2.5 14 8 2 13.5 5.2 8Z" fill="#334155" />
+          <path d="M2 2.5 14 8 2 13.5 5.2 8Z" fill={DEFAULT_NOODLE_COLOR} />
         </marker>
       </defs>
       <path
         d={path}
         fill="none"
-        stroke="#334155"
+        stroke={DEFAULT_NOODLE_COLOR}
         strokeWidth={2}
+        style={{ stroke: DEFAULT_NOODLE_COLOR }}
         className="react-flow__connection-path"
         markerEnd="url(#noodle-drag-arrow)"
       />

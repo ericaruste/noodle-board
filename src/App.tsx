@@ -80,7 +80,7 @@ import ConnectMode from "./ConnectMode";
 import NoodleConnectionLine from "./connectionLine";
 import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
-import { NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
+import { DEFAULT_NOODLE_COLOR, NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
 import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./noodleLabel";
 import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
 import {
@@ -171,7 +171,7 @@ const edgeTypes = { smoothstep: NoodleEdge };
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "smoothstep",
   zIndex: layers.canvas,
-  markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: "#334155" },
+  markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: DEFAULT_NOODLE_COLOR },
   style: { strokeWidth: 2 },
 };
 
