@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef, useState } from "react";
 import { type Node, type NodeProps } from "@xyflow/react";
 import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar";
-import { SWATCH_FAMILIES, swatchColor, type SwatchFamily } from "./ColorSwatch";
+import { isSwatchName, swatchColor, type SwatchFamily, type SwatchName } from "./ColorSwatch";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
@@ -25,13 +25,17 @@ export type StickyColor = keyof typeof STICKY_COLORS;
 
 export type StickyPaint =
   | { kind: "none" }
-  | { kind: "swatch"; family: SwatchFamily }
+  | { kind: "swatch"; family: SwatchName }
   | { kind: "custom"; hex: string };
+
+/** New notes start on purple. `color` stays a legacy name the file still requires. */
+export const NEW_STICKY_COLOR: StickyColor = "yellow";
+export const NEW_STICKY_PAINT: StickyPaint = { kind: "swatch", family: "purple" };
 
 export type StickyData = {
   text?: string;
   color: StickyColor;
-  /** Palette, custom, or none. Absent on notes saved before the color picker. */
+  /** Palette, neutral frost, custom, or none. Absent on notes saved before the color picker. */
   paint?: StickyPaint;
   /** Last custom color, kept when a palette swatch is selected. Six digits, no #. */
   customHex?: string;
@@ -62,7 +66,7 @@ export function isStickyPaint(value: unknown): value is StickyPaint {
   if (!value || typeof value !== "object") return false;
   const paint = value as StickyPaint;
   if (paint.kind === "none") return true;
-  if (paint.kind === "swatch") return (SWATCH_FAMILIES as readonly string[]).includes(paint.family);
+  if (paint.kind === "swatch") return typeof paint.family === "string" && isSwatchName(paint.family);
   if (paint.kind === "custom") return typeof paint.hex === "string" && HEX.test(paint.hex);
   return false;
 }
@@ -100,14 +104,20 @@ export function stickyFill(data: Pick<StickyData, "color" | "paint">) {
   return swatchColor(data.paint.family, 200);
 }
 
+/** Neutral 200 is the transparent note: the 60% fill plus the toolbar frost. Saved none stays clear. */
+export function stickyFrost(data: Pick<StickyData, "paint">) {
+  return isStickyPaint(data.paint) && data.paint.kind === "swatch" && data.paint.family === "neutral";
+}
+
 export function applyStickyChoice(data: StickyData, choice: ColorPickerChoice, hex: string): StickyData {
   if (choice.kind === "mixed") return data;
   const customHex = HEX.test(cleanHex(hex)) ? cleanHex(hex) : stickyCustomHex(data);
   if (choice.kind === "none") return { ...data, customHex, paint: { kind: "none" } };
   if (choice.kind === "swatch") {
+    const legacy = choice.family === "neutral" ? undefined : FAMILY_LEGACY[choice.family];
     return {
       ...data,
-      color: FAMILY_LEGACY[choice.family] ?? data.color,
+      color: legacy ?? data.color,
       customHex,
       paint: { kind: "swatch", family: choice.family },
     };
@@ -177,7 +187,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
     <div
       role="group"
       aria-label="Sticky note"
-      className="noodle-node relative h-full w-full rounded-sm shadow-[2px_4px_12px_rgba(15,23,42,0.18)]"
+      className={`noodle-node relative h-full w-full rounded-sm shadow-[2px_4px_12px_rgba(15,23,42,0.18)]${stickyFrost(data) ? " backdrop-blur-xl" : ""}`}
       style={{ ...resizeStyle, background: stickyFill(data) }}
       onDoubleClick={(event) => {
         event.stopPropagation();
@@ -265,6 +275,7 @@ export function StickyColorToolbar({
     >
       <ColorPickerToolbar
         scale={200}
+        leading="neutral"
         choice={choice}
         customHex={customHex}
         onChoiceChange={(next) => schedule({ choice: next, hex: hexRef.current })}

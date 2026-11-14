@@ -20,11 +20,21 @@ export const SWATCH_FAMILIES = [
 
 export type SwatchFamily = (typeof SWATCH_FAMILIES)[number];
 
+/**
+ * A palette family, or the leading neutral disc.
+ * Neutral is not in `SWATCH_FAMILIES`. The caller chooses that disc.
+ */
+export type SwatchName = SwatchFamily | "neutral";
+
 /** Fill and sticky notes use 200. Stroke and noodles use 500. */
 export type SwatchScale = 200 | 500;
 
-export function swatchColor(family: SwatchFamily, scale: SwatchScale) {
+export function swatchColor(family: SwatchName, scale: SwatchScale) {
   return `var(--alias-swatch-${family}-${scale})`;
+}
+
+export function isSwatchName(value: string): value is SwatchName {
+  return value === "neutral" || (SWATCH_FAMILIES as readonly string[]).includes(value);
 }
 
 /**
@@ -41,6 +51,22 @@ export const SWATCH_HEX: Record<SwatchFamily, Record<SwatchScale, string>> = {
   tomato: { 200: "FF9E97", 500: "FF7066" },
   pink: { 200: "FFE4ED", 500: "FF99BB" },
 };
+
+/**
+ * Six digits for the leading neutral disc.
+ * Step 200 is the source of the 60% mix, `alias.warm-neutral.100`.
+ * The disc itself paints `alias.swatch.neutral.200`, which is that color at 60%.
+ * Step 500 is `alias.swatch.neutral.500`.
+ */
+export const NEUTRAL_SWATCH_HEX: Record<SwatchScale, string> = {
+  200: "FDFBF7",
+  500: "303132",
+};
+
+export function swatchHex(family: SwatchName, scale: SwatchScale) {
+  if (family === "neutral") return NEUTRAL_SWATCH_HEX[scale];
+  return SWATCH_HEX[family][scale];
+}
 
 export function swatchFamilyForHex(hex: string, scale: SwatchScale): SwatchFamily | null {
   const digits = hex.replace(/#/g, "").toUpperCase();

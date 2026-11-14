@@ -3,7 +3,7 @@ import { ViewportPortal, useReactFlow, useStore } from "@xyflow/react";
 import { layers } from "./layers";
 import { isCanvasPlacementTarget, placementSize, snapFlowPoint, type Placement } from "./placement";
 import { ShapePreview } from "./ShapeNode";
-import { legacyStickyPaint, stickyFill } from "./StickyNode";
+import { NEW_STICKY_PAINT, stickyFill } from "./StickyNode";
 
 const PLACEHOLDER = "Double-click to write";
 
@@ -88,7 +88,7 @@ export default function PlacementGhost({ placement }: { placement: Placement }) 
         {placement.kind === "sticky" ? (
           <div
             className="h-full w-full rounded-sm p-3 font-alias-font-family-placeholder text-responsive-desktop-placeholder-lg-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder shadow-[2px_4px_12px_rgba(15,23,42,0.18)]"
-            style={{ background: stickyFill({ color: placement.color, paint: legacyStickyPaint(placement.color) }) }}
+            style={{ background: stickyFill({ color: placement.color, paint: NEW_STICKY_PAINT }) }}
           >
             {PLACEHOLDER}
           </div>
