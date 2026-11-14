@@ -1,7 +1,7 @@
 ---
 id: NB-51
 title: Transparent sticky
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
