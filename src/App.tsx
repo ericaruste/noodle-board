@@ -64,7 +64,7 @@ import {
   type NoodleViewport,
 } from "./noodleFile";
 import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./recents";
-import StickyNode, { legacyStickyPaint, type StickyColor } from "./StickyNode";
+import StickyNode, { NEW_STICKY_COLOR, NEW_STICKY_PAINT } from "./StickyNode";
 import ShapeNode from "./ShapeNode";
 import {
   DEFAULT_SHAPE_FILL,
@@ -1198,9 +1198,7 @@ function Board() {
       cancelPlacement();
       return;
     }
-    const colors: StickyColor[] = ["yellow", "pink", "blue", "green"];
-    const color = colors[Math.floor(Math.random() * colors.length)] ?? "yellow";
-    armPlacement({ kind: "sticky", color });
+    armPlacement({ kind: "sticky", color: NEW_STICKY_COLOR });
   }, [armPlacement, cancelPlacement]);
 
   const beginText = useCallback(() => {
@@ -1253,7 +1251,7 @@ function Board() {
             ? { width: size.width }
             : { width: size.width, height: size.height },
         ...(current.kind === "sticky"
-          ? { type: "sticky", data: { text: "", color: current.color, paint: legacyStickyPaint(current.color) } }
+          ? { type: "sticky", data: { text: "", color: current.color, paint: NEW_STICKY_PAINT } }
           : current.kind === "text"
             ? { type: "text", data: { paragraphs: emptyBody() } }
             : current.kind === "shape"

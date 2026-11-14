@@ -1,7 +1,7 @@
 ---
 id: NB-51
 title: Transparent sticky
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -31,11 +31,11 @@ The sticky swatch still offers none. The transparent note should be the neutral 
 
 ## Acceptance criteria
 
-- [ ] The sticky toolbar does not offer the none swatch. That disc is `alias.swatch.neutral.200` (`#FDFBF7` at 60%)
-- [ ] Choosing that disc paints a transparent sticky: the 60% fill plus the existing 24px frost blur. Blur is `not a token`
-- [ ] A new sticky starts on purple, `alias.swatch.purple.200` (`#EBCFFF`). The purple disc is selected
-- [ ] A note saved with another swatch, a custom color, or none keeps that paint when the file opens
-- [ ] The toolbar and the picker stay above a selected note and a note that is mid-drag
+- [x] The sticky toolbar does not offer the none swatch. That disc is `alias.swatch.neutral.200` (`#FDFBF7` at 60%)
+- [x] Choosing that disc paints a transparent sticky: the 60% fill plus the existing 24px frost blur. Blur is `not a token`
+- [x] A new sticky starts on purple, `alias.swatch.purple.200` (`#EBCFFF`). The purple disc is selected
+- [x] A note saved with another swatch, a custom color, or none keeps that paint when the file opens
+- [x] The toolbar and the picker stay above a selected note and a note that is mid-drag
 
 ## Technical notes
 

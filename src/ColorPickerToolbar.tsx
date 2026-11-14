@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Copy, Pipette } from "lucide-react";
-import { ColorSwatch, SWATCH_FAMILIES, SWATCH_HEX, swatchColor, type SwatchFamily, type SwatchScale } from "./ColorSwatch";
+import { ColorSwatch, SWATCH_FAMILIES, swatchColor, swatchHex, type SwatchName, type SwatchScale } from "./ColorSwatch";
 import { FloatingLayer, FloatingPanel, floatingSlot } from "./FloatingPanel";
 import { HexInput } from "./HexInput";
 import { IconButton } from "./IconButton";
@@ -9,13 +9,18 @@ import { layers } from "./layers";
 
 export type ColorPickerChoice =
   | { kind: "none" }
-  | { kind: "swatch"; family: SwatchFamily }
+  | { kind: "swatch"; family: SwatchName }
   | { kind: "custom" }
   | { kind: "mixed" };
 
 type ColorPickerToolbarProps = {
   /** Fill and sticky notes use 200. Stroke and noodles use 500. */
   scale?: SwatchScale;
+  /**
+   * First disc. The trial keeps none.
+   * A caller passes neutral to replace it. The step comes from `scale`.
+   */
+  leading?: "none" | "neutral";
   choice?: ColorPickerChoice;
   defaultChoice?: ColorPickerChoice;
   /** Six hex digits for the custom swatch, without the #. */
@@ -63,6 +68,7 @@ function digitsOf(raw: string) {
 
 export default function ColorPickerToolbar({
   scale = 200,
+  leading = "none",
   choice: choiceProp,
   defaultChoice = { kind: "none" },
   customHex: customHexProp,
@@ -101,7 +107,7 @@ export default function ColorPickerToolbar({
     onExpandedChange?.(next);
   }
 
-  const shown = choice.kind === "swatch" ? SWATCH_HEX[choice.family][scale] : customHex;
+  const shown = choice.kind === "swatch" ? swatchHex(choice.family, scale) : customHex;
   const pickerHex = held.current;
 
   useLayoutEffect(() => {
@@ -124,7 +130,7 @@ export default function ColorPickerToolbar({
     const nextExpanded = choice.kind === "custom" ? !expanded : true;
     // Opening custom from a palette keeps that fill. The picker starts on it
     // instead of the last custom color.
-    if (choice.kind === "swatch") setCustomHex(SWATCH_HEX[choice.family][scale]);
+    if (choice.kind === "swatch") setCustomHex(swatchHex(choice.family, scale));
     if (choice.kind !== "custom") setChoice({ kind: "custom" });
     setExpanded(nextExpanded);
   }
@@ -181,14 +187,27 @@ export default function ColorPickerToolbar({
       {/* The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row matches that width. No spacing token is 152px. */}
       <div ref={toolbarRef} className={`noodle-color-toolbar grid w-max grid-cols-1 gap-brand-scale-400 ${panelClass}`}>
         <div className="grid grid-cols-5 gap-brand-scale-200">
-          <ColorSwatch
-            type="none"
-            selected={choice.kind === "none"}
-            onClick={() => {
-              setChoice({ kind: "none" });
-              setExpanded(false);
-            }}
-          />
+          {leading === "neutral" ? (
+            <ColorSwatch
+              type="color"
+              color={swatchColor("neutral", scale)}
+              selected={choice.kind === "swatch" && choice.family === "neutral"}
+              ariaLabel={`neutral ${scale}`}
+              onClick={() => {
+                setChoice({ kind: "swatch", family: "neutral" });
+                setExpanded(false);
+              }}
+            />
+          ) : (
+            <ColorSwatch
+              type="none"
+              selected={choice.kind === "none"}
+              onClick={() => {
+                setChoice({ kind: "none" });
+                setExpanded(false);
+              }}
+            />
+          )}
           {SWATCH_FAMILIES.map((family) => (
             <ColorSwatch
               key={family}
