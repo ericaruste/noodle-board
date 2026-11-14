@@ -240,7 +240,7 @@ export default function ColorPickerToolbar({
 }
 
 const captionClass =
-  "font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight";
+  "font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight";
 
 function LayerCheck() {
   const anchorRef = useRef<HTMLDivElement>(null);

@@ -67,6 +67,7 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #909397 | `text-mapped-text-disabled` | `mapped.text.disabled` | color |
 | #BE123C | `text-mapped-text-error` | `mapped.text.error` | color |
 | #BE123C | `text-mapped-text-error-hover` | `mapped.text.error-hover` | color |
+| #606264 | `text-mapped-text-placeholder` | `mapped.text.placeholder` | color |
 
 ## Alias tokens
 
@@ -109,6 +110,7 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | Geist | `font-alias-font-family-body` | `alias.font-family.body` | font |
 | Geist | `font-alias-font-family-caption` | `alias.font-family.caption` | font |
 | Geist | `font-alias-font-family-heading` | `alias.font-family.heading` | font |
+| Open Sans | `font-alias-font-family-placeholder` | `alias.font-family.placeholder` | font |
 | #DBEAF8 | `var(--alias-primary-100)` | `alias.primary.100` | color |
 | #B7D4F1 | `var(--alias-primary-200)` | `alias.primary.200` | color |
 | #92BFE9 | `var(--alias-primary-300)` | `alias.primary.300` | color |
@@ -124,6 +126,8 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #FF8F66 | `var(--alias-swatch-coral-500)` | `alias.swatch.coral.500` | color |
 | #E9FFDB | `var(--alias-swatch-lime-200)` | `alias.swatch.lime.200` | color |
 | #A5F075 | `var(--alias-swatch-lime-500)` | `alias.swatch.lime.500` | color |
+| #FDFBF7 / 60% | `var(--alias-swatch-neutral-200)` | `alias.swatch.neutral.200` | color |
+| #303132 | `var(--alias-swatch-neutral-500)` | `alias.swatch.neutral.500` | color |
 | #FFDBA7 | `var(--alias-swatch-orange-200)` | `alias.swatch.orange.200` | color |
 | #FFC066 | `var(--alias-swatch-orange-500)` | `alias.swatch.orange.500` | color |
 | #FFE4ED | `var(--alias-swatch-pink-200)` | `alias.swatch.pink.200` | color |
@@ -184,6 +188,8 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #FFFFFF | `var(--brand-foundation-white)` | `brand.foundation.white` | color |
 | #E9FFDB | `var(--brand-lime-200)` | `brand.lime.200` | color |
 | #A5F075 | `var(--brand-lime-500)` | `brand.lime.500` | color |
+| #5B4BDB | `var(--brand-neutral-200)` | `brand.neutral.200` | color |
+| #5B4BDB | `var(--brand-neutral-500)` | `brand.neutral.500` | color |
 | #FFDBA7 | `var(--brand-orange-200)` | `brand.orange.200` | color |
 | #FFC066 | `var(--brand-orange-500)` | `brand.orange.500` | color |
 | #FFE4ED | `var(--brand-pink-200)` | `brand.pink.200` | color |
@@ -233,15 +239,19 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #191919 | `var(--brand-warm-gray-950)` | `brand.warm-gray.950` | color |
 | #FFF6BF | `var(--brand-yellow-200)` | `brand.yellow.200` | color |
 | #F0DE75 | `var(--brand-yellow-500)` | `brand.yellow.500` | color |
-| 16.8px | `leading-responsive-desktop-body-lg-line-height` | `responsive.desktop.body.lg.line-height` | line height |
-| 14px | `leading-responsive-desktop-body-lg-line-height-tight` | `responsive.desktop.body.lg.line-height-tight` | line height |
-| 14px | `text-responsive-desktop-body-lg-size` | `responsive.desktop.body.lg.size` | font size |
-| 14.4px | `leading-responsive-desktop-body-md-line-height` | `responsive.desktop.body.md.line-height` | line height |
-| 12px | `leading-responsive-desktop-body-md-line-height-tight` | `responsive.desktop.body.md.line-height-tight` | line height |
-| 12px | `text-responsive-desktop-body-md-size` | `responsive.desktop.body.md.size` | font size |
+| 19.2px | `leading-responsive-desktop-body-lg-line-height` | `responsive.desktop.body.lg.line-height` | line height |
+| 16px | `text-responsive-desktop-body-lg-size` | `responsive.desktop.body.lg.size` | font size |
+| 16.8px | `leading-responsive-desktop-body-md-line-height` | `responsive.desktop.body.md.line-height` | line height |
+| 14px | `leading-responsive-desktop-body-md-line-height-tight` | `responsive.desktop.body.md.line-height-tight` | line height |
+| 14px | `text-responsive-desktop-body-md-size` | `responsive.desktop.body.md.size` | font size |
+| 14.4px | `leading-responsive-desktop-body-sm-line-height` | `responsive.desktop.body.sm.line-height` | line height |
+| 12px | `leading-responsive-desktop-body-sm-line-height-tight` | `responsive.desktop.body.sm.line-height-tight` | line height |
+| 12px | `text-responsive-desktop-body-sm-size` | `responsive.desktop.body.sm.size` | font size |
 | 12px | `leading-responsive-desktop-caption-md-line-height` | `responsive.desktop.caption.md.line-height` | line height |
 | 10px | `leading-responsive-desktop-caption-md-line-height-tight` | `responsive.desktop.caption.md.line-height-tight` | line height |
 | 10px | `text-responsive-desktop-caption-md-size` | `responsive.desktop.caption.md.size` | font size |
+| 16px | `text-responsive-desktop-placeholder-lg-size` | `responsive.desktop.placeholder.lg.size` | font size |
+| 19.2px | `leading-responsive-desktop-placeholder-line-height` | `responsive.desktop.placeholder.line-height` | line height |
 
 ## Duplicate values
 
@@ -256,14 +266,14 @@ These values are shared by more than one token, so a Figma value on its own is a
 | #1E3B58 | `mapped.border.action-ring-selected`, `mapped.icon.action-hover`, `mapped.icon.action-selected`, `mapped.text.action-hover`, `mapped.text.action-selected`, `alias.primary.800`, `brand.blue.800` |
 | #26040C | `alias.error.900`, `brand.red.900` |
 | #2C5983 | `alias.primary.700`, `brand.blue.700` |
-| #303132 | `mapped.icon.action`, `mapped.icon.action-strong`, `mapped.text.action`, `mapped.text.action-strong`, `mapped.text.default`, `alias.cool-neutral.900`, `brand.cool-gray.900` |
+| #303132 | `mapped.icon.action`, `mapped.icon.action-strong`, `mapped.text.action`, `mapped.text.action-strong`, `mapped.text.default`, `alias.cool-neutral.900`, `alias.swatch.neutral.500`, `brand.cool-gray.900` |
 | #333231 | `alias.warm-neutral.900`, `brand.warm-gray.900` |
 | #3B76AF | `mapped.border.action`, `alias.primary.600`, `brand.blue.600` |
 | #4A94DB | `mapped.border.action-ring-focus`, `mapped.surface.action-strong-selected`, `alias.primary.500`, `brand.blue.500` |
 | #4C0718 | `alias.error.800`, `brand.red.800` |
 | #4C4B4A | `alias.warm-neutral.800`, `brand.warm-gray.800` |
-| #5B4BDB | `alias.primary.900`, `brand.blue.900` |
-| #606264 | `mapped.text.caption`, `alias.cool-neutral.800`, `brand.cool-gray.800` |
+| #5B4BDB | `alias.primary.900`, `brand.blue.900`, `brand.neutral.200`, `brand.neutral.500` |
+| #606264 | `mapped.text.caption`, `mapped.text.placeholder`, `alias.cool-neutral.800`, `brand.cool-gray.800` |
 | #656463 | `alias.warm-neutral.700`, `brand.warm-gray.700` |
 | #66C7FF | `alias.swatch.sky.500`, `brand.sky.500` |
 | #6EA9E2 | `mapped.border.action-ring-pressed`, `mapped.surface.action-strong-hover`, `alias.primary.400`, `brand.blue.400` |
@@ -310,11 +320,13 @@ These values are shared by more than one token, so a Figma value on its own is a
 | #FFF6BF | `alias.swatch.yellow.200`, `brand.yellow.200` |
 | 0px | `alias.border-radius.none`, `alias.border-width.none`, `brand.scale.0` |
 | 10px | `responsive.desktop.caption.md.line-height-tight`, `responsive.desktop.caption.md.size` |
-| 12px | `alias.border-radius.xl`, `alias.border-width.xl`, `brand.scale.300`, `responsive.desktop.body.md.line-height-tight`, `responsive.desktop.body.md.size`, `responsive.desktop.caption.md.line-height` |
-| 14px | `responsive.desktop.body.lg.line-height-tight`, `responsive.desktop.body.lg.size` |
-| 16px | `alias.border-radius.xxl`, `brand.scale.400` |
+| 12px | `alias.border-radius.xl`, `alias.border-width.xl`, `brand.scale.300`, `responsive.desktop.body.sm.line-height-tight`, `responsive.desktop.body.sm.size`, `responsive.desktop.caption.md.line-height` |
+| 14px | `responsive.desktop.body.md.line-height-tight`, `responsive.desktop.body.md.size` |
+| 16px | `alias.border-radius.xxl`, `brand.scale.400`, `responsive.desktop.body.lg.size`, `responsive.desktop.placeholder.lg.size` |
+| 19.2px | `responsive.desktop.body.lg.line-height`, `responsive.desktop.placeholder.line-height` |
 | 1px | `alias.border-width.xsm`, `brand.scale.25` |
 | 2px | `alias.border-radius.sm`, `alias.border-width.sm`, `brand.scale.50` |
 | 4px | `alias.border-radius.md`, `alias.border-width.md`, `brand.scale.100` |
 | 8px | `alias.border-radius.lg`, `alias.border-width.lg`, `brand.scale.200` |
 | Geist | `alias.font-family.body`, `alias.font-family.caption`, `alias.font-family.heading` |
+| Open Sans | `alias.font-family.placeholder`, `alias.typeface.open-sans` |

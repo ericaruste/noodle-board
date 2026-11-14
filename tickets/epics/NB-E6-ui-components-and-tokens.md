@@ -34,8 +34,10 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-48 Color swatch](../NB-48-color-swatch.md)
 - [NB-49 Color picker toolbar](../NB-49-color-picker-toolbar.md)
 - [NB-50 Noodle toolbar](../NB-50-noodle-toolbar.md)
+- [NB-51 Transparent sticky](../NB-51-transparent-sticky.md)
+- [NB-52 Noodle stroke color](../NB-52-noodle-stroke-color.md)
 
-The next component ticket is the next free id after NB-49, parented to NB-E6, and titled with the component name.
+The next component ticket is the next free id after NB-52, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 

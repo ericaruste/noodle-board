@@ -22,15 +22,20 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Color picker placement.** The frame paints the picker under the swatch grid. The app puts it in its own panel beside the toolbar: on the right when that side fits, on the left when the toolbar is against the right edge. Opening it does not move the toolbar.
 - **[code] Color picker on shape fill and stroke.** Sticky notes use the color picker toolbar. Noodles pick from the eight step-500 swatches on the noodle toolbar. Shape fill and stroke still use the Phase 1 bars. The noodle bar does not open the picker.
 - **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
-- **[Figma] Noodle color menu.** The frame does not paint the open color menu. The app opens eight `alias.swatch` step-500 discs. A custom color and the color picker are not on this bar. A noodle that is not one of those swatches keeps that color on the disc until a swatch is chosen.
+- **[Figma] Noodle color menu.** The frame does not paint the open color menu. The app opens eight `alias.swatch` step-500 discs. A custom color and the color picker are not on this bar. A noodle that is not one of those swatches keeps that color on the disc until a swatch is chosen. NB-52 replaces this menu with the color picker toolbar.
+- **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
+- **[token app] Placeholder line height sits beside `lg`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.lg.line-height`. `lg` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
+- **[code] Transparent sticky.** NB-51. The sticky swatch still offers none. Neutral 200 and the frost blur are not on the note. A new note is still a random legacy color, not purple.
+- **[code] Noodle stroke color.** NB-52. The noodle color control is still the eight step-500 discs. Neutral 500 is not the default, and the color picker is not on that control.
 
 ## Decisions already made
 
-- Heading, body, and caption are Geist. SF Pro is gone from the token export. The Figma text style `body/md/tight` still names SF Pro.
+- Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
 - `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 80%. The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
-- Desktop font size and line height are tokens under `responsive.desktop`. The text style `body/md/tight` is `responsive.desktop.body.md.size` (12px) and `responsive.desktop.body.md.line-height-tight` (12px). The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
+- Desktop font size and line height are tokens under `responsive.desktop`. The 12px tight style is `responsive.desktop.body.sm.size` and `responsive.desktop.body.sm.line-height-tight`. That style was `body.md`. `body.md` is now 14px / 16.8px, with tight 14px, which is the old `body.lg`. `body.lg` is 16px / 19.2px and has no tight line height. The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
+- Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.lg.size` (16px) and `responsive.desktop.placeholder.line-height` (19.2px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
 - 6px is `brand.scale.150` and 28px is `brand.scale.700`. Inserting them moved the later steps: 32px is `brand.scale.800`, 36px is `brand.scale.900`, 40px is `brand.scale.1000`, 44px is `brand.scale.1100`, and 48px is `brand.scale.1200`. Names through `brand.scale.600` (24px) stayed put.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
@@ -44,6 +49,22 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open menu uses the 24px color swatch at step 500.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
+## Canvas text
+
+No Figma frame for this pass. The tokens are `alias.font-family.placeholder`, `responsive.desktop.placeholder`, and `mapped.text.placeholder`. Code: `src/RichText.tsx` (`canvasDefault` on a sticky and a shape), `src/PlacementGhost.tsx` for the sticky ghost, and `.noodle-edge-label` in `src/index.css`. A text object does not use this style.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Font | `alias.font-family.placeholder` | Open Sans |
+| Size | `responsive.desktop.placeholder.lg.size` | 16px |
+| Line height | `responsive.desktop.placeholder.line-height` | 19.2px. The line height sits beside `lg`, not inside it. Paragraph spacing is `not a token` |
+| Empty hint | `mapped.text.placeholder` | `#606264`, `alias.cool-neutral.800` |
+| Typed sticky and shape | none | the existing slate ink |
+| Typed noodle | the stroke color | unchanged. Weight stays 600 |
+| Text object | none | 14px, family omitted |
+
+The empty hint and the typed default share the font and the size. A run that sets its own family or size still wins. The toolbar shows Open Sans and 16 when the run has neither.
+
 ## Contextual button
 
 Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`.
@@ -56,7 +77,7 @@ Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualBu
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the button has no stroke |
 | Font | `alias.font-family.body` | Geist |
-| Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight` |
+| Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight` |
 | Icon | `brand.scale.400` | 16px |
 | Chevron | `brand.scale.200` | 8px |
 | Default fill | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -127,7 +148,7 @@ Every control is a contextual button with the unused slots turned off.
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
-| Type size on the labels | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight` |
+| Type size on the labels | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight` |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties:
 
@@ -196,7 +217,7 @@ A single row for a dropdown. The label sits on the left. The caption and the sub
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the row has no stroke |
 | Font | `alias.font-family.body` | Geist |
-| Label size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. The row still writes 12px |
+| Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px |
 | Caption size | `responsive.desktop.caption.md.size`, `responsive.desktop.caption.md.line-height-tight` | 10px / 10px. The row still writes 10px. Paragraph spacing is `not a token` |
 | Chevron | `brand.scale.300` | 12px, Lucide `chevron-right` |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -275,7 +296,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Label, Coming Soon | `alias.typeface.coming-soon` | Coming Soon |
 | Label, Noto Serif | `alias.typeface.noto-serif` | Noto Serif |
 | Label, Montserrat | `alias.typeface.montserrat` | Montserrat |
-| Label size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. The row still writes 12px |
+| Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px |
 | Label, default | `mapped.text.action` | `#303132` |
 | Label, hover | `mapped.text.action-hover` | `#1E3B58` |
 | Label, selected | `mapped.text.action-selected` | `#1E3B58` |
@@ -314,7 +335,7 @@ Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 1
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
 | Font | `alias.font-family.body` | Geist |
-| Label size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. The row still writes 12px. Paragraph spacing is `not a token` |
+| Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px. Paragraph spacing is `not a token` |
 | Label, default | `mapped.text.action` | `#303132` |
 | Label, hover | `mapped.text.action-hover` | `#1E3B58` |
 | Label, selected | `mapped.text.action-selected` | `#1E3B58` |
@@ -397,7 +418,7 @@ A hex field for the color toolbar that comes later. It is not that toolbar. Two 
 | Gap | `brand.scale.100` | 4px between `#` and the hex code |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Font | `alias.font-family.body` | Geist |
-| Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 12px / 12px, text style `body/md/tight`. Paragraph spacing is `not a token` |
+| Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token` |
 | Text, every state | `mapped.text.default` | `#303132`. The Figma text style is named `default` |
 | Fill, default | none | the field has no fill |
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9`. The Figma style is `action-hover` |

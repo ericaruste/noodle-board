@@ -533,9 +533,10 @@ body,
   padding: 0 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  font-size: 12px;
+  font-family: var(--alias-font-family-placeholder);
+  font-size: var(--responsive-desktop-placeholder-lg-size);
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--responsive-desktop-placeholder-line-height);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -550,7 +551,6 @@ body,
   border: 0;
   outline: none;
   appearance: none;
-  font-family: inherit;
   text-overflow: clip;
   pointer-events: auto;
   user-select: text;
@@ -560,8 +560,8 @@ body,
 }
 
 .noodle-edge-label-input::placeholder {
-  color: currentColor;
-  opacity: 0.45;
+  color: var(--mapped-text-placeholder);
+  opacity: 1;
 }
 
 .noodle-marquee {

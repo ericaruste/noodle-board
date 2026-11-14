@@ -19,6 +19,8 @@ import type { ColorPickerChoice } from "./ColorPickerToolbar";
 import TextToolbar from "./TextToolbar";
 import {
   ALIGN_LABELS,
+  CANVAS_FONT_FAMILY,
+  CANVAS_FONT_SIZE,
   FONT_STYLE_LABELS,
   alignsInRange,
   applyAlign,
@@ -99,9 +101,13 @@ function GroupTextBar({
   const [linkMixed, setLinkMixed] = useState(false);
   const styles = uniformOf(sources.flatMap((source) => stylesInRange(source.body, fullRange(source.body))));
   const aligns = uniformOf(sources.flatMap((source) => alignsInRange(source.body, fullRange(source.body))));
-  const families = uniformFamily(sources.flatMap((source) => familiesInRange(source.body, fullRange(source.body))));
+  const canvas = type === "sticky" || type === "shape";
+  const familiesRaw = uniformFamily(sources.flatMap((source) => familiesInRange(source.body, fullRange(source.body))));
+  const families = canvas && familiesRaw === "none" ? CANVAS_FONT_FAMILY : familiesRaw;
   const sizes = uniformNumber(
-    sources.flatMap((source) => sizesInRange(source.body, fullRange(source.body), source.fontSize)),
+    sources.flatMap((source) =>
+      sizesInRange(source.body, fullRange(source.body), canvas ? (source.fontSize ?? CANVAS_FONT_SIZE) : source.fontSize),
+    ),
   );
   const hrefs = sources.flatMap((source) => hrefsInRange(source.body, fullRange(source.body)));
   const linked = hrefs.filter((href) => href).length;

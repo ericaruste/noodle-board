@@ -18,6 +18,8 @@ import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
 import {
   ALIGN_LABELS,
+  CANVAS_FONT_FAMILY,
+  CANVAS_FONT_SIZE,
   FONT_FAMILY_STACK,
   FONT_STYLE_LABELS,
   FONT_STYLES,
@@ -82,6 +84,11 @@ export type RichTextProps = {
   selected: boolean;
   placeholder?: string;
   fontSize?: number;
+  /**
+   * Sticky notes and shapes. Omitted family and size paint Open Sans at the
+   * placeholder size. The empty hint uses `mapped.text.placeholder`.
+   */
+  canvasDefault?: boolean;
   fill?: boolean;
   onCommit: (body: TextBody) => void;
   onCancel: () => void;
@@ -212,6 +219,7 @@ export function RichText({
   selected,
   placeholder = "Double-click to write",
   fontSize,
+  canvasDefault = false,
   fill = false,
   onCommit,
   onCancel,
@@ -549,8 +557,10 @@ export function RichText({
   const styleValues = stylesInRange(shown, toolbarRange);
   const uniformStyle = pendingStyle && caretPending ? pendingStyle : uniformOf(styleValues);
   const familyValues = familiesInRange(shown, toolbarRange);
-  const uniformFamilyValue = pendingFamily && caretPending ? pendingFamily : uniformFamily(familyValues);
-  const sizeValues = sizesInRange(shown, toolbarRange, fontSize);
+  const uniformFamilyRaw = pendingFamily && caretPending ? pendingFamily : uniformFamily(familyValues);
+  const uniformFamilyValue =
+    canvasDefault && uniformFamilyRaw === "none" ? CANVAS_FONT_FAMILY : uniformFamilyRaw;
+  const sizeValues = sizesInRange(shown, toolbarRange, canvasDefault ? (fontSize ?? CANVAS_FONT_SIZE) : fontSize);
   const uniformSize = pendingSize !== null && caretPending ? pendingSize : uniformNumber(sizeValues);
   const alignValues = alignsInRange(shown, toolbarRange);
   const uniformAlign = uniformOf(alignValues);
@@ -809,6 +819,12 @@ export function RichText({
 
   const showPlaceholder = isEmptyBody(shown);
   const editorStyle = fontSize && fontSize > 0 ? { fontSize, lineHeight: 1.43 } : undefined;
+  const hintClass = canvasDefault
+    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-lg-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder"
+    : "text-sm leading-5 text-slate-400";
+  const editorClass = canvasDefault
+    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-lg-size leading-responsive-desktop-placeholder-line-height text-slate-800"
+    : "text-sm leading-5 text-slate-800";
   const hideChrome = useConnectChromeHidden();
   const showChrome = selected && !hideChrome;
 
@@ -882,18 +898,18 @@ export function RichText({
         className={fill ? "h-full min-h-0 overflow-auto p-3" : "min-h-[1.5rem] overflow-auto px-1 py-0.5"}
       >
         {!editing && showPlaceholder ? (
-          <div className="text-sm leading-5 text-slate-400">{placeholder}</div>
+          <div className={hintClass}>{placeholder}</div>
         ) : (
           <div className="relative">
             {editing && showPlaceholder ? (
-              <div className="pointer-events-none absolute inset-0 z-0 text-sm leading-5 text-slate-400" aria-hidden>
+              <div className={`pointer-events-none absolute inset-0 z-0 ${hintClass}`} aria-hidden>
                 {placeholder}
               </div>
             ) : null}
             <div
               key={`${editing ? "editing" : "reading"}-${structureEpoch}`}
               ref={editorRef}
-              className={`noodle-text-editor relative z-[1] text-sm leading-5 text-slate-800 ${
+              className={`noodle-text-editor relative z-[1] ${editorClass} ${
                 editing ? "nodrag nopan nowheel min-h-[1.25rem]" : ""
               }`}
               style={editorStyle}

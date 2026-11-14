@@ -14,6 +14,12 @@ export const FONT_FAMILY_STACK: Record<FontFamily, string> = {
 };
 
 export const DEFAULT_FONT_SIZE = 14;
+
+/** Default face for sticky, noodle, and shape text. `alias.font-family.placeholder`. */
+export const CANVAS_FONT_FAMILY: FontFamily = "Open Sans";
+
+/** `responsive.desktop.placeholder.lg.size`. Text objects stay on `DEFAULT_FONT_SIZE`. */
+export const CANVAS_FONT_SIZE = 16;
 export const MIN_FONT_SIZE = 1;
 export const MAX_FONT_SIZE = 400;
 export const FONT_SIZE_PRESETS = [10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72] as const;
@@ -28,7 +34,7 @@ export type TextRun = {
   text: string;
   style: FontStyle;
   href?: string;
-  /** Omitted for the system sans. */
+  /** Omitted for the default face: Open Sans on a sticky, noodle, or shape, and the system sans on a text object. */
   family?: FontFamily;
   /** Omitted to inherit the node size, or 14 when the node has none. */
   size?: number;

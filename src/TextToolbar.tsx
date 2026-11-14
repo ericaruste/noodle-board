@@ -499,7 +499,7 @@ function FontSizeField({
               }
             }}
             style={{ width: `${Math.max(text.length, 2)}ch` }}
-            className={`bg-transparent font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-action outline-none group-hover:text-mapped-text-action-hover ${editing ? "cursor-text" : "cursor-pointer"}`}
+            className={`bg-transparent font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-action outline-none group-hover:text-mapped-text-action-hover ${editing ? "cursor-text" : "cursor-pointer"}`}
           />
         }
       />

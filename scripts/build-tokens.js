@@ -196,11 +196,52 @@ if (
 ) {
   throw new Error("Scale 150, 700, 800, 900, 1000, 1100, and 1200 were not written.");
 }
-if (!css.includes("--responsive-desktop-body-md-size: 12px") || !css.includes("--responsive-desktop-body-md-line-height: 14.4px")) {
-  throw new Error("Desktop body font size and line height were not written.");
+if (
+  !css.includes("--responsive-desktop-body-sm-size: 12px") ||
+  !css.includes("--responsive-desktop-body-sm-line-height: 14.4px") ||
+  !css.includes("--responsive-desktop-body-sm-line-height-tight: 12px")
+) {
+  throw new Error("Desktop body sm was not written.");
 }
-if (!lookupText.includes("`responsive.desktop.body.md.size`") || !lookupText.includes("`text-responsive-desktop-body-md-size`")) {
-  throw new Error("Token lookup is missing desktop body type.");
+if (
+  !css.includes("--responsive-desktop-body-md-size: 14px") ||
+  !css.includes("--responsive-desktop-body-md-line-height: 16.8px") ||
+  !css.includes("--responsive-desktop-body-md-line-height-tight: 14px")
+) {
+  throw new Error("Desktop body md was not written.");
+}
+if (!css.includes("--responsive-desktop-body-lg-size: 16px") || !css.includes("--responsive-desktop-body-lg-line-height: 19.2px")) {
+  throw new Error("Desktop body lg was not written.");
+}
+if (css.includes("--responsive-desktop-body-lg-line-height-tight")) {
+  throw new Error("Desktop body lg has a tight line height this export does not define.");
+}
+if (!css.includes('--alias-font-family-placeholder: "Open Sans"')) {
+  throw new Error("Placeholder font was not written.");
+}
+if (
+  !css.includes("--responsive-desktop-placeholder-lg-size: 16px") ||
+  !css.includes("--responsive-desktop-placeholder-line-height: 19.2px")
+) {
+  throw new Error("Placeholder type was not written.");
+}
+if (!css.includes("--mapped-text-placeholder: var(--alias-cool-neutral-800)")) {
+  throw new Error("Placeholder text color was not written.");
+}
+if (
+  !css.includes("--alias-swatch-neutral-200: color-mix(in srgb, var(--alias-warm-neutral-100) 60%, transparent)") ||
+  !css.includes("--alias-swatch-neutral-500: var(--alias-cool-neutral-900)")
+) {
+  throw new Error("Neutral swatches were not written.");
+}
+if (!lookupText.includes("`responsive.desktop.body.sm.size`") || !lookupText.includes("`text-responsive-desktop-body-sm-size`")) {
+  throw new Error("Token lookup is missing desktop body sm.");
+}
+if (!lookupText.includes("`responsive.desktop.placeholder.lg.size`") || !lookupText.includes("`mapped.text.placeholder`")) {
+  throw new Error("Token lookup is missing placeholder type or color.");
+}
+if (!lookupText.includes("`alias.swatch.neutral.200`") || !lookupText.includes("`alias.swatch.neutral.500`")) {
+  throw new Error("Token lookup is missing the neutral swatches.");
 }
 
 const declarations = css.split("\n").filter((line) => line.trim().startsWith("--")).length;

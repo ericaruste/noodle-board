@@ -290,6 +290,16 @@
       "id": "6c5b8824-c713-4136-a062-613ad8a6801e",
       "identifier": "ERI-65",
       "url": "https://linear.app/ericar/issue/ERI-65/noodle-toolbar"
+    },
+    "NB-51": {
+      "id": "d94f65d7-cdc8-4f26-8205-8f9510a7f86c",
+      "identifier": "ERI-66",
+      "url": "https://linear.app/ericar/issue/ERI-66/transparent-sticky"
+    },
+    "NB-52": {
+      "id": "7a740961-3fa0-42f6-91d0-34a1e6597448",
+      "identifier": "ERI-67",
+      "url": "https://linear.app/ericar/issue/ERI-67/noodle-stroke-color"
     }
   }
 }

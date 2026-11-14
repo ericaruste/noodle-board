@@ -55,6 +55,10 @@ export default {
           "200": "var(--alias-swatch-lime-200)",
           "500": "var(--alias-swatch-lime-500)"
         },
+        "neutral": {
+          "200": "var(--alias-swatch-neutral-200)",
+          "500": "var(--alias-swatch-neutral-500)"
+        },
         "orange": {
           "200": "var(--alias-swatch-orange-200)",
           "500": "var(--alias-swatch-orange-500)"
@@ -131,6 +135,10 @@ export default {
       "lime": {
         "200": "var(--brand-lime-200)",
         "500": "var(--brand-lime-500)"
+      },
+      "neutral": {
+        "200": "var(--brand-neutral-200)",
+        "500": "var(--brand-neutral-500)"
       },
       "orange": {
         "200": "var(--brand-orange-200)",
@@ -228,7 +236,8 @@ export default {
         "default": "var(--mapped-text-default)",
         "disabled": "var(--mapped-text-disabled)",
         "error": "var(--mapped-text-error)",
-        "error-hover": "var(--mapped-text-error-hover)"
+        "error-hover": "var(--mapped-text-error-hover)",
+        "placeholder": "var(--mapped-text-placeholder)"
       }
     }
   },
@@ -270,6 +279,7 @@ export default {
     "alias-font-family-body": "var(--alias-font-family-body)",
     "alias-font-family-caption": "var(--alias-font-family-caption)",
     "alias-font-family-heading": "var(--alias-font-family-heading)",
+    "alias-font-family-placeholder": "var(--alias-font-family-placeholder)",
     "alias-typeface-coming-soon": "var(--alias-typeface-coming-soon)",
     "alias-typeface-geist-mono": "var(--alias-typeface-geist-mono)",
     "alias-typeface-montserrat": "var(--alias-typeface-montserrat)",
@@ -279,14 +289,18 @@ export default {
   "fontSize": {
     "responsive-desktop-body-lg-size": "var(--responsive-desktop-body-lg-size)",
     "responsive-desktop-body-md-size": "var(--responsive-desktop-body-md-size)",
-    "responsive-desktop-caption-md-size": "var(--responsive-desktop-caption-md-size)"
+    "responsive-desktop-body-sm-size": "var(--responsive-desktop-body-sm-size)",
+    "responsive-desktop-caption-md-size": "var(--responsive-desktop-caption-md-size)",
+    "responsive-desktop-placeholder-lg-size": "var(--responsive-desktop-placeholder-lg-size)"
   },
   "lineHeight": {
     "responsive-desktop-body-lg-line-height": "var(--responsive-desktop-body-lg-line-height)",
-    "responsive-desktop-body-lg-line-height-tight": "var(--responsive-desktop-body-lg-line-height-tight)",
     "responsive-desktop-body-md-line-height": "var(--responsive-desktop-body-md-line-height)",
     "responsive-desktop-body-md-line-height-tight": "var(--responsive-desktop-body-md-line-height-tight)",
+    "responsive-desktop-body-sm-line-height": "var(--responsive-desktop-body-sm-line-height)",
+    "responsive-desktop-body-sm-line-height-tight": "var(--responsive-desktop-body-sm-line-height-tight)",
     "responsive-desktop-caption-md-line-height": "var(--responsive-desktop-caption-md-line-height)",
-    "responsive-desktop-caption-md-line-height-tight": "var(--responsive-desktop-caption-md-line-height-tight)"
+    "responsive-desktop-caption-md-line-height-tight": "var(--responsive-desktop-caption-md-line-height-tight)",
+    "responsive-desktop-placeholder-line-height": "var(--responsive-desktop-placeholder-line-height)"
   }
 };

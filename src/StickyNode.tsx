@@ -197,6 +197,7 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         editing={editing}
         selected={showChrome}
         fill
+        canvasDefault
         placeholder="Double-click to write"
         onCommit={commit}
         onCancel={() => setEditing(false)}

@@ -138,7 +138,7 @@ const previewTypes: ColorSwatchType[] = ["none", "color", "custom"];
 const previewStates: ColorSwatchState[] = ["default", "hover", "selected"];
 
 const captionClass =
-  "font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight";
+  "font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight";
 
 function SwatchScaleRow({
   label,

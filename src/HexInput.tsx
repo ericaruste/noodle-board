@@ -86,7 +86,7 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
   return (
     <label
       data-hex-input
-      className={`${state ? "" : "noodle-hex-input"} flex h-brand-scale-700 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default ${shellClass[visual]} ${className ?? "w-[108px] shrink-0"}`}
+      className={`${state ? "" : "noodle-hex-input"} flex h-brand-scale-700 cursor-text items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default ${shellClass[visual]} ${className ?? "w-[108px] shrink-0"}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onMouseDown={onFieldMouseDown}
@@ -115,7 +115,7 @@ export const HexInput = forwardRef<HTMLInputElement, HexInputProps>(function Hex
           selectOnFocus.current = false;
           setFocused(false);
         }}
-        className="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default outline-none"
+        className="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default outline-none"
       />
     </label>
   );
@@ -128,13 +128,13 @@ export function HexInputPreview() {
 
   return (
     <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
-      <p className="font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight">
+      <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
         Hex input
       </p>
       <div className="flex items-end gap-brand-scale-600">
         {previewStates.map((state) => (
           <div key={state} className="flex flex-col items-start gap-brand-scale-100">
-            <p className="font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight">
+            <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
               {state}
             </p>
             <HexInput state={state} />
@@ -142,11 +142,11 @@ export function HexInputPreview() {
         ))}
       </div>
       <div className="flex flex-col items-start gap-brand-scale-100">
-        <p className="font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight">
+        <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
           Live
         </p>
         <HexInput value={live} onValueChange={setLive} />
-        <p className="font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight">
+        <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
           #{live}
         </p>
       </div>
