@@ -8,6 +8,7 @@ import {
   type ReactFlowState,
 } from "@xyflow/react";
 import { layers } from "./layers";
+import { DEFAULT_NOODLE_COLOR } from "./noodleData";
 import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
 import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
@@ -236,10 +237,10 @@ function ConnectPreview({
       <svg className="noodle-connect-preview" style={{ zIndex: layers.canvas }} aria-hidden>
         <defs>
           <marker id="noodle-connect-preview-arrow" viewBox="0 0 16 16" markerWidth="14" markerHeight="14" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
-            <path d="M2 2.5 14 8 2 13.5 5.2 8Z" fill="#334155" />
+            <path d="M2 2.5 14 8 2 13.5 5.2 8Z" fill={DEFAULT_NOODLE_COLOR} />
           </marker>
         </defs>
-        <path d={path} fill="none" stroke="#334155" strokeWidth={2} markerEnd="url(#noodle-connect-preview-arrow)" />
+        <path d={path} fill="none" stroke={DEFAULT_NOODLE_COLOR} strokeWidth={2} markerEnd="url(#noodle-connect-preview-arrow)" />
       </svg>
     </ViewportPortal>
   );
