@@ -24,6 +24,11 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
 - **[token app] Placeholder line height sits beside `lg`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.lg.line-height`. `lg` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
+- **[Figma] Thumb sheet label says focus.** The variant property is `pressed`. The sheet writes focus over that disc.
+- **[Figma] Thumb ring is a drop shadow.** Hover and pressed hide the stroke and draw the ring as a shadow. The code uses an outline, the same treatment as the color swatch ring. The measured ring is 2px, `alias.border-width.sm`.
+- **[token app] Opacity track width.** The pill is 120px wide. No spacing token is 120px.
+- **[Figma] Fill opacity label color.** The percent is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
+- **[Figma] Track specimen color.** The gradient ends at `#6579F8`. That color is not a token. The track uses the swatch color it is given.
 
 ## Decisions already made
 
@@ -45,6 +50,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The custom preview is a 12px circle, `brand.scale.300`, with a 1px white stroke, `brand.foundation.white` at `alias.border-width.xsm`, drawn inside the circle. It is not a separate white circle. The custom swatch has no disc stroke in default, hover, or selected. None and color keep the 1px `mapped.border.control` stroke on default only. Hover and selected drop it. Keyboard focus uses the hover ring, so that stroke is hidden then too.
 - The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
+- The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The sheet label over the pressed thumb says focus. The variant property is pressed.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
 ## Canvas text
@@ -790,3 +796,104 @@ Painted: collapsed and extended. The leading disc is neutral at step 500, in def
 Not painted: a none disc on this menu. A saved hex that matches no step-500 swatch selects custom and keeps that stroke.
 
 The toolbar and the picker sit in the color menu’s FloatingPanel on the dropdown layer. They add no z-index of their own. They stay above a selected noodle and a noodle that is mid-drag. The 16px disc on the bar is the contextual button icon slot, documented on the noodle toolbar.
+
+## Thumb
+
+Figma `slider/thumb`, on the spec frame titled `slider`, node `288:2302`. Ticket NB-53. Code `src/SliderThumb.tsx`. The trial page is `?trial=slider-thumb`.
+
+A 12px disc for the fill opacity slider. It is not that slider. The ring sits outside the disc.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Size | `brand.scale.300` | 12px circle |
+| Corner radius | not a token | a full circle. The panel reads 9999. No radius token is fully round |
+| Fill, every state | `mapped.surface.action-solid` | `#FCFDFE` |
+| Stroke, default | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc |
+| Stroke, disabled | `mapped.border.disabled`, `alias.border-width.xsm` | `#D8DCE2`, 1px, drawn inside the disc |
+| Stroke, hover and pressed | none | the stroke is hidden |
+| Ring, default and disabled | none | the disc has no ring. A drop shadow sits on the layer and is hidden |
+| Ring, hover | `mapped.border.action-ring`, `alias.border-width.sm` | `#B7D4F1`, 2px, drawn outside the disc. Figma uses a drop shadow |
+| Ring, pressed | `mapped.border.action-ring-pressed`, `alias.border-width.sm` | `#6EA9E2`, 2px, drawn outside the disc. Figma uses a drop shadow. The sheet writes focus over this disc |
+| Shadow | not a token | Figma uses a drop shadow for the ring. The code uses an outline. The hidden shadow on default and disabled is not painted |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no text and no divider.
+
+Figma properties, read from the component set:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| state | variant | `default`, `hover`, `pressed`, `disabled` |
+
+Painted states: `default`, `hover`, `pressed`, and `disabled`.
+
+Not painted: focus. The sheet writes focus over the pressed disc. Keyboard focus on the fill opacity slider uses the hover ring so the thumb stays visible. That ring is not a Figma state.
+
+This thumb is not a slider. The fill opacity slider that places it is its own component.
+
+## Track
+
+Figma `slider/track/color-opacity`, on the spec frame titled `slider`, node `288:2302`. Ticket NB-54. Code `src/SliderTrack.tsx`. The trial page is `?trial=slider-track`.
+
+A 120 by 6 pill. A checker sits under a fade from clear to the swatch color. It is not the slider.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 120px. No spacing token is 120px |
+| Height | `brand.scale.150` | 6px |
+| Corner radius | not a token | a full pill. The panel reads 200. No radius token is fully round |
+| Checker | not a token | the image fill. Squares are `brand.foundation.white` (`#FFFFFF`) and `mapped.border.disabled` (`#D8DCE2`), 8px |
+| Gradient | the swatch color | white at 0% opacity to the swatch at 100%. The specimen is `#6579F8`. That color is not a token |
+| Stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the pill |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no text and no divider. The frame exposes no properties. The color is the swatch the caller passes.
+
+Painted: one pill. The sheet draws it twice, once under the heading and once with the 6px note.
+
+Not painted: hover, focus, pressed, and disabled. Those belong to the thumb.
+
+This track is not a slider. The fill opacity slider that places it is its own component.
+
+## Fill opacity slider
+
+Figma `slider/color-opacity`, on the spec frame titled `slider`, node `288:2302`. Ticket NB-55. Code `src/FillOpacitySlider.tsx`. The trial page is `?trial=fill-opacity`.
+
+The row that will sit in the shape fill toolbar. It is not that toolbar. The specimen is 154 by 12 and reads 50%. Dragging the thumb sets the percent. A double click on the percent edits the number. Enter commits. Escape restores the previous number.
+
+The track shows the swatch color it is given. The trial uses the specimen `#6579F8` and paints a square at that opacity. Shape fill still uses the Phase 1 bar.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | `brand.scale.300` | 12px, the thumb. The 6px track is centered on the thumb and paints under it |
+| Width | none | hug. The specimen is 154px: the 120px track, an 8px gap, and the 26px label. No spacing token is 154px or 26px |
+| Gap | `brand.scale.200` | 8px between the track and the percent |
+| Track | track | 120 by 6. The fade ends at the swatch color |
+| Thumb | thumb | 12px, centered on the value, painted above the track. Default at rest. Hover while the pointer is over the row. Pressed while dragging. Disabled when the slider is disabled |
+| Font | `alias.font-family.body` | Geist |
+| Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token` |
+| Text | `mapped.text.default` | `#303132`. The Figma fill is `#334155` |
+| Text, disabled | `mapped.text.disabled` | `#909397` |
+| Stroke | none | the row has no stroke |
+| Fill | none | the row has no fill |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no divider.
+
+The component exposes no variant set that could be read. The children are the track frame and the `50%` text.
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| value | the percent | 0 to 100. The specimen is 50 |
+| color | the swatch | the opaque end of the track. The specimen is `#6579F8` |
+
+Painted: one resting row at 50%, with the thumb in default.
+
+Not painted: hover, pressed, disabled, and editing. Hover and pressed belong to the thumb. Disabled uses the disabled thumb and `mapped.text.disabled`. Editing is the font size gesture: a double click, then a number.
+
+This slider is not a toolbar. The shape fill toolbar that places it later uses FloatingPanel and the z-index tokens in `src/layers.ts`. The trial does not put a copy on the board.

@@ -300,6 +300,21 @@
       "id": "7a740961-3fa0-42f6-91d0-34a1e6597448",
       "identifier": "ERI-67",
       "url": "https://linear.app/ericar/issue/ERI-67/noodle-stroke-color"
+    },
+    "NB-53": {
+      "id": "236ccf4e-445c-469d-b455-1091be33d162",
+      "identifier": "ERI-68",
+      "url": "https://linear.app/ericar/issue/ERI-68/thumb"
+    },
+    "NB-54": {
+      "id": "e14db1e9-67b3-48af-a9ba-53c2cd6ee106",
+      "identifier": "ERI-69",
+      "url": "https://linear.app/ericar/issue/ERI-69/track"
+    },
+    "NB-55": {
+      "id": "d23fc6b5-b8f4-4259-950a-dc7f3f82c35b",
+      "identifier": "ERI-70",
+      "url": "https://linear.app/ericar/issue/ERI-70/fill-opacity-slider"
     }
   }
 }

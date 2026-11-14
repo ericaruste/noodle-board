@@ -4,13 +4,19 @@ import App from "./App";
 import { ColorSwatchPreview } from "./ColorSwatch";
 import { ColorPickerToolbarPreview } from "./ColorPickerToolbar";
 import { ContextualButtonPreview } from "./ContextualButton";
+import { FillOpacitySliderPreview } from "./FillOpacitySlider";
 import { HexInputPreview } from "./HexInput";
 import { IconButtonPreview } from "./IconButton";
 import { MenuItemPreview } from "./MenuItem";
+import { SliderThumbPreview } from "./SliderThumb";
+import { SliderTrackPreview } from "./SliderTrack";
 import "./styles/tokens.css";
 import "./index.css";
 
 const trial = new URLSearchParams(window.location.search).get("trial");
+const showFillOpacityTrial = window.location.hash === "#fill-opacity" || trial === "fill-opacity";
+const showSliderTrackTrial = window.location.hash === "#slider-track" || trial === "slider-track";
+const showSliderThumbTrial = window.location.hash === "#slider-thumb" || trial === "slider-thumb";
 const showColorPickerTrial = window.location.hash === "#color-picker" || trial === "color-picker";
 const showColorSwatchTrial = window.location.hash === "#color-swatch" || trial === "color-swatch";
 const showHexInputTrial = window.location.hash === "#hex-input" || trial === "hex-input";
@@ -21,7 +27,13 @@ const showContextualButtonTrial =
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {showColorPickerTrial ? (
+    {showFillOpacityTrial ? (
+      <FillOpacitySliderPreview />
+    ) : showSliderTrackTrial ? (
+      <SliderTrackPreview />
+    ) : showSliderThumbTrial ? (
+      <SliderThumbPreview />
+    ) : showColorPickerTrial ? (
       <ColorPickerToolbarPreview />
     ) : showColorSwatchTrial ? (
       <ColorSwatchPreview />
