@@ -145,18 +145,43 @@ export function edgeAnchor(edgeId: string, end: "source" | "target") {
   );
 }
 
+let stopEndRelay: (() => void) | null = null;
+
+function mouseAt(type: "mousedown" | "mousemove" | "mouseup", point: { clientX: number; clientY: number }) {
+  return new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: point.clientX,
+    clientY: point.clientY,
+    button: 0,
+    buttons: type === "mouseup" ? 0 : 1,
+    view: window,
+  });
+}
+
+/**
+ * The visible port and the end knob cancel the pointerdown so the element underneath
+ * does not also move. That cancellation drops the mouse events a connect drag listens
+ * for, so the rest of the gesture is forwarded from the pointer events that still fire.
+ */
 export function forwardEndDrag(anchor: Element, point: { clientX: number; clientY: number }) {
-  anchor.dispatchEvent(
-    new MouseEvent("mousedown", {
-      bubbles: true,
-      cancelable: true,
-      clientX: point.clientX,
-      clientY: point.clientY,
-      button: 0,
-      buttons: 1,
-      view: window,
-    }),
-  );
+  anchor.dispatchEvent(mouseAt("mousedown", point));
+  if (stopEndRelay) return;
+  const relay = (event: PointerEvent) => {
+    const up = event.type !== "pointermove";
+    document.dispatchEvent(mouseAt(up ? "mouseup" : "mousemove", event));
+    if (!up) return;
+    stopEndRelay?.();
+  };
+  stopEndRelay = () => {
+    stopEndRelay = null;
+    window.removeEventListener("pointermove", relay, true);
+    window.removeEventListener("pointerup", relay, true);
+    window.removeEventListener("pointercancel", relay, true);
+  };
+  window.addEventListener("pointermove", relay, true);
+  window.addEventListener("pointerup", relay, true);
+  window.addEventListener("pointercancel", relay, true);
 }
 
 export function pointFromEvent(event: MouseEvent | TouchEvent) {
