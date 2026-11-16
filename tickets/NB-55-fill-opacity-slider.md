@@ -13,9 +13,9 @@ linear_url: https://linear.app/ericar/issue/ERI-70/fill-opacity-slider
 
 ## Context
 
-The slider that will sit in the shape fill toolbar. Figma component `slider/color-opacity`, on the spec frame titled `slider`, node `288:2302`.
+The slider that will sit in the shape fill toolbar. Figma component `slider/color-opacity`, on the spec frame titled `slider`, node `172:1794`.
 
-The row hugs its width. The specimen is 154 by 12: the 120px track, an 8px gap, and the `50%` label. Dragging the thumb sets the percent. A double click on the label edits the number, the same gesture as the font size button.
+The row hugs its width. The specimen is 154 by 16: the 120px track, an 8px gap, and the `50%` label. Dragging the thumb sets the percent. A double click on the label edits the number, the same gesture as the font size button.
 
 [`src/FillOpacitySlider.tsx`](../src/FillOpacitySlider.tsx) is the component. It uses the thumb and the track. `?trial=fill-opacity` shows a live slider and a fill swatch without changing the board.
 
@@ -41,7 +41,7 @@ Shape fill has a color and no opacity control. The slider is the control. It is 
 
 ## Technical notes
 
-The row is 12px tall, `brand.scale.300`, because the thumb is 12px and the track is 6px, centered. Gap is `brand.scale.200`. The label is `body/sm/tight`: `alias.font-family.body`, `responsive.desktop.body.sm.size`, and `responsive.desktop.body.sm.line-height-tight`. The Figma fill is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
+The row is 16px tall, `brand.scale.400`, because the thumb is 16px. The default track is `md`, 12px, `brand.scale.300`, centered on the thumb. `sm` is 8px, `brand.scale.200`. Gap is `brand.scale.200`. The label is `body/sm/tight`: `alias.font-family.body`, `responsive.desktop.body.sm.size`, and `responsive.desktop.body.sm.line-height-tight`. The Figma fill is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
 
 The sheet says the slider shows the current swatch color. The trial uses the specimen `#6579F8`. A caller passes the swatch.
 

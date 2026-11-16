@@ -1,9 +1,19 @@
+/** `sm` is 8px. `md` is 12px and is the default. */
+export type SliderTrackSize = "sm" | "md";
+
+export const sliderTrackSizeClass: Record<SliderTrackSize, string> = {
+  sm: "h-brand-scale-200",
+  md: "h-brand-scale-300",
+};
+
 type SliderTrackProps = {
   /**
    * Opaque end of the fade. The Figma specimen is `#6579F8`, which is not a token.
    * A caller passes the current swatch color.
    */
   color?: string;
+  /** Leave unset for the 12px `md` pill. */
+  size?: SliderTrackSize;
   className?: string;
 };
 
@@ -18,14 +28,16 @@ function fade(color: string) {
 }
 
 /**
- * 120 by 6 pill. Figma `slider/track/color-opacity`.
- * The checker is the image fill. The gradient fades from clear to the swatch color.
+ * 120px pill. Figma `slider/track/color-opacity`.
+ * `md` is 12px. `sm` is 8px. The checker is the image fill.
+ * The gradient fades from clear to the swatch color.
  */
-export function SliderTrack({ color = SLIDER_SPECIMEN_COLOR, className = "" }: SliderTrackProps) {
+export function SliderTrack({ color = SLIDER_SPECIMEN_COLOR, size = "md", className = "" }: SliderTrackProps) {
   return (
     <span
       data-slider-track=""
-      className={`relative inline-block h-brand-scale-150 w-[120px] overflow-hidden rounded-full ${className}`}
+      data-size={size}
+      className={`relative inline-block w-[120px] overflow-hidden rounded-full ${sliderTrackSizeClass[size]} ${className}`}
     >
       {/* 120px is the frame width. No spacing token is 120px. TODO token mismatch: Figma 120px */}
       <span
@@ -53,8 +65,15 @@ export function SliderTrackPreview() {
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
         Track
       </p>
+      <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
+        md
+      </p>
       <SliderTrack />
       <SliderTrack color="#BF66FF" />
+      <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
+        sm
+      </p>
+      <SliderTrack size="sm" />
     </main>
   );
 }

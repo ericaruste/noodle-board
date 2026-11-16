@@ -16,14 +16,14 @@ const paint: Record<SliderThumbState, string> = {
   disabled: "[box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-disabled)]",
 };
 
-/** 12px disc. Figma `slider/thumb`. Hover and pressed hide the stroke and draw the ring outside. */
+/** 16px disc. Figma `slider/thumb`. Hover and pressed hide the stroke and draw the ring outside. */
 export function SliderThumb({ state = "default", className = "", style }: SliderThumbProps) {
   return (
     <span
       data-slider-thumb=""
       data-state={state}
       style={style}
-      className={`inline-block size-brand-scale-300 shrink-0 rounded-full bg-mapped-surface-action-solid ${paint[state]} ${className}`}
+      className={`inline-block size-brand-scale-400 shrink-0 rounded-full bg-mapped-surface-action-solid ${paint[state]} ${className}`}
     />
   );
 }

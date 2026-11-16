@@ -13,9 +13,9 @@ linear_url: https://linear.app/ericar/issue/ERI-68/thumb
 
 ## Context
 
-Building block for a slider. Figma component `slider/thumb`, on the spec frame titled `slider`, node `288:2302`.
+Building block for a slider. Figma component `slider/thumb`, on the spec frame titled `slider`, node `172:1794`.
 
-The disc is 12px. States are default, hover, pressed, and disabled. The sheet writes “focus” over the pressed disc. The variant property is `pressed`.
+The disc is 16px, `brand.scale.400`. States are default, hover, pressed, and disabled. The sheet writes “focus” over the pressed disc. The variant property is `pressed`.
 
 [`src/SliderThumb.tsx`](../src/SliderThumb.tsx) is the component. `?trial=slider-thumb` shows the four states without changing the board.
 
@@ -31,7 +31,7 @@ The fill opacity slider needs a shared thumb first. Hover and pressed draw a rin
 ## Acceptance criteria
 
 - [x] The disc uses semantic tokens for fill, stroke, and the ring color
-- [x] The disc is 12px
+- [x] The disc is 16px
 - [x] Default and disabled draw an inside stroke. Hover and pressed hide that stroke
 - [x] Hover and pressed draw the ring outside the disc
 - [x] The live board is unchanged when the trial page is absent
@@ -40,7 +40,7 @@ The fill opacity slider needs a shared thumb first. Hover and pressed draw a rin
 
 The fill is `mapped.surface.action-solid`. Default stroke is `mapped.border.control` at `alias.border-width.xsm`, drawn inside the disc. Disabled stroke is `mapped.border.disabled` at the same width. Hover and pressed hide the stroke.
 
-Figma draws the ring as a drop shadow. Outline is a stroke outside the disc and does not change the 12px size. Hover uses `mapped.border.action-ring`. Pressed uses `mapped.border.action-ring-pressed`. Both are 2px, `alias.border-width.sm`.
+Figma draws the ring as a drop shadow. Outline is a stroke outside the disc and does not change the 16px size. Hover uses `mapped.border.action-ring`. Pressed uses `mapped.border.action-ring-pressed`. Both are 2px, `alias.border-width.sm`.
 
 The spec sheet around the component (state names, the red size notes, the dashed frame, the title, and the description) is documentation. It is not part of the component.
 
