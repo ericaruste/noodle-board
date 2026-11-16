@@ -16,7 +16,7 @@ import { useConnectChromeHidden } from "./portHot";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
-import { retainSelectionAfterEdit, setTextEditCancel } from "./textEditSelection";
+import { setTextEditCancel } from "./textEditSelection";
 import {
   ALIGN_LABELS,
   CANVAS_FONT_FAMILY,
@@ -133,10 +133,10 @@ function alignClass(align: TextAlign): string {
 }
 
 /** Reading uses the first paragraph. An empty edit uses the caret paragraph. */
-function hintAlign(body: TextBody, editing: boolean, range: TextRange | null): TextAlign {
-  if (!editing) return body[0]?.align ?? "left";
+function hintAlign(shown: TextBody, editing: boolean, range: TextRange | null): TextAlign {
+  if (!editing) return shown[0]?.align ?? "left";
   const index = range?.start.paragraph ?? 0;
-  return body[index]?.align ?? body[0]?.align ?? "left";
+  return shown[index]?.align ?? shown[0]?.align ?? "left";
 }
 
 function pressFor(lists: ListKind[], kind: "bullet" | "numbered"): Pressed {
@@ -953,8 +953,6 @@ export function RichText({
                       const next = event.relatedTarget;
                       if (next instanceof Element && next.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                       if (next instanceof Node && rootRef.current?.contains(next)) return;
-                      const nodeId = rootRef.current?.closest(".react-flow__node")?.getAttribute("data-id");
-                      if (nodeId) retainSelectionAfterEdit(nodeId);
                       if (blurTimer.current !== null) window.clearTimeout(blurTimer.current);
                       blurTimer.current = window.setTimeout(() => {
                         blurTimer.current = null;

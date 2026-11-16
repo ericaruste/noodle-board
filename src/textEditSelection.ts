@@ -16,6 +16,10 @@ export function retainSelectionAfterEdit(id: string) {
   retainedUntil = performance.now() + 400;
 }
 
+export function clearRetainedSelection() {
+  retainedId = null;
+}
+
 export function consumeRetainedSelection(): string | null {
   if (!retainedId || performance.now() > retainedUntil) {
     retainedId = null;

@@ -28,7 +28,6 @@ import {
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { useSelectedObjectCount } from "./selectionScope";
 import { coerceBody, isTextBody, sameBody, type TextBody } from "./textBody";
-import { retainSelectionAfterEdit } from "./textEditSelection";
 
 function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): ShapeData {
   const kind = isShapeKind(patch.kind) ? patch.kind : isShapeKind(current.kind) ? current.kind : "rect";
@@ -303,7 +302,6 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
 
   const commitText = (next: TextBody) => {
     setEditing(false);
-    retainSelectionAfterEdit(id);
     const current = dataRef.current;
     const stored = isTextBody(current.paragraphs) ? coerceBody(current.paragraphs) : body;
     if (sameBody(next, stored)) return;

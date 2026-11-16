@@ -9,7 +9,6 @@ import SelectionChrome from "./SelectionChrome";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { useSelectedObjectCount } from "./selectionScope";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
-import { retainSelectionAfterEdit } from "./textEditSelection";
 
 function snapshot() {
   window.dispatchEvent(new Event("noodle-snapshot"));
@@ -155,7 +154,6 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
 
   const commit = (next: TextBody) => {
     setEditing(false);
-    retainSelectionAfterEdit(id);
     const current = dataRef.current;
     const stored = isTextBody(current.paragraphs) ? coerceBody(current.paragraphs) : body;
     if (sameBody(next, stored)) return;

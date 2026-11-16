@@ -37,7 +37,7 @@ import {
   type GuideOverlay,
 } from "./alignSnap";
 import { bindBoardZoom } from "./editorZoom";
-import { cancelTextEdit, consumeRetainedSelection, retainSelectionAfterEdit } from "./textEditSelection";
+import { cancelTextEdit, clearRetainedSelection, consumeRetainedSelection, retainSelectionAfterEdit } from "./textEditSelection";
 import { FloatingLayer } from "./FloatingPanel";
 import { layers } from "./layers";
 import PlacementGhost from "./PlacementGhost";
@@ -522,10 +522,14 @@ function Board() {
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (target.closest(".react-flow__node, [data-text-toolbar], [data-selection-chrome]")) return;
+      const blocked = target.closest(
+        ".react-flow__node, .react-flow__edge, .react-flow__handle, .react-flow__resize-control, .react-flow__minimap, .react-flow__controls, .react-flow__panel, [data-text-toolbar], [data-selection-chrome], [data-floating-panel], [data-noodle-toolbar], .board-toolbar",
+      );
       const editor = document.querySelector<HTMLElement>("[contenteditable='true']");
       const id = editor?.closest(".react-flow__node")?.getAttribute("data-id");
-      if (id) retainSelectionAfterEdit(id);
+      // Only a pane click both commits and clears the selection. A click on another object must not bring this one back.
+      if (!blocked && target.closest(".react-flow__pane") && id) retainSelectionAfterEdit(id);
+      else clearRetainedSelection();
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
