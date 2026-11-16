@@ -2411,7 +2411,7 @@ function Board() {
             </button>
           </div>
         ) : null}
-        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld} />
+        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld && !placement} />
         <ReactFlow
           style={{ "--noodle-layer-selection": layers.selection } as CSSProperties}
           className={[connectMode ? "noodle-connect" : "", tool === "hand" || spaceHeld ? "noodle-hand" : "", selectedObjectCount(nodes, edges) === 1 ? "noodle-solo" : ""].filter(Boolean).join(" ") || undefined}
