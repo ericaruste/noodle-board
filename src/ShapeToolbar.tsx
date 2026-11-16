@@ -5,9 +5,10 @@ import { ContextualButton } from "./ContextualButton";
 import FillOpacitySlider from "./FillOpacitySlider";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { LineWeightMenuIcon } from "./noodleIcons";
+import { SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "./shapeData";
 import { ShapeKindIcon } from "./shapeKindIcon";
+import ShapeSwatch from "./ShapeSwatch";
 import StrokeProperty from "./StrokeProperty";
-import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "./shapeData";
 
 type ShapeToolbarProps = {
   kind: ShapeKind | null;
@@ -85,35 +86,6 @@ function kindIcon(kind: ShapeKind): SlotIcon {
   return function KindIcon({ className }: { className?: string }) {
     return <ShapeKindIcon kind={kind} className={className} />;
   };
-}
-
-const menuChrome =
-  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl";
-
-function IconChoice({
-  label,
-  pressed,
-  icon,
-  onClick,
-}: {
-  label: string;
-  pressed: boolean;
-  icon: SlotIcon;
-  onClick: () => void;
-}) {
-  return (
-    <ContextualButton
-      ariaLabel={label}
-      title={label}
-      pressed={pressed}
-      onClick={onClick}
-      showLeftIcon={false}
-      showLabel={false}
-      showDropdownIcon={false}
-      showRightIcon
-      icon={icon}
-    />
-  );
 }
 
 export default function ShapeToolbar({
@@ -196,20 +168,13 @@ export default function ShapeToolbar({
           open={menu === "kind"}
           onToggle={() => toggle("kind")}
         >
-          <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label="Shape">
-            {SHAPE_KINDS.map((option) => (
-              <IconChoice
-                key={option}
-                label={SHAPE_LABELS[option]}
-                pressed={kind === option}
-                icon={kindIcon(option)}
-                onClick={() => {
-                  setMenu(null);
-                  onKind(option);
-                }}
-              />
-            ))}
-          </div>
+          <ShapeSwatch
+            kind={kind}
+            onKind={(option) => {
+              setMenu(null);
+              onKind(option);
+            }}
+          />
         </MenuButton>
       </div>
       <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
