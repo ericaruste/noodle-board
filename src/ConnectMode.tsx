@@ -33,7 +33,7 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
 function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__edge, .react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint, .noodle-end",
+      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint, .noodle-end",
     ),
   );
 }
@@ -140,8 +140,8 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       const state = store.getState();
       const armed = state.connectionClickStartHandle;
       if (blockedTarget(target)) {
-        // A stroke click selects the noodle. Drop an armed click so the preview does not stay up.
-        if (armed && target.closest(".react-flow__edge, .noodle-end")) {
+        // An end knob reconnects that end. Drop an armed click so the preview does not stay up.
+        if (armed && target.closest(".noodle-end")) {
           store.setState({ connectionClickStartHandle: null });
           clearConnectionOrigin();
           setHotPort(null);

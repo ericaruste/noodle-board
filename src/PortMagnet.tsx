@@ -595,7 +595,7 @@ function pointerOverChrome(clientX: number, clientY: number) {
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__handle, .react-flow__edge, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__node-endpoint",
+      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__node-endpoint",
     ),
   );
 }
@@ -712,6 +712,7 @@ export default function PortMagnet({ connectMode, canStart = true }: { connectMo
       if (target instanceof HTMLElement && target.isContentEditable) return;
       const state = store.getState();
       if (state.connection.inProgress) return;
+      // A stroke away from a port falls through and selects the noodle. A stroke on the port starts one.
       const port = portOnBand(state, event.clientX, event.clientY);
       if (!port?.handleId || !isSide(port.handleId) || port.fraction == null) return;
       const pin = { nodeId: port.nodeId, handleId: port.handleId, fraction: port.fraction };
