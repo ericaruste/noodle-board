@@ -33,7 +33,7 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
 function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint",
+      ".react-flow__edge, .react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint, .noodle-end",
     ),
   );
 }

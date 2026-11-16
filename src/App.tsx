@@ -2407,7 +2407,7 @@ function Board() {
             </button>
           </div>
         ) : null}
-        <PortMagnet connectMode={connectMode} />
+        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld} />
         <ReactFlow
           className={[connectMode ? "noodle-connect" : "", tool === "hand" || spaceHeld ? "noodle-hand" : "", selectedObjectCount(nodes, edges) === 1 ? "noodle-solo" : ""].filter(Boolean).join(" ") || undefined}
           nodes={nodes}
@@ -2457,9 +2457,9 @@ function Board() {
           connectionLineComponent={NoodleConnectionLine}
           connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
-          connectOnClick={connectMode}
+          connectOnClick={connectMode && !spaceHeld}
           nodesDraggable={tool === "select" && !spaceHeld && !placement}
-          nodesConnectable={!placement}
+          nodesConnectable={tool !== "hand" && !spaceHeld && !placement}
           elementsSelectable={tool !== "hand" && !spaceHeld && !placement}
           panOnDrag={tool === "hand" || spaceHeld ? [0, 1] : [1]}
           panActivationKeyCode={null}
@@ -2580,7 +2580,7 @@ function Board() {
             bgColor="transparent"
             maskColor="rgba(28, 25, 23, 0.12)"
           />
-          <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
+          <ConnectMode active={connectMode && !spaceHeld} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
         <Toolbar
           tool={tool}

@@ -1,7 +1,7 @@
 ---
 id: NB-62
 title: Start a noodle only from a selected element's port
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas, UX]
 parent: NB-E1
@@ -42,17 +42,17 @@ A noodle starts only when the Select tool or the Arrow tool is on, an element is
 
 ## Acceptance criteria
 
-- [ ] A noodle drag starts only when the Select tool or the Arrow tool is on, an element is selected, the pointer is over that element's port, and the user presses that port
-- [ ] With the Select tool on and nothing selected, a click in the gap between elements does not start a noodle and does not grab a port. A drag that starts on empty canvas still draws the marquee (NB-30)
+- [x] A noodle drag starts only when the Select tool or the Arrow tool is on, an element is selected, the pointer is over that element's port, and the user presses that port
+- [x] With the Select tool on and nothing selected, a click in the gap between elements does not start a noodle and does not grab a port. A drag that starts on empty canvas still draws the marquee (NB-30)
 - [ ] Dragging or selecting an element that overlaps another does not start a noodle from the element underneath, and does not select that underneath port. The element on top is the one that moves or becomes selected
-- [ ] A click on a noodle stroke, away from a port, selects that noodle and opens the noodle toolbar. It does not enter a noodle drag and does not grab another element's port
-- [ ] Hovering a port, or the area beside an element, does not arm a noodle when that element is not selected. This holds for Select and for Arrow
-- [ ] Ports stay hidden until that element is selected. Hovering an unselected element does not show its ports
-- [ ] The Hand tool never starts a noodle from a port, a gap, an overlap, or a click on a noodle
+- [x] A click on a noodle stroke, away from a port, selects that noodle and opens the noodle toolbar. It does not enter a noodle drag and does not grab another element's port
+- [x] Hovering a port, or the area beside an element, does not arm a noodle when that element is not selected. This holds for Select and for Arrow
+- [x] Ports stay hidden until that element is selected. Hovering an unselected element does not show its ports
+- [x] The Hand tool never starts a noodle from a port, a gap, an overlap, or a click on a noodle
 - [ ] Pressing the visible port of a selected element, with Select or Arrow on, still starts one noodle. Releasing it over an element still attaches (NB-22). Dropping an existing end on empty canvas still parks it (NB-03)
 - [ ] Clicking or dragging a selected element's body, away from its ports, still selects and moves that element and does not start a noodle
 - [ ] Dragging the visible end knob of an already selected noodle still reconnects that end (NB-03)
-- [ ] With the Arrow tool on, a click on an element body, or on an element that is not selected, does not start a noodle
+- [x] With the Arrow tool on, a click on an element body, or on an element that is not selected, does not start a noodle
 
 ## Technical notes
 

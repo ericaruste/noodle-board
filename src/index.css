@@ -308,17 +308,25 @@ body,
   pointer-events: none;
 }
 
-.noodle-solo:not(.noodle-connect) .react-flow__node.selected .react-flow__handle,
-.noodle-solo:not(.noodle-connect) .react-flow__node.selected .react-flow__handle.connectionindicator {
+.noodle-solo .react-flow__node.selected .react-flow__handle,
+.noodle-solo .react-flow__node.selected .react-flow__handle.connectionindicator {
   opacity: 1;
   pointer-events: all;
 }
 
-/* Arrow-tool ports: only the element under the pointer. Selection ports stay off. */
+/* The source handle stays visible while its noodle is dragged. Hover does not use this. */
 .noodle-node .react-flow__handle.noodle-ports-show,
 .noodle-node .react-flow__handle.noodle-ports-show.connectionindicator {
   opacity: 1;
   pointer-events: all;
+}
+
+.noodle-hand.noodle-solo .react-flow__node.selected .react-flow__handle,
+.noodle-hand.noodle-solo .react-flow__node.selected .react-flow__handle.connectionindicator,
+.noodle-hand .noodle-node .react-flow__handle.noodle-ports-show,
+.noodle-hand .noodle-node .react-flow__handle.noodle-ports-show.connectionindicator {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .noodle-hand .react-flow__pane,
