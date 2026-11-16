@@ -1,7 +1,7 @@
 ---
 id: NB-58
 title: Keep a shape at its default height until the text overflows
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E6
