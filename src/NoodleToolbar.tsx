@@ -3,16 +3,8 @@ import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar
 import { NEUTRAL_SWATCH_HEX, swatchFamilyForHex, swatchHex } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
-import {
-  LineWeightMenuIcon,
-  TypeCurveIcon,
-  TypeDashedIcon,
-  TypeElbowIcon,
-  TypeMediumIcon,
-  TypeStraightIcon,
-  TypeThickIcon,
-  TypeThinIcon,
-} from "./noodleIcons";
+import { LineWeightMenuIcon, TypeCurveIcon, TypeElbowIcon, TypeStraightIcon } from "./noodleIcons";
+import StrokeProperty from "./StrokeProperty";
 import {
   NOODLE_ARROWS,
   NOODLE_ARROW_LABELS,
@@ -21,9 +13,7 @@ import {
   snapshotBoard,
   type NoodleArrow,
   type NoodleData,
-  type NoodleLineStyle,
   type NoodleShape,
-  type NoodleThickness,
 } from "./noodleData";
 import { releaseNoodleLabel, retainNoodleLabel, toggleNoodleLabel, useNoodleLabelEditing } from "./noodleLabel";
 
@@ -44,17 +34,6 @@ const SHAPE_ICONS: Record<NoodleShape, SlotIcon> = {
   straight: TypeStraightIcon,
   elbow: TypeElbowIcon,
   curve: TypeCurveIcon,
-};
-
-const THICKNESS_ICONS: Record<NoodleThickness, SlotIcon> = {
-  thin: TypeThinIcon,
-  medium: TypeMediumIcon,
-  thick: TypeThickIcon,
-};
-
-const LINE_STYLE_ICONS: Record<NoodleLineStyle, SlotIcon> = {
-  solid: TypeStraightIcon,
-  dashed: TypeDashedIcon,
 };
 
 const NOODLE_SWATCH_SCALE = 500;
@@ -259,41 +238,14 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
           open={menu === "weight"}
           onToggle={() => toggle("weight")}
         >
-          <div className={`${menuChrome} gap-brand-scale-100`} role="menu" aria-label="Line weight and line type">
-            <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
-              {(
-                [
-                  ["thin", "Thin"],
-                  ["medium", "Medium"],
-                  ["thick", "Thick"],
-                ] as const
-              ).map(([thickness, label]) => (
-                <IconChoice
-                  key={thickness}
-                  label={`${label} line`}
-                  pressed={on("thickness", thickness)}
-                  icon={THICKNESS_ICONS[thickness]}
-                  onClick={() => write({ ...dataRef.current, thickness }, true, { thickness })}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-brand-scale-50">
-              {(
-                [
-                  ["solid", "Solid line"],
-                  ["dashed", "Dashed line"],
-                ] as const
-              ).map(([style, label]) => (
-                <IconChoice
-                  key={style}
-                  label={label}
-                  pressed={on("lineStyle", style)}
-                  icon={LINE_STYLE_ICONS[style]}
-                  onClick={() => write({ ...dataRef.current, lineStyle: style }, true, { lineStyle: style })}
-                />
-              ))}
-            </div>
-          </div>
+          <StrokeProperty
+            thickness={data.thickness}
+            lineStyle={data.lineStyle}
+            thicknessMixed={mixed?.has("thickness")}
+            lineStyleMixed={mixed?.has("lineStyle")}
+            onThickness={(thickness) => write({ ...dataRef.current, thickness }, true, { thickness })}
+            onLineStyle={(lineStyle) => write({ ...dataRef.current, lineStyle }, true, { lineStyle })}
+          />
         </MenuButton>
         <MenuButton
           label="Noodle type"
