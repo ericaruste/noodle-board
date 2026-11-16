@@ -11,7 +11,7 @@ import { layers } from "./layers";
 import { DEFAULT_NOODLE_COLOR } from "./noodleData";
 import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
-import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portGeometry, portOnBand, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
 import { armClickSwallow, beginPortGesture, clearConnectionOrigin, consumePortGesture, getConnectionOrigin, getHoverTarget, holdSelection, notePortRelease, setConnectionOrigin, setHotPort } from "./portHot";
 
@@ -138,7 +138,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
       const target = event.target;
       if (!(target instanceof Element) || blockedTarget(target)) return;
       const state = store.getState();
-      const port = portAtClient(state, event.clientX, event.clientY);
+      const port = portOnBand(state, event.clientX, event.clientY);
       if (!port?.handleId || !isSide(port.handleId)) {
         if (state.connectionClickStartHandle) {
           store.setState({ connectionClickStartHandle: null });
@@ -168,7 +168,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     const onClick = (event: MouseEvent) => {
       const target = event.target;
       if (!(target instanceof Element) || blockedTarget(target)) return;
-      if (!portAtClient(store.getState(), event.clientX, event.clientY)) return;
+      if (!portOnBand(store.getState(), event.clientX, event.clientY)) return;
       event.stopPropagation();
       event.preventDefault();
     };

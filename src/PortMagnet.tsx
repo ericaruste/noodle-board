@@ -39,6 +39,9 @@ import {
   type HoverTarget,
 } from "./portHot";
 
+/** Screen pixels. A noodle that is already moving can land this far from a side. It does not start a noodle. */
+const LANDING_BAND_SCREEN_PX = 28;
+
 export function pointerToFlow(state: ReactFlowState, pointer?: XYPosition | null): XYPosition | null {
   const flow = flowPoint(state, pointer);
   if (!flow) return null;
@@ -220,6 +223,7 @@ function selectedPortPress(state: ReactFlowState, clientX: number, clientY: numb
   if (!node || node.type === ENDPOINT_TYPE) return null;
   const box = nodeBox(node);
   if (!box) return null;
+  // Port size and outset are the node's own CSS pixels, which are flow units. The viewport scale does not change them.
   const hitRadius = readPortRadius(nodeId);
   const outline = outlineRadius(node.type, node.data, box);
   const outset = readOutset(nodeId);
@@ -242,15 +246,21 @@ function selectedPortPress(state: ReactFlowState, clientX: number, clientY: numb
   return { nodeId, handleId: best.side, fraction: 0.5 };
 }
 
-/** A port press on the selected element's visible port. The body and the gap are not a press. */
+/**
+ * Where a noodle that is already moving can land.
+ * On an element, that element's port. In a gap, the nearest side inside the landing band.
+ */
 export function portAtClient(
   state: ReactFlowState,
   clientX: number,
   clientY: number,
-  _mode: AttachmentMode = "midpoint",
+  mode: AttachmentMode = "midpoint",
 ): HotPort | null {
-  void _mode;
-  return selectedPortPress(state, clientX, clientY);
+  const flow = clientToFlow(state, clientX, clientY);
+  if (!flow || state.transform[2] === 0) return null;
+  const nodeId = nodeAtFlowPoint(state, flow);
+  if (nodeId) return nearestHandleOnNode(state, nodeId, flow, mode);
+  return closestPerimeter(state, flow, LANDING_BAND_SCREEN_PX / state.transform[2], mode);
 }
 
 /** Same gate as a port press. A gap, an unselected element, and the element underneath are not a start. */
@@ -657,7 +667,7 @@ export default function PortMagnet({ connectMode, canStart = true }: { connectMo
         return;
       }
       // Arm the guard before React Flow can select the element under this press.
-      if (portAtClient(state, event.clientX, event.clientY)) holdSelection();
+      if (portOnBand(state, event.clientX, event.clientY)) holdSelection();
     };
     window.addEventListener("pointerdown", onPress, true);
     window.addEventListener("pointermove", onPointerMove);
