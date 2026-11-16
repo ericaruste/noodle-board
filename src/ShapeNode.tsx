@@ -1,26 +1,27 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { type Node, type NodeProps, useStore } from "@xyflow/react";
-import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { NoodleResizer, useNoodleResizeStyle } from "./NoodleResizer";
 import ObjectPorts from "./ObjectPorts";
 import RichText from "./RichText";
 import SelectionChrome from "./SelectionChrome";
+import ShapeToolbar from "./ShapeToolbar";
 import {
   DEFAULT_SHAPE_FILL,
   DEFAULT_SHAPE_STROKE,
-  FILL_SWATCHES,
   SHAPE_DEFAULT_HEIGHT,
   SHAPE_DEFAULT_WIDTH,
-  SHAPE_KINDS,
   SHAPE_LABELS,
   SHAPE_MIN_SIZE,
-  STROKE_SWATCHES,
   STROKE_WIDTH,
   isShapeColor,
   roundRectRadius,
   isShapeKind,
+  shapeFillOpacity,
   shapeHeightForText,
+  shapeLineStyle,
   shapeTextFrame,
+  shapeThickness,
+  shapeThicknessPx,
   type ShapeData,
   type ShapeKind,
 } from "./shapeData";
@@ -32,7 +33,14 @@ function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): Shape
   const kind = isShapeKind(patch.kind) ? patch.kind : isShapeKind(current.kind) ? current.kind : "rect";
   const fill = patch.fill === undefined ? (isShapeColor(current.fill) ? current.fill : null) : patch.fill;
   const stroke = patch.stroke === undefined ? (isShapeColor(current.stroke) ? current.stroke : null) : patch.stroke;
-  const next: ShapeData = { kind, fill, stroke };
+  const next: ShapeData = {
+    kind,
+    fill,
+    stroke,
+    fillOpacity: patch.fillOpacity === undefined ? shapeFillOpacity(current) : shapeFillOpacity(patch),
+    thickness: patch.thickness === undefined ? shapeThickness(current) : shapeThickness(patch),
+    lineStyle: patch.lineStyle === undefined ? shapeLineStyle(current) : shapeLineStyle(patch),
+  };
   const paragraphs = patch.paragraphs === undefined ? current.paragraphs : patch.paragraphs;
   if (isTextBody(paragraphs)) next.paragraphs = paragraphs;
   const manualHeight = patch.manualHeight === undefined ? current.manualHeight : patch.manualHeight;
@@ -69,27 +77,7 @@ function publishHeight(id: string, height: number) {
   );
 }
 
-export function ShapeKindIcon({ kind }: { kind: ShapeKind }) {
-  return (
-    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden className="shrink-0">
-      {kind === "rect" ? (
-        <rect x="3" y="5" width="14" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      ) : null}
-      {kind === "round-rect" ? (
-        <rect x="3" y="5" width="14" height="10" rx="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      ) : null}
-      {kind === "ellipse" ? (
-        <ellipse cx="10" cy="10" rx="7" ry="5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      ) : null}
-      {kind === "triangle" ? (
-        <polygon points="10,3 17,16 3,16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      ) : null}
-      {kind === "diamond" ? (
-        <polygon points="10,2 18,10 10,18 2,10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      ) : null}
-    </svg>
-  );
-}
+export { ShapeKindIcon } from "./shapeKindIcon";
 
 function insetPolygon(points: Array<[number, number]>, width: number, height: number, inset: number) {
   const cx = width / 2;
@@ -101,18 +89,20 @@ function insetPolygon(points: Array<[number, number]>, width: number, height: nu
 
 type Paint = {
   fill: string;
+  fillOpacity: number;
   stroke: string;
   strokeWidth: number;
+  strokeDasharray?: string;
 };
 
-function cornerRadius(width: number, height: number) {
-  return roundRectRadius(width, height);
+function cornerRadius(width: number, height: number, strokeWidth: number) {
+  return roundRectRadius(width, height, strokeWidth);
 }
 
 /** Matches the painted geometry so empty corners of the node box are not a hit target. */
-function hitClip(kind: ShapeKind, width: number, height: number) {
+function hitClip(kind: ShapeKind, width: number, height: number, strokeWidth: number) {
   if (kind === "ellipse") return "ellipse(50% 50% at 50% 50%)";
-  if (kind === "round-rect") return `inset(0 round ${cornerRadius(width, height)}px)`;
+  if (kind === "round-rect") return `inset(0 round ${cornerRadius(width, height, strokeWidth)}px)`;
   if (kind === "triangle") return "polygon(50% 0%, 100% 100%, 0% 100%)";
   if (kind === "diamond") return "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)";
   return "none";
@@ -129,12 +119,14 @@ function ShapeGeometry({
   height: number;
   paint: Paint;
 }) {
-  const inset = STROKE_WIDTH / 2;
+  const inset = paint.strokeWidth / 2;
   const shared = {
     className: "noodle-shape-geometry",
     fill: paint.fill,
+    fillOpacity: paint.fillOpacity,
     stroke: paint.stroke,
     strokeWidth: paint.strokeWidth,
+    strokeDasharray: paint.strokeDasharray,
     strokeLinejoin: "round" as const,
     strokeLinecap: "round" as const,
     pointerEvents: "none" as const,
@@ -191,7 +183,7 @@ function ShapeGeometry({
 
   const innerWidth = Math.max(0, width - inset * 2);
   const innerHeight = Math.max(0, height - inset * 2);
-  const radius = kind === "round-rect" ? cornerRadius(width, height) : 0;
+  const radius = kind === "round-rect" ? cornerRadius(width, height, paint.strokeWidth) : 0;
 
   return <rect x={inset} y={inset} width={innerWidth} height={innerHeight} rx={radius} ry={radius} {...shared} />;
 }
@@ -213,6 +205,7 @@ export function ShapePreview({
         height={height}
         paint={{
           fill: DEFAULT_SHAPE_FILL,
+          fillOpacity: 1,
           stroke: DEFAULT_SHAPE_STROKE,
           strokeWidth: STROKE_WIDTH,
         }}
@@ -221,227 +214,6 @@ export function ShapePreview({
   );
 }
 
-function PaintSwatch({
-  name,
-  value,
-  active,
-  onPick,
-}: {
-  name: string;
-  value: string;
-  active: boolean;
-  onPick: (value: string) => void;
-}) {
-  return (
-    <button
-      type="button"
-      title={name}
-      aria-label={name}
-      aria-pressed={active}
-      className={`h-4 w-4 rounded-full border border-black/10 ${active ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}
-      style={{ background: value }}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={(event) => {
-        event.stopPropagation();
-        onPick(value);
-      }}
-    />
-  );
-}
-
-function PaintNone({
-  label,
-  active,
-  onPick,
-}: {
-  label: string;
-  active: boolean;
-  onPick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      aria-pressed={active}
-      className={`relative h-4 w-4 rounded-full border border-slate-300 bg-white ${active ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={(event) => {
-        event.stopPropagation();
-        onPick();
-      }}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-px w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-slate-500"
-      />
-    </button>
-  );
-}
-
-export function ShapeKindMenu({ kind, onPick }: { kind: ShapeKind | null; onPick: (kind: ShapeKind) => void }) {
-  const [open, setOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const { menuRef, box } = useAnchoredBox(open, buttonRef, "start");
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest("[data-shape-kind-menu], [data-text-toolbar]")) return;
-      setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  return (
-    <div data-shape-kind-menu="">
-      <button
-        ref={buttonRef}
-        type="button"
-        aria-label={`Shape, ${kind ? SHAPE_LABELS[kind] : "Mixed"}`}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onMouseDown={(event) => event.preventDefault()}
-        onClick={(event) => {
-          event.stopPropagation();
-          setOpen((current) => !current);
-        }}
-        className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-      >
-        {kind ? <ShapeKindIcon kind={kind} /> : null}
-        <span className="whitespace-nowrap text-left">{kind ? SHAPE_LABELS[kind] : "Mixed"}</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="shrink-0 fill-slate-500">
-          <path d="M2 3.5 5 7l3-3.5" />
-        </svg>
-      </button>
-      {open ? (
-        <FloatingPanel
-          layer="dropdown"
-          panelRef={menuRef}
-          role="menu"
-          ariaLabel="Shape"
-          data-text-toolbar=""
-          className="overflow-hidden rounded-lg border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
-          style={{
-            position: "absolute",
-            top: box?.top ?? 0,
-            left: box?.left ?? 0,
-            minWidth: box?.minWidth,
-            visibility: box ? "visible" : "hidden",
-          }}
-        >
-          {SHAPE_KINDS.map((option) => {
-            const current = kind != null && option === kind;
-            return (
-              <button
-                key={option}
-                type="button"
-                role="menuitemradio"
-                aria-checked={current}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setOpen(false);
-                  onPick(option);
-                }}
-                className={`flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-xs ${
-                  current ? "bg-slate-100 font-semibold text-slate-900" : "text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                <ShapeKindIcon kind={option} />
-                {SHAPE_LABELS[option]}
-              </button>
-            );
-          })}
-        </FloatingPanel>
-      ) : null}
-    </div>
-  );
-}
-
-function PaintRow({
-  label,
-  value,
-  mixed = false,
-  swatches,
-  noneLabel,
-  onChange,
-}: {
-  label: string;
-  value: string | null;
-  mixed?: boolean;
-  swatches: readonly { name: string; value: string }[];
-  noneLabel: string;
-  onChange: (value: string | null) => void;
-}) {
-  return (
-    <div role="group" aria-label={label} className="flex items-center gap-1">
-      <span className="w-11 text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</span>
-      {swatches.map((swatch) => (
-        <PaintSwatch
-          key={swatch.value}
-          name={`${swatch.name} ${label.toLowerCase()}`}
-          value={swatch.value}
-          active={!mixed && value === swatch.value}
-          onPick={onChange}
-        />
-      ))}
-      <PaintNone label={noneLabel} active={!mixed && value === null} onPick={() => onChange(null)} />
-    </div>
-  );
-}
-
-export function ShapeColorBar({
-  fill,
-  stroke,
-  fillMixed = false,
-  strokeMixed = false,
-  onFill,
-  onStroke,
-}: {
-  fill: string | null;
-  stroke: string | null;
-  fillMixed?: boolean;
-  strokeMixed?: boolean;
-  onFill: (value: string | null) => void;
-  onStroke: (value: string | null) => void;
-}) {
-  return (
-    <div
-      data-shape-colors
-      className="noodle-shape-colors nodrag nopan nowheel pointer-events-auto flex flex-col gap-1 rounded-xl border border-white/50 bg-white/40 p-1.5 shadow backdrop-blur-xl"
-      onMouseDown={(event) => event.stopPropagation()}
-      onClick={(event) => event.stopPropagation()}
-      onDoubleClick={(event) => event.stopPropagation()}
-    >
-      <PaintRow
-        label="Fill"
-        value={fill}
-        mixed={fillMixed}
-        swatches={FILL_SWATCHES}
-        noneLabel="No fill"
-        onChange={onFill}
-      />
-      <PaintRow
-        label="Stroke"
-        value={stroke}
-        mixed={strokeMixed}
-        swatches={STROKE_SWATCHES}
-        noneLabel="No stroke"
-        onChange={onStroke}
-      />
-    </div>
-  );
-}
 
 function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeType>) {
   const resizeStyle = useNoodleResizeStyle();
@@ -458,6 +230,10 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
   const kind = isShapeKind(data.kind) ? data.kind : "rect";
   const fill = isShapeColor(data.fill) ? data.fill : null;
   const stroke = isShapeColor(data.stroke) ? data.stroke : null;
+  const fillOpacity = shapeFillOpacity(data);
+  const thickness = shapeThickness(data);
+  const lineStyle = shapeLineStyle(data);
+  const strokeWidth = stroke ? shapeThicknessPx(thickness) : 0;
   const body = useMemo(() => coerceBody(data.paragraphs), [data.paragraphs]);
   const boxWidth = width && width > 0 ? width : SHAPE_DEFAULT_WIDTH;
   const boxHeight = height && height > 0 ? height : SHAPE_DEFAULT_HEIGHT;
@@ -497,14 +273,20 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
     publish(id, next, { width: userWidth, height: userHeight });
   }, [id]);
 
-  const commitPaint = (patch: Partial<Pick<ShapeData, "fill" | "stroke">>) => {
+  const commitPaint = (patch: Partial<Pick<ShapeData, "fill" | "stroke" | "fillOpacity" | "thickness" | "lineStyle">>, history: boolean) => {
     const current = dataRef.current;
     const next = paintedShape(current, patch);
-    const currentFill = isShapeColor(current.fill) ? current.fill : null;
-    const currentStroke = isShapeColor(current.stroke) ? current.stroke : null;
-    if (next.fill === currentFill && next.stroke === currentStroke) return;
+    if (
+      next.fill === (isShapeColor(current.fill) ? current.fill : null) &&
+      next.stroke === (isShapeColor(current.stroke) ? current.stroke : null) &&
+      next.fillOpacity === shapeFillOpacity(current) &&
+      next.thickness === shapeThickness(current) &&
+      next.lineStyle === shapeLineStyle(current)
+    ) {
+      return;
+    }
     dataRef.current = next;
-    snapshot();
+    if (history) snapshot();
     publish(id, next);
   };
 
@@ -618,8 +400,10 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
           height={boxHeight}
           paint={{
             fill: fill ?? "transparent",
+            fillOpacity: fill == null ? 0 : fillOpacity / 100,
             stroke: stroke ?? "none",
-            strokeWidth: stroke ? STROKE_WIDTH : 0,
+            strokeWidth,
+            strokeDasharray: stroke && lineStyle === "dashed" ? "8 6" : undefined,
           }}
         />
       </svg>
@@ -628,7 +412,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
         tabIndex={-1}
         aria-label={SHAPE_LABELS[kind]}
         className="noodle-shape-hit pointer-events-auto absolute inset-0 z-0 cursor-grab outline-none"
-        style={{ clipPath: hitClip(kind, boxWidth, boxHeight) }}
+        style={{ clipPath: hitClip(kind, boxWidth, boxHeight, strokeWidth) }}
       />
       <div
         className="noodle-shape-text"
@@ -644,18 +428,25 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             onCommit={commitText}
             onCancel={() => setEditing(false)}
             onFormat={formatText}
-            toolbarExtra={<ShapeKindMenu kind={kind} onPick={commitKind} />}
           />
         </div>
       </div>
       <ObjectPorts nodeId={id} />
       {showChrome ? (
         <SelectionChrome side="below">
-          <ShapeColorBar
+          <ShapeToolbar
+            kind={kind}
             fill={fill}
             stroke={stroke}
-            onFill={(value) => commitPaint({ fill: value })}
-            onStroke={(value) => commitPaint({ stroke: value })}
+            fillOpacity={fillOpacity}
+            thickness={thickness}
+            lineStyle={lineStyle}
+            onKind={commitKind}
+            onFill={(value, history) => commitPaint({ fill: value }, history)}
+            onStroke={(value, history) => commitPaint({ stroke: value }, history)}
+            onFillOpacity={(value, history) => commitPaint({ fillOpacity: value }, history)}
+            onThickness={(value) => commitPaint({ thickness: value }, true)}
+            onLineStyle={(value) => commitPaint({ lineStyle: value }, true)}
           />
         </SelectionChrome>
       ) : null}

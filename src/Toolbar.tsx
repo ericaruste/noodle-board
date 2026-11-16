@@ -12,7 +12,7 @@ import {
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import type { PlacementKind } from "./placement";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
-import { ShapeKindIcon } from "./ShapeNode";
+import { ShapeKindIcon } from "./shapeKindIcon";
 
 export type BoardTool = "select" | "hand" | "arrow";
 

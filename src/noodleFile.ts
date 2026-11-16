@@ -188,8 +188,15 @@ function isShapeData(data: unknown): boolean {
   if (!isRecord(data) || !isShapeKind(data.kind)) return false;
   if (!isShapeColor(data.fill) || !isShapeColor(data.stroke)) return false;
   if (data.paragraphs !== undefined && !isTextBody(data.paragraphs)) return false;
-  if (data.manualHeight === undefined) return true;
-  return finiteNumber(data.manualHeight) && data.manualHeight > 0;
+  if (data.manualHeight !== undefined && !(finiteNumber(data.manualHeight) && data.manualHeight > 0)) return false;
+  if (data.thickness !== undefined && data.thickness !== "thin" && data.thickness !== "medium" && data.thickness !== "thick") {
+    return false;
+  }
+  if (data.lineStyle !== undefined && data.lineStyle !== "solid" && data.lineStyle !== "dashed") return false;
+  if (data.fillOpacity !== undefined && !(finiteNumber(data.fillOpacity) && data.fillOpacity >= 0 && data.fillOpacity <= 100)) {
+    return false;
+  }
+  return true;
 }
 
 function isTextNodeData(data: unknown): boolean {

@@ -90,7 +90,7 @@ function blockPanelEvent(event: Blockable) {
   event.stopPropagation();
   const target = event.target;
   // Canceling pointerdown suppresses the mouse moves react-colorful uses to drag.
-  if (target instanceof Element && target.closest(".react-colorful, input, textarea, select")) return;
+  if (target instanceof Element && target.closest(".react-colorful, input, textarea, select, [data-fill-opacity]")) return;
   event.preventDefault();
 }
 
@@ -108,6 +108,7 @@ type FloatingPanelProps = {
   "data-shapes-menu"?: string;
   "data-recent-menu"?: string;
   "data-group-toolbar"?: string;
+  "data-shape-colors"?: string;
 };
 
 function setRef(ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null) {

@@ -22,35 +22,55 @@ export const DEFAULT_SHAPE_STROKE = "#334155";
 
 export const STROKE_WIDTH = 2;
 
+export const SHAPE_THICKNESS = ["thin", "medium", "thick"] as const;
+export type ShapeThickness = (typeof SHAPE_THICKNESS)[number];
+
+export const SHAPE_LINE_STYLES = ["solid", "dashed"] as const;
+export type ShapeLineStyle = (typeof SHAPE_LINE_STYLES)[number];
+
+/** Same steps as the noodle stroke. Medium is the 2px stroke shapes already paint. */
+const THICKNESS_PX: Record<ShapeThickness, number> = {
+  thin: 1.25,
+  medium: 2,
+  thick: 3.5,
+};
+
+export function shapeThicknessPx(thickness: ShapeThickness) {
+  return THICKNESS_PX[thickness];
+}
+
+export function shapeThickness(data: { thickness?: unknown }): ShapeThickness {
+  return data.thickness === "thin" || data.thickness === "thick" ? data.thickness : "medium";
+}
+
+export function shapeLineStyle(data: { lineStyle?: unknown }): ShapeLineStyle {
+  return data.lineStyle === "dashed" ? "dashed" : "solid";
+}
+
+/** 0 to 100. Missing means opaque, so shapes saved before the slider stay solid. */
+export function shapeFillOpacity(data: { fillOpacity?: unknown }) {
+  if (typeof data.fillOpacity !== "number" || !Number.isFinite(data.fillOpacity)) return 100;
+  return Math.min(100, Math.max(0, Math.round(data.fillOpacity)));
+}
+
 /** Corner radius of a rounded rectangle, matching the painted geometry. */
-export function roundRectRadius(width: number, height: number) {
-  const inset = STROKE_WIDTH / 2;
+export function roundRectRadius(width: number, height: number, strokeWidth = STROKE_WIDTH) {
+  const inset = strokeWidth / 2;
   const innerWidth = Math.max(0, width - inset * 2);
   const innerHeight = Math.max(0, height - inset * 2);
   return Math.min(28, innerWidth / 2, innerHeight / 2, width * 0.22, height * 0.22);
 }
 
-export const FILL_SWATCHES = [
-  { name: "White", value: "#ffffff" },
-  { name: "Slate", value: "#e2e8f0" },
-  { name: "Blue", value: "#bfdbfe" },
-  { name: "Yellow", value: "#fef08a" },
-  { name: "Green", value: "#bbf7d0" },
-  { name: "Pink", value: "#fbcfe8" },
-] as const;
-
-export const STROKE_SWATCHES = [
-  { name: "Slate", value: "#334155" },
-  { name: "Blue", value: "#1d4ed8" },
-  { name: "Green", value: "#15803d" },
-  { name: "Rose", value: "#be123c" },
-  { name: "Amber", value: "#b45309" },
-] as const;
-
 export type ShapeData = {
   kind: ShapeKind;
   fill: string | null;
   stroke: string | null;
+  /** 0 to 100. Omitted on shapes saved before the fill slider. Those stay opaque. */
+  fillOpacity?: number;
+  /** Omitted until a weight is chosen. Missing means medium, the 2px stroke. */
+  thickness?: ShapeThickness;
+  /** Omitted until a line type is chosen. Missing means solid. */
+  lineStyle?: ShapeLineStyle;
   /** Same paragraph model as text objects. Omitted on shapes saved before text. */
   paragraphs?: TextParagraph[];
   /**

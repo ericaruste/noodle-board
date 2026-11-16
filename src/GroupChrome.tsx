@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState, type ReactNode } from "react";
 import { useStore, type Node } from "@xyflow/react";
-import { isShapeColor, isShapeKind, type ShapeData, type ShapeKind } from "./shapeData";
-import { ShapeColorBar, ShapeKindMenu } from "./ShapeNode";
+import { isShapeColor, isShapeKind, shapeFillOpacity, shapeLineStyle, shapeThickness, type ShapeData, type ShapeKind } from "./shapeData";
+import ShapeToolbar from "./ShapeToolbar";
 import SelectionChrome from "./SelectionChrome";
 import { publishGroupStyle } from "./GroupSelection";
 import { drawnNoodle } from "./drawnNoodle";
@@ -234,12 +234,18 @@ function ShapeBars({ box }: { box: Box }) {
   const paint = useStore((state) => {
     const fills: (string | null)[] = [];
     const strokes: (string | null)[] = [];
+    const opacities: number[] = [];
+    const thicknesses: ReturnType<typeof shapeThickness>[] = [];
+    const lineStyles: ReturnType<typeof shapeLineStyle>[] = [];
     const kinds: ShapeKind[] = [];
     for (const node of selectedNodes(state.nodes, "shape")) {
       const data = node.data as ShapeData | undefined;
       if (!data) continue;
       fills.push(isShapeColor(data.fill) ? data.fill : null);
       strokes.push(isShapeColor(data.stroke) ? data.stroke : null);
+      opacities.push(shapeFillOpacity(data));
+      thicknesses.push(shapeThickness(data));
+      lineStyles.push(shapeLineStyle(data));
       if (isShapeKind(data.kind)) kinds.push(data.kind);
     }
     const agreed = <T,>(values: T[]): T | null =>
@@ -249,24 +255,45 @@ function ShapeBars({ box }: { box: Box }) {
       stroke: agreed(strokes),
       fillMixed: fills.length > 1 && agreed(fills) === null,
       strokeMixed: strokes.length > 1 && agreed(strokes) === null,
+      fillOpacity: agreed(opacities) ?? opacities[0] ?? 100,
+      opacityMixed: opacities.length > 1 && agreed(opacities) === null,
+      thickness: agreed(thicknesses) ?? thicknesses[0] ?? "medium",
+      thicknessMixed: thicknesses.length > 1 && agreed(thicknesses) === null,
+      lineStyle: agreed(lineStyles) ?? lineStyles[0] ?? "solid",
+      lineStyleMixed: lineStyles.length > 1 && agreed(lineStyles) === null,
+      sliderColor: fills.find((value) => value) ?? undefined,
       kind: agreed(kinds),
     };
   });
+  const write = (
+    patch: Partial<Pick<ShapeData, "fill" | "stroke" | "fillOpacity" | "thickness" | "lineStyle">>,
+    history = true,
+  ) => {
+    publishGroupStyle({ property: "shapePatch", patch, history });
+  };
   return (
     <>
-      <GroupTextBar
-        type="shape"
-        box={box}
-        extra={<ShapeKindMenu kind={paint.kind} onPick={(kind) => publishGroupStyle({ property: "kind", value: kind })} />}
-      />
+      <GroupTextBar type="shape" box={box} />
       <SelectionChrome side="below" box={box} scope="group">
-        <ShapeColorBar
+        <ShapeToolbar
+          kind={paint.kind}
           fill={paint.fill}
           stroke={paint.stroke}
+          fillOpacity={paint.fillOpacity}
+          thickness={paint.thickness}
+          lineStyle={paint.lineStyle}
           fillMixed={paint.fillMixed}
           strokeMixed={paint.strokeMixed}
-          onFill={(value) => publishGroupStyle({ property: "fill", value })}
-          onStroke={(value) => publishGroupStyle({ property: "stroke", value })}
+          opacityMixed={paint.opacityMixed}
+          thicknessMixed={paint.thicknessMixed}
+          lineStyleMixed={paint.lineStyleMixed}
+          sliderColor={paint.sliderColor}
+          onKind={(kind) => publishGroupStyle({ property: "kind", value: kind })}
+          onFill={(value, history) => write({ fill: value }, history)}
+          onStroke={(value, history) => write({ stroke: value }, history)}
+          onFillOpacity={(value, history) => write({ fillOpacity: value }, history)}
+          onThickness={(thickness) => write({ thickness })}
+          onLineStyle={(lineStyle) => write({ lineStyle })}
         />
       </SelectionChrome>
     </>

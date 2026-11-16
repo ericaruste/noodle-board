@@ -9,7 +9,7 @@ import { ResizeHandles, useNoodleResizeStyle } from "./NoodleResizer";
 import { useConnectChromeHidden } from "./portHot";
 import { type ResizeHandle } from "./resizeMath";
 import { selectedObjectCount } from "./selectionScope";
-import { isShapeColor, isShapeKind, type ShapeData, type ShapeKind } from "./shapeData";
+import { isShapeColor, isShapeKind, shapeFillOpacity, shapeLineStyle, shapeThickness, type ShapeData, type ShapeKind } from "./shapeData";
 import { applyStickyChoice, sameStickyPaint, type StickyData } from "./StickyNode";
 import type { ColorPickerChoice } from "./ColorPickerToolbar";
 import { coerceBody, sameBody, type TextBody } from "./textBody";
@@ -22,6 +22,7 @@ export type GroupKind = SameKind | "image" | "mixed";
 export type GroupStyleDetail = (
   | { property: "fill"; value: string | null }
   | { property: "stroke"; value: string | null }
+  | { property: "shapePatch"; patch: Partial<Pick<ShapeData, "fill" | "stroke" | "fillOpacity" | "thickness" | "lineStyle">> }
   | { property: "sticky"; choice: ColorPickerChoice; customHex: string }
   | { property: "kind"; value: ShapeKind }
   | { property: "noodle"; value: string }
@@ -254,6 +255,20 @@ export function applyGroupStyle(
   let edgesChanged = false;
   const nextNodes = nodes.map((node) => {
     if (!node.selected || !node.data || typeof node.data !== "object") return node;
+    if (detail.property === "shapePatch" && node.type === "shape") {
+      const data = node.data as ShapeData;
+      const current = {
+        fill: isShapeColor(data.fill) ? data.fill : null,
+        stroke: isShapeColor(data.stroke) ? data.stroke : null,
+        fillOpacity: shapeFillOpacity(data),
+        thickness: shapeThickness(data),
+        lineStyle: shapeLineStyle(data),
+      };
+      const keys = Object.keys(detail.patch) as (keyof typeof detail.patch)[];
+      if (keys.every((key) => detail.patch[key] === undefined || current[key] === detail.patch[key])) return node;
+      nodesChanged = true;
+      return { ...node, data: { ...data, ...detail.patch } };
+    }
     if ((detail.property === "fill" || detail.property === "stroke") && node.type === "shape") {
       const data = node.data as ShapeData;
       const current = detail.property === "fill" ? (isShapeColor(data.fill) ? data.fill : null) : isShapeColor(data.stroke) ? data.stroke : null;

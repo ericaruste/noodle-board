@@ -9,7 +9,7 @@ type FillOpacitySliderProps = {
   onValueChange?: (value: number) => void;
   /** Opaque end of the track. The specimen is `#6579F8`. */
   color?: string;
-  /** Track size. Leave unset for `md`, the 12px track. `sm` is 8px. The thumb stays 16px. */
+  /** Leave unset for `sm`: an 8px track and a 12px thumb. `md` is a 12px track and a 16px thumb. */
   size?: SliderTrackSize;
   disabled?: boolean;
 };
@@ -35,7 +35,7 @@ export default function FillOpacitySlider({
   defaultValue = 50,
   onValueChange,
   color = SLIDER_SPECIMEN_COLOR,
-  size = "md",
+  size = "sm",
   disabled = false,
 }: FillOpacitySliderProps) {
   const [valueState, setValueState] = useState(() => clampPercent(defaultValue));
@@ -130,7 +130,7 @@ export default function FillOpacitySlider({
   const thumb: SliderThumbState = disabled ? "disabled" : dragging ? "pressed" : hovered || focused ? "hover" : "default";
 
   return (
-    <div data-fill-opacity="" className="inline-flex items-center gap-brand-scale-200">
+    <div data-fill-opacity="" className="inline-flex items-center gap-brand-scale-400">
       <div
         ref={trackRef}
         role="slider"
@@ -140,7 +140,7 @@ export default function FillOpacitySlider({
         aria-valuenow={value}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : 0}
-        className="relative h-brand-scale-400 w-[120px] touch-none outline-none"
+        className={`relative w-[120px] touch-none outline-none ${size === "sm" ? "h-brand-scale-300" : "h-brand-scale-400"}`}
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
         onPointerUp={endDrag}
@@ -161,79 +161,85 @@ export default function FillOpacitySlider({
         </span>
         <SliderThumb
           state={thumb}
+          size={size}
           className="absolute top-1/2"
           // left is the percent. The disc stays centered on that point, above the track.
           style={{ left: `${value}%`, transform: "translate(-50%, -50%)" }}
         />
       </div>
+      {/* "100%" reserves the width. The number is left-aligned, so a short value stays next to the slider. */}
       {/* TODO token mismatch: Figma #334155. Nearest text token is mapped.text.default #303132. */}
-      <input
-        ref={inputRef}
-        aria-label="Fill opacity percent"
-        inputMode="numeric"
-        autoComplete="off"
-        disabled={disabled}
-        readOnly={!editing}
-        value={shown}
-        style={{ width: `${Math.max(shown.length, 2)}ch` }}
-        onPointerDown={(event) => {
-          fromPointer.current = true;
-          const now = performance.now();
-          const secondClick = now - lastDown.current < 300;
-          lastDown.current = now;
-          if (!editingRef.current && secondClick) {
+      <span className="relative inline-grid whitespace-nowrap font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-left tabular-nums text-mapped-text-default">
+        <span className="invisible col-start-1 row-start-1 text-left tabular-nums" aria-hidden>
+          100%
+        </span>
+        <input
+          ref={inputRef}
+          aria-label="Fill opacity percent"
+          inputMode="numeric"
+          autoComplete="off"
+          disabled={disabled}
+          readOnly={!editing}
+          value={shown}
+          onPointerDown={(event) => {
+            fromPointer.current = true;
+            const now = performance.now();
+            const secondClick = now - lastDown.current < 300;
+            lastDown.current = now;
+            if (!editingRef.current && secondClick) {
+              event.preventDefault();
+              beginEdit();
+              return;
+            }
+            if (!editingRef.current) event.preventDefault();
+          }}
+          onMouseDown={(event) => {
+            if (!editingRef.current) event.preventDefault();
+          }}
+          onDoubleClick={(event) => {
             event.preventDefault();
+            event.stopPropagation();
             beginEdit();
-            return;
-          }
-          if (!editingRef.current) event.preventDefault();
-        }}
-        onMouseDown={(event) => {
-          if (!editingRef.current) event.preventDefault();
-        }}
-        onDoubleClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          beginEdit();
-        }}
-        onFocus={() => {
-          if (editingRef.current || fromPointer.current) return;
-          beginEdit();
-        }}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={() => {
-          const wasEditing = editingRef.current;
-          editingRef.current = false;
-          setEditing(false);
-          fromPointer.current = false;
-          if (!wasEditing) {
-            skipCommit.current = false;
-            return;
-          }
-          if (skipCommit.current) {
-            skipCommit.current = false;
-            return;
-          }
-          commit();
-        }}
-        onKeyDown={(event) => {
-          event.stopPropagation();
-          if (event.key === "Enter") {
-            event.preventDefault();
+          }}
+          onFocus={() => {
+            if (editingRef.current || fromPointer.current) return;
+            beginEdit();
+          }}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={() => {
+            const wasEditing = editingRef.current;
+            editingRef.current = false;
             setEditing(false);
+            fromPointer.current = false;
+            if (!wasEditing) {
+              skipCommit.current = false;
+              return;
+            }
+            if (skipCommit.current) {
+              skipCommit.current = false;
+              return;
+            }
             commit();
-            event.currentTarget.blur();
-          }
-          if (event.key === "Escape") {
-            event.preventDefault();
-            skipCommit.current = true;
-            setDraft(String(value));
-            setEditing(false);
-            event.currentTarget.blur();
-          }
-        }}
-        className={`m-0 border-0 bg-transparent p-0 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default outline-none disabled:text-mapped-text-disabled ${editing ? "cursor-text" : "cursor-pointer"}`}
-      />
+          }}
+          onKeyDown={(event) => {
+            event.stopPropagation();
+            if (event.key === "Enter") {
+              event.preventDefault();
+              setEditing(false);
+              commit();
+              event.currentTarget.blur();
+            }
+            if (event.key === "Escape") {
+              event.preventDefault();
+              skipCommit.current = true;
+              setDraft(String(value));
+              setEditing(false);
+              event.currentTarget.blur();
+            }
+          }}
+          className={`absolute inset-0 m-0 border-0 bg-transparent p-0 text-left tabular-nums text-inherit outline-none disabled:text-mapped-text-disabled ${editing ? "cursor-text" : "cursor-pointer"}`}
+        />
+      </span>
     </div>
   );
 }
@@ -262,9 +268,9 @@ export function FillOpacitySliderPreview() {
         <FillOpacitySlider value={value} onValueChange={setValue} />
       </div>
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
-        sm
+        md
       </p>
-      <FillOpacitySlider size="sm" value={small} onValueChange={setSmall} />
+      <FillOpacitySlider size="md" value={small} onValueChange={setSmall} />
     </main>
   );
 }
