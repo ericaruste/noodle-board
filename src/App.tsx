@@ -97,6 +97,7 @@ import {
   paintEndpoints,
   pointFromEvent,
   pruneEndpoints,
+  releaseEndDrag,
   sameEnds,
 } from "./noodleEnds";
 import { carryDraggedNoodles } from "./selectionMove";
@@ -2077,6 +2078,7 @@ function Board() {
           clearReleaseLanding();
           holdSelection();
           document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+          releaseEndDrag();
           suppressConnectRef.current = false;
           armClickSwallow();
           const swallowRelease = () => {
@@ -2096,6 +2098,7 @@ function Board() {
         clearConnectionOrigin();
         setHotPort(null);
         document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+        releaseEndDrag();
         suppressConnectRef.current = false;
         chooseTool("select");
         return;
@@ -2408,7 +2411,7 @@ function Board() {
             </button>
           </div>
         ) : null}
-        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld} />
+        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld && !placement} />
         <ReactFlow
           style={{ "--noodle-layer-selection": layers.selection } as CSSProperties}
           className={[connectMode ? "noodle-connect" : "", tool === "hand" || spaceHeld ? "noodle-hand" : "", selectedObjectCount(nodes, edges) === 1 ? "noodle-solo" : ""].filter(Boolean).join(" ") || undefined}
