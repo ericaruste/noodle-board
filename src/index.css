@@ -534,7 +534,7 @@ body,
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   font-family: var(--alias-font-family-placeholder);
-  font-size: var(--responsive-desktop-placeholder-lg-size);
+  font-size: var(--responsive-desktop-placeholder-md-size);
   font-weight: 600;
   line-height: var(--responsive-desktop-placeholder-line-height);
   white-space: nowrap;

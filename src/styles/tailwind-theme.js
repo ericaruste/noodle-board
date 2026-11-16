@@ -291,7 +291,7 @@ export default {
     "responsive-desktop-body-md-size": "var(--responsive-desktop-body-md-size)",
     "responsive-desktop-body-sm-size": "var(--responsive-desktop-body-sm-size)",
     "responsive-desktop-caption-md-size": "var(--responsive-desktop-caption-md-size)",
-    "responsive-desktop-placeholder-lg-size": "var(--responsive-desktop-placeholder-lg-size)"
+    "responsive-desktop-placeholder-md-size": "var(--responsive-desktop-placeholder-md-size)"
   },
   "lineHeight": {
     "responsive-desktop-body-lg-line-height": "var(--responsive-desktop-body-lg-line-height)",

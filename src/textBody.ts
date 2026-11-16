@@ -18,8 +18,8 @@ export const DEFAULT_FONT_SIZE = 14;
 /** Default face for sticky, noodle, and shape text. `alias.font-family.placeholder`. */
 export const CANVAS_FONT_FAMILY: FontFamily = "Open Sans";
 
-/** `responsive.desktop.placeholder.lg.size`. Text objects stay on `DEFAULT_FONT_SIZE`. */
-export const CANVAS_FONT_SIZE = 16;
+/** `responsive.desktop.placeholder.md.size`. Text objects stay on `DEFAULT_FONT_SIZE`. */
+export const CANVAS_FONT_SIZE = 14;
 export const MIN_FONT_SIZE = 1;
 export const MAX_FONT_SIZE = 400;
 export const FONT_SIZE_PRESETS = [10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72] as const;

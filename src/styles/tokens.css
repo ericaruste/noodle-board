@@ -117,8 +117,8 @@
   --responsive-desktop-caption-md-size: 10px;
   --responsive-desktop-caption-md-line-height: 12px;
   --responsive-desktop-caption-md-line-height-tight: 10px;
-  --responsive-desktop-placeholder-lg-size: 16px;
-  --responsive-desktop-placeholder-line-height: 19.2px;
+  --responsive-desktop-placeholder-md-size: 14px;
+  --responsive-desktop-placeholder-line-height: 16.8px;
   --alias-primary-50: var(--brand-blue-50);
   --alias-primary-100: var(--brand-blue-100);
   --alias-primary-200: var(--brand-blue-200);

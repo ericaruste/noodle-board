@@ -23,7 +23,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[code] Color picker on shape fill and stroke.** Sticky notes and noodles use the color picker toolbar. Shape fill and stroke still use the Phase 1 bars.
 - **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
-- **[token app] Placeholder line height sits beside `lg`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.lg.line-height`. `lg` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
+- **[token app] Placeholder line height sits beside `md`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.md.line-height`. `md` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
 - **[Figma] Thumb sheet label says focus.** The variant property is `pressed`. The sheet writes focus over that disc.
 - **[Figma] Thumb ring is a drop shadow.** Hover and pressed hide the stroke and draw the ring as a shadow. The code uses an outline, the same treatment as the color swatch ring. The measured ring is 2px, `alias.border-width.sm`.
 - **[token app] Opacity track width.** The pill is 120px wide. No spacing token is 120px.
@@ -37,7 +37,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
 - `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 80%. The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
 - Desktop font size and line height are tokens under `responsive.desktop`. The 12px tight style is `responsive.desktop.body.sm.size` and `responsive.desktop.body.sm.line-height-tight`. That style was `body.md`. `body.md` is now 14px / 16.8px, with tight 14px, which is the old `body.lg`. `body.lg` is 16px / 19.2px and has no tight line height. The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
-- Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.lg.size` (16px) and `responsive.desktop.placeholder.line-height` (19.2px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
+- Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.md.size` (14px) and `responsive.desktop.placeholder.line-height` (16.8px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
 - 6px is `brand.scale.150` and 28px is `brand.scale.700`. Inserting them moved the later steps: 32px is `brand.scale.800`, 36px is `brand.scale.900`, 40px is `brand.scale.1000`, 44px is `brand.scale.1100`, and 48px is `brand.scale.1200`. Names through `brand.scale.600` (24px) stayed put.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
@@ -60,14 +60,14 @@ No Figma frame for this pass. The tokens are `alias.font-family.placeholder`, `r
 | Piece | Token | Value |
 | --- | --- | --- |
 | Font | `alias.font-family.placeholder` | Open Sans |
-| Size | `responsive.desktop.placeholder.lg.size` | 16px |
-| Line height | `responsive.desktop.placeholder.line-height` | 19.2px. The line height sits beside `lg`, not inside it. Paragraph spacing is `not a token` |
+| Size | `responsive.desktop.placeholder.md.size` | 14px |
+| Line height | `responsive.desktop.placeholder.line-height` | 16.8px. The line height sits beside `md`, not inside it. Paragraph spacing is `not a token` |
 | Empty hint | `mapped.text.placeholder` | `#606264`, `alias.cool-neutral.800` |
 | Typed sticky and shape | none | the existing slate ink |
 | Typed noodle | the stroke color | unchanged. Weight stays 600 |
 | Text object | none | 14px, family omitted |
 
-The empty hint and the typed default share the font and the size. A run that sets its own family or size still wins. The toolbar shows Open Sans and 16 when the run has neither.
+The empty hint and the typed default share the font and the size. A run that sets its own family or size still wins. The toolbar shows Open Sans and 14 when the run has neither.
 
 ## Contextual button
 

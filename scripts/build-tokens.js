@@ -220,8 +220,8 @@ if (!css.includes('--alias-font-family-placeholder: "Open Sans"')) {
   throw new Error("Placeholder font was not written.");
 }
 if (
-  !css.includes("--responsive-desktop-placeholder-lg-size: 16px") ||
-  !css.includes("--responsive-desktop-placeholder-line-height: 19.2px")
+  !css.includes("--responsive-desktop-placeholder-md-size: 14px") ||
+  !css.includes("--responsive-desktop-placeholder-line-height: 16.8px")
 ) {
   throw new Error("Placeholder type was not written.");
 }
@@ -237,7 +237,7 @@ if (
 if (!lookupText.includes("`responsive.desktop.body.sm.size`") || !lookupText.includes("`text-responsive-desktop-body-sm-size`")) {
   throw new Error("Token lookup is missing desktop body sm.");
 }
-if (!lookupText.includes("`responsive.desktop.placeholder.lg.size`") || !lookupText.includes("`mapped.text.placeholder`")) {
+if (!lookupText.includes("`responsive.desktop.placeholder.md.size`") || !lookupText.includes("`mapped.text.placeholder`")) {
   throw new Error("Token lookup is missing placeholder type or color.");
 }
 if (!lookupText.includes("`alias.swatch.neutral.200`") || !lookupText.includes("`alias.swatch.neutral.500`")) {

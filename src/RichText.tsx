@@ -820,10 +820,10 @@ export function RichText({
   const showPlaceholder = isEmptyBody(shown);
   const editorStyle = fontSize && fontSize > 0 ? { fontSize, lineHeight: 1.43 } : undefined;
   const hintClass = canvasDefault
-    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-lg-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder"
+    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-md-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder"
     : "text-sm leading-5 text-slate-400";
   const editorClass = canvasDefault
-    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-lg-size leading-responsive-desktop-placeholder-line-height text-slate-800"
+    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-md-size leading-responsive-desktop-placeholder-line-height text-slate-800"
     : "text-sm leading-5 text-slate-800";
   const hideChrome = useConnectChromeHidden();
   const showChrome = selected && !hideChrome;

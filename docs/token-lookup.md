@@ -250,8 +250,8 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | 12px | `leading-responsive-desktop-caption-md-line-height` | `responsive.desktop.caption.md.line-height` | line height |
 | 10px | `leading-responsive-desktop-caption-md-line-height-tight` | `responsive.desktop.caption.md.line-height-tight` | line height |
 | 10px | `text-responsive-desktop-caption-md-size` | `responsive.desktop.caption.md.size` | font size |
-| 16px | `text-responsive-desktop-placeholder-lg-size` | `responsive.desktop.placeholder.lg.size` | font size |
-| 19.2px | `leading-responsive-desktop-placeholder-line-height` | `responsive.desktop.placeholder.line-height` | line height |
+| 16.8px | `leading-responsive-desktop-placeholder-line-height` | `responsive.desktop.placeholder.line-height` | line height |
+| 14px | `text-responsive-desktop-placeholder-md-size` | `responsive.desktop.placeholder.md.size` | font size |
 
 ## Duplicate values
 
@@ -321,9 +321,9 @@ These values are shared by more than one token, so a Figma value on its own is a
 | 0px | `alias.border-radius.none`, `alias.border-width.none`, `brand.scale.0` |
 | 10px | `responsive.desktop.caption.md.line-height-tight`, `responsive.desktop.caption.md.size` |
 | 12px | `alias.border-radius.xl`, `alias.border-width.xl`, `brand.scale.300`, `responsive.desktop.body.sm.line-height-tight`, `responsive.desktop.body.sm.size`, `responsive.desktop.caption.md.line-height` |
-| 14px | `responsive.desktop.body.md.line-height-tight`, `responsive.desktop.body.md.size` |
-| 16px | `alias.border-radius.xxl`, `brand.scale.400`, `responsive.desktop.body.lg.size`, `responsive.desktop.placeholder.lg.size` |
-| 19.2px | `responsive.desktop.body.lg.line-height`, `responsive.desktop.placeholder.line-height` |
+| 14px | `responsive.desktop.body.md.line-height-tight`, `responsive.desktop.body.md.size`, `responsive.desktop.placeholder.md.size` |
+| 16.8px | `responsive.desktop.body.md.line-height`, `responsive.desktop.placeholder.line-height` |
+| 16px | `alias.border-radius.xxl`, `brand.scale.400`, `responsive.desktop.body.lg.size` |
 | 1px | `alias.border-width.xsm`, `brand.scale.25` |
 | 2px | `alias.border-radius.sm`, `alias.border-width.sm`, `brand.scale.50` |
 | 4px | `alias.border-radius.md`, `alias.border-width.md`, `brand.scale.100` |
