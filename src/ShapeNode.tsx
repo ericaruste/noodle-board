@@ -362,9 +362,8 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       const held = kindHeightRef.current;
       if (held != null) {
         target = Math.max(target, Math.round(held));
-        // The hold only covers this pass. A short label returns to the base
-        // once the new text band has been measured.
-        kindHeightRef.current = null;
+        // Keep the hold for every measurement in this pass. The frame below
+        // returns a short label to the base once the new text band has settled.
         if (target - settled > 1) {
           if (release) cancelAnimationFrame(release);
           const releaseKind = kind;
