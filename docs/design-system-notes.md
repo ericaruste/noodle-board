@@ -53,7 +53,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
 - The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.400`. The thumb has two sizes. `sm` is 12px, `brand.scale.300`, and it is the default. `md` is 16px, `brand.scale.400`. The track has two sizes. `sm` is 8px, `brand.scale.200`. `md` is 12px, `brand.scale.300`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
-- The shape toolbar’s fill and stroke open the color picker at step 200, with none. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
+- The shape toolbar’s fill opens the color picker at step 200, and its stroke opens the color picker at step 500. Both offer none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). A shape already saved keeps its own fill and stroke. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
 ## Canvas text
@@ -912,7 +912,7 @@ This slider is not a toolbar. The shape toolbar places it and uses FloatingPanel
 
 ## Shape toolbar
 
-Figma `toolbar/contextual/shape-color`, on the spec frame titled `shape toolbar`, node `193:3525`. The frame measures 622 by 548, including the callouts. Ticket NB-56. Code `src/ShapeToolbar.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
+Figma `toolbar/contextual/shape-color`, on the spec frame titled `shape toolbar`, node `193:3525`. The frame measures 622 by 548, including the callouts. Ticket NB-56. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
 
 Every control is a contextual button with the unused slots turned off, except the fill opacity slider, which is the slider component.
 
@@ -920,7 +920,7 @@ Every control is a contextual button with the unused slots turned off, except th
 - Second group: stroke, then line weight and line type. A divider sits on the right of the group.
 - Third group: fill, then the fill opacity slider. The gap before the slider is 8px.
 
-Shape swap opens a row of the five kinds. Stroke and fill open the color picker toolbar, step 200, with none. Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
+Shape swap opens a row of the five kinds. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -949,6 +949,8 @@ Shape swap opens a row of the five kinds. Stroke and fill open the color picker 
 | Color disc | `brand.scale.400` | 16px, the contextual button icon slot. It paints the color swatch’s default look, scaled from the 24px disc. Type none or color. Not hover, selected, or custom |
 | Color disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, on the default disc |
 | Slider | fill opacity slider, `sm` | 8px track, `brand.scale.200`, centered on the 12px thumb, `brand.scale.300`. The track uses the fill. No fill uses `#C0C4C9`. The percent is left-aligned in a slot the width of `100%`, with 16px before it |
+| New shape fill | `alias.swatch.purple.200` | `#EBCFFF`. The fill grid is step 200. Choosing purple writes this hex and selects the purple disc |
+| New shape stroke | `alias.swatch.purple.500` | `#BF66FF`. The stroke grid is step 500. Choosing purple writes this hex and selects the purple disc |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties. The property panel was not opened. These were read from the frame:
 
@@ -961,7 +963,7 @@ The component exposes no properties of its own. The buttons inside set the conte
 
 The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`. Four icons are painted: ellipse, diamond, rectangle, triangle. The app also draws rounded rectangle, in the existing kind order. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
 
-The open color menu is the color picker toolbar. Both fill and stroke use step 200 and none. A saved hex that is not a step-200 swatch selects custom and keeps that paint. The button disc stays type color for that hex. The note on the frame says the disc is not hover, not selected, and not the custom type.
+The open fill menu is the color picker toolbar at step 200, with none. Choosing purple writes `#EBCFFF` and selects the purple disc. The open stroke menu is the same picker at step 500, with none. Choosing purple writes `#BF66FF` and selects the purple disc. A saved hex that is not on that menu’s step selects custom and keeps that paint, including `#bfdbfe` and `#334155`. Clearing fill or stroke clears only that paint. The button disc stays type color for a hex, and type none when that paint is cleared. The note on the frame says the disc is not hover, not selected, and not the custom type.
 
 Painted on the bar: one resting frame. The buttons in that frame are resting. The slider reads 50%.
 
