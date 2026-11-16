@@ -595,7 +595,7 @@ function pointerOverChrome(clientX: number, clientY: number) {
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__node-endpoint",
+      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, .board-toolbar, [data-floating-panel], [data-canvas-chrome], [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], [data-shapes-menu], .react-flow__node-endpoint",
     ),
   );
 }
