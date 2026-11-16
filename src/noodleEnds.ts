@@ -164,10 +164,15 @@ function mouseAt(type: "mousedown" | "mousemove" | "mouseup", point: { clientX: 
  * does not also move. That cancellation drops the mouse events a connect drag listens
  * for, so the rest of the gesture is forwarded from the pointer events that still fire.
  */
-export function forwardEndDrag(anchor: Element, point: { clientX: number; clientY: number }) {
+export function forwardEndDrag(anchor: Element, point: { clientX: number; clientY: number; pointerId?: number }) {
+  if (stopEndRelay) {
+    document.dispatchEvent(mouseAt("mouseup", point));
+    stopEndRelay();
+  }
+  const pointerId = point.pointerId;
   anchor.dispatchEvent(mouseAt("mousedown", point));
-  if (stopEndRelay) return;
   const relay = (event: PointerEvent) => {
+    if (pointerId != null && event.pointerId !== pointerId) return;
     const up = event.type !== "pointermove";
     document.dispatchEvent(mouseAt(up ? "mouseup" : "mousemove", event));
     if (!up) return;
