@@ -40,8 +40,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-54 Track](../NB-54-track.md)
 - [NB-55 Fill opacity slider](../NB-55-fill-opacity-slider.md)
 - [NB-56 Shape toolbar](../NB-56-shape-toolbar.md)
+- [NB-57 Show one toolbar at a time on sticky and shape](../NB-57-one-toolbar-at-a-time.md)
 
-The next component ticket is the next free id after NB-56, parented to NB-E6, and titled with the component name.
+NB-57 is the one-toolbar behavior, not a component. The next component ticket is the next free id after NB-57, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 

@@ -320,6 +320,11 @@
       "id": "3df7ab95-7772-48c0-96bb-e586e1ad4a19",
       "identifier": "ERI-71",
       "url": "https://linear.app/ericar/issue/ERI-71/shape-toolbar"
+    },
+    "NB-57": {
+      "id": "41893cf3-ab3b-4d7d-a7ee-82dceb644b97",
+      "identifier": "ERI-72",
+      "url": "https://linear.app/ericar/issue/ERI-72/show-one-toolbar-at-a-time-on-sticky-and-shape"
     }
   }
 }

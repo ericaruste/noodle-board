@@ -425,6 +425,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             selected={showChrome}
             canvasDefault
             placeholder="Double-click to write"
+            toolbarOnSelect={false}
             onCommit={commitText}
             onCancel={() => setEditing(false)}
             onFormat={formatText}
@@ -432,7 +433,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
         </div>
       </div>
       <ObjectPorts nodeId={id} />
-      {showChrome ? (
+      {showChrome && !editing ? (
         <SelectionChrome side="below">
           <ShapeToolbar
             kind={kind}

@@ -209,11 +209,12 @@ function StickyNode({ id, data, selected }: NodeProps<StickyNodeType>) {
         fill
         canvasDefault
         placeholder="Double-click to write"
+        toolbarOnSelect={false}
         onCommit={commit}
         onCancel={() => setEditing(false)}
         onFormat={format}
       />
-      {showChrome ? (
+      {showChrome && !editing ? (
         <SelectionChrome side="below">
           <StickyColorToolbar
             choice={stickyChoice(data)}
