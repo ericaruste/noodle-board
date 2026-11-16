@@ -200,46 +200,36 @@ function soleSelectedElement(state: ReactFlowState) {
   return null;
 }
 
-function readPortRadius(nodeId: string) {
-  const el = document.querySelector(`.react-flow__node[data-id="${CSS.escape(nodeId)}"] .noodle-node`);
-  if (!(el instanceof HTMLElement)) return 5;
-  const parsed = parseFloat(getComputedStyle(el).getPropertyValue("--noodle-port-size"));
-  const size = Number.isFinite(parsed) ? parsed : 10;
-  return size / 2;
+function portIsVisible(el: HTMLElement) {
+  const style = getComputedStyle(el);
+  return style.pointerEvents !== "none" && Number(style.opacity) !== 0;
 }
 
 /**
- * The visible port under the pointer. A port press is that circle on the selected
- * element. The element body, a gap, and an element underneath are not a port.
+ * The visible port under the pointer. A stroke may paint over an occupied port;
+ * the painted circle is still the press. The element body and a different element on top are not.
  */
 function selectedPortPress(state: ReactFlowState, clientX: number, clientY: number): HotPort | null {
-  const flow = clientToFlow(state, clientX, clientY);
-  const zoom = state.transform[2];
-  if (!flow || !zoom) return null;
-  if (nodeAtFlowPoint(state, flow)) return null;
   const nodeId = soleSelectedElement(state);
   if (!nodeId) return null;
-  const node = state.nodeLookup.get(nodeId);
-  if (!node || node.type === ENDPOINT_TYPE) return null;
-  const box = nodeBox(node);
-  if (!box) return null;
-  // Port size and outset are the node's own CSS pixels, which are flow units. The viewport scale does not change them.
-  const hitRadius = readPortRadius(nodeId);
-  const outline = outlineRadius(node.type, node.data, box);
-  const outset = readOutset(nodeId);
+  const top = document.elementFromPoint(clientX, clientY);
+  if (top instanceof Element) {
+    const owner = top.closest(".react-flow__node")?.getAttribute("data-id");
+    const onHandle = Boolean(top.closest(".react-flow__handle"));
+    if (owner && owner !== nodeId && !onHandle) return null;
+    if (owner === nodeId && !onHandle) return null;
+  }
   let best: { side: SideId; distance: number } | null = null;
   for (const side of SIDES) {
-    const mid = pointOnOutline(box, side, 0.5, outline);
-    const center =
-      side === "right"
-        ? { x: mid.x + outset, y: mid.y }
-        : side === "left"
-          ? { x: mid.x - outset, y: mid.y }
-          : side === "top"
-            ? { x: mid.x, y: mid.y - outset }
-            : { x: mid.x, y: mid.y + outset };
-    const distance = Math.hypot(center.x - flow.x, center.y - flow.y);
-    if (distance > hitRadius) continue;
+    const el = handleElement(nodeId, side);
+    if (!(el instanceof HTMLElement) || !portIsVisible(el)) continue;
+    const rect = el.getBoundingClientRect();
+    const radius = Math.max(rect.width, rect.height) / 2;
+    if (radius < 1) continue;
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) continue;
     if (!best || distance < best.distance) best = { side, distance };
   }
   if (!best) return null;

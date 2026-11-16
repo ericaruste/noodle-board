@@ -68,6 +68,10 @@ Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index toke
 
 This ticket adds no panel. The port fill, the landing outline, and the edge marker stay on the selection token while a noodle that was started from a real port press is mid-drag.
 
+A port that already has a noodle stays pressable. The selected element paints on the selection layer, above noodles, so the stroke does not cover its ports. Pressing that port still starts one noodle.
+
+With the Arrow tool on, the shape, text, sticky, and noodle toolbars stay hidden. The board toolbar stays, and the selected element's ports stay visible.
+
 ## Out of scope
 
 Where a noodle attaches, and the stored fraction (NB-17, NB-18). Landing once a drag was started from a selected port (NB-22). The drag-preview drawing (NB-20, NB-29). Noodle toolbar contents and the gap above the arrow (NB-33, NB-50). Hand-tool panning. Port size, color, and tokens.

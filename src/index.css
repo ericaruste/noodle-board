@@ -308,6 +308,11 @@ body,
   pointer-events: none;
 }
 
+/* Above noodles, which paint on the canvas layer. The ports stay clickable when a stroke runs through them. */
+.noodle-solo .react-flow__node.selected {
+  z-index: var(--noodle-layer-selection) !important;
+}
+
 .noodle-solo .react-flow__node.selected .react-flow__handle,
 .noodle-solo .react-flow__node.selected .react-flow__handle.connectionindicator {
   opacity: 1;

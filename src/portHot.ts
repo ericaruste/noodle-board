@@ -24,6 +24,7 @@ let swallowUntil = 0;
 let portGesture = false;
 let portGestureTimer = 0;
 let connectSession = false;
+let arrowTool = false;
 let holdUntil = 0;
 let holdTimer = 0;
 let releaseSet = false;
@@ -156,6 +157,28 @@ export function readReleaseLanding(): HoverTarget | null | undefined {
 export function clearReleaseLanding() {
   releaseSet = false;
   releaseLanding = null;
+}
+
+/** Arrow tool. Selection toolbars stay off so the gesture is connecting. */
+export function setArrowTool(next: boolean) {
+  if (arrowTool === next) return;
+  arrowTool = next;
+  emit();
+}
+
+export function useArrowTool() {
+  const [on, setOn] = useState(arrowTool);
+
+  useEffect(() => {
+    const sync = () => setOn((prev) => (prev === arrowTool ? prev : arrowTool));
+    listeners.add(sync);
+    sync();
+    return () => {
+      listeners.delete(sync);
+    };
+  }, []);
+
+  return on;
 }
 
 /** Hide text toolbars and color chips for the whole connecting session, including the release click. */
