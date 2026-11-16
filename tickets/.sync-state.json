@@ -325,6 +325,16 @@
       "id": "41893cf3-ab3b-4d7d-a7ee-82dceb644b97",
       "identifier": "ERI-72",
       "url": "https://linear.app/ericar/issue/ERI-72/show-one-toolbar-at-a-time-on-sticky-and-shape"
+    },
+    "NB-58": {
+      "id": "7463822c-1f96-4371-bfea-e187d37023fd",
+      "identifier": "ERI-73",
+      "url": "https://linear.app/ericar/issue/ERI-73/keep-a-shape-at-its-default-height-until-the-text-overflows"
+    },
+    "NB-59": {
+      "id": "26b84d9d-df05-4a20-9e54-d500490f32ab",
+      "identifier": "ERI-74",
+      "url": "https://linear.app/ericar/issue/ERI-74/start-new-shapes-on-purple"
     }
   }
 }
