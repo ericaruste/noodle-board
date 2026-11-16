@@ -57,7 +57,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     const root = store.getState().domNode;
     if (!root) return;
 
-    let gesture: { nodeId: string; handleId: string; fraction: number; x: number; y: number; dragged: boolean } | null = null;
+    let gesture: { nodeId: string; handleId: string; fraction: number; x: number; y: number; pointerId: number; dragged: boolean } | null = null;
 
     const finishGesture = () => {
       window.removeEventListener("pointermove", onMove);
@@ -66,7 +66,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     };
 
     const onMove = (event: PointerEvent) => {
-      if (!gesture || gesture.dragged) return;
+      if (!gesture || event.pointerId !== gesture.pointerId || gesture.dragged) return;
       if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) < DRAG_START) return;
       if (!isSide(gesture.handleId)) return;
       const state = store.getState();
@@ -82,6 +82,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     };
 
     const onUp = (event: PointerEvent) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
       const current = gesture;
       gesture = null;
       finishGesture();
@@ -171,6 +172,7 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         fraction: port.fraction ?? 0.5,
         x: event.clientX,
         y: event.clientY,
+        pointerId: event.pointerId,
         dragged: false,
       };
       window.addEventListener("pointermove", onMove);

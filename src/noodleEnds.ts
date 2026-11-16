@@ -147,6 +147,11 @@ export function edgeAnchor(edgeId: string, end: "source" | "target") {
 
 let stopEndRelay: (() => void) | null = null;
 
+/** Drop a forwarded drag so a later pointer move cannot keep it going. */
+export function releaseEndDrag() {
+  stopEndRelay?.();
+}
+
 function mouseAt(type: "mousedown" | "mousemove" | "mouseup", point: { clientX: number; clientY: number }) {
   return new MouseEvent(type, {
     bubbles: true,
