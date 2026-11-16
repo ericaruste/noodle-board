@@ -1,6 +1,7 @@
 import { useNodeId, useStore } from "@xyflow/react";
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { FloatingPanel } from "./FloatingPanel";
+import { useArrowTool } from "./portHot";
 import { useChromeLayout } from "./NoodleEdge";
 import { selectionClearance } from "./NoodleResizer";
 import {
@@ -219,6 +220,7 @@ export default function SelectionChrome({ side, order = 0, children, box, scope:
   const scope = scopeProp ?? nodeId ?? (box ? "group" : null);
   const slotId = `${scope ?? "node"}:${side}:${order}`;
   const host = useStore(rendererOf);
+  const arrowTool = useArrowTool();
   const nodeAnchor = useStore((state): Anchor | null => {
     if (box || !nodeId) return null;
     const node = state.nodeLookup.get(nodeId);
@@ -308,7 +310,7 @@ export default function SelectionChrome({ side, order = 0, children, box, scope:
       : undefined;
   void layoutTick;
 
-  if (!host || !scope) return null;
+  if (!host || !scope || arrowTool) return null;
 
   return (
     <FloatingPanel

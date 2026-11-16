@@ -8,7 +8,6 @@ import {
   pointOnOutline,
   pointOnSide,
   projectOntoOutline,
-  projectOntoSideMidpoint,
   routeEnd,
   sidePosition,
   SIDES,
@@ -17,6 +16,7 @@ import {
 import { layers } from "./layers";
 import { ENDPOINT_TYPE, PORT_SCREEN_RADIUS, forwardEndDrag, type HotPort } from "./noodleEnds";
 import { ROUTE_GAP } from "./noodleRoute";
+import { selectedObjectCount } from "./selectionScope";
 import {
   consumePortGesture,
   beginPortGesture,
@@ -39,8 +39,8 @@ import {
   type HoverTarget,
 } from "./portHot";
 
-/** Screen pixels. Hover and handle-drag grab the side this far from the border. */
-const BAND_SCREEN_PX = 28;
+/** Screen pixels. A noodle that is already moving can land this far from a side. It does not start a noodle. */
+const LANDING_BAND_SCREEN_PX = 28;
 
 export function pointerToFlow(state: ReactFlowState, pointer?: XYPosition | null): XYPosition | null {
   const flow = flowPoint(state, pointer);
@@ -138,9 +138,12 @@ function closestPerimeter(
   radius: number,
   mode: AttachmentMode,
 ): HotPort | null {
+  // A press inside an element stays on that element. The one underneath is not a candidate.
+  const owner = nodeAtFlowPoint(state, point);
   let best: { port: HotPort; distance: number; z: number } | null = null;
   for (const node of state.nodeLookup.values()) {
     if (node.type === ENDPOINT_TYPE) continue;
+    if (owner && node.id !== owner) continue;
     const box = nodeBox(node);
     if (!box) continue;
     const hit = projectForMode(node, box, point, mode);
@@ -188,7 +191,55 @@ function nodeAtFlowPoint(state: ReactFlowState, point: XYPosition) {
   return best?.id ?? null;
 }
 
-/** Nearest port on the object under the pointer, or just outside its border. Used by the Arrow tool. */
+/** The one selected element, when nothing else is selected. Its four ports are the only visible ones. */
+function soleSelectedElement(state: ReactFlowState) {
+  if (selectedObjectCount(state.nodes, state.edges) !== 1) return null;
+  for (const node of state.nodes) {
+    if (node.selected && node.type !== ENDPOINT_TYPE) return node.id;
+  }
+  return null;
+}
+
+function portIsVisible(el: HTMLElement) {
+  const style = getComputedStyle(el);
+  return style.pointerEvents !== "none" && Number(style.opacity) !== 0;
+}
+
+/**
+ * The visible port under the pointer. A stroke may paint over an occupied port;
+ * the painted circle is still the press. The element body and a different element on top are not.
+ */
+function selectedPortPress(state: ReactFlowState, clientX: number, clientY: number): HotPort | null {
+  const nodeId = soleSelectedElement(state);
+  if (!nodeId) return null;
+  const top = document.elementFromPoint(clientX, clientY);
+  if (top instanceof Element) {
+    const owner = top.closest(".react-flow__node")?.getAttribute("data-id");
+    const onHandle = Boolean(top.closest(".react-flow__handle"));
+    if (owner && owner !== nodeId && !onHandle) return null;
+    if (owner === nodeId && !onHandle) return null;
+  }
+  let best: { side: SideId; distance: number } | null = null;
+  for (const side of SIDES) {
+    const el = handleElement(nodeId, side);
+    if (!(el instanceof HTMLElement) || !portIsVisible(el)) continue;
+    const rect = el.getBoundingClientRect();
+    const radius = Math.max(rect.width, rect.height) / 2;
+    if (radius < 1) continue;
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) continue;
+    if (!best || distance < best.distance) best = { side, distance };
+  }
+  if (!best) return null;
+  return { nodeId, handleId: best.side, fraction: 0.5 };
+}
+
+/**
+ * Where a noodle that is already moving can land.
+ * On an element, that element's port. In a gap, the nearest side inside the landing band.
+ */
 export function portAtClient(
   state: ReactFlowState,
   clientX: number,
@@ -199,33 +250,12 @@ export function portAtClient(
   if (!flow || state.transform[2] === 0) return null;
   const nodeId = nodeAtFlowPoint(state, flow);
   if (nodeId) return nearestHandleOnNode(state, nodeId, flow, mode);
-  return closestPerimeter(state, flow, BAND_SCREEN_PX / state.transform[2], mode);
+  return closestPerimeter(state, flow, LANDING_BAND_SCREEN_PX / state.transform[2], mode);
 }
 
-/**
- * Side band outside the object (and a few pixels inside the border).
- * Interior clicks still move the object. Used to start a noodle from an occupied side.
- */
+/** Same gate as a port press. A gap, an unselected element, and the element underneath are not a start. */
 export function portOnBand(state: ReactFlowState, clientX: number, clientY: number): HotPort | null {
-  const flow = clientToFlow(state, clientX, clientY);
-  const zoom = state.transform[2];
-  if (!flow || !zoom) return null;
-  const radius = BAND_SCREEN_PX / zoom;
-  const insideSlop = 6 / zoom;
-  let best: { port: HotPort; distance: number; z: number } | null = null;
-  for (const node of state.nodeLookup.values()) {
-    if (node.type === ENDPOINT_TYPE) continue;
-    const box = nodeBox(node);
-    if (!box) continue;
-    const hit = projectOntoSideMidpoint(box, flow);
-    if (hit.distance > radius) continue;
-    if (containsPoint(box, flow) && hit.distance > insideSlop) continue;
-    const z = node.internals.z ?? 0;
-    if (!best || hit.distance < best.distance - 0.5 || (Math.abs(hit.distance - best.distance) <= 0.5 && z >= best.z)) {
-      best = { port: portFromHit(node.id, hit), distance: hit.distance, z };
-    }
-  }
-  return best?.port ?? null;
+  return selectedPortPress(state, clientX, clientY);
 }
 
 export function portGeometry(
@@ -555,12 +585,12 @@ function pointerOverChrome(clientX: number, clientY: number) {
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], .react-flow__node-endpoint",
+      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, .react-flow__edge-toolbar, .board-toolbar, [data-floating-panel], [data-canvas-chrome], [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], [data-shapes-menu], .react-flow__node-endpoint",
     ),
   );
 }
 
-export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
+export default function PortMagnet({ connectMode, canStart = true }: { connectMode: boolean; canStart?: boolean }) {
   const store = useStoreApi();
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -589,18 +619,11 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       const hover = flow && !pointerOverChrome(clientX, clientY) ? resolveHover(state, flow, kind) : null;
       if (state.connection.inProgress || armed) {
         setDragFeedback(hover, hover ? portFromHover(hover, kind) : null);
-        setPortsElement(connectMode ? (hover?.elementId ?? null) : null);
+        setPortsElement(null);
         syncPlacedHandles(state);
         return;
       }
-      if (connectMode) {
-        // Same element resolveHover uses mid-drag. Landing chrome stays off until a noodle is moving.
-        setPortsElement(hover?.elementId ?? null);
-        setDragFeedback(null, hover ? portAtClient(state, clientX, clientY) : null);
-        syncPlacedHandles(state);
-        return;
-      }
-      // A port stays hidden until the element is selected, or the pointer is over it with the Arrow tool.
+      // Ports stay on the selected element. Hover does not reveal them or arm a noodle.
       setPortsElement(null);
       setDragFeedback(null, null);
       syncPlacedHandles(state);
@@ -627,14 +650,14 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       captureReleaseLanding(flow ? resolveHover(state, flow, kind) : null);
     };
     const onPress = (event: PointerEvent) => {
-      if (!connectMode || event.button !== 0) return;
+      if (!connectMode || !canStart || event.button !== 0) return;
       const state = store.getState();
       if (state.connection.inProgress) {
         holdSelection();
         return;
       }
       // Arm the guard before React Flow can select the element under this press.
-      if (portAtClient(state, event.clientX, event.clientY)) holdSelection();
+      if (portOnBand(state, event.clientX, event.clientY)) holdSelection();
     };
     window.addEventListener("pointerdown", onPress, true);
     window.addEventListener("pointermove", onPointerMove);
@@ -648,7 +671,7 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       window.removeEventListener("pointerup", onRelease, true);
       window.removeEventListener("mouseup", onRelease, true);
     };
-  }, [connectMode, store]);
+  }, [canStart, connectMode, store]);
 
   useEffect(() => {
     const stop = (event: Event) => {
@@ -669,7 +692,7 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
   }, []);
 
   useEffect(() => {
-    if (connectMode) return;
+    if (connectMode || !canStart) return;
     const root = store.getState().domNode;
     if (!root) return;
     const onDown = (event: PointerEvent) => {
@@ -679,6 +702,7 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
       if (target instanceof HTMLElement && target.isContentEditable) return;
       const state = store.getState();
       if (state.connection.inProgress) return;
+      // A stroke away from a port falls through and selects the noodle. A stroke on the port starts one.
       const port = portOnBand(state, event.clientX, event.clientY);
       if (!port?.handleId || !isSide(port.handleId) || port.fraction == null) return;
       const pin = { nodeId: port.nodeId, handleId: port.handleId, fraction: port.fraction };
@@ -703,7 +727,7 @@ export default function PortMagnet({ connectMode }: { connectMode: boolean }) {
     };
     root.addEventListener("pointerdown", onDown, true);
     return () => root.removeEventListener("pointerdown", onDown, true);
-  }, [connectMode, store]);
+  }, [canStart, connectMode, store]);
 
   return (
     <>

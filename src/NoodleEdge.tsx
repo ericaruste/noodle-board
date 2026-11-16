@@ -5,7 +5,7 @@ import { layers } from "./layers";
 import { ENDPOINT_TYPE, edgeAnchor, forwardEndDrag, knobOnRim, outward } from "./noodleEnds";
 import { isSide, nodeBox, outlineRadius, resolveAttachments, routeEnd, sidePosition, type SideId } from "./attachment";
 import { placeHandle, syncPlacedHandles } from "./PortMagnet";
-import { setConnectionOrigin, setHotPort } from "./portHot";
+import { setConnectionOrigin, setHotPort, useArrowTool } from "./portHot";
 import {
   publishNoodle,
   readNoodle,
@@ -364,12 +364,14 @@ export function NoodleToolbarSlot({
   handles?: FlowCircle[];
   children: ReactNode;
 }) {
+  const arrowTool = useArrowTool();
   useChromeLayout();
   const { flowToScreenPosition } = useReactFlow();
   const [, , zoom] = useStore(
     (state) => state.transform,
     (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2],
   );
+  if (arrowTool) return null;
   return (
     <FloatingPanel
       layer="toolbar"

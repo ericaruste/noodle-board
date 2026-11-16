@@ -11,7 +11,7 @@ import { layers } from "./layers";
 import { DEFAULT_NOODLE_COLOR } from "./noodleData";
 import { layoutNoodle } from "./noodleRoute";
 import { forwardEndDrag } from "./noodleEnds";
-import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, syncPlacedHandles } from "./PortMagnet";
+import { clearEdgeSelection, clientToFlow, landingGeometry, nearestHandleOnNode, placeHandle, portAtClient, portGeometry, portOnBand, syncPlacedHandles } from "./PortMagnet";
 import { isSide, sameAttachmentPoint } from "./attachment";
 import { armClickSwallow, beginPortGesture, clearConnectionOrigin, consumePortGesture, getConnectionOrigin, getHoverTarget, holdSelection, notePortRelease, setConnectionOrigin, setHotPort } from "./portHot";
 
@@ -33,7 +33,7 @@ function facing(fromX: number, fromY: number, toX: number, toY: number): Positio
 function blockedTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], .react-flow__resize-control, .react-flow__node-endpoint",
+      ".react-flow__minimap, .react-flow__edge-toolbar, .react-flow__panel, .board-toolbar, [data-floating-panel], [data-canvas-chrome], [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], [data-shapes-menu], .react-flow__resize-control, .react-flow__node-endpoint, .noodle-end",
     ),
   );
 }
@@ -136,11 +136,24 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
       const target = event.target;
-      if (!(target instanceof Element) || blockedTarget(target)) return;
+      if (!(target instanceof Element)) return;
       const state = store.getState();
-      const port = portAtClient(state, event.clientX, event.clientY);
+      const armed = state.connectionClickStartHandle;
+      if (blockedTarget(target)) {
+        // An end knob reconnects that end. Drop an armed click so the preview does not stay up.
+        if (armed && target.closest(".noodle-end")) {
+          store.setState({ connectionClickStartHandle: null });
+          clearConnectionOrigin();
+          setHotPort(null);
+        }
+        return;
+      }
+      // A new noodle starts only on the selected port. A click that is already armed lands on the element under the pointer.
+      const port =
+        portOnBand(state, event.clientX, event.clientY) ??
+        (armed ? portAtClient(state, event.clientX, event.clientY) : null);
       if (!port?.handleId || !isSide(port.handleId)) {
-        if (state.connectionClickStartHandle) {
+        if (armed) {
           store.setState({ connectionClickStartHandle: null });
           clearConnectionOrigin();
           setHotPort(null);
@@ -168,9 +181,16 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
     const onClick = (event: MouseEvent) => {
       const target = event.target;
       if (!(target instanceof Element) || blockedTarget(target)) return;
-      if (!portAtClient(store.getState(), event.clientX, event.clientY)) return;
-      event.stopPropagation();
-      event.preventDefault();
+      const state = store.getState();
+      if (portOnBand(state, event.clientX, event.clientY)) {
+        event.stopPropagation();
+        event.preventDefault();
+        return;
+      }
+      if (state.connectionClickStartHandle && portAtClient(state, event.clientX, event.clientY)) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
     };
 
     root.addEventListener("pointerdown", onDown, true);

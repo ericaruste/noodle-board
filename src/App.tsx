@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -83,7 +83,7 @@ import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort
 import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
 import { DEFAULT_NOODLE_COLOR, NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
 import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./noodleLabel";
-import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
+import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setArrowTool, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -432,6 +432,7 @@ function Board() {
   useEffect(() => {
     toolRef.current = tool;
     connectModeRef.current = connectMode;
+    setArrowTool(connectMode);
   }, [tool, connectMode]);
 
   useEffect(() => {
@@ -2407,8 +2408,9 @@ function Board() {
             </button>
           </div>
         ) : null}
-        <PortMagnet connectMode={connectMode} />
+        <PortMagnet connectMode={connectMode} canStart={tool !== "hand" && !spaceHeld} />
         <ReactFlow
+          style={{ "--noodle-layer-selection": layers.selection } as CSSProperties}
           className={[connectMode ? "noodle-connect" : "", tool === "hand" || spaceHeld ? "noodle-hand" : "", selectedObjectCount(nodes, edges) === 1 ? "noodle-solo" : ""].filter(Boolean).join(" ") || undefined}
           nodes={nodes}
           edges={edges}
@@ -2457,9 +2459,9 @@ function Board() {
           connectionLineComponent={NoodleConnectionLine}
           connectionLineContainerStyle={{ zIndex: layers.canvas }}
           connectionMode={ConnectionMode.Loose}
-          connectOnClick={connectMode}
+          connectOnClick={connectMode && !spaceHeld}
           nodesDraggable={tool === "select" && !spaceHeld && !placement}
-          nodesConnectable={!placement}
+          nodesConnectable={tool !== "hand" && !spaceHeld && !placement}
           elementsSelectable={tool !== "hand" && !spaceHeld && !placement}
           panOnDrag={tool === "hand" || spaceHeld ? [0, 1] : [1]}
           panActivationKeyCode={null}
@@ -2580,7 +2582,7 @@ function Board() {
             bgColor="transparent"
             maskColor="rgba(28, 25, 23, 0.12)"
           />
-          <ConnectMode active={connectMode} onConnect={onConnect} isValidConnection={isValidConnection} />
+          <ConnectMode active={connectMode && !spaceHeld} onConnect={onConnect} isValidConnection={isValidConnection} />
         </ReactFlow>
         <Toolbar
           tool={tool}
