@@ -4,17 +4,10 @@ import { swatchFamilyForHex, swatchHex, type SwatchScale } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import FillOpacitySlider from "./FillOpacitySlider";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
-import { LineWeightMenuIcon, TypeDashedIcon, TypeMediumIcon, TypeStraightIcon, TypeThickIcon, TypeThinIcon } from "./noodleIcons";
+import { LineWeightMenuIcon } from "./noodleIcons";
 import { ShapeKindIcon } from "./shapeKindIcon";
-import {
-  SHAPE_KINDS,
-  SHAPE_LABELS,
-  SHAPE_LINE_STYLES,
-  SHAPE_THICKNESS,
-  type ShapeKind,
-  type ShapeLineStyle,
-  type ShapeThickness,
-} from "./shapeData";
+import StrokeProperty from "./StrokeProperty";
+import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "./shapeData";
 
 type ShapeToolbarProps = {
   kind: ShapeKind | null;
@@ -47,17 +40,6 @@ const FILL_SWATCH_SCALE: SwatchScale = 200;
 const STROKE_SWATCH_SCALE: SwatchScale = 500;
 const CUSTOM_DISC_HEX = "EBCFFF";
 const NONE_SLIDER_COLOR = "#C0C4C9";
-
-const THICKNESS_ICONS: Record<ShapeThickness, SlotIcon> = {
-  thin: TypeThinIcon,
-  medium: TypeMediumIcon,
-  thick: TypeThickIcon,
-};
-
-const LINE_STYLE_ICONS: Record<ShapeLineStyle, SlotIcon> = {
-  solid: TypeStraightIcon,
-  dashed: TypeDashedIcon,
-};
 
 function shapeColorChoice(color: string | null, scale: SwatchScale): ColorPickerChoice {
   if (color == null) return { kind: "none" };
@@ -246,30 +228,14 @@ export default function ShapeToolbar({
           open={menu === "weight"}
           onToggle={() => toggle("weight")}
         >
-          <div className={`${menuChrome} gap-brand-scale-100`} role="menu" aria-label="Line weight and line type">
-            <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
-              {SHAPE_THICKNESS.map((option) => (
-                <IconChoice
-                  key={option}
-                  label={option === "thin" ? "Thin line" : option === "medium" ? "Medium line" : "Thick line"}
-                  pressed={!thicknessMixed && thickness === option}
-                  icon={THICKNESS_ICONS[option]}
-                  onClick={() => onThickness(option)}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-brand-scale-50">
-              {SHAPE_LINE_STYLES.map((option) => (
-                <IconChoice
-                  key={option}
-                  label={option === "solid" ? "Solid line" : "Dashed line"}
-                  pressed={!lineStyleMixed && lineStyle === option}
-                  icon={LINE_STYLE_ICONS[option]}
-                  onClick={() => onLineStyle(option)}
-                />
-              ))}
-            </div>
-          </div>
+          <StrokeProperty
+            thickness={thickness}
+            lineStyle={lineStyle}
+            thicknessMixed={thicknessMixed}
+            lineStyleMixed={lineStyleMixed}
+            onThickness={onThickness}
+            onLineStyle={onLineStyle}
+          />
         </MenuButton>
       </div>
       <div className="flex items-center gap-brand-scale-200">
