@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { SliderThumb, type SliderThumbState } from "./SliderThumb";
-import { SLIDER_SPECIMEN_COLOR, SliderTrack } from "./SliderTrack";
+import { SLIDER_SPECIMEN_COLOR, SliderTrack, sliderTrackSizeClass, type SliderTrackSize } from "./SliderTrack";
 
 type FillOpacitySliderProps = {
   /** 0 to 100. Leave unset to keep the value inside the slider. */
@@ -9,6 +9,8 @@ type FillOpacitySliderProps = {
   onValueChange?: (value: number) => void;
   /** Opaque end of the track. The specimen is `#6579F8`. */
   color?: string;
+  /** Track size. Leave unset for `md`, the 12px track. `sm` is 8px. The thumb stays 16px. */
+  size?: SliderTrackSize;
   disabled?: boolean;
 };
 
@@ -33,6 +35,7 @@ export default function FillOpacitySlider({
   defaultValue = 50,
   onValueChange,
   color = SLIDER_SPECIMEN_COLOR,
+  size = "md",
   disabled = false,
 }: FillOpacitySliderProps) {
   const [valueState, setValueState] = useState(() => clampPercent(defaultValue));
@@ -137,7 +140,7 @@ export default function FillOpacitySlider({
         aria-valuenow={value}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : 0}
-        className="relative h-brand-scale-300 w-[120px] touch-none outline-none"
+        className="relative h-brand-scale-400 w-[120px] touch-none outline-none"
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
         onPointerUp={endDrag}
@@ -153,8 +156,8 @@ export default function FillOpacitySlider({
       >
         {/* 120px matches the track. No spacing token is 120px. TODO token mismatch: Figma 120px */}
         {/* The track keeps its own relative box. This wrapper centers that box on the thumb. */}
-        <span className="pointer-events-none absolute inset-x-0 top-1/2 flex h-brand-scale-150 -translate-y-1/2">
-          <SliderTrack color={color} />
+        <span className={`pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 ${sliderTrackSizeClass[size]}`}>
+          <SliderTrack color={color} size={size} />
         </span>
         <SliderThumb
           state={thumb}
@@ -237,6 +240,7 @@ export default function FillOpacitySlider({
 
 export function FillOpacitySliderPreview() {
   const [value, setValue] = useState(50);
+  const [small, setSmall] = useState(50);
   return (
     <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
@@ -257,6 +261,10 @@ export function FillOpacitySliderPreview() {
         </span>
         <FillOpacitySlider value={value} onValueChange={setValue} />
       </div>
+      <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
+        sm
+      </p>
+      <FillOpacitySlider size="sm" value={small} onValueChange={setSmall} />
     </main>
   );
 }
