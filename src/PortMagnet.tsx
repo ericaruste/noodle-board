@@ -202,9 +202,9 @@ function soleSelectedElement(state: ReactFlowState) {
 
 function readPortRadius(nodeId: string) {
   const el = document.querySelector(`.react-flow__node[data-id="${CSS.escape(nodeId)}"] .noodle-node`);
-  if (!(el instanceof HTMLElement)) return 4;
+  if (!(el instanceof HTMLElement)) return 5;
   const parsed = parseFloat(getComputedStyle(el).getPropertyValue("--noodle-port-size"));
-  const size = Number.isFinite(parsed) ? parsed : 8;
+  const size = Number.isFinite(parsed) ? parsed : 10;
   return size / 2;
 }
 
@@ -595,7 +595,7 @@ function pointerOverChrome(clientX: number, clientY: number) {
 function ignoredBandTarget(target: Element) {
   return Boolean(
     target.closest(
-      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, .board-toolbar, [data-floating-panel], [data-canvas-chrome], [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], [data-shapes-menu], .react-flow__node-endpoint",
+      ".react-flow__handle, .noodle-end, .react-flow__resize-control, .react-flow__minimap, .react-flow__panel, .react-flow__edge-toolbar, .board-toolbar, [data-floating-panel], [data-canvas-chrome], [data-noodle-toolbar], [data-noodle-anchor], [data-text-toolbar], [data-selection-chrome], [data-sticky-colors], [data-shape-colors], [data-shapes-menu], .react-flow__node-endpoint",
     ),
   );
 }
