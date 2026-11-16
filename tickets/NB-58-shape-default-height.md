@@ -1,7 +1,7 @@
 ---
 id: NB-58
 title: Keep a shape at its default height until the text overflows
-status: Todo
+status: In Progress
 priority: 2
 labels: [Bug, Canvas]
 parent: NB-E6
@@ -37,15 +37,15 @@ A new rectangle checked on the board started at 180 by 140. The letter `a` left 
 
 ## Acceptance criteria
 
-- [ ] A new shape is 180 by 140. A short word, or a font size the text already fits at, leaves the height at 140. The width stays 180
-- [ ] Text that no longer fits the default height grows the shape so the label stays inside the geometry. Deleting that text, or lowering the font size until it fits, returns the height to 140
-- [ ] Dragging a height handle sets that height. A shorter word, a smaller font size, or deleting the text does not shrink below it. Text that no longer fits still grows the shape past it
-- [ ] Dragging only the width does not lock the height. Narrowing the shape grows it when the wrapped text no longer fits. Widening it back returns the height to 140, or to the dragged height if one was set
-- [ ] Double-clicking to edit does not shrink the shape. Leaving the edit with short text keeps 140, or the dragged height
-- [ ] Changing the kind does not shrink the shape. The new kind can still grow it so the label fits
-- [ ] The resize handles still cannot crop the label
-- [ ] Undo restores the height from before the text edit or the drag, and redo applies it again
-- [ ] A shape already saved opens at the size in the file. [`docs/noodle-json.md`](../docs/noodle-json.md) describes this height rule
+- [x] A new shape is 180 by 140. A short word, or a font size the text already fits at, leaves the height at 140. The width stays 180
+- [x] Text that no longer fits the default height grows the shape so the label stays inside the geometry. Deleting that text, or lowering the font size until it fits, returns the height to 140
+- [x] Dragging a height handle sets that height. A shorter word, a smaller font size, or deleting the text does not shrink below it. Text that no longer fits still grows the shape past it
+- [x] Dragging only the width does not lock the height. Narrowing the shape grows it when the wrapped text no longer fits. Widening it back returns the height to 140, or to the dragged height if one was set
+- [x] Double-clicking to edit does not shrink the shape. Leaving the edit with short text keeps 140, or the dragged height
+- [x] Changing the kind does not shrink the shape. The new kind can still grow it so the label fits
+- [x] The resize handles still cannot crop the label
+- [x] Undo restores the height from before the text edit or the drag, and redo applies it again
+- [x] A shape already saved opens at the size in the file. [`docs/noodle-json.md`](../docs/noodle-json.md) describes this height rule
 
 ## Technical notes
 
