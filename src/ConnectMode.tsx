@@ -161,6 +161,11 @@ export default function ConnectMode({ active, onConnect, isValidConnection }: Co
         }
         return;
       }
+      if (gesture) {
+        finishGesture();
+        gesture = null;
+        notePortRelease();
+      }
       clearEdgeSelection(state);
       holdSelection();
       beginPortGesture();
