@@ -1,7 +1,7 @@
 ---
 id: NB-57
 title: Show one toolbar at a time on sticky and shape
-status: In Progress
+status: Done
 priority: 2
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
