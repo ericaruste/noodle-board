@@ -1,7 +1,7 @@
 ---
 id: NB-62
 title: Start a noodle only from a selected element's port
-status: In Progress
+status: Done
 priority: 2
 labels: [Bug, Canvas, UX]
 parent: NB-E1
