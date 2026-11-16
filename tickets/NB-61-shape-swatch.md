@@ -1,7 +1,7 @@
 ---
 id: NB-61
 title: Shape swatch
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
