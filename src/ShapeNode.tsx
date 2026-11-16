@@ -459,7 +459,7 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
             editing={editing}
             selected={showChrome}
             canvasDefault
-            placeholder="Double-click to write"
+            placeholder="Add text"
             toolbarOnSelect={false}
             onCommit={commitText}
             onCancel={() => setEditing(false)}

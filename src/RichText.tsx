@@ -930,16 +930,16 @@ export function RichText({
         ) : (
           <div className="relative">
             {editing && showPlaceholder ? (
-              <div className={`pointer-events-none absolute inset-0 z-0 ${hintClass}`} aria-hidden>
+              <div className={`pointer-events-none ${hintClass}`} aria-hidden>
                 {placeholder}
               </div>
             ) : null}
             <div
               key={`${editing ? "editing" : "reading"}-${structureEpoch}`}
               ref={editorRef}
-              className={`noodle-text-editor relative z-[1] ${editorClass} ${
-                editing ? "nodrag nopan nowheel min-h-[1.25rem]" : ""
-              }`}
+              className={`noodle-text-editor z-[1] ${editorClass} ${
+                editing && showPlaceholder ? "absolute inset-0" : "relative"
+              } ${editing ? "nodrag nopan nowheel min-h-[1.25rem]" : ""}`}
               style={editorStyle}
               contentEditable={editing}
               suppressContentEditableWarning

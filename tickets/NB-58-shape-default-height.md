@@ -46,12 +46,15 @@ A new rectangle checked on the board started at 180 by 140. The letter `a` left 
 - [x] The resize handles still cannot crop the label
 - [x] Undo restores the height from before the text edit or the drag, and redo applies it again
 - [x] A shape already saved opens at the size in the file. [`docs/noodle-json.md`](../docs/noodle-json.md) describes this height rule
+- [x] An empty shape says "Add text". The hint is one line and stays centered in the band, including a diamond and a triangle. Double-clicking does not move it, and the shape stays 180 by 140
 
 ## Technical notes
 
 In the layout effect in [`src/ShapeNode.tsx`](../src/ShapeNode.tsx), the unresized target is `hasText ? floor : Math.max(SHAPE_DEFAULT_HEIGHT, fitted)`. The base height is `SHAPE_DEFAULT_HEIGHT` until a height drag writes `manualHeight`. The published height is the base or the text floor, whichever is taller. `manualHeight` stays the base after a height drag, and a width-only drag still does not write it.
 
-The edit hold and the kind hold stay. They stop a shrink while the hint leaves the flow or the kind changes. They must not keep a short label from returning to the base once the edit or the kind change has settled.
+The edit hold and the kind hold stay. They stop a shrink while the kind changes. They must not keep a short label from returning to the base once the kind change has settled.
+
+The empty hint is "Add text". It stays in the flow while editing, and the caret is drawn on top of it, so a double-click does not drop the hint or change the measured height. Stickies and text objects still say "Double-click to write".
 
 This ticket adds no toolbar, dropdown, or popover.
 
