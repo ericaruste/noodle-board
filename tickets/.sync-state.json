@@ -335,6 +335,11 @@
       "id": "26b84d9d-df05-4a20-9e54-d500490f32ab",
       "identifier": "ERI-74",
       "url": "https://linear.app/ericar/issue/ERI-74/start-new-shapes-on-purple"
+    },
+    "NB-60": {
+      "id": "d860264b-f08a-4746-8370-a43d9749e32c",
+      "identifier": "ERI-75",
+      "url": "https://linear.app/ericar/issue/ERI-75/stroke-property"
     }
   }
 }
