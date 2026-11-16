@@ -74,8 +74,9 @@ export type ShapeData = {
   /** Same paragraph model as text objects. Omitted on shapes saved before text. */
   paragraphs?: TextParagraph[];
   /**
-   * Height left by the resize handles. Text can grow the shape past this,
-   * and will not shrink it below this. Omitted until the user resizes.
+   * Height left by a height drag. Text can grow the shape past this, and will
+   * not shrink it below this. Omitted until that drag. Without it, the base
+   * height is SHAPE_DEFAULT_HEIGHT. A width-only drag does not set this.
    */
   manualHeight?: number;
 };

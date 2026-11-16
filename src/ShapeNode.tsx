@@ -48,12 +48,6 @@ function paintedShape(current: ShapeData, patch: Partial<ShapeData> = {}): Shape
   return next;
 }
 
-function shapeHasText(root: HTMLElement) {
-  const runs = root.querySelectorAll("[data-runs]");
-  if (runs.length === 0) return false;
-  return [...runs].some((run) => (run.textContent ?? "").replace(/\u200b/g, "").trim().length > 0);
-}
-
 function snapshot() {
   window.dispatchEvent(new Event("noodle-snapshot"));
 }
@@ -245,6 +239,8 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
   const kindHeightRef = useRef<number | null>(null);
   /** Height when text editing started. The hint leaves the flow, and the shape must not shrink with it. */
   const editHeightRef = useRef<number | null>(null);
+  /** The edit hold is one pass. A later measurement can return a short label to the base. */
+  const editHeldRef = useRef(false);
   const resizeCommitRef = useRef<number | null>(null);
   const sizeRef = useRef({ width: boxWidth, height: boxHeight });
   sizeRef.current = { width: boxWidth, height: boxHeight };
@@ -341,11 +337,16 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
     }
 
     if (editing) {
-      if (editHeightRef.current == null) editHeightRef.current = boxHeight;
+      if (editHeightRef.current == null && !editHeldRef.current) {
+        editHeightRef.current = boxHeight;
+        editHeldRef.current = true;
+      }
     } else {
       editHeightRef.current = null;
+      editHeldRef.current = false;
     }
 
+    let release = 0;
     const fit = () => {
       const contentHeight = measure.offsetHeight;
       if (contentHeight < 1) return;
@@ -354,24 +355,59 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
       contentFloorRef.current = floor;
       if (!resizing) setContentFloor((prev) => (Math.abs(prev - floor) <= 1 ? prev : floor));
       if (resizing) return;
-      const hasText = shapeHasText(measure);
       const manual = manualHeightRef.current;
-      let target =
-        typeof manual === "number"
-          ? Math.round(Math.max(manual, floor))
-          : Math.round(hasText ? floor : Math.max(SHAPE_DEFAULT_HEIGHT, fitted));
+      const base = typeof manual === "number" ? manual : SHAPE_DEFAULT_HEIGHT;
+      const settled = Math.round(Math.max(base, floor));
+      let target = settled;
       const held = kindHeightRef.current;
-      if (held != null) target = Math.max(target, Math.round(held));
+      if (held != null) {
+        target = Math.max(target, Math.round(held));
+        // The hold only covers this pass. A short label returns to the base
+        // once the new text band has been measured.
+        kindHeightRef.current = null;
+        if (target - settled > 1) {
+          if (release) cancelAnimationFrame(release);
+          const releaseKind = kind;
+          const releaseWidth = boxWidth;
+          release = requestAnimationFrame(() => {
+            const nextHeight = measure.offsetHeight;
+            if (nextHeight < 1) return;
+            const nextFloor = Math.round(
+              Math.max(SHAPE_MIN_SIZE, shapeHeightForText(releaseKind, releaseWidth, nextHeight)),
+            );
+            const manualNow = manualHeightRef.current;
+            const nextBase = typeof manualNow === "number" ? manualNow : SHAPE_DEFAULT_HEIGHT;
+            let nextTarget = Math.round(Math.max(nextBase, nextFloor));
+            const editNow = editHeightRef.current;
+            if (editNow != null) nextTarget = Math.max(nextTarget, Math.round(editNow));
+            const nodeNow = root.closest(".react-flow__node");
+            const paintedNow = nodeNow instanceof HTMLElement ? Number.parseFloat(nodeNow.style.height) : Number.NaN;
+            const currentNow = Number.isFinite(paintedNow) && paintedNow > 0 ? paintedNow : sizeRef.current.height;
+            if (Math.abs(nextTarget - currentNow) <= 1) return;
+            publishHeight(id, nextTarget);
+          });
+        }
+      }
       const editFloor = editHeightRef.current;
-      if (editFloor != null) target = Math.max(target, Math.round(editFloor));
-      if (Math.abs(target - boxHeight) <= 1) return;
+      if (editFloor != null) {
+        target = Math.max(target, Math.round(editFloor));
+        editHeightRef.current = null;
+      }
+      // The height prop can be the measured content. The painted box is the style.
+      const node = root.closest(".react-flow__node");
+      const painted = node instanceof HTMLElement ? Number.parseFloat(node.style.height) : Number.NaN;
+      const current = Number.isFinite(painted) && painted > 0 ? painted : boxHeight;
+      if (Math.abs(target - current) <= 1) return;
       publishHeight(id, target);
     };
 
     fit();
     const observer = new ResizeObserver(fit);
     observer.observe(measure);
-    return () => observer.disconnect();
+    return () => {
+      if (release) cancelAnimationFrame(release);
+      observer.disconnect();
+    };
   }, [id, kind, boxWidth, boxHeight, body, editing, resizing, data.manualHeight]);
 
   return (
