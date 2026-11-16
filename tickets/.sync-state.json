@@ -345,6 +345,11 @@
       "id": "8beadbd4-acbc-4229-97d3-e59da404e19f",
       "identifier": "ERI-76",
       "url": "https://linear.app/ericar/issue/ERI-76/shape-swatch"
+    },
+    "NB-62": {
+      "id": "4a617a72-9793-4ce6-8581-569260dc5ab6",
+      "identifier": "ERI-78",
+      "url": "https://linear.app/ericar/issue/ERI-78/start-a-noodle-only-from-a-selected-elements-port"
     }
   }
 }

@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-5/canvas-interaction-quality
 
 The MVP canvas in [`src/App.tsx`](../../src/App.tsx) is a controlled React Flow board with sticky and image nodes. Noodles are smoothstep edges with arrow markers. Selection, keyboard delete, and a top-nav Delete button exist; resize and edge editing are incomplete.
 
-Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md), [NB-29](../NB-29-edge-drag-bend.md), [NB-30](../NB-30-marquee-select.md), [NB-33](../NB-33-noodle-toolbar-gap.md), [NB-34](../NB-34-group-scale-and-toolbar.md), [NB-35](../NB-35-zoomed-element-toolbars.md).
+Child tickets: [NB-01](../NB-01-noodles-behind-images.md), [NB-02](../NB-02-usable-resize-targets.md), [NB-03](../NB-03-detach-reconnect-noodles.md), [NB-13](../NB-13-import-image-shape.md), [NB-16](../NB-16-copy-duplicate.md), [NB-17](../NB-17-edge-attachment-points.md), [NB-18](../NB-18-free-target-attachment.md), [NB-20](../NB-20-smooth-noodle-drag.md), [NB-22](../NB-22-reliable-noodle-landing.md), [NB-23](../NB-23-hand-and-select-tools.md), [NB-26](../NB-26-zoom-while-text-highlighted.md), [NB-27](../NB-27-trackpad-zoom.md), [NB-28](../NB-28-arrow-ports-on-hover.md), [NB-29](../NB-29-edge-drag-bend.md), [NB-30](../NB-30-marquee-select.md), [NB-33](../NB-33-noodle-toolbar-gap.md), [NB-34](../NB-34-group-scale-and-toolbar.md), [NB-35](../NB-35-zoomed-element-toolbars.md), [NB-62](../NB-62-noodle-port-only-when-selected.md).
 
 ## Goal
 
@@ -39,6 +39,7 @@ Make the existing three object types (sticky, image, noodle) feel trustworthy: n
 - NB-33 Keep a gap between the noodle toolbar and the arrow
 - NB-34 Hide the leftover marquee and scale a group from its box
 - NB-35 Keep text and color toolbars on a zoomed-in element
+- NB-62 Start a noodle only from a selected element's port
 
 ## Success looks like
 

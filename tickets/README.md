@@ -65,6 +65,7 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 29. **One toolbar** — NB-57 (a single click on a sticky shows only the color picker, and a single click on a shape shows only the shape toolbar; a double-click shows only the text toolbar and hides the other bar; the empty hint uses the text alignment). Follows the text toolbar, the color picker, and the shape toolbar.
 30. **Shape height** — NB-58 (a shape stays at its default height when the text is shorter, and the height changes when the user drags it; text that no longer fits still grows the shape, and shrinks back only to that default or dragged height). Follows the shape text from NB-21.
 31. **Purple shapes** — NB-59 (a new shape’s fill starts on `alias.swatch.purple.200` and its stroke on `alias.swatch.purple.500`, instead of the MVP blue fill and dark stroke). Follows the shape toolbar from NB-56.
+32. **Selected port only** — NB-62 (a noodle drag starts only from a press on the port of a selected element, with the Select or Arrow tool on). A gap, an overlapped element underneath, and a click on a noodle stroke do not grab a port. High priority. Follows the current port hit testing from NB-22 and NB-28.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
