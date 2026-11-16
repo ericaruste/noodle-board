@@ -1,7 +1,7 @@
 ---
 id: NB-61
 title: Shape swatch
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -31,14 +31,14 @@ Shape swap and the bottom Shapes tool are two menus. They are one shape-swatch c
 
 ## Acceptance criteria
 
-- [ ] One shape-swatch component opens from the shape toolbar and from the bottom Shapes tool
-- [ ] The row is the five kinds, in the existing order, using the shape kind icons
-- [ ] On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected
-- [ ] Choosing a kind on a selected shape changes that shape and closes the menu
-- [ ] Choosing a kind on the bottom tool places that kind and closes the menu
-- [ ] The popover keeps the surface, border, spacing, and radius the shape toolbar’s kind row already uses
-- [ ] Each menu uses FloatingPanel on the dropdown layer and opens 4px from the control that opened it
-- [ ] The shape-toolbar menu stays above a selected shape and above a shape while it is dragged
+- [x] One shape-swatch component opens from the shape toolbar and from the bottom Shapes tool
+- [x] The row is the five kinds, in the existing order, using the shape kind icons
+- [x] On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected
+- [x] Choosing a kind on a selected shape changes that shape and closes the menu
+- [x] Choosing a kind on the bottom tool places that kind and closes the menu
+- [x] The popover keeps the surface, border, spacing, and radius the shape toolbar’s kind row already uses
+- [x] Each menu uses FloatingPanel on the dropdown layer and opens 4px from the control that opened it
+- [x] The shape-toolbar menu stays above a selected shape and above a shape while it is dragged
 
 ## Technical notes
 

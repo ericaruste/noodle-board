@@ -54,6 +54,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
 - The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.400`. The thumb has two sizes. `sm` is 12px, `brand.scale.300`, and it is the default. `md` is 16px, `brand.scale.400`. The track has two sizes. `sm` is 8px, `brand.scale.200`. `md` is 12px, `brand.scale.300`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
 - The line weight and line type row is one component, `src/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
+- The shape kind row is one component, `src/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
 - The shape toolbar’s fill opens the color picker at step 200, and its stroke opens the color picker at step 500. Both offer none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). A shape already saved keeps its own fill and stroke. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
 
@@ -921,7 +922,7 @@ Every control is a contextual button with the unused slots turned off, except th
 - Second group: stroke, then line weight and line type. A divider sits on the right of the group.
 - Third group: fill, then the fill opacity slider. The gap before the slider is 8px.
 
-Shape swap opens a row of the five kinds. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
+Shape swap opens the shape swatch, the five kinds in the existing order. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -962,7 +963,7 @@ The component exposes no properties of its own. The buttons inside set the conte
 | Line weight | left icon off, label off, right icon on, dropdown on | `line-weight-menu` |
 | Fill | left icon off, label on (`Fill`), right icon on, dropdown on | the disc is type color on the specimen |
 
-The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`. Four icons are painted: ellipse, diamond, rectangle, triangle. The app also draws rounded rectangle, in the existing kind order. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
+The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`, drawn by `src/ShapeSwatch.tsx`. The bottom Shapes tool opens the same row. Four icons are painted in Figma: ellipse, diamond, rectangle, triangle. The app also draws rounded rectangle, in the existing kind order. The current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind closes the menu. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
 
 The open fill menu is the color picker toolbar at step 200, with none. Choosing purple writes `#EBCFFF` and selects the purple disc. The open stroke menu is the same picker at step 500, with none. Choosing purple writes `#BF66FF` and selects the purple disc. A saved hex that is not on that menu’s step selects custom and keeps that paint, including `#bfdbfe` and `#334155`. Clearing fill or stroke clears only that paint. The button disc stays type color for a hex, and type none when that paint is cleared. The note on the frame says the disc is not hover, not selected, and not the custom type.
 
@@ -1017,3 +1018,43 @@ Painted: one resting row. The app paints the current weight and the current line
 Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
 
 The menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board. The row adds no z-index. Each toolbar opens it in FloatingPanel on the dropdown layer. It stays above a selected element and an element that is mid-drag.
+
+## Shape swatch
+
+Figma `toolbar/contextual/shape/pop-over/shape-swatch`. The node id was not read. Figma is out of scope for this ticket. Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
+
+Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | `brand.scale.1000` | 40px, from 4px padding and a 32px button |
+| Padding | `brand.scale.100` | 4px |
+| Gap | `brand.scale.50` | 2px between the icon buttons |
+| Corner radius | `alias.border-radius.xl` | 12px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | none | the row has no divider |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Control text | none on this row | the label slot is off |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+
+The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on. Each icon is 16px, `brand.scale.400`.
+
+The property list was not opened. Figma is out of scope for this ticket. The code takes the current kind. Null means mixed.
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| kind | the shape | `rect`, `ellipse`, `round-rect`, `triangle`, `diamond`. Null leaves every button unselected |
+
+Painted: one resting row. The app paints the current kind with the button’s selected state. A mixed kind stays in the default look.
+
+Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
+
+Each menu sits `brand.scale.100` (4px) from the control that opened it. On the shape toolbar the portal host is a zero-size box at the top of the layer, so the gap is measured from the painted pill. The bottom Shapes menu uses the same gap from the bottom toolbar. A menu moves above the control only when it would leave the board. The row adds no z-index. Each caller opens it in FloatingPanel on the dropdown layer. The shape-toolbar menu stays above a selected shape and a shape that is mid-drag.
