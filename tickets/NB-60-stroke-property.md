@@ -1,7 +1,7 @@
 ---
 id: NB-60
 title: Stroke property
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -29,13 +29,13 @@ A change to the row has to be made in both toolbars. The row is one component.
 
 ## Acceptance criteria
 
-- [ ] One stroke-property component draws the row for a noodle and for a shape
-- [ ] The row is thin, medium, and thick, a divider, then solid and dashed, using the icons in `src/assets/icons`
-- [ ] The current weight and the current line style are the selected buttons. A mixed value leaves that group unselected
-- [ ] Choosing a weight or a line style updates the selected noodle or shape and leaves the menu open
-- [ ] The popover keeps the surface, border, spacing, and radius the two menus already use
-- [ ] The menu uses FloatingPanel on the dropdown layer and opens 4px from the painted pill
-- [ ] The menu stays above a selected element and above an element while it is dragged
+- [x] One stroke-property component draws the row for a noodle and for a shape
+- [x] The row is thin, medium, and thick, a divider, then solid and dashed, using the icons in `src/assets/icons`
+- [x] The current weight and the current line style are the selected buttons. A mixed value leaves that group unselected
+- [x] Choosing a weight or a line style updates the selected noodle or shape and leaves the menu open
+- [x] The popover keeps the surface, border, spacing, and radius the two menus already use
+- [x] The menu uses FloatingPanel on the dropdown layer and opens 4px from the painted pill
+- [x] The menu stays above a selected element and above an element while it is dragged
 
 ## Technical notes
 

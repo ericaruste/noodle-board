@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import type { PlacementKind } from "./placement";
-import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
-import { ShapeKindIcon } from "./shapeKindIcon";
+import type { ShapeKind } from "./shapeData";
+import ShapeSwatch from "./ShapeSwatch";
 
 export type BoardTool = "select" | "hand" | "arrow";
 
@@ -196,10 +196,8 @@ export default function Toolbar({
           <FloatingPanel
             layer="dropdown"
             panelRef={shapesMenuRef}
-            role="menu"
             ariaLabel="Shapes"
             data-shapes-menu=""
-            className="w-52 overflow-hidden rounded-xl border border-white/50 bg-white/40 py-1 shadow-lg backdrop-blur-xl"
             style={{
               position: "absolute",
               top: shapesBox?.top ?? 0,
@@ -207,22 +205,13 @@ export default function Toolbar({
               visibility: shapesBox ? "visible" : "hidden",
             }}
           >
-            {SHAPE_KINDS.map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                role="menuitem"
-                aria-pressed={placingShape === kind}
-                onClick={() => {
-                  setShapesOpen(false);
-                  onAddShape(kind);
-                }}
-                className="flex h-10 w-full items-center gap-2 px-3 text-left text-sm font-medium text-slate-700 hover:bg-emerald-50"
-              >
-                <ShapeKindIcon kind={kind} />
-                {SHAPE_LABELS[kind]}
-              </button>
-            ))}
+            <ShapeSwatch
+              kind={placingShape}
+              onKind={(kind) => {
+                setShapesOpen(false);
+                onAddShape(kind);
+              }}
+            />
           </FloatingPanel>
         ) : null}
       </div>

@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
 import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar";
-import { swatchFamilyForHex, swatchHex } from "./ColorSwatch";
+import { swatchFamilyForHex, swatchHex, type SwatchScale } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import FillOpacitySlider from "./FillOpacitySlider";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
-import { LineWeightMenuIcon, TypeDashedIcon, TypeMediumIcon, TypeStraightIcon, TypeThickIcon, TypeThinIcon } from "./noodleIcons";
+import { LineWeightMenuIcon } from "./noodleIcons";
+import { SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "./shapeData";
 import { ShapeKindIcon } from "./shapeKindIcon";
-import {
-  SHAPE_KINDS,
-  SHAPE_LABELS,
-  SHAPE_LINE_STYLES,
-  SHAPE_THICKNESS,
-  type ShapeKind,
-  type ShapeLineStyle,
-  type ShapeThickness,
-} from "./shapeData";
+import ShapeSwatch from "./ShapeSwatch";
+import StrokeProperty from "./StrokeProperty";
 
 type ShapeToolbarProps = {
   kind: ShapeKind | null;
@@ -42,25 +36,15 @@ type OpenMenu = "kind" | "stroke" | "weight" | "fill";
 
 type SlotIcon = ComponentType<{ className?: string }>;
 
-/** Step 200, the pastel grid painted beside the shape toolbar. Both fill and stroke use it. */
-const SHAPE_SWATCH_SCALE = 200;
+/** Fill stays on the step-200 grid. Stroke uses step 500, the same step as a noodle. */
+const FILL_SWATCH_SCALE: SwatchScale = 200;
+const STROKE_SWATCH_SCALE: SwatchScale = 500;
 const CUSTOM_DISC_HEX = "EBCFFF";
 const NONE_SLIDER_COLOR = "#C0C4C9";
 
-const THICKNESS_ICONS: Record<ShapeThickness, SlotIcon> = {
-  thin: TypeThinIcon,
-  medium: TypeMediumIcon,
-  thick: TypeThickIcon,
-};
-
-const LINE_STYLE_ICONS: Record<ShapeLineStyle, SlotIcon> = {
-  solid: TypeStraightIcon,
-  dashed: TypeDashedIcon,
-};
-
-function shapeColorChoice(color: string | null): ColorPickerChoice {
+function shapeColorChoice(color: string | null, scale: SwatchScale): ColorPickerChoice {
   if (color == null) return { kind: "none" };
-  const family = swatchFamilyForHex(color, SHAPE_SWATCH_SCALE);
+  const family = swatchFamilyForHex(color, scale);
   return family ? { kind: "swatch", family } : { kind: "custom" };
 }
 
@@ -70,9 +54,9 @@ function shapeCustomHex(color: string | null, choice: ColorPickerChoice) {
   return /^[0-9A-F]{6}$/.test(digits) ? digits : CUSTOM_DISC_HEX;
 }
 
-function shapeColorValue(choice: ColorPickerChoice, hex: string) {
+function shapeColorValue(choice: ColorPickerChoice, hex: string, scale: SwatchScale) {
   if (choice.kind === "none" || choice.kind === "mixed") return null;
-  if (choice.kind === "swatch") return `#${swatchHex(choice.family, SHAPE_SWATCH_SCALE)}`;
+  if (choice.kind === "swatch") return `#${swatchHex(choice.family, scale)}`;
   if (choice.kind === "custom" && /^[0-9A-F]{6}$/.test(hex)) return `#${hex}`;
   return null;
 }
@@ -102,35 +86,6 @@ function kindIcon(kind: ShapeKind): SlotIcon {
   return function KindIcon({ className }: { className?: string }) {
     return <ShapeKindIcon kind={kind} className={className} />;
   };
-}
-
-const menuChrome =
-  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl";
-
-function IconChoice({
-  label,
-  pressed,
-  icon,
-  onClick,
-}: {
-  label: string;
-  pressed: boolean;
-  icon: SlotIcon;
-  onClick: () => void;
-}) {
-  return (
-    <ContextualButton
-      ariaLabel={label}
-      title={label}
-      pressed={pressed}
-      onClick={onClick}
-      showLeftIcon={false}
-      showLabel={false}
-      showDropdownIcon={false}
-      showRightIcon
-      icon={icon}
-    />
-  );
 }
 
 export default function ShapeToolbar({
@@ -213,20 +168,13 @@ export default function ShapeToolbar({
           open={menu === "kind"}
           onToggle={() => toggle("kind")}
         >
-          <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label="Shape">
-            {SHAPE_KINDS.map((option) => (
-              <IconChoice
-                key={option}
-                label={SHAPE_LABELS[option]}
-                pressed={kind === option}
-                icon={kindIcon(option)}
-                onClick={() => {
-                  setMenu(null);
-                  onKind(option);
-                }}
-              />
-            ))}
-          </div>
+          <ShapeSwatch
+            kind={kind}
+            onKind={(option) => {
+              setMenu(null);
+              onKind(option);
+            }}
+          />
         </MenuButton>
       </div>
       <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
@@ -237,7 +185,7 @@ export default function ShapeToolbar({
           open={menu === "stroke"}
           onToggle={() => toggle("stroke")}
         >
-          <ShapeColorMenu color={stroke} mixed={strokeMixed} onColor={onStroke} />
+          <ShapeColorMenu color={stroke} mixed={strokeMixed} scale={STROKE_SWATCH_SCALE} onColor={onStroke} />
         </MenuButton>
         <MenuButton
           label="Line weight and line type"
@@ -245,35 +193,19 @@ export default function ShapeToolbar({
           open={menu === "weight"}
           onToggle={() => toggle("weight")}
         >
-          <div className={`${menuChrome} gap-brand-scale-100`} role="menu" aria-label="Line weight and line type">
-            <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
-              {SHAPE_THICKNESS.map((option) => (
-                <IconChoice
-                  key={option}
-                  label={option === "thin" ? "Thin line" : option === "medium" ? "Medium line" : "Thick line"}
-                  pressed={!thicknessMixed && thickness === option}
-                  icon={THICKNESS_ICONS[option]}
-                  onClick={() => onThickness(option)}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-brand-scale-50">
-              {SHAPE_LINE_STYLES.map((option) => (
-                <IconChoice
-                  key={option}
-                  label={option === "solid" ? "Solid line" : "Dashed line"}
-                  pressed={!lineStyleMixed && lineStyle === option}
-                  icon={LINE_STYLE_ICONS[option]}
-                  onClick={() => onLineStyle(option)}
-                />
-              ))}
-            </div>
-          </div>
+          <StrokeProperty
+            thickness={thickness}
+            lineStyle={lineStyle}
+            thicknessMixed={thicknessMixed}
+            lineStyleMixed={lineStyleMixed}
+            onThickness={onThickness}
+            onLineStyle={onLineStyle}
+          />
         </MenuButton>
       </div>
       <div className="flex items-center gap-brand-scale-200">
         <MenuButton label="Fill" text="Fill" icon={FillIcon} open={menu === "fill"} onToggle={() => toggle("fill")}>
-          <ShapeColorMenu color={fill} mixed={fillMixed} onColor={onFill} />
+          <ShapeColorMenu color={fill} mixed={fillMixed} scale={FILL_SWATCH_SCALE} onColor={onFill} />
         </MenuButton>
         <div
           className="flex items-center"
@@ -309,13 +241,15 @@ export default function ShapeToolbar({
 function ShapeColorMenu({
   color,
   mixed,
+  scale,
   onColor,
 }: {
   color: string | null;
   mixed: boolean;
+  scale: SwatchScale;
   onColor: (value: string | null, history: boolean) => void;
 }) {
-  const initial = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color);
+  const initial = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
   const [choice, setChoice] = useState<ColorPickerChoice>(initial);
   const [hex, setHex] = useState(() => shapeCustomHex(color, initial));
   const written = useRef(color);
@@ -334,7 +268,7 @@ function ShapeColorMenu({
     mixedRef.current = mixed;
     applied.current = null;
     if (!fromUs) {
-      const nextChoice = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color);
+      const nextChoice = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
       const nextHex = shapeCustomHex(color, nextChoice);
       setChoice(nextChoice);
       setHex(nextHex);
@@ -347,7 +281,7 @@ function ShapeColorMenu({
     const next = pending.current;
     pending.current = null;
     if (!next || next.choice.kind === "mixed") return;
-    const value = shapeColorValue(next.choice, next.hex);
+    const value = shapeColorValue(next.choice, next.hex, scale);
     if (next.choice.kind !== "none" && value == null) return;
     const recordHistory = !gesture.current;
     gesture.current = true;
@@ -374,7 +308,7 @@ function ShapeColorMenu({
       }}
     >
       <ColorPickerToolbar
-        scale={SHAPE_SWATCH_SCALE}
+        scale={scale}
         leading="none"
         choice={choice}
         customHex={hex}

@@ -1,3 +1,4 @@
+import { swatchHex } from "./ColorSwatch";
 import type { TextParagraph } from "./textBody";
 
 export const SHAPE_KINDS = ["rect", "ellipse", "round-rect", "triangle", "diamond"] as const;
@@ -16,9 +17,10 @@ export const SHAPE_DEFAULT_WIDTH = 180;
 export const SHAPE_DEFAULT_HEIGHT = 140;
 export const SHAPE_MIN_SIZE = 48;
 
-/** Visible against the stone canvas, with a dark outline. */
-export const DEFAULT_SHAPE_FILL = "#bfdbfe";
-export const DEFAULT_SHAPE_STROKE = "#334155";
+/** A new shape starts on `alias.swatch.purple.200`. */
+export const DEFAULT_SHAPE_FILL = `#${swatchHex("purple", 200)}`;
+/** A new shape starts on `alias.swatch.purple.500`. */
+export const DEFAULT_SHAPE_STROKE = `#${swatchHex("purple", 500)}`;
 
 export const STROKE_WIDTH = 2;
 
