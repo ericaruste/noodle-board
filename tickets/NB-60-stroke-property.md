@@ -1,7 +1,7 @@
 ---
 id: NB-60
 title: Stroke property
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
