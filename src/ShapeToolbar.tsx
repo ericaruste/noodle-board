@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
 import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar";
-import { swatchFamilyForHex, swatchHex } from "./ColorSwatch";
+import { swatchFamilyForHex, swatchHex, type SwatchScale } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import FillOpacitySlider from "./FillOpacitySlider";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
@@ -42,8 +42,9 @@ type OpenMenu = "kind" | "stroke" | "weight" | "fill";
 
 type SlotIcon = ComponentType<{ className?: string }>;
 
-/** Step 200, the pastel grid painted beside the shape toolbar. Both fill and stroke use it. */
-const SHAPE_SWATCH_SCALE = 200;
+/** Fill stays on the step-200 grid. Stroke uses step 500, the same step as a noodle. */
+const FILL_SWATCH_SCALE: SwatchScale = 200;
+const STROKE_SWATCH_SCALE: SwatchScale = 500;
 const CUSTOM_DISC_HEX = "EBCFFF";
 const NONE_SLIDER_COLOR = "#C0C4C9";
 
@@ -58,9 +59,9 @@ const LINE_STYLE_ICONS: Record<ShapeLineStyle, SlotIcon> = {
   dashed: TypeDashedIcon,
 };
 
-function shapeColorChoice(color: string | null): ColorPickerChoice {
+function shapeColorChoice(color: string | null, scale: SwatchScale): ColorPickerChoice {
   if (color == null) return { kind: "none" };
-  const family = swatchFamilyForHex(color, SHAPE_SWATCH_SCALE);
+  const family = swatchFamilyForHex(color, scale);
   return family ? { kind: "swatch", family } : { kind: "custom" };
 }
 
@@ -70,9 +71,9 @@ function shapeCustomHex(color: string | null, choice: ColorPickerChoice) {
   return /^[0-9A-F]{6}$/.test(digits) ? digits : CUSTOM_DISC_HEX;
 }
 
-function shapeColorValue(choice: ColorPickerChoice, hex: string) {
+function shapeColorValue(choice: ColorPickerChoice, hex: string, scale: SwatchScale) {
   if (choice.kind === "none" || choice.kind === "mixed") return null;
-  if (choice.kind === "swatch") return `#${swatchHex(choice.family, SHAPE_SWATCH_SCALE)}`;
+  if (choice.kind === "swatch") return `#${swatchHex(choice.family, scale)}`;
   if (choice.kind === "custom" && /^[0-9A-F]{6}$/.test(hex)) return `#${hex}`;
   return null;
 }
@@ -237,7 +238,7 @@ export default function ShapeToolbar({
           open={menu === "stroke"}
           onToggle={() => toggle("stroke")}
         >
-          <ShapeColorMenu color={stroke} mixed={strokeMixed} onColor={onStroke} />
+          <ShapeColorMenu color={stroke} mixed={strokeMixed} scale={STROKE_SWATCH_SCALE} onColor={onStroke} />
         </MenuButton>
         <MenuButton
           label="Line weight and line type"
@@ -273,7 +274,7 @@ export default function ShapeToolbar({
       </div>
       <div className="flex items-center gap-brand-scale-200">
         <MenuButton label="Fill" text="Fill" icon={FillIcon} open={menu === "fill"} onToggle={() => toggle("fill")}>
-          <ShapeColorMenu color={fill} mixed={fillMixed} onColor={onFill} />
+          <ShapeColorMenu color={fill} mixed={fillMixed} scale={FILL_SWATCH_SCALE} onColor={onFill} />
         </MenuButton>
         <div
           className="flex items-center"
@@ -309,13 +310,15 @@ export default function ShapeToolbar({
 function ShapeColorMenu({
   color,
   mixed,
+  scale,
   onColor,
 }: {
   color: string | null;
   mixed: boolean;
+  scale: SwatchScale;
   onColor: (value: string | null, history: boolean) => void;
 }) {
-  const initial = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color);
+  const initial = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
   const [choice, setChoice] = useState<ColorPickerChoice>(initial);
   const [hex, setHex] = useState(() => shapeCustomHex(color, initial));
   const written = useRef(color);
@@ -334,7 +337,7 @@ function ShapeColorMenu({
     mixedRef.current = mixed;
     applied.current = null;
     if (!fromUs) {
-      const nextChoice = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color);
+      const nextChoice = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
       const nextHex = shapeCustomHex(color, nextChoice);
       setChoice(nextChoice);
       setHex(nextHex);
@@ -347,7 +350,7 @@ function ShapeColorMenu({
     const next = pending.current;
     pending.current = null;
     if (!next || next.choice.kind === "mixed") return;
-    const value = shapeColorValue(next.choice, next.hex);
+    const value = shapeColorValue(next.choice, next.hex, scale);
     if (next.choice.kind !== "none" && value == null) return;
     const recordHistory = !gesture.current;
     gesture.current = true;
@@ -374,7 +377,7 @@ function ShapeColorMenu({
       }}
     >
       <ColorPickerToolbar
-        scale={SHAPE_SWATCH_SCALE}
+        scale={scale}
         leading="none"
         choice={choice}
         customHex={hex}

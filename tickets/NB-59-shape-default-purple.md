@@ -1,7 +1,7 @@
 ---
 id: NB-59
 title: Start new shapes on purple
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX, Canvas]
 parent: NB-E6
@@ -29,14 +29,14 @@ A new shape still arrives in the MVP blue, with a dark stroke. The fill should s
 
 ## Acceptance criteria
 
-- [ ] A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`)
-- [ ] A new shape’s stroke is `alias.swatch.purple.500` (`#BF66FF`)
-- [ ] The placement ghost uses that fill and stroke for all five kinds
-- [ ] Fill opens the step-200 grid. Choosing purple there writes `#EBCFFF` and selects the purple disc
-- [ ] Stroke opens the step-500 grid. Choosing purple there writes `#BF66FF` and selects the purple disc
-- [ ] A shape already saved keeps its fill and stroke, including `#bfdbfe` and `#334155`
-- [ ] Clearing fill or stroke still clears only that paint
-- [ ] The shape toolbar section in [`docs/design-system-notes.md`](../docs/design-system-notes.md) records the purple 200 fill, the purple 500 stroke, and the two grids
+- [x] A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`)
+- [x] A new shape’s stroke is `alias.swatch.purple.500` (`#BF66FF`)
+- [x] The placement ghost uses that fill and stroke for all five kinds
+- [x] Fill opens the step-200 grid. Choosing purple there writes `#EBCFFF` and selects the purple disc
+- [x] Stroke opens the step-500 grid. Choosing purple there writes `#BF66FF` and selects the purple disc
+- [x] A shape already saved keeps its fill and stroke, including `#bfdbfe` and `#334155`
+- [x] Clearing fill or stroke still clears only that paint
+- [x] The shape toolbar section in [`docs/design-system-notes.md`](../docs/design-system-notes.md) records the purple 200 fill, the purple 500 stroke, and the two grids
 
 ## Technical notes
 
