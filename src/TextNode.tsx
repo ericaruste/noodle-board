@@ -6,6 +6,7 @@ import RichText from "./RichText";
 import { selectionHeld, swallowsClick, useConnectChromeHidden } from "./portHot";
 import { useSelectedObjectCount } from "./selectionScope";
 import { clearTextEdit, peekTextEdit } from "./textEdit";
+import { retainSelectionAfterEdit } from "./textEditSelection";
 import { keepReleasedSize } from "./alignSnap";
 import { coerceBody, isTextBody, sameBody, type TextBody, type TextParagraph } from "./textBody";
 
@@ -91,6 +92,7 @@ function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
 
   const commit = (next: TextBody) => {
     setEditing(false);
+    retainSelectionAfterEdit(id);
     const current = dataRef.current;
     const stored = isTextBody(current.paragraphs) ? coerceBody(current.paragraphs) : body;
     if (sameBody(next, stored)) return;

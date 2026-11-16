@@ -16,6 +16,7 @@ import { useConnectChromeHidden } from "./portHot";
 import SelectionChrome from "./SelectionChrome";
 import TextToolbar from "./TextToolbar";
 import { placeRange, readRange } from "./textDom";
+import { retainSelectionAfterEdit, setTextEditCancel } from "./textEditSelection";
 import {
   ALIGN_LABELS,
   CANVAS_FONT_FAMILY,
@@ -93,6 +94,11 @@ export type RichTextProps = {
   onCommit: (body: TextBody) => void;
   onCancel: () => void;
   onFormat: (body: TextBody) => void;
+  /**
+   * Text objects show this bar on selection. Stickies and shapes show it only
+   * while the text is being edited, so the object bar can take the click.
+   */
+  toolbarOnSelect?: boolean;
   /** Sits beside the text controls. Shapes use it for the kind dropdown. */
   toolbarExtra?: ReactNode;
 };
@@ -124,6 +130,13 @@ function alignClass(align: TextAlign): string {
   if (align === "right") return "noodle-align-right";
   if (align === "justify") return "noodle-align-justify";
   return "noodle-align-left";
+}
+
+/** Reading uses the first paragraph. An empty edit uses the caret paragraph. */
+function hintAlign(body: TextBody, editing: boolean, range: TextRange | null): TextAlign {
+  if (!editing) return body[0]?.align ?? "left";
+  const index = range?.start.paragraph ?? 0;
+  return body[index]?.align ?? body[0]?.align ?? "left";
 }
 
 function pressFor(lists: ListKind[], kind: "bullet" | "numbered"): Pressed {
@@ -224,6 +237,7 @@ export function RichText({
   onCommit,
   onCancel,
   onFormat,
+  toolbarOnSelect = true,
   toolbarExtra,
 }: RichTextProps) {
   const store = useStoreApi();
@@ -552,6 +566,23 @@ export function RichText({
     linkInputRef.current?.select();
   }, [linkOpen]);
 
+  const cancelEditing = () => {
+    ignoreBlur.current = true;
+    const restored = structuredClone(bodyRef.current);
+    draftRef.current = restored;
+    setDraft(restored);
+    setLinkOpen(false);
+    onCancelRef.current();
+  };
+  const cancelEditingRef = useRef(cancelEditing);
+  cancelEditingRef.current = cancelEditing;
+
+  useEffect(() => {
+    if (!editing) return;
+    setTextEditCancel(() => cancelEditingRef.current());
+    return () => setTextEditCancel(null);
+  }, [editing]);
+
   const toolbarRange = editing && range ? range : fullRange(shown);
   const caretPending = Boolean(editing && range && isCollapsed(normalizeRange(shown, range)));
   const styleValues = stylesInRange(shown, toolbarRange);
@@ -760,12 +791,7 @@ export function RichText({
     event.stopPropagation();
     if (event.key === "Escape") {
       event.preventDefault();
-      ignoreBlur.current = true;
-      const restored = structuredClone(bodyRef.current);
-      draftRef.current = restored;
-      setDraft(restored);
-      setLinkOpen(false);
-      onCancelRef.current();
+      cancelEditing();
       return;
     }
     if ((event.ctrlKey || event.metaKey) && !event.altKey && (event.key.toLowerCase() === "b" || event.key.toLowerCase() === "i")) {
@@ -819,18 +845,20 @@ export function RichText({
 
   const showPlaceholder = isEmptyBody(shown);
   const editorStyle = fontSize && fontSize > 0 ? { fontSize, lineHeight: 1.43 } : undefined;
-  const hintClass = canvasDefault
-    ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-md-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder"
-    : "text-sm leading-5 text-slate-400";
+  const hintClass = `${alignClass(hintAlign(shown, editing, range))} ${
+    canvasDefault
+      ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-md-size leading-responsive-desktop-placeholder-line-height text-mapped-text-placeholder"
+      : "text-sm leading-5 text-slate-400"
+  }`;
   const editorClass = canvasDefault
     ? "font-alias-font-family-placeholder text-responsive-desktop-placeholder-md-size leading-responsive-desktop-placeholder-line-height text-slate-800"
     : "text-sm leading-5 text-slate-800";
   const hideChrome = useConnectChromeHidden();
-  const showChrome = selected && !hideChrome;
+  const showTextToolbar = !hideChrome && (toolbarOnSelect ? selected : editing);
 
   return (
     <div ref={rootRef} className={fill ? "relative h-full w-full" : "relative w-full"}>
-      {showChrome ? (
+      {showTextToolbar ? (
         <SelectionChrome side="above" order={0}>
           <TextToolbar
             styleLabel={uniformStyle === "mixed" ? "Mixed" : FONT_STYLE_LABELS[uniformStyle]}
@@ -853,7 +881,7 @@ export function RichText({
           />
         </SelectionChrome>
       ) : null}
-      {linkOpen ? (
+      {showTextToolbar && linkOpen ? (
         <SelectionChrome side="above" order={1}>
           <form
             data-text-toolbar
@@ -925,6 +953,8 @@ export function RichText({
                       const next = event.relatedTarget;
                       if (next instanceof Element && next.closest("[data-text-toolbar], [data-selection-chrome]")) return;
                       if (next instanceof Node && rootRef.current?.contains(next)) return;
+                      const nodeId = rootRef.current?.closest(".react-flow__node")?.getAttribute("data-id");
+                      if (nodeId) retainSelectionAfterEdit(nodeId);
                       if (blurTimer.current !== null) window.clearTimeout(blurTimer.current);
                       blurTimer.current = window.setTimeout(() => {
                         blurTimer.current = null;

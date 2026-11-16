@@ -37,6 +37,7 @@ import {
   type GuideOverlay,
 } from "./alignSnap";
 import { bindBoardZoom } from "./editorZoom";
+import { cancelTextEdit, consumeRetainedSelection, retainSelectionAfterEdit } from "./textEditSelection";
 import { FloatingLayer } from "./FloatingPanel";
 import { layers } from "./layers";
 import PlacementGhost from "./PlacementGhost";
@@ -516,6 +517,35 @@ function Board() {
       setEdges(nextEdges);
     }
   }, []);
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".react-flow__node, [data-text-toolbar], [data-selection-chrome]")) return;
+      const editor = document.querySelector<HTMLElement>("[contenteditable='true']");
+      const id = editor?.closest(".react-flow__node")?.getAttribute("data-id");
+      if (id) retainSelectionAfterEdit(id);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const editor = document.querySelector<HTMLElement>("[contenteditable='true']");
+      if (!editor) return;
+      const target = event.target;
+      if (target instanceof Element && (target.isContentEditable || target.closest("input, textarea"))) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const id = editor.closest(".react-flow__node")?.getAttribute("data-id");
+      cancelTextEdit();
+      if (id) queueMicrotask(() => selectIds(new Set([id]), new Set()));
+    };
+    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [selectIds]);
 
   const clearPlacement = useCallback(() => {
     placementEpoch.current += 1;
@@ -2382,6 +2412,12 @@ function Board() {
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onPaneClick={() => {
+            const id = consumeRetainedSelection();
+            if (!id) return;
+            // The pane click clears the selection in this same turn. Put it back after that.
+            queueMicrotask(() => selectIds(new Set([id]), new Set()));
+          }}
           onEdgeDoubleClick={(event, edge) => {
             openNoodleFromDoubleClick(event, edge.id, edge.selected);
           }}
