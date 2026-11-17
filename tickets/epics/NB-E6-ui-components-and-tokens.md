@@ -45,8 +45,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-59 Start new shapes on purple](../NB-59-shape-default-purple.md)
 - [NB-60 Stroke property](../NB-60-stroke-property.md)
 - [NB-61 Shape swatch](../NB-61-shape-swatch.md)
+- [NB-63 Main button](../NB-63-main-button.md)
 
-NB-57, NB-58, and NB-59 are behavior tickets, not components. The next component ticket is the next free id after NB-61, parented to NB-E6, and titled with the component name.
+NB-57, NB-58, and NB-59 are behavior tickets, not components. The next component ticket is the next free id after NB-63, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 
