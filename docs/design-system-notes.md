@@ -32,6 +32,8 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Thumb size.** The sheet paints one 16px disc. The app adds a 12px `sm` disc and uses it with the `sm` track as the slider default.
 - **[Figma] Track specimen color.** The gradient ends at `#6579F8`. That color is not a token. The track uses the swatch color it is given.
 - **[Figma] Main button slot switches.** The layers are a left `icon/lucide/case-sensitive`, `Label`, and a right `icon/lucide/case-sensitive`. The property panel was behind the sign-up wall, so the boolean names are not confirmed. The code hides each slot.
+- **[Figma] Main toolbar property list.** Node `186:3425`, component `toolbar/main`. The sign-up wall blocked the property panel. The eight buttons were read from the painted frame.
+- **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.100`.
 
 ## Decisions already made
 
@@ -1114,4 +1116,56 @@ Painted states: `default`, `hover`, `selected`, and `disabled` on the default ty
 
 Not painted: focus. Selected is not painted on the destructive type.
 
-This button is not a toolbar. A toolbar that places it is its own component, and that toolbar uses FloatingPanel and the z-index tokens in `src/layers.ts`.
+This button is not a toolbar. The main toolbar places it. See Main toolbar.
+
+## Main toolbar
+
+Figma `toolbar/main`, node `186:3425`. Ticket NB-64. Code `src/Toolbar.tsx`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
+
+Every control is a main button with the label and the right icon turned off, so each one is 40 by 40. The row is select, hand, sticky note, text, image, shapes, noodle, and delete. Delete is the destructive type. The shapes control opens the same shape swatch the shape toolbar uses.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | hug. 4px padding and a 40px button make 48px, which is the frame label. The painted frame is 48px including the 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px |
+| Width | none | hug. The frame label is 342. Eight 40px buttons, seven 2px gaps, and 3px of padding on each side, plus the 1px stroke, make 342 |
+| Padding | `brand.scale.100` | 4px. Figma is 3px. `/* TODO token mismatch: Figma 3px */` |
+| Gap | `brand.scale.50` | 2px between buttons |
+| Corner radius | `alias.border-radius.xl` | 12px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | none | the frame has no divider |
+| Control height | `brand.scale.1000` | 40px |
+| Control padding | `brand.scale.300` | 12px, so an icon-only button is 40 by 40 |
+| Control radius | `alias.border-radius.lg` | 8px |
+| Control font | none | the label slot is off |
+| Control icon | `brand.scale.400` | 16px |
+| Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Control fill, hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
+| Control fill, selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
+| Control fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
+| Control fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
+| Control text | none | the label slot is off |
+| Control icon, default | `mapped.icon.action` | `#303132` |
+| Control icon, hover | `mapped.icon.action-strong-hover` | `#FCFDFE` |
+| Control icon, selected | `mapped.icon.action-strong-selected` | `#FCFDFE` |
+| Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Control icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
+| Dot grid | not a token | excluded from the component |
+
+The icons are Lucide, except the noodle, which is `src/assets/icons/noodle-main.svg`. Select is `mouse-pointer-2`. Hand is `hand`. Sticky note is `sticky-note`. Text is `type`. Image is `image`. Shapes is `shapes`. Delete is `trash`.
+
+The property panel was behind the Figma sign-up wall. The slots were read from the painted frame.
+
+Figma properties, read from the frame:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| Button | main button | label off, right icon off, left icon on |
+| Delete type | main button type | `destructive` |
+| Shapes menu | the shared shape swatch | the note on the frame says the shape tool uses the shape contextual popover |
+
+Painted: one resting row. Select, hand, sticky, text, image, shapes, and noodle sit on the default type. Delete sits on the destructive type, red icon, clear fill.
+
+Not painted on this frame: hover, selected, and disabled. Those come from the main button when a tool is on, a pointer is over a button, or delete has nothing to remove. The button has no focus state. The frame paints no tooltip. The hover label above each tool stays the one the board already shows.

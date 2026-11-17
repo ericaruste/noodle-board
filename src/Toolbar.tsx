@@ -3,13 +3,14 @@ import {
   Hand,
   Image,
   MousePointer2,
-  MoveUpRight,
   Shapes,
   StickyNote,
   Trash,
-  TypeOutline,
+  Type,
 } from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
+import { MainButton } from "./MainButton";
+import { NoodleMainIcon } from "./noodleIcons";
 import type { PlacementKind } from "./placement";
 import type { ShapeKind } from "./shapeData";
 import ShapeSwatch from "./ShapeSwatch";
@@ -30,15 +31,6 @@ type ToolbarProps = {
   canDelete: boolean;
 };
 
-const iconProps = { size: 20, strokeWidth: 2, "aria-hidden": true as const };
-
-const pressed = "bg-slate-900 text-white shadow-sm";
-const idle = "text-slate-800 hover:bg-slate-900/10";
-const disabledClass = "pointer-events-none cursor-not-allowed text-slate-300";
-
-const toolButton =
-  "flex h-10 w-10 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900";
-
 function Tip({
   label,
   show = true,
@@ -49,12 +41,12 @@ function Tip({
   children: ReactNode;
 }) {
   return (
-    <span className="group relative">
+    <span className="group/tip relative">
       {children}
       {show ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg group-hover:opacity-100 group-focus-within:opacity-100"
+          className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
         >
           {label}
         </span>
@@ -80,6 +72,7 @@ export default function Toolbar({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const shapesButtonRef = useRef<HTMLButtonElement>(null);
   const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center");
+  const idle = placement == null;
 
   useEffect(() => {
     if (!shapesOpen) return;
@@ -104,10 +97,10 @@ export default function Toolbar({
       layer="toolbar"
       role="toolbar"
       ariaLabel="Tools"
-      className="board-toolbar rounded-full border border-white/50 bg-white/40 p-1 shadow-lg backdrop-blur-xl"
+      className="board-toolbar rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma padding 3px
     >
       <div
-        className="flex items-center gap-0.5"
+        className="flex items-center gap-brand-scale-50"
         onPointerDown={(event) => {
           const target = event.target;
           if (target instanceof Element && target.closest("[data-shapes-menu]")) return;
@@ -115,43 +108,52 @@ export default function Toolbar({
         }}
       >
       <Tip label="Select">
-        <button
-          type="button"
-          aria-label="Select"
-          aria-pressed={placement == null && tool === "select"}
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={MousePointer2}
+          ariaLabel="Select"
+          selected={idle && tool === "select"}
           onClick={() => onTool("select")}
-          className={`${toolButton} ${placement == null && tool === "select" ? pressed : idle}`}
-        >
-          <MousePointer2 {...iconProps} />
-        </button>
+        />
       </Tip>
       <Tip label="Hand">
-        <button
-          type="button"
-          aria-label="Hand"
-          aria-pressed={placement == null && tool === "hand"}
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={Hand}
+          ariaLabel="Hand"
+          selected={idle && tool === "hand"}
           onClick={() => onTool("hand")}
-          className={`${toolButton} ${placement == null && tool === "hand" ? pressed : idle}`}
-        >
-          <Hand {...iconProps} />
-        </button>
+        />
+      </Tip>
+      <Tip label="Sticky note">
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={StickyNote}
+          ariaLabel="Sticky note"
+          selected={placement === "sticky"}
+          onClick={onAddSticky}
+        />
       </Tip>
       <Tip label="Text">
-        <button
-          type="button"
-          aria-label="Text"
-          aria-pressed={placement === "text"}
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={Type}
+          ariaLabel="Text"
+          selected={placement === "text"}
           onClick={onAddText}
-          className={`${toolButton} ${placement === "text" ? pressed : idle}`}
-        >
-          <TypeOutline {...iconProps} />
-        </button>
+        />
       </Tip>
       <Tip label="Image">
-        <button
-          type="button"
-          aria-label="Image"
-          aria-pressed={placement === "image"}
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={Image}
+          ariaLabel="Image"
+          selected={placement === "image"}
           onClick={() => {
             if (placement === "image") {
               onCancelPlacement();
@@ -159,10 +161,7 @@ export default function Toolbar({
             }
             imageInputRef.current?.click();
           }}
-          className={`${toolButton} ${placement === "image" ? pressed : idle}`}
-        >
-          <Image {...iconProps} />
-        </button>
+        />
         <input
           ref={imageInputRef}
           type="file"
@@ -179,18 +178,17 @@ export default function Toolbar({
       </Tip>
       <div data-shapes-menu="">
         <Tip label="Shapes" show={!shapesOpen}>
-          <button
+          <MainButton
             ref={shapesButtonRef}
-            type="button"
-            aria-label="Shapes"
-            aria-expanded={shapesOpen}
-            aria-haspopup="menu"
-            aria-pressed={shapesOpen || placement === "shape"}
+            showLabel={false}
+            showRightIcon={false}
+            leftIcon={Shapes}
+            ariaLabel="Shapes"
+            ariaExpanded={shapesOpen}
+            ariaHasPopup="menu"
+            selected={shapesOpen || placement === "shape"}
             onClick={() => setShapesOpen((open) => !open)}
-            className={`${toolButton} ${shapesOpen || placement === "shape" ? pressed : idle}`}
-          >
-            <Shapes {...iconProps} />
-          </button>
+          />
         </Tip>
         {shapesOpen ? (
           <FloatingPanel
@@ -216,37 +214,25 @@ export default function Toolbar({
         ) : null}
       </div>
       <Tip label="Noodle">
-        <button
-          type="button"
-          aria-label="Noodle"
-          aria-pressed={placement == null && tool === "arrow"}
-          onClick={() => onTool(placement == null && tool === "arrow" ? "select" : "arrow")}
-          className={`${toolButton} ${placement == null && tool === "arrow" ? pressed : idle}`}
-        >
-          <MoveUpRight {...iconProps} />
-        </button>
-      </Tip>
-      <Tip label="Sticky note">
-        <button
-          type="button"
-          aria-label="Sticky note"
-          aria-pressed={placement === "sticky"}
-          onClick={onAddSticky}
-          className={`${toolButton} ${placement === "sticky" ? pressed : idle}`}
-        >
-          <StickyNote {...iconProps} />
-        </button>
+        <MainButton
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={NoodleMainIcon}
+          ariaLabel="Noodle"
+          selected={idle && tool === "arrow"}
+          onClick={() => onTool(idle && tool === "arrow" ? "select" : "arrow")}
+        />
       </Tip>
       <Tip label="Delete">
-        <button
-          type="button"
-          aria-label="Delete"
-          onClick={onDelete}
+        <MainButton
+          type="destructive"
+          showLabel={false}
+          showRightIcon={false}
+          leftIcon={Trash}
+          ariaLabel="Delete"
           disabled={!canDelete}
-          className={`${toolButton} ${canDelete ? "text-rose-700 hover:bg-rose-50" : disabledClass}`}
-        >
-          <Trash {...iconProps} />
-        </button>
+          onClick={onDelete}
+        />
       </Tip>
       </div>
     </FloatingPanel>

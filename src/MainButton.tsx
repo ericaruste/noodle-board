@@ -1,5 +1,7 @@
-import { forwardRef } from "react";
+import { forwardRef, type ComponentType } from "react";
 import { CaseSensitive, type LucideIcon } from "lucide-react";
+
+type MainButtonIcon = LucideIcon | ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 
 export type MainButtonState = "default" | "hover" | "selected" | "disabled";
 export type MainButtonType = "default" | "destructive";
@@ -7,8 +9,8 @@ export type MainButtonType = "default" | "destructive";
 type MainButtonProps = {
   label?: string;
   /** Right-hand icon. Defaults to the case-sensitive glyph from the spec. */
-  icon?: LucideIcon;
-  leftIcon?: LucideIcon;
+  icon?: MainButtonIcon;
+  leftIcon?: MainButtonIcon;
   showLabel?: boolean;
   showLeftIcon?: boolean;
   showRightIcon?: boolean;
@@ -19,6 +21,8 @@ type MainButtonProps = {
   disabled?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  ariaExpanded?: boolean;
+  ariaHasPopup?: "menu";
   title?: string;
 };
 
@@ -94,6 +98,8 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(functio
     disabled = false,
     onClick,
     ariaLabel,
+    ariaExpanded,
+    ariaHasPopup,
     title,
   },
   ref,
@@ -117,6 +123,8 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(functio
       type="button"
       disabled={isDisabled}
       aria-label={name}
+      aria-expanded={ariaExpanded}
+      aria-haspopup={ariaHasPopup}
       title={title}
       aria-pressed={
         type === "destructive" ? undefined : selected === true || state === "selected" ? true : selected === false ? false : undefined
