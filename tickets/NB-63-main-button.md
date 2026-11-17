@@ -1,7 +1,7 @@
 ---
 id: NB-63
 title: Main button
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -32,13 +32,13 @@ The main toolbar still draws its own controls. Phase 2 needs one button for that
 
 ## Acceptance criteria
 
-- [ ] The button uses semantic tokens for fill, text, icon color, spacing, and corner radius
-- [ ] The control is 40px tall, and 40px by 40px when only the icon shows
-- [ ] Default paints default, hover, selected, and disabled
-- [ ] Destructive paints default, hover, and disabled
-- [ ] The label, the left icon, and the right icon can each be hidden
-- [ ] The label uses the responsive desktop size and line height that match the Figma text style
-- [ ] The live board is unchanged when the trial page is absent
+- [x] The button uses semantic tokens for fill, text, icon color, spacing, and corner radius
+- [x] The control is 40px tall, and 40px by 40px when only the icon shows
+- [x] Default paints default, hover, selected, and disabled
+- [x] Destructive paints default, hover, and disabled
+- [x] The label, the left icon, and the right icon can each be hidden
+- [x] The label uses the responsive desktop size and line height that match the Figma text style
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 

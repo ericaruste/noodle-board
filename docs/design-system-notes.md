@@ -31,6 +31,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[Figma] Fill opacity label gap.** The specimen leaves 8px between the track and the percent. The gap is 16px.
 - **[Figma] Thumb size.** The sheet paints one 16px disc. The app adds a 12px `sm` disc and uses it with the `sm` track as the slider default.
 - **[Figma] Track specimen color.** The gradient ends at `#6579F8`. That color is not a token. The track uses the swatch color it is given.
+- **[Figma] Main button slot switches.** The layers are a left `icon/lucide/case-sensitive`, `Label`, and a right `icon/lucide/case-sensitive`. The property panel was behind the sign-up wall, so the boolean names are not confirmed. The code hides each slot.
 
 ## Decisions already made
 
@@ -1058,3 +1059,59 @@ Painted: one resting row. The app paints the current kind with the button’s se
 Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
 
 Each menu sits `brand.scale.100` (4px) from the control that opened it. On the shape toolbar the portal host is a zero-size box at the top of the layer, so the gap is measured from the painted pill. The bottom Shapes menu uses the same gap from the bottom toolbar. A menu moves above the control only when it would leave the board. The row adds no z-index. Each caller opens it in FloatingPanel on the dropdown layer. The shape-toolbar menu stays above a selected shape and a shape that is mid-drag.
+
+## Main button
+
+Figma `button/main`, spec frame `main button`, node `288:2302`. Ticket NB-63. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`.
+
+A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the label and both icons, the width follows that content. The default type has four states. The destructive type has three.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | `brand.scale.1000` | 40px |
+| Width, icon only | `brand.scale.1000` | 40px. One 16px icon and 12px padding on each side |
+| Padding | `brand.scale.300` | 12px |
+| Gap | `brand.scale.200` | 8px between the left icon, the label, and the right icon |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | none | the button has no stroke |
+| Font | `alias.font-family.body` | Geist |
+| Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token`. The label box measures 31 by 12 |
+| Icon | `brand.scale.400` | 16px, Lucide. Both slots are the case-sensitive glyph |
+| Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
+| Fill, default hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
+| Fill, default selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
+| Fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
+| Fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
+| Text, default | `mapped.text.action` | `#303132` |
+| Text, default hover | `mapped.text.action-strong-hover` | `#FCFDFE` |
+| Text, default selected | `mapped.text.action-strong-selected` | `#FCFDFE` |
+| Text, disabled | `mapped.text.disabled` | `#909397` |
+| Text, destructive default and hover | `mapped.text.error`, `mapped.text.error-hover` | `#BE123C` |
+| Icon, default | `mapped.icon.action` | `#303132` |
+| Icon, default hover | `mapped.icon.action-strong-hover` | `#FCFDFE` |
+| Icon, default selected | `mapped.icon.action-strong-selected` | `#FCFDFE` |
+| Icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+The hover fill is `mapped.surface.action-strong-hover`, `#6EA9E2`, with light text and icons. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with the same light foreground. Both colors were read off the painted buttons. The pale action hover used by the icon button is a different fill.
+
+The property panel was behind the Figma sign-up wall. The slots were read from the layer list.
+
+Figma properties, read from the variant grid and the layers:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| type | variant | `default`, `destructive` |
+| state | variant | `default`, `hover`, `selected`, `disabled` |
+| Label | text | default `Label`. The layer is `Label` |
+| Left icon | slot | `icon/lucide/case-sensitive`. It can be hidden |
+| Right icon | slot | `icon/lucide/case-sensitive`. It can be hidden |
+
+Painted states: `default`, `hover`, `selected`, and `disabled` on the default type. `default`, `hover`, and `disabled` on the destructive type. The type diagram paints the icon-only size at 40 by 40.
+
+Not painted: focus. Selected is not painted on the destructive type.
+
+This button is not a toolbar. A toolbar that places it is its own component, and that toolbar uses FloatingPanel and the z-index tokens in `src/layers.ts`.
