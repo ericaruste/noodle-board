@@ -170,9 +170,9 @@ for (const banned of ["box-shadow", "backdrop-filter", "backdrop-blur", "drop-sh
   }
 }
 
-const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-400) 80%, transparent)";
+const surfaceDefault = "color-mix(in srgb, var(--alias-cool-neutral-200) 60%, transparent)";
 if (!css.includes(surfaceDefault)) {
-  throw new Error("mapped.surface.default was not written as an 80% color.");
+  throw new Error("mapped.surface.default was not written as a 60% color.");
 }
 
 const lookupPath = path.join(ROOT, "docs", "token-lookup.md");
@@ -182,8 +182,8 @@ const lookupText = fs.readFileSync(lookupPath, "utf8");
 if (lookupText.includes("box-shadow") || lookupText.includes("backdrop")) {
   throw new Error("Token lookup includes a group that should be left out.");
 }
-if (!lookupText.includes("#F0F5FB / 80%") || !lookupText.includes("`mapped.surface.default`")) {
-  throw new Error("Token lookup is missing the 80% surface color.");
+if (!lookupText.includes("#F6F9FD / 60%") || !lookupText.includes("`mapped.surface.default`")) {
+  throw new Error("Token lookup is missing the 60% surface color.");
 }
 if (
   !css.includes("--brand-scale-150: 6px") ||

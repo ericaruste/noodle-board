@@ -39,7 +39,7 @@ The font size menu still uses the Phase 1 rows. The Figma menu is the shared men
 
 ## Technical notes
 
-The frame measures 44 by 344. That is padding 4, twelve 28px rows, and no gap. Each row is 36px, so the hug width is 44px (`brand.scale.1100`): 4px padding, the row, and 4px padding. The row size is `sm`. The corner radius is 8px. The stroke is `mapped.border.default` at 1px. The fill matches the text toolbar frost, `mapped.surface.default` at 80%. Figma blur and shadow are not a token.
+The frame measures 44 by 344. That is padding 4, twelve 28px rows, and no gap. Each row is 36px, so the hug width is 44px (`brand.scale.1100`): 4px padding, the row, and 4px padding. The row size is `sm`. The corner radius is 8px. The stroke is `mapped.border.default` at 1px. The fill matches the text toolbar frost, `mapped.surface.default` (`#F6F9FD` at 60%, `alias.cool-neutral.200`). Figma blur and shadow are not a token.
 
 The list adds 40 between 36 and 48. The Phase 1 list did not have 40. The frame height is twelve rows.
 

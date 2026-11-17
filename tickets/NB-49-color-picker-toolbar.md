@@ -64,7 +64,7 @@ On a sticky, the open picker is not stored. The toolbar mounts only while the no
 
 Sticky notes store `data.paint` and `data.customHex`. `data.color` stays `yellow`, `pink`, `blue`, or `green` so older files still open.
 
-The panel fill is `mapped.surface.default` at 80%, with the same 24px blur and the same shadow as the text toolbar. Figma’s blur is ignored.
+The panel fill is `mapped.surface.default` (`#F6F9FD` at 60%, `alias.cool-neutral.200`), with the same 24px blur and the same shadow as the text toolbar. Figma’s blur is ignored.
 
 This toolbar does not wrap itself in FloatingPanel. Selection chrome already does, and the toolbar is the child that will go in that panel. It adds no z-index of its own. The trial mounts one copy in FloatingPanel, over a box at the selection layer and a second box at the selection layer standing in for a drag.
 

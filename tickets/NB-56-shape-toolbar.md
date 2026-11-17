@@ -45,7 +45,7 @@ A selected shape still uses the Phase 1 fill and stroke rows. The Figma bar is t
 
 ## Technical notes
 
-The fill is `mapped.surface.default` (`#F0F5FB` at 80%). Blur is the existing `backdrop-blur-xl`. Figma’s blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
+The fill is `mapped.surface.default` (`#F6F9FD` at 60%, `alias.cool-neutral.200`). Blur is the existing `backdrop-blur-xl`. Figma’s blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
 
 The color disc in the button is 16px, the contextual button icon slot. It paints the color swatch’s default look, type none or color. The 24px swatch is a button, so it does not sit inside this button. The open color menu uses the color picker toolbar at step 200, with none. The frame paints that picker with none selected.
 

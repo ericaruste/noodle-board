@@ -41,7 +41,7 @@ The noodle toolbar still used the Phase 1 colors and its own icon drawings. The 
 
 ## Technical notes
 
-The fill is `mapped.surface.default` (`#F0F5FB` at 80%). Blur is the existing `backdrop-blur-xl`. Figma’s blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
+The fill is `mapped.surface.default` (`#F6F9FD` at 60%, `alias.cool-neutral.200`). Blur is the existing `backdrop-blur-xl`. Figma’s blur is ignored. The existing shadow stays. Blur and shadow stay out of the token file.
 
 The color disc in the button is 16px, the contextual button icon slot. The open color menu uses the 24px color swatch at `alias.swatch` step 500. The frame does not paint that open menu.
 

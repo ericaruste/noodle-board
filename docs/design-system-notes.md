@@ -37,7 +37,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 - Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
-- `mapped.surface.default` in `tokens.json` is `#F0F5FB` at 80%. The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
+- `mapped.surface.default` in `tokens.json` is `#F6F9FD` at 60% (`alias.cool-neutral.200`). The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
 - Desktop font size and line height are tokens under `responsive.desktop`. The 12px tight style is `responsive.desktop.body.sm.size` and `responsive.desktop.body.sm.line-height-tight`. That style was `body.md`. `body.md` is now 14px / 16.8px, with tight 14px, which is the old `body.lg`. `body.lg` is 16px / 19.2px and has no tight line height. The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
 - Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.md.size` (14px) and `responsive.desktop.placeholder.line-height` (16.8px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
 - 6px is `brand.scale.150` and 28px is `brand.scale.700`. Inserting them moved the later steps: 32px is `brand.scale.800`, 36px is `brand.scale.900`, 40px is `brand.scale.1000`, 44px is `brand.scale.1100`, and 48px is `brand.scale.1200`. Names through `brand.scale.600` (24px) stayed put.
@@ -142,7 +142,7 @@ Every control is a contextual button with the unused slots turned off.
 | Gap between groups | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s 2.6px blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
@@ -190,7 +190,7 @@ The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four
 | Gap | `brand.scale.50` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px, outside the 142 by 40 box |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -273,7 +273,7 @@ Four small menu items, caption and chevron off. The order is Regular, Bold, Ital
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
@@ -296,7 +296,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
@@ -339,7 +339,7 @@ Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 1
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
 | Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
@@ -431,7 +431,7 @@ A hex field for the color toolbar that comes later. It is not that toolbar. Two 
 | Text, every state | `mapped.text.default` | `#303132`. The Figma text style is named `default` |
 | Fill, default | none | the field has no fill |
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9`. The Figma style is `action-hover` |
-| Fill, focus | `mapped.surface.default` | `#F0F5FB` at 80%. The Figma style is `default` |
+| Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`). The Figma style is `default` |
 | Stroke, default and hover | none | those variants have no stroke |
 | Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box. The Figma style is `action-ring-focus` |
 | Shadow | not a token | excluded from the component |
@@ -527,7 +527,7 @@ The saturation and hue handles can be dragged. A pointer press on the picker is 
 | Padding | `brand.scale.200` | 8px on the toolbar and on the picker panel. The Figma frame is 12px, `brand.scale.300` |
 | Corner radius | `alias.border-radius.xxl` | 16px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the text toolbar already uses |
 | Blur | not a token | the same 24px frost the text toolbar already uses. Figma’s blur is ignored |
 | Section gap | `brand.scale.400` | 16px between the swatch grid and the hex row |
@@ -616,7 +616,7 @@ The bar is 40px high and hugs its width. The specimen measures 277px wide. That 
 | Gap between groups | `brand.scale.100` | 4px. The bar reads gap 4 |
 | Corner radius | `alias.border-radius.xl` | 12px. The panel reads 12 |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px. The fill style name was not opened. The pill matches the text toolbar beside it, so the bar uses that stroke |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80%. The fill style name was not opened. The pill matches the text toolbar beside it |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`). The fill style name was not opened. The pill matches the text toolbar beside it |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
@@ -664,7 +664,7 @@ Three weight icons, a divider, then solid and dashed. The icons are `type-thin`,
 | Gap between groups | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.100`) of padding before it |
@@ -698,7 +698,7 @@ Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `
 | Gap | `brand.scale.50` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -731,7 +731,7 @@ Six icon buttons, one for each arrowhead the noodle already has: none, arrow, op
 | Gap | `brand.scale.50` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
@@ -772,7 +772,7 @@ The menu mounts only while Color is open. A palette swatch or the neutral disc c
 | Padding | `brand.scale.200` | 8px on the toolbar and on the picker panel |
 | Corner radius | `alias.border-radius.xxl` | 16px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the text toolbar already uses |
 | Blur | not a token | the same 24px frost the text toolbar already uses |
 | Section gap | `brand.scale.400` | 16px between the swatch grid and the hex row |
@@ -933,7 +933,7 @@ Shape swap opens the shape swatch, the five kinds in the existing order. Fill op
 | Gap between groups | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group and the second group, with 4px (`brand.scale.100`) of padding before it |
@@ -989,7 +989,7 @@ Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-t
 | Gap between groups | `brand.scale.100` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
 | Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
 | Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.100`) of padding before it |
@@ -1032,7 +1032,7 @@ Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The
 | Gap | `brand.scale.50` | 2px between the icon buttons |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
-| Fill | `mapped.surface.default` | `#F0F5FB` at 80% |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur |
 | Shadow | not a token | the existing `shadow-lg` |
 | Divider | none | the row has no divider |
