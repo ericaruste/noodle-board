@@ -41,7 +41,7 @@ Shape fill has a color and no opacity control. The slider is the control. It is 
 
 ## Technical notes
 
-The row is 16px tall, `brand.scale.400`, because the thumb is 16px. The default track is `md`, 12px, `brand.scale.300`, centered on the thumb. `sm` is 8px, `brand.scale.200`. Gap is `brand.scale.200`. The label is `body/sm/tight`: `alias.font-family.body`, `responsive.desktop.body.sm.size`, and `responsive.desktop.body.sm.line-height-tight`. The Figma fill is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
+The row is 16px tall, `brand.scale.16`, because the thumb is 16px. The default track is `md`, 12px, `brand.scale.12`, centered on the thumb. `sm` is 8px, `brand.scale.8`. Gap is `brand.scale.8`. The label is `body/sm/tight`: `alias.font-family.body`, `responsive.desktop.body.sm.size`, and `responsive.desktop.body.sm.line-height-tight`. The Figma fill is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
 
 The sheet says the slider shows the current swatch color. The trial uses the specimen `#6579F8`. A caller passes the swatch.
 

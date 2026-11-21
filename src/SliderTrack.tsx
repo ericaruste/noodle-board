@@ -2,8 +2,8 @@
 export type SliderTrackSize = "sm" | "md";
 
 export const sliderTrackSizeClass: Record<SliderTrackSize, string> = {
-  sm: "h-brand-scale-200",
-  md: "h-brand-scale-300",
+  sm: "h-brand-scale-8",
+  md: "h-brand-scale-12",
 };
 
 type SliderTrackProps = {
@@ -61,7 +61,7 @@ export function SliderTrack({ color = SLIDER_SPECIMEN_COLOR, size = "md", classN
 
 export function SliderTrackPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
         Track
       </p>

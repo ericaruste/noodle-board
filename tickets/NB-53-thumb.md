@@ -15,7 +15,7 @@ linear_url: https://linear.app/ericar/issue/ERI-68/thumb
 
 Building block for a slider. Figma component `slider/thumb`, on the spec frame titled `slider`, node `172:1794`.
 
-The disc is 16px, `brand.scale.400`. States are default, hover, pressed, and disabled. The sheet writes “focus” over the pressed disc. The variant property is `pressed`.
+The disc is 16px, `brand.scale.16`. States are default, hover, pressed, and disabled. The sheet writes “focus” over the pressed disc. The variant property is `pressed`.
 
 [`src/SliderThumb.tsx`](../src/SliderThumb.tsx) is the component. `?trial=slider-thumb` shows the four states without changing the board.
 

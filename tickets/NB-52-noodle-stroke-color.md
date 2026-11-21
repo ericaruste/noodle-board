@@ -44,7 +44,7 @@ Fill and sticky notes use step 200. Stroke and noodles use step 500. The leading
 
 The default hex is `alias.swatch.neutral.500`, which is `alias.cool-neutral.900` (`#303132`). `alias.swatch.neutral` does not use `brand.neutral`. `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`, and no alias swatch references them.
 
-The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. Both panels use FloatingPanel through the selection chrome. This control adds no z-index of its own.
+The picker is its own panel, `brand.scale.4` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. Both panels use FloatingPanel through the selection chrome. This control adds no z-index of its own.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

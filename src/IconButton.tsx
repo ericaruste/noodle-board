@@ -49,15 +49,15 @@ const destructiveIcon: Record<IconButtonState, string> = {
 };
 
 const boxClass: Record<IconButtonSize, string> = {
-  lg: "size-brand-scale-800",
-  md: "size-brand-scale-700",
-  sm: "size-brand-scale-500",
+  lg: "size-brand-scale-32",
+  md: "size-brand-scale-28",
+  sm: "size-brand-scale-20",
 };
 
 const iconClass: Record<IconButtonSize, string> = {
-  lg: "size-brand-scale-400",
-  md: "size-brand-scale-300",
-  sm: "size-brand-scale-300",
+  lg: "size-brand-scale-16",
+  md: "size-brand-scale-12",
+  sm: "size-brand-scale-12",
 };
 
 const radiusClass: Record<IconButtonSize, string> = {
@@ -129,16 +129,16 @@ const destructiveStates: IconButtonState[] = ["default", "hover", "disabled"];
 
 export function IconButtonPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <p className="font-alias-font-family-body text-[12px] leading-[1em]">Icon button</p>
       {(["default", "destructive"] as const).map((type) => (
-        <div key={type} className="flex flex-col gap-brand-scale-200">
+        <div key={type} className="flex flex-col gap-brand-scale-8">
           <p className="font-alias-font-family-body text-[12px] leading-[1em]">{type}</p>
-          <div className="flex items-start gap-brand-scale-600">
+          <div className="flex items-start gap-brand-scale-24">
             {(["lg", "md", "sm"] as const).map((size) => (
-              <div key={size} className="flex flex-col gap-brand-scale-100">
+              <div key={size} className="flex flex-col gap-brand-scale-4">
                 <p className="font-alias-font-family-body text-[12px] leading-[1em]">{size}</p>
-                <div className="flex items-center gap-brand-scale-200">
+                <div className="flex items-center gap-brand-scale-8">
                   {(type === "destructive" ? destructiveStates : defaultStates).map((state) => (
                     <IconButton key={state} type={type} size={size} state={state} ariaLabel={`${type} ${size} ${state}`} />
                   ))}
@@ -148,7 +148,7 @@ export function IconButtonPreview() {
           </div>
         </div>
       ))}
-      <div className="flex items-center gap-brand-scale-200">
+      <div className="flex items-center gap-brand-scale-8">
         <IconButton ariaLabel="Live default" />
         <IconButton type="destructive" ariaLabel="Live destructive" />
       </div>

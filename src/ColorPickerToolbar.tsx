@@ -42,7 +42,7 @@ function pickerSideFor(toolbar: HTMLElement, picker: HTMLElement): PickerSide {
   const leftEdge = host?.left ?? 0;
   const rightEdge = host?.right ?? window.innerWidth;
   const pad = 8;
-  const gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-100");
+  const gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-4");
   const gap = Number.parseFloat(gapRaw);
   const space = Number.isFinite(gap) ? gap : 4;
   const box = toolbar.getBoundingClientRect();
@@ -160,7 +160,7 @@ export default function ColorPickerToolbar({
   }
 
   const panelClass =
-    "rounded-alias-border-radius-xxl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-200 shadow-lg backdrop-blur-xl";
+    "rounded-alias-border-radius-xxl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-8 shadow-lg backdrop-blur-xl";
 
   return (
     <div
@@ -185,8 +185,8 @@ export default function ColorPickerToolbar({
       onDoubleClick={(event) => event.stopPropagation()}
     >
       {/* The swatch grid is 152px: five 24px discs and four 8px gaps. The hex row matches that width. No spacing token is 152px. */}
-      <div ref={toolbarRef} className={`noodle-color-toolbar grid w-max grid-cols-1 gap-brand-scale-400 ${panelClass}`}>
-        <div className="grid grid-cols-5 gap-brand-scale-200">
+      <div ref={toolbarRef} className={`noodle-color-toolbar grid w-max grid-cols-1 gap-brand-scale-16 ${panelClass}`}>
+        <div className="grid grid-cols-5 gap-brand-scale-8">
           {leading === "neutral" ? (
             <ColorSwatch
               type="color"
@@ -228,9 +228,9 @@ export default function ColorPickerToolbar({
             onClick={onCustomClick}
           />
         </div>
-        <div className="flex w-0 min-w-full items-center gap-brand-scale-100">
+        <div className="flex w-0 min-w-full items-center gap-brand-scale-4">
           <HexInput className="min-w-0 flex-1" value={shown} onValueChange={onHex} />
-          <div className="flex shrink-0 items-center gap-brand-scale-100">
+          <div className="flex shrink-0 items-center gap-brand-scale-4">
             <IconButton icon={Copy} size="md" ariaLabel="Copy hex" onClick={onCopy} />
             <IconButton icon={Pipette} size="md" ariaLabel="Pick a color from the screen" onClick={() => void onPipette()} />
           </div>
@@ -241,8 +241,8 @@ export default function ColorPickerToolbar({
           ref={pickerRef}
           className={`${panelClass} absolute top-0 ${
             pickerSide === "left"
-              ? "right-[calc(100%+var(--brand-scale-100))]"
-              : "left-[calc(100%+var(--brand-scale-100))]"
+              ? "right-[calc(100%+var(--brand-scale-4))]"
+              : "left-[calc(100%+var(--brand-scale-4))]"
           }`}
           role="group"
           aria-label="Color picker panel"
@@ -285,17 +285,17 @@ function LayerCheck() {
   }, []);
 
   return (
-    <div className="flex flex-col items-start gap-brand-scale-100">
+    <div className="flex flex-col items-start gap-brand-scale-4">
       <p className={captionClass}>Above a selected element and a dragging element</p>
       <div ref={anchorRef} className="relative h-[360px] w-[420px]">
         <div
-          className="absolute left-0 top-0 flex h-[220px] w-[280px] items-end bg-mapped-surface-action-selected p-brand-scale-200"
+          className="absolute left-0 top-0 flex h-[220px] w-[280px] items-end bg-mapped-surface-action-selected p-brand-scale-8"
           style={{ zIndex: layers.selection }}
         >
           <span className={captionClass}>Selected</span>
         </div>
         <div
-          className="absolute left-[140px] top-[48px] flex h-[180px] w-[240px] items-end bg-mapped-surface-action-hover p-brand-scale-200"
+          className="absolute left-[140px] top-[48px] flex h-[180px] w-[240px] items-end bg-mapped-surface-action-hover p-brand-scale-8"
           style={{ zIndex: layers.selection }}
         >
           <span className={captionClass}>Dragging</span>
@@ -323,20 +323,20 @@ export function ColorPickerToolbarPreview() {
     choice.kind === "swatch" ? choice.family : choice.kind;
 
   return (
-    <main className="relative flex h-full flex-col gap-brand-scale-600 overflow-auto bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="relative flex h-full flex-col gap-brand-scale-24 overflow-auto bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <FloatingLayer />
       <p className={captionClass}>Color picker toolbar</p>
-      <div className="flex flex-wrap items-start gap-brand-scale-600">
-        <div className="flex flex-col items-start gap-brand-scale-100">
+      <div className="flex flex-wrap items-start gap-brand-scale-24">
+        <div className="flex flex-col items-start gap-brand-scale-4">
           <p className={captionClass}>Collapsed</p>
           <ColorPickerToolbar choice={{ kind: "none" }} customHex="EBCFFF" expanded={false} />
         </div>
-        <div className="flex flex-col items-start gap-brand-scale-100">
+        <div className="flex flex-col items-start gap-brand-scale-4">
           <p className={captionClass}>Extended</p>
           <ColorPickerToolbar choice={{ kind: "custom" }} customHex="EBCFFF" expanded />
         </div>
       </div>
-      <div className="flex flex-col items-start gap-brand-scale-100">
+      <div className="flex flex-col items-start gap-brand-scale-4">
         <p className={captionClass}>Live</p>
         <ColorPickerToolbar
           choice={choice}

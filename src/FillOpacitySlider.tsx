@@ -130,7 +130,7 @@ export default function FillOpacitySlider({
   const thumb: SliderThumbState = disabled ? "disabled" : dragging ? "pressed" : hovered || focused ? "hover" : "default";
 
   return (
-    <div data-fill-opacity="" className="inline-flex items-center gap-brand-scale-400">
+    <div data-fill-opacity="" className="inline-flex items-center gap-brand-scale-16">
       <div
         ref={trackRef}
         role="slider"
@@ -140,7 +140,7 @@ export default function FillOpacitySlider({
         aria-valuenow={value}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : 0}
-        className={`relative w-[120px] touch-none outline-none ${size === "sm" ? "h-brand-scale-300" : "h-brand-scale-400"}`}
+        className={`relative w-[120px] touch-none outline-none ${size === "sm" ? "h-brand-scale-12" : "h-brand-scale-16"}`}
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
         onPointerUp={endDrag}
@@ -248,14 +248,14 @@ export function FillOpacitySliderPreview() {
   const [value, setValue] = useState(50);
   const [small, setSmall] = useState(50);
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
         Fill opacity
       </p>
-      <div className="flex items-center gap-brand-scale-400">
+      <div className="flex items-center gap-brand-scale-16">
         <span
           aria-hidden
-          className="relative size-brand-scale-1200 overflow-hidden rounded-alias-border-radius-lg"
+          className="relative size-brand-scale-48 overflow-hidden rounded-alias-border-radius-lg"
           style={{
             backgroundColor: "var(--brand-foundation-white)",
             backgroundImage:

@@ -82,11 +82,11 @@ export default function StrokeProperty({
 }: StrokePropertyProps) {
   return (
     <div
-      className="flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      className="flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       role="menu"
       aria-label="Line weight and line type"
     >
-      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         {STROKE_THICKNESS.map((option) => (
           <IconChoice
             key={option}
@@ -97,7 +97,7 @@ export default function StrokeProperty({
           />
         ))}
       </div>
-      <div className="flex items-center gap-brand-scale-50">
+      <div className="flex items-center gap-brand-scale-2">
         {STROKE_LINE_STYLES.map((option) => (
           <IconChoice
             key={option}

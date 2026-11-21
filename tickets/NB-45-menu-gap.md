@@ -27,14 +27,14 @@ The gap was measured from the button inside the toolbar. The toolbar’s own pad
 
 ## Acceptance criteria
 
-- [x] Every popover and dropdown sits `brand.scale.100` (4px) away from the toolbar that opened it
+- [x] Every popover and dropdown sits `brand.scale.4` (4px) away from the toolbar that opened it
 - [x] The gap is measured from the toolbar’s outer edge
 - [x] A menu that opens below clears the bottom by 4px, and a menu that opens above clears the top by 4px
 - [x] The font size menu, the alignment popover, the shapes menu, and the recent menu each measure 4px
 
 ## Technical notes
 
-The distance is the CSS variable `--brand-scale-100`. When the control sits in a floating toolbar, the menu clears that panel. The recent menu clears the file bar. Horizontal alignment still follows the button.
+The distance is the CSS variable `--brand-scale-4`. When the control sits in a floating toolbar, the menu clears that panel. The recent menu clears the file bar. Horizontal alignment still follows the button.
 
 ## Out of scope
 

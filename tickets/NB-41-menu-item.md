@@ -40,7 +40,7 @@ Dropdowns still use the Phase 1 menu rows. Phase 2 needs the shared row first, s
 
 The label uses the Figma text style `body/md/tight` (12px, line height 1em). The caption is drawn smaller, at 10px and line height 1em. Responsive type tokens are still 0, so those sizes are not mismatches. Body and caption use Geist.
 
-Small is 28px, `brand.scale.700`. Medium is 32px, `brand.scale.800`.
+Small is 28px, `brand.scale.28`. Medium is 32px, `brand.scale.32`.
 
 The spec sheet around the component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 

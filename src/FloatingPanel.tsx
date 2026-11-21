@@ -164,9 +164,9 @@ export type AnchorBox = {
   minWidth: number;
 };
 
-/** `brand.scale.100`. The space between a floating toolbar and the menu that opens from it. */
+/** `brand.scale.4`. The space between a floating toolbar and the menu that opens from it. */
 function toolbarMenuGap(): number {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-100");
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--brand-scale-4");
   const value = Number.parseFloat(raw);
   return Number.isFinite(value) ? value : 4;
 }

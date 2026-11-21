@@ -98,13 +98,13 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
   const hoverClass = labelControl
     ? "hover:bg-mapped-surface-action-hover"
     : "enabled:hover:bg-mapped-surface-action-hover";
-  const classes = `group inline-flex h-brand-scale-800 items-center gap-brand-scale-100 rounded-alias-border-radius-lg p-brand-scale-200 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight ${surfaceClass[visual]} ${visual === "default" ? hoverClass : ""}`;
+  const classes = `group inline-flex h-brand-scale-32 items-center gap-brand-scale-4 rounded-alias-border-radius-lg p-brand-scale-8 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight ${surfaceClass[visual]} ${visual === "default" ? hoverClass : ""}`;
   const ariaPressed =
     pressedValue === "mixed" ? "mixed" : pressedValue === true || state === "selected" ? true : pressedValue === false ? false : undefined;
 
   const icons = (
     <>
-      {showLeftIcon ? <LeftIcon className={`size-brand-scale-400 ${iconClass[visual]}`} aria-hidden /> : null}
+      {showLeftIcon ? <LeftIcon className={`size-brand-scale-16 ${iconClass[visual]}`} aria-hidden /> : null}
       {showLabel ? (
         labelControl ?? (
           <span className={`inline-grid whitespace-nowrap text-left ${textClass[visual]}`}>
@@ -117,7 +117,7 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
           </span>
         )
       ) : null}
-      {showRightIcon ? <RightIcon className={`size-brand-scale-400 ${iconClass[visual]}`} aria-hidden /> : null}
+      {showRightIcon ? <RightIcon className={`size-brand-scale-16 ${iconClass[visual]}`} aria-hidden /> : null}
     </>
   );
 
@@ -134,7 +134,7 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
             aria-haspopup={ariaHasPopup}
             onClick={onClick}
           >
-            <ChevronDown className={`size-brand-scale-200 ${iconClass[visual]}`} aria-hidden />
+            <ChevronDown className={`size-brand-scale-8 ${iconClass[visual]}`} aria-hidden />
           </button>
         ) : null}
       </div>
@@ -157,7 +157,7 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
       className={classes}
     >
       {icons}
-      {showDropdownIcon ? <ChevronDown className={`size-brand-scale-200 ${iconClass[visual]}`} aria-hidden /> : null}
+      {showDropdownIcon ? <ChevronDown className={`size-brand-scale-8 ${iconClass[visual]}`} aria-hidden /> : null}
     </button>
   );
 });
@@ -166,14 +166,14 @@ const previewStates: ContextualButtonState[] = ["default", "hover", "selected", 
 
 export function ContextualButtonPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">Contextual button</p>
-      <div className="flex items-center gap-brand-scale-400">
+      <div className="flex items-center gap-brand-scale-16">
         {previewStates.map((state) => (
           <ContextualButton key={state} state={state} />
         ))}
       </div>
-      <div className="flex items-center gap-brand-scale-400">
+      <div className="flex items-center gap-brand-scale-16">
         {previewStates.map((state) => (
           <ContextualButton key={state} state={state} showLeftIcon={false} showLabel={false} />
         ))}

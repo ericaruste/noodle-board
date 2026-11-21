@@ -105,7 +105,7 @@ function ColorMark({ className, color }: { className?: string; color?: string })
 }
 
 const menuChrome =
-  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl";
+  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
 
 function IconChoice({
   label,
@@ -193,7 +193,7 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
     <div
       data-noodle-toolbar
       data-noodle-menu={menu ? "" : undefined}
-      className="nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      className="nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         event.preventDefault();
@@ -201,7 +201,7 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <ContextualButton
           ariaLabel="Text"
           title="Text"
@@ -253,7 +253,7 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
           open={menu === "shape"}
           onToggle={() => toggle("shape")}
         >
-          <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label="Noodle type">
+          <div className={`${menuChrome} gap-brand-scale-2`} role="menu" aria-label="Noodle type">
             {(
               [
                 ["straight", "Straight"],
@@ -272,7 +272,7 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
           </div>
         </MenuButton>
       </div>
-      <div className="flex items-center gap-brand-scale-50">
+      <div className="flex items-center gap-brand-scale-2">
         <ArrowMenu
           label="Start arrowhead"
           value={data.markerStart}
@@ -487,7 +487,7 @@ function ArrowMenu({
         icon={ARROW_ICONS[neutral ? "none" : value]}
       />
       <AnchoredMenu open={open} anchorRef={buttonRef} label={label}>
-        <div className={`${menuChrome} gap-brand-scale-50`} role="menu" aria-label={label}>
+        <div className={`${menuChrome} gap-brand-scale-2`} role="menu" aria-label={label}>
           {NOODLE_ARROWS.map((kind) => (
             <IconChoice
               key={kind}

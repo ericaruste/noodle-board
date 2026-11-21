@@ -46,6 +46,19 @@ export default {
         "900": "var(--alias-primary-900)",
         "950": "var(--alias-primary-950)"
       },
+      "success": {
+        "50": "var(--alias-success-50)",
+        "100": "var(--alias-success-100)",
+        "200": "var(--alias-success-200)",
+        "300": "var(--alias-success-300)",
+        "400": "var(--alias-success-400)",
+        "500": "var(--alias-success-500)",
+        "600": "var(--alias-success-600)",
+        "700": "var(--alias-success-700)",
+        "800": "var(--alias-success-800)",
+        "900": "var(--alias-success-900)",
+        "950": "var(--alias-success-950)"
+      },
       "swatch": {
         "coral": {
           "200": "var(--alias-swatch-coral-200)",
@@ -132,6 +145,19 @@ export default {
         "black": "var(--brand-foundation-black)",
         "white": "var(--brand-foundation-white)"
       },
+      "green": {
+        "50": "var(--brand-green-50)",
+        "100": "var(--brand-green-100)",
+        "200": "var(--brand-green-200)",
+        "300": "var(--brand-green-300)",
+        "400": "var(--brand-green-400)",
+        "500": "var(--brand-green-500)",
+        "600": "var(--brand-green-600)",
+        "700": "var(--brand-green-700)",
+        "800": "var(--brand-green-800)",
+        "900": "var(--brand-green-900)",
+        "950": "var(--brand-green-950)"
+      },
       "lime": {
         "200": "var(--brand-lime-200)",
         "500": "var(--brand-lime-500)"
@@ -204,13 +230,16 @@ export default {
       "icon": {
         "action": "var(--mapped-icon-action)",
         "action-hover": "var(--mapped-icon-action-hover)",
+        "action-light": "var(--mapped-icon-action-light)",
         "action-selected": "var(--mapped-icon-action-selected)",
         "action-strong": "var(--mapped-icon-action-strong)",
         "action-strong-hover": "var(--mapped-icon-action-strong-hover)",
         "action-strong-selected": "var(--mapped-icon-action-strong-selected)",
         "disabled": "var(--mapped-icon-disabled)",
         "error": "var(--mapped-icon-error)",
-        "error-hover": "var(--mapped-icon-error-hover)"
+        "error-hover": "var(--mapped-icon-error-hover)",
+        "success": "var(--mapped-icon-success)",
+        "success-light": "var(--mapped-icon-success-light)"
       },
       "surface": {
         "action": "var(--mapped-surface-action)",
@@ -243,21 +272,23 @@ export default {
   },
   "spacing": {
     "brand-scale-0": "var(--brand-scale-0)",
-    "brand-scale-100": "var(--brand-scale-100)",
-    "brand-scale-1000": "var(--brand-scale-1000)",
-    "brand-scale-1100": "var(--brand-scale-1100)",
-    "brand-scale-1200": "var(--brand-scale-1200)",
-    "brand-scale-150": "var(--brand-scale-150)",
-    "brand-scale-200": "var(--brand-scale-200)",
-    "brand-scale-25": "var(--brand-scale-25)",
-    "brand-scale-300": "var(--brand-scale-300)",
-    "brand-scale-400": "var(--brand-scale-400)",
-    "brand-scale-50": "var(--brand-scale-50)",
-    "brand-scale-500": "var(--brand-scale-500)",
-    "brand-scale-600": "var(--brand-scale-600)",
-    "brand-scale-700": "var(--brand-scale-700)",
-    "brand-scale-800": "var(--brand-scale-800)",
-    "brand-scale-900": "var(--brand-scale-900)"
+    "brand-scale-1": "var(--brand-scale-1)",
+    "brand-scale-12": "var(--brand-scale-12)",
+    "brand-scale-16": "var(--brand-scale-16)",
+    "brand-scale-2": "var(--brand-scale-2)",
+    "brand-scale-20": "var(--brand-scale-20)",
+    "brand-scale-24": "var(--brand-scale-24)",
+    "brand-scale-28": "var(--brand-scale-28)",
+    "brand-scale-32": "var(--brand-scale-32)",
+    "brand-scale-36": "var(--brand-scale-36)",
+    "brand-scale-4": "var(--brand-scale-4)",
+    "brand-scale-40": "var(--brand-scale-40)",
+    "brand-scale-44": "var(--brand-scale-44)",
+    "brand-scale-48": "var(--brand-scale-48)",
+    "brand-scale-52": "var(--brand-scale-52)",
+    "brand-scale-56": "var(--brand-scale-56)",
+    "brand-scale-6": "var(--brand-scale-6)",
+    "brand-scale-8": "var(--brand-scale-8)"
   },
   "borderRadius": {
     "alias-border-radius-lg": "var(--alias-border-radius-lg)",

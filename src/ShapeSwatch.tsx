@@ -51,7 +51,7 @@ function IconChoice({
 export default function ShapeSwatch({ kind, onKind }: ShapeSwatchProps) {
   return (
     <div
-      className="flex items-center gap-brand-scale-50 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      className="flex items-center gap-brand-scale-2 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       role="menu"
       aria-label="Shape"
     >

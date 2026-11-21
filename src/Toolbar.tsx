@@ -97,10 +97,10 @@ export default function Toolbar({
       layer="toolbar"
       role="toolbar"
       ariaLabel="Tools"
-      className="board-toolbar rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma padding 3px
+      className="board-toolbar rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma padding 3px
     >
       <div
-        className="flex items-center gap-brand-scale-50"
+        className="flex items-center gap-brand-scale-2"
         onPointerDown={(event) => {
           const target = event.target;
           if (target instanceof Element && target.closest("[data-shapes-menu]")) return;

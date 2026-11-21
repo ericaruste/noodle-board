@@ -42,8 +42,8 @@ const destructiveSurface: Record<MainButtonState, string> = {
 };
 
 const defaultText: Record<MainButtonState, string> = {
-  default: "text-mapped-text-action group-hover:text-mapped-text-action-strong-hover",
-  hover: "text-mapped-text-action-strong-hover",
+  default: "text-mapped-text-action group-hover:text-mapped-text-action-hover",
+  hover: "text-mapped-text-action-hover",
   selected: "text-mapped-text-action-strong-selected",
   disabled: "text-mapped-text-disabled",
 };
@@ -56,8 +56,8 @@ const destructiveText: Record<MainButtonState, string> = {
 };
 
 const defaultIcon: Record<MainButtonState, string> = {
-  default: "text-mapped-icon-action group-hover:text-mapped-icon-action-strong-hover",
-  hover: "text-mapped-icon-action-strong-hover",
+  default: "text-mapped-icon-action group-hover:text-mapped-icon-action-hover",
+  hover: "text-mapped-icon-action-hover",
   selected: "text-mapped-icon-action-strong-selected",
   disabled: "text-mapped-icon-disabled",
 };
@@ -130,11 +130,11 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(functio
         type === "destructive" ? undefined : selected === true || state === "selected" ? true : selected === false ? false : undefined
       }
       onClick={onClick}
-      className={`group inline-flex h-brand-scale-1000 shrink-0 items-center gap-brand-scale-200 rounded-alias-border-radius-lg p-brand-scale-300 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight ${surface[visual]} ${hoverClass}`}
+      className={`group inline-flex h-brand-scale-40 shrink-0 items-center gap-brand-scale-8 rounded-alias-border-radius-lg p-brand-scale-12 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight ${surface[visual]} ${hoverClass}`}
     >
-      {showLeftIcon ? <LeftIcon className={`size-brand-scale-400 ${glyph[visual]}`} aria-hidden /> : null}
+      {showLeftIcon ? <LeftIcon className={`size-brand-scale-16 ${glyph[visual]}`} aria-hidden /> : null}
       {showLabel ? <span className={`whitespace-nowrap ${text[visual]}`}>{label}</span> : null}
-      {showRightIcon ? <Icon className={`size-brand-scale-400 ${glyph[visual]}`} aria-hidden /> : null}
+      {showRightIcon ? <Icon className={`size-brand-scale-16 ${glyph[visual]}`} aria-hidden /> : null}
     </button>
   );
 });
@@ -144,37 +144,37 @@ const destructiveStates: MainButtonState[] = ["default", "hover", "disabled"];
 
 export function MainButtonPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
         Main button
       </p>
       {(["default", "destructive"] as const).map((type) => (
-        <div key={type} className="flex flex-col gap-brand-scale-200">
+        <div key={type} className="flex flex-col gap-brand-scale-8">
           <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
             {type}
           </p>
-          <div className="flex items-center gap-brand-scale-200">
+          <div className="flex items-center gap-brand-scale-8">
             {(type === "destructive" ? destructiveStates : defaultStates).map((state) => (
               <MainButton key={state} type={type} state={state} ariaLabel={`${type} ${state}`} />
             ))}
           </div>
         </div>
       ))}
-      <div className="flex flex-col gap-brand-scale-200">
+      <div className="flex flex-col gap-brand-scale-8">
         <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
           icon only
         </p>
-        <div className="flex items-center gap-brand-scale-200">
+        <div className="flex items-center gap-brand-scale-8">
           <MainButton showLabel={false} showRightIcon={false} ariaLabel="Icon only" />
           <MainButton type="destructive" showLabel={false} showRightIcon={false} ariaLabel="Destructive icon only" />
         </div>
       </div>
-      <div className="flex items-center gap-brand-scale-200">
+      <div className="flex items-center gap-brand-scale-8">
         <MainButton showLeftIcon={false} ariaLabel="No left icon" />
         <MainButton showRightIcon={false} ariaLabel="No right icon" />
         <MainButton showLabel={false} ariaLabel="No label" />
       </div>
-      <div className="flex items-center gap-brand-scale-200">
+      <div className="flex items-center gap-brand-scale-8">
         <MainButton ariaLabel="Live default" />
         <MainButton type="destructive" ariaLabel="Live destructive" />
         <MainButton selected ariaLabel="Live selected" />

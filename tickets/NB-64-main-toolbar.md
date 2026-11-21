@@ -38,13 +38,13 @@ The bottom bar still draws its own round controls. The frame is the main button,
 
 ## Technical notes
 
-The frame is 342 by 48, hugging its contents. Eight 40px buttons and 2px gaps fit that width when the padding inside the 1px stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.100`, and marks the mismatch.
+The frame is 342 by 48, hugging its contents. Eight 40px buttons and 2px gaps fit that width when the padding inside the 1px stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.4`, and marks the mismatch.
 
 The noodle glyph is `src/assets/icons/noodle-main.svg`. The other glyphs are Lucide. Text is `type`.
 
 The fill is `mapped.surface.default` (`#F6F9FD` at 60%). Blur is the existing `backdrop-blur-xl`. The existing shadow stays. Blur and shadow stay out of the token file.
 
-The bar already lives in FloatingPanel on the toolbar layer. The shapes menu stays on the dropdown layer, `brand.scale.100` (4px) from the bar.
+The bar already lives in FloatingPanel on the toolbar layer. The shapes menu stays on the dropdown layer, `brand.scale.4` (4px) from the bar.
 
 The Figma file request was rate limited, and the property panel was behind the sign-up wall. The row was read from the painted frame.
 

@@ -15,7 +15,7 @@ linear_url: https://linear.app/ericar/issue/ERI-69/track
 
 Building block for a slider. Figma component `slider/track/color-opacity`, on the spec frame titled `slider`, node `172:1794`.
 
-The pill is 120px wide. `sm` is 8px, `brand.scale.200`. `md` is 12px, `brand.scale.300`, and it is the default. A checker sits under a gradient that fades from clear to the current swatch color. The specimen color is `#6579F8`.
+The pill is 120px wide. `sm` is 8px, `brand.scale.8`. `md` is 12px, `brand.scale.12`, and it is the default. A checker sits under a gradient that fades from clear to the current swatch color. The specimen color is `#6579F8`.
 
 [`src/SliderTrack.tsx`](../src/SliderTrack.tsx) is the component. `?trial=slider-track` shows the specimen and a second color without changing the board.
 
@@ -40,7 +40,7 @@ The fill opacity slider needs a shared track first. The fade has to follow the s
 
 ## Technical notes
 
-`sm` is `brand.scale.200`. `md` is `brand.scale.300`. The 120px width has no spacing token. Corner radius in the panel is 200, which is a full pill. No radius token is fully round.
+`sm` is `brand.scale.8`. `md` is `brand.scale.12`. The 120px width has no spacing token. Corner radius in the panel is 200, which is a full pill. No radius token is fully round.
 
 The image fill is the checker. It is not a token. The squares are `brand.foundation.white` and `mapped.border.disabled`. The gradient stops are white at 0% opacity and the swatch color at 100%. The specimen `#6579F8` is not a token.
 

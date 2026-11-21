@@ -186,15 +186,41 @@ if (!lookupText.includes("#F6F9FD / 60%") || !lookupText.includes("`mapped.surfa
   throw new Error("Token lookup is missing the 60% surface color.");
 }
 if (
-  !css.includes("--brand-scale-150: 6px") ||
-  !css.includes("--brand-scale-700: 28px") ||
-  !css.includes("--brand-scale-800: 32px") ||
-  !css.includes("--brand-scale-900: 36px") ||
-  !css.includes("--brand-scale-1000: 40px") ||
-  !css.includes("--brand-scale-1100: 44px") ||
-  !css.includes("--brand-scale-1200: 48px")
+  !css.includes("--brand-scale-0: 0px") ||
+  !css.includes("--brand-scale-1: 1px") ||
+  !css.includes("--brand-scale-2: 2px") ||
+  !css.includes("--brand-scale-4: 4px") ||
+  !css.includes("--brand-scale-6: 6px") ||
+  !css.includes("--brand-scale-8: 8px") ||
+  !css.includes("--brand-scale-12: 12px") ||
+  !css.includes("--brand-scale-16: 16px") ||
+  !css.includes("--brand-scale-20: 20px") ||
+  !css.includes("--brand-scale-24: 24px") ||
+  !css.includes("--brand-scale-28: 28px") ||
+  !css.includes("--brand-scale-32: 32px") ||
+  !css.includes("--brand-scale-36: 36px") ||
+  !css.includes("--brand-scale-40: 40px") ||
+  !css.includes("--brand-scale-44: 44px") ||
+  !css.includes("--brand-scale-48: 48px") ||
+  !css.includes("--brand-scale-52: 52px") ||
+  !css.includes("--brand-scale-56: 56px")
 ) {
-  throw new Error("Scale 150, 700, 800, 900, 1000, 1100, and 1200 were not written.");
+  throw new Error("Brand scale steps were not written with pixel names.");
+}
+if (/--brand-scale-(25|50|100|150|200|300|400|500|600|700|800|900|1000|1100|1200):/.test(css)) {
+  throw new Error("Old brand scale names are still in the CSS.");
+}
+if (!css.includes("--brand-green-500: #16A34A") || !css.includes("--alias-success-500: var(--brand-green-500)")) {
+  throw new Error("Success colors were not written.");
+}
+if (
+  !css.includes("--mapped-icon-success: var(--alias-success-500)") ||
+  !css.includes("--mapped-icon-success-light: var(--alias-success-300)")
+) {
+  throw new Error("Success icon colors were not written.");
+}
+if (!css.includes("--mapped-icon-action-light: var(--alias-cool-neutral-700)")) {
+  throw new Error("Icon action-light was not written.");
 }
 if (
   !css.includes("--responsive-desktop-body-sm-size: 12px") ||

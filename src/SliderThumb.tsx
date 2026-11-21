@@ -15,8 +15,8 @@ type SliderThumbProps = {
 };
 
 const thumbSizeClass: Record<SliderThumbSize, string> = {
-  sm: "size-brand-scale-300",
-  md: "size-brand-scale-400",
+  sm: "size-brand-scale-12",
+  md: "size-brand-scale-16",
 };
 
 const paint: Record<SliderThumbState, string> = {
@@ -44,18 +44,18 @@ const previewSizes: SliderThumbSize[] = ["sm", "md"];
 
 export function SliderThumbPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24">
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
         Thumb
       </p>
       {previewSizes.map((size) => (
-        <div key={size} className="flex flex-col gap-brand-scale-200">
+        <div key={size} className="flex flex-col gap-brand-scale-8">
           <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
             {size}
           </p>
-          <div className="flex items-end gap-brand-scale-800">
+          <div className="flex items-end gap-brand-scale-32">
             {previewStates.map((state) => (
-              <div key={state} className="flex flex-col items-center gap-brand-scale-200">
+              <div key={state} className="flex flex-col items-center gap-brand-scale-8">
                 <SliderThumb state={state} size={size} />
                 <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-default">
                   {state}

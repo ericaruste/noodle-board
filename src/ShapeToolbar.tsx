@@ -68,10 +68,10 @@ function shapeColorValue(choice: ColorPickerChoice, hex: string, scale: SwatchSc
 function PaintMark({ className, type, color }: { className?: string; type: "none" | "color"; color?: string }) {
   return (
     <span className={`relative inline-flex shrink-0 items-center justify-center ${className ?? ""}`}>
-      <span className="pointer-events-none absolute left-1/2 top-1/2 size-brand-scale-600 origin-center -translate-x-1/2 -translate-y-1/2 scale-[0.6667]">
+      <span className="pointer-events-none absolute left-1/2 top-1/2 size-brand-scale-24 origin-center -translate-x-1/2 -translate-y-1/2 scale-[0.6667]">
         {type === "none" ? (
           <span className="absolute inset-0 rounded-full bg-brand-foundation-white">
-            <span className="absolute left-1/2 top-1/2 h-brand-scale-50 w-brand-scale-500 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
+            <span className="absolute left-1/2 top-1/2 h-brand-scale-2 w-brand-scale-20 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
           </span>
         ) : (
           <span className="absolute inset-0 rounded-full" style={{ background: color }} />
@@ -150,7 +150,7 @@ export default function ShapeToolbar({
   return (
     <div
       data-shape-colors=""
-      className="nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      className="nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         const target = event.target;
@@ -161,7 +161,7 @@ export default function ShapeToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
-      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <MenuButton
           label={kind ? `Shape, ${SHAPE_LABELS[kind]}` : "Shape, mixed"}
           icon={kindIcon(kind ?? "diamond")}
@@ -177,7 +177,7 @@ export default function ShapeToolbar({
           />
         </MenuButton>
       </div>
-      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <MenuButton
           label="Stroke"
           text="Stroke"
@@ -203,7 +203,7 @@ export default function ShapeToolbar({
           />
         </MenuButton>
       </div>
-      <div className="flex items-center gap-brand-scale-200">
+      <div className="flex items-center gap-brand-scale-8">
         <MenuButton label="Fill" text="Fill" icon={FillIcon} open={menu === "fill"} onToggle={() => toggle("fill")}>
           <ShapeColorMenu color={fill} mixed={fillMixed} scale={FILL_SWATCH_SCALE} onColor={onFill} />
         </MenuButton>

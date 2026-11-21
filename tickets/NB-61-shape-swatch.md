@@ -44,7 +44,7 @@ Shape swap and the bottom Shapes tool are two menus. They are one shape-swatch c
 
 The shared row replaces the inline kind menu in [`src/ShapeToolbar.tsx`](../src/ShapeToolbar.tsx) and the text list in [`src/Toolbar.tsx`](../src/Toolbar.tsx). The bottom tool still calls `onAddShape`. The shape toolbar still calls `onKind`.
 
-The row is padding 4 and a 2px gap between the icon buttons. The height is 40px, `brand.scale.1000`. The stroke is `mapped.border.default` with `alias.border-width.xsm`. The radius is `alias.border-radius.xl`. The fill is `mapped.surface.default`. Blur is the existing 24px blur. The existing shadow stays. The row has no divider.
+The row is padding 4 and a 2px gap between the icon buttons. The height is 40px, `brand.scale.40`. The stroke is `mapped.border.default` with `alias.border-width.xsm`. The radius is `alias.border-radius.xl`. The fill is `mapped.surface.default`. Blur is the existing 24px blur. The existing shadow stays. The row has no divider.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

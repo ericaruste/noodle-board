@@ -43,6 +43,13 @@ const captionClass: Record<MenuItemState, string> = {
   disabled: "text-mapped-text-disabled",
 };
 
+const iconClass: Record<MenuItemState, string> = {
+  default: "text-mapped-text-caption group-hover:text-mapped-icon-action-hover",
+  hover: "text-mapped-icon-action-hover",
+  selected: "text-mapped-icon-action-selected",
+  disabled: "text-mapped-icon-disabled",
+};
+
 function visualState(
   state: MenuItemState | undefined,
   selected: boolean | undefined,
@@ -74,7 +81,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const visual = visualState(state, selected, disabled);
   const isDisabled = disabled || visual === "disabled";
   const hoverClass = visual === "default" ? "enabled:hover:bg-mapped-surface-action-hover" : "";
-  const heightClass = size === "sm" ? "h-brand-scale-700" : "h-brand-scale-800";
+  const heightClass = size === "sm" ? "h-brand-scale-28" : "h-brand-scale-32";
 
   return (
     <button
@@ -83,7 +90,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       role="menuitem"
       disabled={isDisabled}
       onClick={onClick}
-      className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-200 rounded-alias-border-radius-lg px-brand-scale-200 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
+      className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-8 rounded-alias-border-radius-lg px-brand-scale-8 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
     >
       {showLabel ? (
         <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]} ${labelClassName ?? ""}`}>
@@ -93,12 +100,12 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
         <span />
       )}
       {showCaption || showChevron ? (
-        <span className="flex shrink-0 items-center gap-brand-scale-100">
+        <span className="flex shrink-0 items-center gap-brand-scale-4">
           {showCaption ? (
             <span className={`whitespace-nowrap text-[10px] leading-[1em] ${captionClass[visual]}`}>{caption}</span>
           ) : null}
           {showChevron ? (
-            <ChevronRight className={`size-brand-scale-300 ${captionClass[visual]}`} aria-hidden />
+            <ChevronRight className={`size-brand-scale-12 ${iconClass[visual]}`} aria-hidden />
           ) : null}
         </span>
       ) : null}
@@ -110,13 +117,13 @@ const previewStates: MenuItemState[] = ["default", "hover", "selected", "disable
 
 export function MenuItemPreview() {
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <p className="font-alias-font-family-body text-[12px] leading-[1em]">Menu item</p>
-      <div className="flex items-start gap-brand-scale-600">
+      <div className="flex items-start gap-brand-scale-24">
         {(["md", "sm"] as const).map((size) => (
-          <div key={size} className="flex w-48 flex-col gap-brand-scale-100">
+          <div key={size} className="flex w-48 flex-col gap-brand-scale-4">
             <p className="font-alias-font-family-body text-[12px] leading-[1em]">{size}</p>
-            <div className="flex flex-col gap-brand-scale-50" role="menu" aria-label={`${size} menu items`}>
+            <div className="flex flex-col gap-brand-scale-2" role="menu" aria-label={`${size} menu items`}>
               {previewStates.map((state) => (
                 <MenuItem key={state} size={size} state={state} />
               ))}
@@ -124,7 +131,7 @@ export function MenuItemPreview() {
           </div>
         ))}
       </div>
-      <div className="flex w-48 flex-col gap-brand-scale-50" role="menu" aria-label="Menu item slots">
+      <div className="flex w-48 flex-col gap-brand-scale-2" role="menu" aria-label="Menu item slots">
         <MenuItem showChevron={false} />
         <MenuItem showCaption={false} />
         <MenuItem showCaption={false} showChevron={false} />

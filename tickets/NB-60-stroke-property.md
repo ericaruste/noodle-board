@@ -41,7 +41,7 @@ A change to the row has to be made in both toolbars. The row is one component.
 
 The shared row replaces the inline menus in [`src/ShapeToolbar.tsx`](../src/ShapeToolbar.tsx) and [`src/NoodleToolbar.tsx`](../src/NoodleToolbar.tsx). Each toolbar still owns the open state and writes its own data. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 
-The row is padding 4, 32px buttons, a 2px gap inside each group, and a 4px gap around the divider. The height is 40px, `brand.scale.1000`. The stroke is `mapped.border.default` with `alias.border-width.xsm`. The radius is `alias.border-radius.xl`. The fill is `mapped.surface.default`. Blur is the existing 24px blur. The existing shadow stays.
+The row is padding 4, 32px buttons, a 2px gap inside each group, and a 4px gap around the divider. The height is 40px, `brand.scale.40`. The stroke is `mapped.border.default` with `alias.border-width.xsm`. The radius is `alias.border-radius.xl`. The fill is `mapped.surface.default`. Blur is the existing 24px blur. The existing shadow stays.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 

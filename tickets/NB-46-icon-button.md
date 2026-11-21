@@ -42,7 +42,7 @@ Toolbars still invent icon-only controls from the contextual button by turning t
 
 The spec glyph is the case-sensitive icon. The component takes any Lucide icon in that slot. Large draws it at 16px. Medium and small draw it at 12px.
 
-Large is 32px, `brand.scale.800`, with an 8px corner (`alias.border-radius.lg`). Medium is 28px, `brand.scale.700`, with the same 8px corner. Small is 20px, `brand.scale.500`, with a 4px corner (`alias.border-radius.md`). The 8px left around the medium icon is `brand.scale.200`.
+Large is 32px, `brand.scale.32`, with an 8px corner (`alias.border-radius.lg`). Medium is 28px, `brand.scale.28`, with the same 8px corner. Small is 20px, `brand.scale.20`, with a 4px corner (`alias.border-radius.md`). The 8px left around the medium icon is `brand.scale.8`.
 
 The spec sheet around the component (state names, the red size notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 

@@ -650,7 +650,7 @@ body,
 .noodle-color-picker .react-colorful__saturation {
   flex: none;
   height: 108px; /* TODO token mismatch: Figma 108px */
-  border-bottom-width: var(--brand-scale-300);
+  border-bottom-width: var(--brand-scale-12);
   border-bottom-style: solid;
   border-bottom-color: var(--brand-foundation-black);
   border-top-left-radius: var(--alias-border-radius-lg);
@@ -661,7 +661,7 @@ body,
 
 .noodle-color-picker .react-colorful__hue {
   flex: none;
-  height: var(--brand-scale-400);
+  height: var(--brand-scale-16);
   border-top-left-radius: var(--alias-border-radius-none);
   border-top-right-radius: var(--alias-border-radius-none);
   border-bottom-left-radius: var(--alias-border-radius-lg);
@@ -673,8 +673,8 @@ body,
 }
 
 .noodle-color-picker .react-colorful__pointer {
-  width: var(--brand-scale-500);
-  height: var(--brand-scale-500);
+  width: var(--brand-scale-20);
+  height: var(--brand-scale-20);
   border-width: var(--alias-border-width-xsm);
   border-style: solid;
   border-color: var(--brand-foundation-white);

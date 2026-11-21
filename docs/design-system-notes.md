@@ -1,69 +1,54 @@
 # Design system notes
 
-A running list of what each built piece taught us, so Figma and the token file can be updated from one place.
+A running list of what each built piece taught us, so the token file and the app stay in one place.
 
-When a component, toolbar, dropdown, or popover is built, its section is added here. Each section names the Figma component, the node id, the ticket, and the code path. It has its own token table. It lists the Figma properties and their values, and it says which states are painted.
+When a component, toolbar, dropdown, or popover is built, its section is added here. Each section names the ticket and the code path. It has its own token table. It lists the properties and their values, and it says which states are painted.
 
 Shadow, blur, and the dot grid are left out of the token build. In the table they are marked `not a token`. They are not mismatches. Font size and line height use the responsive desktop tokens. Paragraph spacing is not in the export, so it stays `not a token`.
 
 ## Still to update
 
-- **[Figma] Resting fill is invisible.** `mapped.surface.action` is `#E5F0F9` at 0%. The default button has no fill. Confirm that is the resting state on purpose.
-- **[Figma] Weight label width.** The weight control is held to the width of the words “Bold Italic”, so Regular, Bold, Italic, and Bold Italic do not resize the toolbar. The Figma component may still hug the label. Give that control a minimum width if the bar should stay still.
-- **[code] Underline and strikethrough.** They are drawn on `toolbar/contextual/text` and are not in the app. They wait for the text feature. Leave them in Figma.
-- **[Figma] Caption and chevron switches.** The layers are `caption` and `icon/lucide/chevron-right`. The property panel was not readable, so the boolean names are not confirmed. The code hides each slot.
-- **[Figma] Font style menu width.** The frame is 104px wide. No spacing token is 104px. The code keeps 104px and marks the mismatch.
-- **[Figma] Hex input width.** The frame is 108px wide. No spacing token is 108px. The code keeps 108px and marks the mismatch.
-- **[code] Contextual button and icon button node ids.** Both notes cite node `193:3525`. That node is the color-swatch spec, and it now also holds the color picker toolbar. Their node ids still need a check.
-- **[Figma] Tomato on the color picker toolbar.** The other seven swatches are step 200. Tomato is `#FF7066`, step 500. The toolbar uses one scale for the grid.
+- **[code] Underline and strikethrough.** They are drawn on the text toolbar and are not in the app. They wait for the text feature.
 - **[token app] Color picker field height.** The saturation field, including the 12px black band, is 108px. No spacing token is 108px.
 - **[token app] Color picker toolbar width.** The swatch grid and the hex row are 152px: five 24px discs and four 8px gaps. No spacing token is 152px. The picker field stays 172px. No spacing token is 172px.
-- **[Figma] Color picker toolbar padding.** The frame is 12px, `brand.scale.300`. The toolbar and the picker panel use 8px, `brand.scale.200`.
-- **[Figma] Color picker placement.** The frame paints the picker under the swatch grid. The app puts it in its own panel beside the toolbar: on the right when that side fits, on the left when the toolbar is against the right edge. Opening it does not move the toolbar.
-- **[Figma] Shape swap paints four kinds.** The popover is ellipse, diamond, rectangle, triangle. The app keeps rounded rectangle, and it keeps the existing order: rectangle, ellipse, rounded rectangle, triangle, diamond.
-- **[code] Noodle toolbar node id.** The component is `toolbar/contextual/noodle`. The file link is the spec page, node `193:3525`. The component’s own node id was not in the property panel.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
 - **[token app] Placeholder line height sits beside `md`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.md.line-height`. `md` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
-- **[Figma] Thumb sheet label says focus.** The variant property is `pressed`. The sheet writes focus over that disc.
-- **[Figma] Thumb ring is a drop shadow.** Hover and pressed hide the stroke and draw the ring as a shadow. The code uses an outline, the same treatment as the color swatch ring. The measured ring is 2px, `alias.border-width.sm`.
 - **[token app] Opacity track width.** The pill is 120px wide. No spacing token is 120px.
-- **[Figma] Fill opacity label color.** The percent is `#334155`. The nearest text token is `mapped.text.default`, `#303132`.
-- **[Figma] Fill opacity label gap.** The specimen leaves 8px between the track and the percent. The gap is 16px.
-- **[Figma] Thumb size.** The sheet paints one 16px disc. The app adds a 12px `sm` disc and uses it with the `sm` track as the slider default.
-- **[Figma] Track specimen color.** The gradient ends at `#6579F8`. That color is not a token. The track uses the swatch color it is given.
-- **[Figma] Main button slot switches.** The layers are a left `icon/lucide/case-sensitive`, `Label`, and a right `icon/lucide/case-sensitive`. The property panel was behind the sign-up wall, so the boolean names are not confirmed. The code hides each slot.
-- **[Figma] Main toolbar property list.** Node `186:3425`, component `toolbar/main`. The sign-up wall blocked the property panel. The eight buttons were read from the painted frame.
-- **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.100`.
+- **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.4`.
+- **[token app] Main button hover fill.** This export maps `mapped.surface.action-strong-hover` to `alias.primary.400` (`#6EA9E2`). The previous export used `alias.primary.200` (`#B7D4F1`). The button follows this export. Hover text and icons stay `mapped.text.action-hover` and `mapped.icon.action-hover`.
 
 ## Decisions already made
 
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
-- Shadow, blur, and the dot grid are `not a token`. Figma effects do not apply until they are planned.
-- `mapped.surface.default` in `tokens.json` is `#F6F9FD` at 60% (`alias.cool-neutral.200`). The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board. Figma’s 2.6px blur is ignored.
+- Shadow, blur, and the dot grid are `not a token`.
+- `mapped.surface.default` in `tokens.json` is `#F6F9FD` at 60% (`alias.cool-neutral.200`). The text toolbar, the align popover, the font style menu, the typeface menu, and the font size menu use that fill with the existing 24px blur and the existing shadow, the same frost as the rest of the board.
 - Desktop font size and line height are tokens under `responsive.desktop`. The 12px tight style is `responsive.desktop.body.sm.size` and `responsive.desktop.body.sm.line-height-tight`. That style was `body.md`. `body.md` is now 14px / 16.8px, with tight 14px, which is the old `body.lg`. `body.lg` is 16px / 19.2px and has no tight line height. The caption size is `responsive.desktop.caption.md.size` (10px) and `responsive.desktop.caption.md.line-height-tight` (10px). Paragraph spacing is not in the export, so it stays `not a token`.
 - Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.md.size` (14px) and `responsive.desktop.placeholder.line-height` (16.8px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
-- 6px is `brand.scale.150` and 28px is `brand.scale.700`. Inserting them moved the later steps: 32px is `brand.scale.800`, 36px is `brand.scale.900`, 40px is `brand.scale.1000`, 44px is `brand.scale.1100`, and 48px is `brand.scale.1200`. Names through `brand.scale.600` (24px) stayed put.
+- Spacing steps are named with the pixel size. `brand.scale.4` is 4px and `brand.scale.8` is 8px. The range is `brand.scale.0` through `brand.scale.56`. `brand.scale.52` (52px) and `brand.scale.56` (56px) are new. The old names, such as `brand.scale.100` for 4px and `brand.scale.1200` for 48px, are gone.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
-- Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. Figma’s own icon components are not imported.
+- Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
-- Each font size row is `brand.scale.900` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
-- A popover or dropdown sits `brand.scale.100` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
-- The color swatch action ring is an outline stroke outside the disc. Figma draws that ring as a drop shadow, because a second stroke there changes the disc border. Outline leaves the disc border alone. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
-- The custom preview is a 12px circle, `brand.scale.300`, with a 1px white stroke, `brand.foundation.white` at `alias.border-width.xsm`, drawn inside the circle. It is not a separate white circle. The custom swatch has no disc stroke in default, hover, or selected. None and color keep the 1px `mapped.border.control` stroke on default only. Hover and selected drop it. Keyboard focus uses the hover ring, so that stroke is hidden then too.
-- The noodle toolbar’s color control is a 16px disc, `brand.scale.400`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
+- Each font size row is `brand.scale.36` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
+- A popover or dropdown sits `brand.scale.4` (4px) away from the floating toolbar that opened it. The gap is measured from the toolbar’s outer edge, not from the button inside it.
+- The color swatch action ring is an outline stroke outside the disc. A second stroke there would change the disc border, so the ring is an outline. Hover and selected are 4px, `alias.border-width.md`. The frame measures 3px. Selected uses `mapped.border.action-ring-focus`, not `mapped.border.action-ring-selected`.
+- The custom preview is a 12px circle, `brand.scale.12`, with a 1px white stroke, `brand.foundation.white` at `alias.border-width.xsm`, drawn inside the circle. It is not a separate white circle. The custom swatch has no disc stroke in default, hover, or selected. None and color keep the 1px `mapped.border.control` stroke on default only. Hover and selected drop it. Keyboard focus uses the hover ring, so that stroke is hidden then too.
+- The noodle toolbar’s color control is a 16px disc, `brand.scale.16`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
-- The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.400`. The thumb has two sizes. `sm` is 12px, `brand.scale.300`, and it is the default. `md` is 16px, `brand.scale.400`. The track has two sizes. `sm` is 8px, `brand.scale.200`. `md` is 12px, `brand.scale.300`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
+- The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.16`. The thumb has two sizes. `sm` is 12px, `brand.scale.12`, and it is the default. `md` is 16px, `brand.scale.16`. The track has two sizes. `sm` is 8px, `brand.scale.8`. `md` is 12px, `brand.scale.12`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
 - The line weight and line type row is one component, `src/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
+- `mapped.surface.action-strong-hover` is `alias.primary.400` (`#6EA9E2`) at 100% in this export. The main button and the main toolbar use that fill on hover. Default type hover text is `mapped.text.action-hover` (`#1E3B58`) and the icons are `mapped.icon.action-hover` (`#1E3B58`). Selected keeps the light foreground.
+- Success is `brand.green`, aliased as `alias.success`. `mapped.icon.success` is `alias.success.500` (`#16A34A`). `mapped.icon.success-light` is `alias.success.300` (`#72C68F`). No component paints them yet.
+- `mapped.icon.action-light` is `alias.cool-neutral.700` (`#909397`). No component paints it yet.
 - The shape kind row is one component, `src/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
 - The shape toolbar’s fill opens the color picker at step 200, and its stroke opens the color picker at step 500. Both offer none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). A shape already saved keeps its own fill and stroke. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
-- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.100` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.200`.
+- Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.4` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.8`.
 
 ## Canvas text
 
-No Figma frame for this pass. The tokens are `alias.font-family.placeholder`, `responsive.desktop.placeholder`, and `mapped.text.placeholder`. Code: `src/RichText.tsx` (`canvasDefault` on a sticky and a shape), `src/PlacementGhost.tsx` for the sticky ghost, and `.noodle-edge-label` in `src/index.css`. A text object does not use this style.
+The tokens are `alias.font-family.placeholder`, `responsive.desktop.placeholder`, and `mapped.text.placeholder`. Code: `src/RichText.tsx` (`canvasDefault` on a sticky and a shape), `src/PlacementGhost.tsx` for the sticky ghost, and `.noodle-edge-label` in `src/index.css`. A text object does not use this style.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -79,19 +64,19 @@ The empty hint and the typed default share the font and the size. A run that set
 
 ## Contextual button
 
-Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`.
+Ticket NB-38. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | `brand.scale.800` | 32px |
-| Padding | `brand.scale.200` | 8px |
-| Gap | `brand.scale.100` | 4px |
+| Height | `brand.scale.32` | 32px |
+| Padding | `brand.scale.8` | 8px |
+| Gap | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the button has no stroke |
 | Font | `alias.font-family.body` | Geist |
 | Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight` |
-| Icon | `brand.scale.400` | 16px |
-| Chevron | `brand.scale.200` | 8px |
+| Icon | `brand.scale.16` | 16px |
+| Chevron | `brand.scale.8` | 8px |
 | Default fill | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Hover fill | `mapped.surface.action-hover` | `#E5F0F9` |
 | Selected fill | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -107,7 +92,7 @@ Figma `button/contextual`, node `193:3525`. Ticket NB-38. Code `src/ContextualBu
 
 The icon nodes did not return a fill of their own. The icon color is the label color for that state.
 
-Figma properties:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -128,27 +113,27 @@ This button is not a toolbar. A toolbar that places it is its own component.
 
 ## Text toolbar
 
-Figma `toolbar/contextual/text`, node `165:2947`. Ticket NB-39. Code `src/TextToolbar.tsx`.
+Ticket NB-39. Code `src/TextToolbar.tsx`.
 
 Every control is a contextual button with the unused slots turned off.
 
 - First group: font, size, weight, alignment. A divider sits on the right of the group.
-- Second group: bulleted list, numbered list, and link. Icon only. Underline and strikethrough are in the Figma group and left out on purpose.
+- Second group: bulleted list, numbered list, and link. Icon only. Underline and strikethrough are left out on purpose.
 - Size keeps the number in the label slot. A single click anywhere on the size button opens the presets. A double click edits the number.
 - The weight label reserves the width of “Bold Italic”.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.1000` |
-| Padding | `brand.scale.100` | 4px |
-| Gap inside a group | `brand.scale.50` | 2px |
-| Gap between groups | `brand.scale.100` | 4px |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.40` |
+| Padding | `brand.scale.4` | 4px |
+| Gap inside a group | `brand.scale.2` | 2px |
+| Gap between groups | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s 2.6px blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
-| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.4`) of padding before it |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -181,21 +166,21 @@ The typeface control opens the typeface menu. The size control opens the font si
 
 ## Text align popover
 
-Figma `toolbar/contextual/text/pop-over/text-align`, node `165:2948`. Ticket NB-40. Code `AlignPopover` in `src/TextToolbar.tsx`.
+Ticket NB-40. Code `AlignPopover` in `src/TextToolbar.tsx`.
 
 The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four contextual buttons, icon only: left, center, right, and justify. The current alignment is the selected button. The popover opens above a selected element and above an element while it is dragged. This frame has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
+| Height | none | 40px (`brand.scale.40`), from 4px padding and a 32px button |
 | Width | none | 142px, from the padding, four buttons, and the gaps |
-| Padding | `brand.scale.100` | 4px |
-| Gap | `brand.scale.50` | 2px |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.2` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px, outside the 142 by 40 box |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -211,27 +196,27 @@ The property list on this component was not in the saved frame read. It is not c
 
 Painted: one resting frame of four icon buttons.
 
-Not painted on this frame, as far as the saved read shows: hover and disabled. The button has no focus state. Whether Figma paints one of the four buttons as `selected` was not in that read. The app paints the current alignment with the button’s selected state.
+Not painted on this frame: hover and disabled. The button has no focus state. The app paints the current alignment with the button’s selected state.
 
 ## Menu item
 
-Figma `menu-item`, component set node `206:3727` (389 by 199). Spec frame `menu item`, node `193:3525`. Ticket NB-41. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
+Ticket NB-41. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
 
 A single row for a dropdown. The label sits on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between the label and that pair.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height, md | `brand.scale.800` | 32px |
-| Height, sm | `brand.scale.700` | 28px |
-| Padding, horizontal | `brand.scale.200` | 8px |
-| Gap between label and the caption group | `brand.scale.200` | 8px, and the row pushes the caption group to the far side |
-| Gap between caption and chevron | `brand.scale.100` | 4px |
+| Height, md | `brand.scale.32` | 32px |
+| Height, sm | `brand.scale.28` | 28px |
+| Padding, horizontal | `brand.scale.8` | 8px |
+| Gap between label and the caption group | `brand.scale.8` | 8px, and the row pushes the caption group to the far side |
+| Gap between caption and chevron | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the row has no stroke |
 | Font | `alias.font-family.body` | Geist |
 | Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px |
 | Caption size | `responsive.desktop.caption.md.size`, `responsive.desktop.caption.md.line-height-tight` | 10px / 10px. The row still writes 10px. Paragraph spacing is `not a token` |
-| Chevron | `brand.scale.300` | 12px, Lucide `chevron-right` |
+| Chevron | `brand.scale.12` | 12px, Lucide `chevron-right` |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -241,12 +226,14 @@ A single row for a dropdown. The label sits on the left. The caption and the sub
 | Label, disabled | `mapped.text.disabled` | `#909397` |
 | Caption, default, hover, and selected | `mapped.text.caption` | `#606264` |
 | Caption, disabled | `mapped.text.disabled` | `#909397` |
-| Chevron, default, hover, and selected | `mapped.text.caption` | `#606264`. The icon layer did not return a fill of its own. It reads as the caption color |
-| Chevron, disabled | `mapped.text.disabled` | `#909397` |
+| Chevron, default | `mapped.text.caption` | `#606264`. A real hover uses `mapped.icon.action-hover` |
+| Chevron, hover | `mapped.icon.action-hover` | `#1E3B58` |
+| Chevron, selected | `mapped.icon.action-selected` | `#1E3B58` |
+| Chevron, disabled | `mapped.icon.disabled` | `#909397` |
 
-The component set is two columns and four rows. The columns are the sizes. The rows are the states. The fills were matched to the action surface tokens by eye. The file request was rate limited, and the inspect panel was behind the Figma sign-up wall.
+The component set is two columns and four rows. The columns are the sizes. The rows are the states.
 
-Figma properties:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -264,45 +251,45 @@ Not painted: focus. A leading icon is not in the painted rows.
 
 ## Font style menu
 
-Figma node `165:2949`, on the contextual toolbar sheet. Ticket NB-42. Code `src/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
+Ticket NB-42. Code `src/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
 
 Four small menu items, caption and chevron off. The order is Regular, Bold, Italic, Bold Italic. The labels stay in Geist. They are not drawn in bold or italic.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | 104px. TODO token mismatch: Figma 104px. The label is narrower, and the extra space sits to its right |
+| Width | none | 104px. 104px. The label is narrower, and the extra space sits to its right |
 | Height | hug | 120px |
-| Padding | `brand.scale.100` | 4px |
+| Padding | `brand.scale.4` | 4px |
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
 
-The file request was rate limited. Padding, radius, and the stroke were read from the canvas. The first row is painted with the hover fill, `#E5F0F9`. The toolbar above that frame shows Bold Italic, so that row is the hover example. The live menu marks the current weight with the selected fill.
+The first row is painted with the hover fill, `#E5F0F9`. The live menu marks the current weight with the selected fill.
 
 The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 ## Typeface menu
 
-Figma node `168:3116`, on the contextual toolbar sheet. Ticket NB-43. Code `TypefaceMenu` in `src/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
+Ticket NB-43. Code `TypefaceMenu` in `src/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
 
 Five small menu items, caption and chevron off. The order is Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label uses its `alias.typeface` token. The menu item body font stays Geist on every other menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | 128px. TODO token mismatch: Figma 128px. The label is narrower, and the extra space sits to its right |
+| Width | none | 128px. 128px. The label is narrower, and the extra space sits to its right |
 | Height | hug | 148px |
-| Padding | `brand.scale.100` | 4px |
+| Padding | `brand.scale.4` | 4px |
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
 | Label, Geist Mono | `alias.typeface.geist-mono` | Geist Mono |
 | Label, Open Sans | `alias.typeface.open-sans` | Open Sans |
 | Label, Coming Soon | `alias.typeface.coming-soon` | Coming Soon |
@@ -317,7 +304,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
 
-The file request was rate limited. Padding, radius, and the stroke were read from the canvas, beside the font style menu. The first row, Geist Mono, is painted with the hover fill, `#E5F0F9`. The live menu marks the current family with the selected fill.
+The first row, Geist Mono, is painted with the hover fill, `#E5F0F9`. The live menu marks the current family with the selected fill.
 
 The rows use the menu item properties: size `sm`, caption off, chevron off. The frame itself exposes no properties.
 
@@ -329,23 +316,23 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 ## Font size menu
 
-Figma node `212:4004`, on the contextual toolbar sheet. Ticket NB-44. Code `FontSizeField` in `src/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
+Ticket NB-44. Code `FontSizeField` in `src/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
 
-Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.900` (36px) so the column does not change width with the digits. The labels stay in Geist.
+Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.36` (36px) so the column does not change width with the digits. The labels stay in Geist.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Row width | `brand.scale.900` | 36px. The same width on every row |
-| Width | `brand.scale.1100` | 44px hug. That is 4px padding, the 36px row, and 4px padding. The 1px stroke sits on that box |
+| Row width | `brand.scale.36` | 36px. The same width on every row |
+| Width | `brand.scale.44` | 44px hug. That is 4px padding, the 36px row, and 4px padding. The 1px stroke sits on that box |
 | Height | hug | 344px |
-| Padding | `brand.scale.100` | 4px |
+| Padding | `brand.scale.4` | 4px |
 | Gap | `brand.scale.0` | 0px |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.700`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
 | Font | `alias.font-family.body` | Geist |
 | Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px. Paragraph spacing is `not a token` |
 | Label, default | `mapped.text.action` | `#303132` |
@@ -360,7 +347,7 @@ There is no icon on this frame. Caption and chevron are off, so the menu item dr
 
 The frame has no divider.
 
-The rows use the menu item properties: size `sm`, caption off, chevron off, and a fixed width of `brand.scale.900`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
+The rows use the menu item properties: size `sm`, caption off, chevron off, and a fixed width of `brand.scale.36`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
 
 Painted: one resting frame. 14 is filled, and the toolbar above shows 14, so that row is the current size. The live menu marks the current size with the selected fill.
 
@@ -368,23 +355,23 @@ Not painted on this frame: hover and disabled. Those states belong to the menu i
 
 ## Icon button
 
-Figma `button/icon`, spec frame `button icon`, node `193:3525`. Ticket NB-46. Code `src/IconButton.tsx`. The trial page is `?trial=icon-button`.
+Ticket NB-46. Code `src/IconButton.tsx`. The trial page is `?trial=icon-button`.
 
 A square button whose only content is an icon. It is not a contextual button with the label turned off. Large is 32px, medium is 28px, and small is 20px. The default type has four states. The destructive type has three.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size, lg | `brand.scale.800` | 32px square |
-| Size, md | `brand.scale.700` | 28px square |
-| Size, sm | `brand.scale.500` | 20px square |
-| Padding, lg | `brand.scale.200` | 8px, the space left by a 16px icon in the 32px square |
-| Padding, md | `brand.scale.200` | 8px, the space left by a 12px icon in the 28px square |
-| Padding, sm | `brand.scale.100` | 4px, the space left by a 12px icon in the 20px square |
+| Size, lg | `brand.scale.32` | 32px square |
+| Size, md | `brand.scale.28` | 28px square |
+| Size, sm | `brand.scale.20` | 20px square |
+| Padding, lg | `brand.scale.8` | 8px, the space left by a 16px icon in the 32px square |
+| Padding, md | `brand.scale.8` | 8px, the space left by a 12px icon in the 28px square |
+| Padding, sm | `brand.scale.4` | 4px, the space left by a 12px icon in the 20px square |
 | Corner radius, lg and md | `alias.border-radius.lg` | 8px |
 | Corner radius, sm | `alias.border-radius.md` | 4px |
 | Stroke | none | the button has no stroke |
-| Icon, lg | `brand.scale.400` | 16px, Lucide |
-| Icon, md and sm | `brand.scale.300` | 12px, Lucide |
+| Icon, lg | `brand.scale.16` | 16px, Lucide |
+| Icon, md and sm | `brand.scale.12` | 12px, Lucide |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Fill, default hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, default selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -399,9 +386,7 @@ A square button whose only content is an icon. It is not a contextual button wit
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
-The file request was rate limited, and the property panel was behind the Figma sign-up wall. Fills were matched to the action and error surface tokens by eye. The icon slot in the spec is the case-sensitive glyph.
-
-Figma properties, read from the variant grid:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -418,34 +403,32 @@ This button is not a toolbar. A toolbar that places it is its own component.
 
 ## Hex input
 
-Figma `input/hex`, on the spec frame titled `input`. Ticket NB-47. Code `src/HexInput.tsx`. The trial page is `?trial=hex-input`.
+Ticket NB-47. Code `src/HexInput.tsx`. The trial page is `?trial=hex-input`.
 
 A hex field for the color toolbar that comes later. It is not that toolbar. Two labels sit in the box. `#` is constant. The hex code is the value the user types or pastes.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Width | none | 108px fixed. No spacing token is 108px |
-| Height | `brand.scale.700` | 28px hug |
-| Padding | `brand.scale.200` | 8px |
-| Gap | `brand.scale.100` | 4px between `#` and the hex code |
+| Height | `brand.scale.28` | 28px hug |
+| Padding | `brand.scale.8` | 8px |
+| Gap | `brand.scale.4` | 4px between `#` and the hex code |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Font | `alias.font-family.body` | Geist |
 | Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token` |
-| Text, every state | `mapped.text.default` | `#303132`. The Figma text style is named `default` |
+| Text, every state | `mapped.text.default` | `#303132` |
 | Fill, default | none | the field has no fill |
-| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9`. The Figma style is `action-hover` |
-| Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`). The Figma style is `default` |
+| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Stroke, default and hover | none | those variants have no stroke |
-| Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box. The Figma style is `action-ring-focus` |
+| Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box |
 | Shadow | not a token | excluded from the component |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
 There is no icon and no divider.
 
-The file request was rate limited. Sizes, padding, gap, radius, fills, and the stroke were read from the Figma property panel on the component set.
-
-Figma properties:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -463,36 +446,34 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 ## Color swatch
 
-Figma `color-swatch`, on the spec frame titled `color-swatch`, node `193:3525`. Ticket NB-48. Code `src/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
+Ticket NB-48. Code `src/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
 
 A round color choice for the fill and stroke toolbar, and for the color picker that comes later. It is not that toolbar. The disc is 24px. The action ring sits outside it.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size | `brand.scale.600` | 24px circle |
+| Size | `brand.scale.24` | 24px circle |
 | Corner radius | not a token | a full circle. No radius token is fully round |
 | Disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc on none and color, default only. Hover and selected have no disc stroke. Custom has no disc stroke |
 | None fill | `brand.foundation.white` | `#FFFFFF`. No mapped surface is white |
 | Slash color | `mapped.icon.disabled` | `#909397` |
 | Slash thickness | `alias.border-width.sm` | 2px |
-| Slash length | `brand.scale.500` | 20px, rotated 45 degrees so the ends stay off the disc stroke |
-| Color fill | `alias.swatch` | Fill and sticky notes use step 200. Stroke and noodles use step 500. The Figma specimen is `alias.swatch.purple.500`, `#BF66FF` |
+| Slash length | `brand.scale.20` | 20px, rotated 45 degrees so the ends stay off the disc stroke |
+| Color fill | `alias.swatch` | Fill and sticky notes use step 200. Stroke and noodles use step 500. The specimen is `alias.swatch.purple.500`, `#BF66FF` |
 | Custom wheel | not a token | Angular gradient. Stops, each at 100% opacity: 0% `#F43F5E`, 14% `#F59E0B`, 29% `#EAB308`, 43% `#22C55E`, 57% `#06B6D4`, 71% `#6366F1`, 86% `#D946EF`, 100% `#F43F5E`. None of these colors are tokens. 0% sits at the left, matching the stop handles on the frame |
-| Custom preview | the picker color, `brand.scale.300` | 12px circle. The Figma specimen shows purple. That color is not an `alias.swatch`, and it does not follow the color type |
+| Custom preview | the picker color, `brand.scale.12` | 12px circle. The specimen shows purple. That color is not an `alias.swatch`, and it does not follow the color type |
 | Custom preview stroke | `brand.foundation.white`, `alias.border-width.xsm` | `#FFFFFF`, 1px, drawn inside the 12px circle |
-| Custom wheel thickness | `brand.scale.150` | 6px, the space from the 24px disc edge to the 12px preview |
+| Custom wheel thickness | `brand.scale.6` | 6px, the space from the 24px disc edge to the 12px preview |
 | Ring, default | none | the disc has no action ring |
-| Ring, hover | `mapped.border.action-ring`, `alias.border-width.md` | `#B7D4F1`, 4px, drawn outside the disc. The Figma style is `action-ring`. The frame measures 3px |
-| Ring, selected | `mapped.border.action-ring-focus`, `alias.border-width.md` | `#4A94DB`, 4px, drawn outside the disc. The Figma style on the frame is `action-ring-selected`. The swatch uses `action-ring-focus` |
-| Shadow | not a token | Figma uses a drop shadow for the action ring. The code uses an outline stroke. The frame shadow is excluded |
+| Ring, hover | `mapped.border.action-ring`, `alias.border-width.md` | `#B7D4F1`, 4px, drawn outside the disc. The frame measures 3px |
+| Ring, selected | `mapped.border.action-ring-focus`, `alias.border-width.md` | `#4A94DB`, 4px, drawn outside the disc. The swatch uses `action-ring-focus` |
+| Shadow | not a token | The code uses an outline stroke. The frame shadow is excluded |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
 There is no text and no divider. The slash is part of the none type, not a separate icon slot.
 
-The file request was rate limited. Sizes and colors were read from the rendered frame at 400%. The property panel was behind the Figma sign-up wall.
-
-Figma properties, read from the variant grid and the spec labels:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -507,13 +488,13 @@ Custom can be selected. Its inner circle is the color it is given. On the color 
 
 Painted states: `default`, `hover`, and `selected`, on `none`, `color`, and `custom`.
 
-Not painted: focus, disabled, and pressed. Keyboard focus uses the hover ring at 4px so the swatch stays visible. That ring is not a Figma state.
+Not painted: focus, disabled, and pressed. Keyboard focus uses the hover ring at 4px so the swatch stays visible.
 
 This swatch is not a toolbar. The color picker toolbar that places it is its own component.
 
 ## Color picker toolbar
 
-Figma frame titled `color-swatch`, node `193:3525`. Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
+Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
 
 The toolbar that sits below a selected sticky note, and the menu the noodle color control opens. Shape fill and stroke still use the Phase 1 bars. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker. The picker is its own panel beside the toolbar. It opens from the custom swatch and does not move the toolbar. It sits on the right when that side fits, and on the left when the toolbar is against the right edge.
 
@@ -527,40 +508,40 @@ The saturation and hue handles can be dragged. A pointer press on the picker is 
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Padding | `brand.scale.200` | 8px on the toolbar and on the picker panel. The Figma frame is 12px, `brand.scale.300` |
+| Padding | `brand.scale.8` | 8px on the toolbar and on the picker panel. |
 | Corner radius | `alias.border-radius.xxl` | 16px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the text toolbar already uses |
-| Blur | not a token | the same 24px frost the text toolbar already uses. Figma’s blur is ignored |
-| Section gap | `brand.scale.400` | 16px between the swatch grid and the hex row |
-| Picker gap | `brand.scale.100` | 4px from the toolbar’s outer edge to the picker panel. The picker is top aligned. Right when that side fits. Left when the toolbar is against the right edge |
+| Blur | not a token | the same 24px frost the text toolbar already uses |
+| Section gap | `brand.scale.16` | 16px between the swatch grid and the hex row |
+| Picker gap | `brand.scale.4` | 4px from the toolbar’s outer edge to the picker panel. The picker is top aligned. Right when that side fits. Left when the toolbar is against the right edge |
 | Content width | none | The column is the swatch grid, 152px: five 24px discs and four 8px gaps. The hex row matches that width. No spacing token is 152px |
-| Swatch gap | `brand.scale.200` | 8px |
+| Swatch gap | `brand.scale.8` | 8px |
 | Swatch columns | five | The leading disc is chosen by the caller. This trial keeps none. Sticky passes neutral at step 200. Noodle passes neutral at step 500. Then `alias.swatch` in token-file order, then custom |
 | Swatch | color swatch | 24px disc. The specimen uses step 200. Tomato on the frame is step 500 |
 | Picker | react-colorful `HexColorPicker` | saturation and hue, in its own panel beside the toolbar. No alpha bar |
 | Saturation height | none | 108px, including the black band. No spacing token is 108px |
 | Saturation radius | `alias.border-radius.lg` on the top corners, `alias.border-radius.none` on the bottom | 8px on top. The bottom stays square where the black band meets the hue |
-| Black band | `brand.foundation.black`, `brand.scale.300` | `#000000`, 12px, the bottom border of the saturation field |
-| Hue height | `brand.scale.400` | 16px |
+| Black band | `brand.foundation.black`, `brand.scale.12` | `#000000`, 12px, the bottom border of the saturation field |
+| Hue height | `brand.scale.16` | 16px |
 | Hue radius | `alias.border-radius.none` on the top corners, `alias.border-radius.lg` on the bottom | 0px on top, 8px on the bottom. The picker container’s radius is these two pieces: saturation on top, hue on the bottom |
 | Picker stack gap | `brand.scale.0` | 0px. The hue sits against the black band |
-| Pointer | `brand.scale.500` | 20px |
+| Pointer | `brand.scale.20` | 20px |
 | Pointer stroke | `brand.foundation.white`, `alias.border-width.xsm` | `#FFFFFF`, 1px |
 | Pointer shadow | not a token | the small shadow react-colorful paints on the handle |
 | Hex field | hex input | The row matches the 152px grid, so this field shrinks below its 108px frame. The hex input component itself stays 108px. A click focuses it and selects the code. A click outside, or on copy or pipette, returns it to default. The value is the selected swatch, or the custom color when none or custom is selected |
 | Icon buttons | icon button, `md` | 28px. Copy, then pipette |
-| Icon gap | `brand.scale.100` | 4px |
+| Icon gap | `brand.scale.4` | 4px |
 | Icon, copy | Lucide `Copy` | 12px, the medium icon button glyph |
 | Icon, pipette | Lucide `Pipette` | 12px, the medium icon button glyph |
 | Dot grid | not a token | excluded from the component |
 
 There is no divider.
 
-The picker container is the frame `react-colorful container`, node `263:2593`. Its outline is one rounded rectangle. The saturation carries the top corners. The hue is square against the black band and carries the bottom corners.
+The picker container is one rounded rectangle. The saturation carries the top corners. The hue is square against the black band and carries the bottom corners.
 
-The disc is 24px, `brand.scale.600`. The panel padding is 8px, `brand.scale.200`. The Figma frame is 12px. The panel corner is 16px, `alias.border-radius.xxl`. The swatch centers are 32px apart: the 24px disc plus an 8px gap. The picker panel uses that same padding, corner, stroke, fill, shadow, and blur, and sits 4px, `brand.scale.100`, off the toolbar. It stays out of the toolbar’s box, so the centered bar does not shift when it opens. The right side is used when the picker fits there. The left side is used when the toolbar is against the right edge.
+The disc is 24px, `brand.scale.24`. The panel padding is 8px, `brand.scale.8`. The panel corner is 16px, `alias.border-radius.xxl`. The swatch centers are 32px apart: the 24px disc plus an 8px gap. The picker panel uses that same padding, corner, stroke, fill, shadow, and blur, and sits 4px, `brand.scale.4`, off the toolbar. It stays out of the toolbar’s box, so the centered bar does not shift when it opens. The right side is used when the picker fits there. The left side is used when the toolbar is against the right edge.
 
 The frame does not expose a variant set that could be read. The two states are two instances.
 
@@ -576,7 +557,7 @@ The toolbar adds no z-index. Selection chrome already uses FloatingPanel. This t
 
 ## Transparent sticky
 
-No Figma frame for this pass. Ticket NB-51. Code `src/StickyNode.tsx`, with the sticky toolbar in `StickyColorToolbar` passing `leading="neutral"` and `scale={200}` to `src/ColorPickerToolbar.tsx`. A new note is placed from `beginSticky` in `src/App.tsx`.
+Ticket NB-51. Code `src/StickyNode.tsx`, with the sticky toolbar in `StickyColorToolbar` passing `leading="neutral"` and `scale={200}` to `src/ColorPickerToolbar.tsx`. A new note is placed from `beginSticky` in `src/App.tsx`.
 
 The first disc on a sticky is `alias.swatch.neutral.200`. Choosing it stores `{ "kind": "swatch", "family": "neutral" }`. The note paints that color-mix and the same 24px frost the toolbars already use. A saved `{ "kind": "none" }` stays clear, with no frost, and no disc is selected. Another swatch or a custom color stays as stored. A new note stores `{ "kind": "swatch", "family": "purple" }`, so the purple disc is selected. `data.color` stays `yellow`, `pink`, `blue`, or `green` so older files still open. The new note’s legacy name is `yellow`. The paint is what shows.
 
@@ -592,8 +573,6 @@ The hex field is six digits, so neutral shows `FDFBF7`, the source of the mix (`
 
 There is no divider.
 
-The note has no Figma properties. The disc uses the color swatch properties.
-
 Painted: the neutral disc in default, hover, and selected, and the frosted note when that disc is chosen. A new note paints purple.
 
 Not painted: a none disc on the sticky toolbar. A saved none keeps a clear note and selects no disc.
@@ -602,7 +581,7 @@ The toolbar and the picker are the color picker toolbar inside selection chrome.
 
 ## Noodle toolbar
 
-Figma `toolbar/contextual/noodle`. Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The pill slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar. The component node id was not in the property panel. The file link is the spec page, node `193:3525`.
+Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The pill slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar.
 
 Every control is a contextual button with the unused slots turned off.
 
@@ -613,16 +592,16 @@ The bar is 40px high and hugs its width. The specimen measures 277px wide. That 
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.1000`. The panel reads H 40 |
-| Padding | `brand.scale.100` | 4px |
-| Gap inside a group | `brand.scale.50` | 2px. The first group and the arrow group both read gap 2 |
-| Gap between groups | `brand.scale.100` | 4px. The bar reads gap 4 |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.40`. The panel reads H 40 |
+| Padding | `brand.scale.4` | 4px |
+| Gap inside a group | `brand.scale.2` | 2px. The first group and the arrow group both read gap 2 |
+| Gap between groups | `brand.scale.4` | 4px. The bar reads gap 4 |
 | Corner radius | `alias.border-radius.xl` | 12px. The panel reads 12 |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px. The fill style name was not opened. The pill matches the text toolbar beside it, so the bar uses that stroke |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`). The fill style name was not opened. The pill matches the text toolbar beside it |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
-| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.100`) of padding before it |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group, with 4px (`brand.scale.4`) of padding before it |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -631,7 +610,7 @@ The bar is 40px high and hugs its width. The specimen measures 277px wide. That 
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
-| Color disc | `brand.scale.400` | 16px, the contextual button icon slot. It paints the noodle color. It is not the 24px color swatch |
+| Color disc | `brand.scale.16` | 16px, the contextual button icon slot. It paints the noodle color. It is not the 24px color swatch |
 | Color disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties. These were read from the property panel:
@@ -651,26 +630,26 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
+The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 ## Line weight and line type menu
 
-Figma frame under `toolbar/contextual/noodle`, the menu labeled as the truncated `toolbar/contex...` beside the bar. Ticket NB-50. The row is `src/StrokeProperty.tsx`, ticket NB-60. `src/NoodleToolbar.tsx` opens it and writes the noodle.
+Ticket NB-50. The row is `src/StrokeProperty.tsx`, ticket NB-60. `src/NoodleToolbar.tsx` opens it and writes the noodle.
 
 Three weight icons, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. Choosing one leaves the menu open, so the other group can be set too.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
-| Padding | `brand.scale.100` | 4px |
-| Gap inside a group | `brand.scale.50` | 2px |
-| Gap between groups | `brand.scale.100` | 4px |
+| Height | none | 40px (`brand.scale.40`), from 4px padding and a 32px button |
+| Padding | `brand.scale.4` | 4px |
+| Gap inside a group | `brand.scale.2` | 2px |
+| Gap between groups | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
-| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.100`) of padding before it |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.4`) of padding before it |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -690,20 +669,20 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Noodle type menu
 
-Figma frame under `toolbar/contextual/noodle`, the menu on the right of the three open rows. Ticket NB-50. Code is the shape menu in `src/NoodleToolbar.tsx`.
+Ticket NB-50. Code is the shape menu in `src/NoodleToolbar.tsx`.
 
 Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `type-elbow`, and `type-curve`. The current shape is the selected button. Choosing one closes the menu. This frame has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
-| Padding | `brand.scale.100` | 4px |
-| Gap | `brand.scale.50` | 2px |
+| Height | none | 40px (`brand.scale.40`), from 4px padding and a 32px button |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.2` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -723,20 +702,20 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Arrow menu
 
-Figma frame under `toolbar/contextual/noodle`, the middle open row. Ticket NB-50. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`.
+Ticket NB-50. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`.
 
 Six icon buttons, one for each arrowhead the noodle already has: none, arrow, open, triangle, circle, and diamond. The glyphs are the current arrow icons. The current end is the selected button. Choosing one closes the menu. Start and end open the same menu with their own selection. This frame has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
-| Padding | `brand.scale.100` | 4px |
-| Gap | `brand.scale.50` | 2px |
+| Height | none | 40px (`brand.scale.40`), from 4px padding and a 32px button |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.2` | 2px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -758,38 +737,38 @@ The toolbar and these menus add no z-index. The bar is already in FloatingPanel 
 
 ## Noodle stroke color
 
-No Figma frame for this pass. Ticket NB-52. Code is `NoodleColorMenu` in `src/NoodleToolbar.tsx`. It opens `src/ColorPickerToolbar.tsx` with `scale={500}` and `leading="neutral"`. A new noodle comes from `defaultNoodleData` in `src/noodleData.ts`. The connect preview in `src/connectionLine.tsx` and `src/ConnectMode.tsx` uses that same color.
+Ticket NB-52. Code is `NoodleColorMenu` in `src/NoodleToolbar.tsx`. It opens `src/ColorPickerToolbar.tsx` with `scale={500}` and `leading="neutral"`. A new noodle comes from `defaultNoodleData` in `src/noodleData.ts`. The connect preview in `src/connectionLine.tsx` and `src/ConnectMode.tsx` uses that same color.
 
-The color control on the noodle bar stays a contextual button. Its 16px disc paints the stroke. Opening it shows the color picker toolbar, `brand.scale.100` (4px) under the painted pill. The first disc is `alias.swatch.neutral.500`, which is `alias.cool-neutral.900` (`#303132`). None is not offered. The other discs are `alias.swatch` at step 500, then custom. A new noodle stores `#303132`, and the neutral disc is selected. The connect preview uses that hex.
+The color control on the noodle bar stays a contextual button. Its 16px disc paints the stroke. Opening it shows the color picker toolbar, `brand.scale.4` (4px) under the painted pill. The first disc is `alias.swatch.neutral.500`, which is `alias.cool-neutral.900` (`#303132`). None is not offered. The other discs are `alias.swatch` at step 500, then custom. A new noodle stores `#303132`, and the neutral disc is selected. The connect preview uses that hex.
 
-A saved stroke that matches a step-500 swatch selects that disc. Any other saved hex selects custom and keeps that stroke. Opening custom from a swatch copies that swatch into the picker, so the stroke stays put until a drag, a hex edit, or the pipette. The custom disc stays on `EBCFFF` until custom is the selection. The picker is its own panel, `brand.scale.100` (4px) from this toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. It stays out of the toolbar’s box, so opening it does not move the noodle bar or this toolbar.
+A saved stroke that matches a step-500 swatch selects that disc. Any other saved hex selects custom and keeps that stroke. Opening custom from a swatch copies that swatch into the picker, so the stroke stays put until a drag, a hex edit, or the pipette. The custom disc stays on `EBCFFF` until custom is the selection. The picker is its own panel, `brand.scale.4` (4px) from this toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge. It stays out of the toolbar’s box, so opening it does not move the noodle bar or this toolbar.
 
 The menu mounts only while Color is open. A palette swatch or the neutral disc closes the picker and leaves the menu open. Closing Color, or clicking the canvas, unmounts the menu. The next open starts collapsed.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Default stroke | `alias.swatch.neutral.500` | `alias.cool-neutral.900`, `#303132`. `alias.swatch.neutral` does not use `brand.neutral` |
-| Leading disc | color swatch | 24px, `brand.scale.600`. Step 500. Neutral. None is not offered |
+| Leading disc | color swatch | 24px, `brand.scale.24`. Step 500. Neutral. None is not offered |
 | Palette | `alias.swatch` step 500 | purple `#BF66FF`, sky `#66C7FF`, lime `#A5F075`, orange `#FFC066`, yellow `#F0DE75`, coral `#FF8F66`, tomato `#FF7066`, pink `#FF99BB` |
 | Custom disc | color swatch, custom | `EBCFFF` until custom is selected, then the picker color |
-| Padding | `brand.scale.200` | 8px on the toolbar and on the picker panel |
+| Padding | `brand.scale.8` | 8px on the toolbar and on the picker panel |
 | Corner radius | `alias.border-radius.xxl` | 16px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the text toolbar already uses |
 | Blur | not a token | the same 24px frost the text toolbar already uses |
-| Section gap | `brand.scale.400` | 16px between the swatch grid and the hex row |
-| Swatch gap | `brand.scale.200` | 8px |
-| Picker gap | `brand.scale.100` | 4px from this toolbar’s outer edge. Top aligned. Right when that side fits. Left when the toolbar is against the right edge |
+| Section gap | `brand.scale.16` | 16px between the swatch grid and the hex row |
+| Swatch gap | `brand.scale.8` | 8px |
+| Picker gap | `brand.scale.4` | 4px from this toolbar’s outer edge. Top aligned. Right when that side fits. Left when the toolbar is against the right edge |
 | Hex field | hex input | the selected swatch, or the custom color when custom is selected |
-| Text, every state | `mapped.text.default` | `#303132`. The Figma text style is `body/sm/tight`, 12px / 12px. Paragraph spacing is `not a token` |
-| Icon buttons | icon button, `md` | 28px, `brand.scale.700`. Copy, then pipette. Default type |
+| Text, every state | `mapped.text.default` | `#303132`. Paragraph spacing is `not a token` |
+| Icon buttons | icon button, `md` | 28px, `brand.scale.28`. Copy, then pipette. Default type |
 | Icon, default | `mapped.icon.action` | `#303132` |
 | Icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Icon, disabled | `mapped.icon.disabled` | `#909397` |
-| Icon, copy | Lucide `Copy` | 12px, `brand.scale.300` |
-| Icon, pipette | Lucide `Pipette` | 12px, `brand.scale.300` |
+| Icon, copy | Lucide `Copy` | 12px, `brand.scale.12` |
+| Icon, pipette | Lucide `Pipette` | 12px, `brand.scale.12` |
 | Divider | none | this toolbar has no divider |
 
 The color picker toolbar’s caller props on this menu:
@@ -807,29 +786,29 @@ The toolbar and the picker sit in the color menu’s FloatingPanel on the dropdo
 
 ## Thumb
 
-Figma `slider/thumb`, on the spec frame titled `slider`, node `172:1794`. Ticket NB-53. Code `src/SliderThumb.tsx`. The trial page is `?trial=slider-thumb`.
+Ticket NB-53. Code `src/SliderThumb.tsx`. The trial page is `?trial=slider-thumb`.
 
 A disc for the fill opacity slider. It is not that slider. The ring sits outside the disc. `sm` is 12px and is the default. `md` is 16px, the disc on the sheet.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size, sm | `brand.scale.300` | 12px circle. This is the default |
-| Size, md | `brand.scale.400` | 16px circle. The specimen is this disc |
+| Size, sm | `brand.scale.12` | 12px circle. This is the default |
+| Size, md | `brand.scale.16` | 16px circle. The specimen is this disc |
 | Corner radius | not a token | a full circle. The panel reads 9999. No radius token is fully round |
 | Fill, every state | `mapped.surface.action-solid` | `#FCFDFE` |
 | Stroke, default | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, drawn inside the disc |
 | Stroke, disabled | `mapped.border.disabled`, `alias.border-width.xsm` | `#D8DCE2`, 1px, drawn inside the disc |
 | Stroke, hover and pressed | none | the stroke is hidden |
 | Ring, default and disabled | none | the disc has no ring. A drop shadow sits on the layer and is hidden |
-| Ring, hover | `mapped.border.action-ring`, `alias.border-width.sm` | `#B7D4F1`, 2px, drawn outside the disc. Figma uses a drop shadow |
-| Ring, pressed | `mapped.border.action-ring-pressed`, `alias.border-width.sm` | `#6EA9E2`, 2px, drawn outside the disc. Figma uses a drop shadow. The sheet writes focus over this disc |
-| Shadow | not a token | Figma uses a drop shadow for the ring. The code uses an outline. The hidden shadow on default and disabled is not painted |
+| Ring, hover | `mapped.border.action-ring`, `alias.border-width.sm` | `#B7D4F1`, 2px, drawn outside the disc |
+| Ring, pressed | `mapped.border.action-ring-pressed`, `alias.border-width.sm` | `#6EA9E2`, 2px, drawn outside the disc. The sheet writes focus over this disc |
+| Shadow | not a token | The code uses an outline. The hidden shadow on default and disabled is not painted |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
 There is no text and no divider.
 
-Figma properties, read from the component set:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -838,21 +817,21 @@ Figma properties, read from the component set:
 
 Painted states: `default`, `hover`, `pressed`, and `disabled`, on the 16px disc. The trial also paints the 12px disc.
 
-Not painted: focus. The sheet writes focus over the pressed disc. Keyboard focus on the fill opacity slider uses the hover ring so the thumb stays visible. That ring is not a Figma state.
+Not painted: focus. The sheet writes focus over the pressed disc. Keyboard focus on the fill opacity slider uses the hover ring so the thumb stays visible.
 
 This thumb is not a slider. The fill opacity slider that places it is its own component.
 
 ## Track
 
-Figma `slider/track/color-opacity`, on the spec frame titled `slider`, node `172:1794`. Ticket NB-54. Code `src/SliderTrack.tsx`. The trial page is `?trial=slider-track`.
+Ticket NB-54. Code `src/SliderTrack.tsx`. The trial page is `?trial=slider-track`.
 
 A 120px pill. A checker sits under a fade from clear to the swatch color. It is not the slider. `sm` is 8px. `md` is 12px and is the default.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Width | none | 120px. No spacing token is 120px |
-| Height, sm | `brand.scale.200` | 8px |
-| Height, md | `brand.scale.300` | 12px. This is the default |
+| Height, sm | `brand.scale.8` | 8px |
+| Height, md | `brand.scale.12` | 12px. This is the default |
 | Corner radius | not a token | a full pill. The panel reads 200. No radius token is fully round |
 | Checker | not a token | the image fill. Squares are `brand.foundation.white` (`#FFFFFF`) and `mapped.border.disabled` (`#D8DCE2`), 8px |
 | Gradient | the swatch color | white at 0% opacity to the swatch at 100%. The specimen is `#6579F8`. That color is not a token |
@@ -865,7 +844,7 @@ There is no text and no divider. The color is the swatch the caller passes.
 
 | Property | Kind | Values |
 | --- | --- | --- |
-| size | code | `sm`, `md`. The default is `md`. Figma was not re-read for a size variant |
+| size | code | `sm`, `md`. The default is `md` |
 
 Painted: `md` and `sm`. The sheet draws the pill under the heading. The trial draws `md` twice, once in the specimen color and once in purple, then `sm`.
 
@@ -875,7 +854,7 @@ This track is not a slider. The fill opacity slider that places it is its own co
 
 ## Fill opacity slider
 
-Figma `slider/color-opacity`, on the spec frame titled `slider`, node `172:1794`. Ticket NB-55. Code `src/FillOpacitySlider.tsx`. The trial page is `?trial=fill-opacity`.
+Ticket NB-55. Code `src/FillOpacitySlider.tsx`. The trial page is `?trial=fill-opacity`.
 
 The row in the shape toolbar, after the fill control, uses the `sm` track. The specimen is 154 by 16 and reads 50% on the `md` track. Dragging the thumb sets the percent. A double click on the percent edits the number. Enter commits. Escape restores the previous number.
 
@@ -883,15 +862,15 @@ The track shows the swatch color it is given. The trial uses the specimen `#6579
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | the thumb | `sm` is 12px, `brand.scale.300`, and it is the default. `md` is 16px, `brand.scale.400`. The track is centered on the thumb |
+| Height | the thumb | `sm` is 12px, `brand.scale.12`, and it is the default. `md` is 16px, `brand.scale.16`. The track is centered on the thumb |
 | Width | none | the track is 120px. The percent slot is the width of `100%` with tabular figures, and the number is left-aligned. No spacing token is 120px. The specimen hugs `50%` at about 26px |
-| Gap | `brand.scale.400` | 16px between the track and the percent. At 100% the 12px thumb hangs 6px past the track. The 16px thumb hangs 8px. The specimen gap is 8px, with the thumb at 50% |
+| Gap | `brand.scale.16` | 16px between the track and the percent. At 100% the 12px thumb hangs 6px past the track. The 16px thumb hangs 8px. The specimen gap is 8px, with the thumb at 50% |
 | Track, sm | track | 120 by 8. This is the slider default, with the 12px thumb |
 | Track, md | track | 120 by 12. The fade ends at the swatch color. Paired with the 16px thumb |
 | Thumb | thumb | 16px, centered on the value, painted above the track. Default at rest. Hover while the pointer is over the row. Pressed while dragging. Disabled when the slider is disabled |
 | Font | `alias.font-family.body` | Geist |
 | Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token` |
-| Text | `mapped.text.default` | `#303132`. The Figma fill is `#334155` |
+| Text | `mapped.text.default` | `#303132` |
 | Text, disabled | `mapped.text.disabled` | `#909397` |
 | Stroke | none | the row has no stroke |
 | Fill | none | the row has no fill |
@@ -917,7 +896,7 @@ This slider is not a toolbar. The shape toolbar places it and uses FloatingPanel
 
 ## Shape toolbar
 
-Figma `toolbar/contextual/shape-color`, on the spec frame titled `shape toolbar`, node `193:3525`. The frame measures 622 by 548, including the callouts. Ticket NB-56. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
+Ticket NB-56. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
 
 Every control is a contextual button with the unused slots turned off, except the fill opacity slider, which is the slider component.
 
@@ -929,17 +908,17 @@ Shape swap opens the shape swatch, the five kinds in the existing order. Fill op
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.1000`. The panel reads H 40 |
-| Padding | `brand.scale.100` | 4px |
-| Gap inside a group | `brand.scale.50` | 2px. Shape swap is alone. Stroke and line weight share a group |
-| Gap before the slider | `brand.scale.200` | 8px. The fill button and the slider are one group |
-| Gap between groups | `brand.scale.100` | 4px |
+| Height | none | hug. 4px padding and a 32px button make 40px, which is `brand.scale.40`. The panel reads H 40 |
+| Padding | `brand.scale.4` | 4px |
+| Gap inside a group | `brand.scale.2` | 2px. Shape swap is alone. Stroke and line weight share a group |
+| Gap before the slider | `brand.scale.8` | 8px. The fill button and the slider are one group |
+| Gap between groups | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
-| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group and the second group, with 4px (`brand.scale.100`) of padding before it |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the first group and the second group, with 4px (`brand.scale.4`) of padding before it |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -951,9 +930,9 @@ Shape swap opens the shape swatch, the five kinds in the existing order. Fill op
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
-| Color disc | `brand.scale.400` | 16px, the contextual button icon slot. It paints the color swatch’s default look, scaled from the 24px disc. Type none or color. Not hover, selected, or custom |
+| Color disc | `brand.scale.16` | 16px, the contextual button icon slot. It paints the color swatch’s default look, scaled from the 24px disc. Type none or color. Not hover, selected, or custom |
 | Color disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px, on the default disc |
-| Slider | fill opacity slider, `sm` | 8px track, `brand.scale.200`, centered on the 12px thumb, `brand.scale.300`. The track uses the fill. No fill uses `#C0C4C9`. The percent is left-aligned in a slot the width of `100%`, with 16px before it |
+| Slider | fill opacity slider, `sm` | 8px track, `brand.scale.8`, centered on the 12px thumb, `brand.scale.12`. The track uses the fill. No fill uses `#C0C4C9`. The percent is left-aligned in a slot the width of `100%`, with 16px before it |
 | New shape fill | `alias.swatch.purple.200` | `#EBCFFF`. The fill grid is step 200. Choosing purple writes this hex and selects the purple disc |
 | New shape stroke | `alias.swatch.purple.500` | `#BF66FF`. The stroke grid is step 500. Choosing purple writes this hex and selects the purple disc |
 
@@ -966,7 +945,7 @@ The component exposes no properties of its own. The buttons inside set the conte
 | Line weight | left icon off, label off, right icon on, dropdown on | `line-weight-menu` |
 | Fill | left icon off, label on (`Fill`), right icon on, dropdown on | the disc is type color on the specimen |
 
-The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`, drawn by `src/ShapeSwatch.tsx`. The bottom Shapes tool opens the same row. Four icons are painted in Figma: ellipse, diamond, rectangle, triangle. The app also draws rounded rectangle, in the existing kind order. The current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind closes the menu. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
+The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`, drawn by `src/ShapeSwatch.tsx`. The bottom Shapes tool opens the same row. The kinds are rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind closes the menu. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
 
 The open fill menu is the color picker toolbar at step 200, with none. Choosing purple writes `#EBCFFF` and selects the purple disc. The open stroke menu is the same picker at step 500, with none. Choosing purple writes `#BF66FF` and selects the purple disc. A saved hex that is not on that menu’s step selects custom and keeps that paint, including `#bfdbfe` and `#334155`. Clearing fill or stroke clears only that paint. The button disc stays type color for a hex, and type none when that paint is cleared. The note on the frame says the disc is not hover, not selected, and not the custom type.
 
@@ -974,28 +953,28 @@ Painted on the bar: one resting frame. The buttons in that frame are resting. Th
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state. The app paints the current kind, weight, and line type with the button’s selected state.
 
-Each menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
+Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 The toolbar and these menus add no z-index. The bar is already in FloatingPanel on the toolbar layer. The menus use FloatingPanel on the dropdown layer. They stay above a selected shape and a shape that is mid-drag.
 
 ## Stroke property
 
-Figma `toolbar/contextual/shape/pop-over/stroke-property`. The noodle bar opens the same row from the menu under `toolbar/contextual/noodle`. The node id was not read. Figma is out of scope for this ticket. Ticket NB-60. Code `src/StrokeProperty.tsx`. `src/ShapeToolbar.tsx` and `src/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
+Ticket NB-60. Code `src/StrokeProperty.tsx`. `src/ShapeToolbar.tsx` and `src/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
 
 Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. A mixed value leaves that group unselected. Choosing one leaves the menu open, so the other group can be set too. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | none | 40px (`brand.scale.1000`), from 4px padding and a 32px button |
-| Padding | `brand.scale.100` | 4px |
-| Gap inside a group | `brand.scale.50` | 2px |
-| Gap between groups | `brand.scale.100` | 4px |
+| Height | none | 40px (`brand.scale.40`), from 4px padding and a 32px button |
+| Padding | `brand.scale.4` | 4px |
+| Gap inside a group | `brand.scale.2` | 2px |
+| Gap between groups | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
-| Blur | not a token | the existing 24px blur. Figma’s blur is ignored |
-| Shadow | not a token | the existing `shadow-lg`. Figma’s shadow is ignored |
-| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.100`) of padding before it |
+| Blur | not a token | the existing 24px blur |
+| Shadow | not a token | the existing `shadow-lg` |
+| Divider | `mapped.border.default`, `alias.border-width.xsm` | 1px `#D8DCE2` on the right of the weights, with 4px (`brand.scale.4`) of padding before it |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -1007,7 +986,7 @@ Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-t
 
 The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
 
-The property list was not opened. Figma is out of scope for this ticket. The code takes the current weight, the current line style, and a mixed flag for each group.
+The property list was not opened. The code takes the current weight, the current line style, and a mixed flag for each group.
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -1020,19 +999,19 @@ Painted: one resting row. The app paints the current weight and the current line
 
 Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
 
-The menu sits `brand.scale.100` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board. The row adds no z-index. Each toolbar opens it in FloatingPanel on the dropdown layer. It stays above a selected element and an element that is mid-drag.
+The menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board. The row adds no z-index. Each toolbar opens it in FloatingPanel on the dropdown layer. It stays above a selected element and an element that is mid-drag.
 
 ## Shape swatch
 
-Figma `toolbar/contextual/shape/pop-over/shape-swatch`. The node id was not read. Figma is out of scope for this ticket. Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
+Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
 
 Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | `brand.scale.1000` | 40px, from 4px padding and a 32px button |
-| Padding | `brand.scale.100` | 4px |
-| Gap | `brand.scale.50` | 2px between the icon buttons |
+| Height | `brand.scale.40` | 40px, from 4px padding and a 32px button |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.2` | 2px between the icon buttons |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
@@ -1048,9 +1027,9 @@ Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 
-The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on. Each icon is 16px, `brand.scale.400`.
+The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on. Each icon is 16px, `brand.scale.16`.
 
-The property list was not opened. Figma is out of scope for this ticket. The code takes the current kind. Null means mixed.
+The property list was not opened. The code takes the current kind. Null means mixed.
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -1060,37 +1039,37 @@ Painted: one resting row. The app paints the current kind with the button’s se
 
 Not painted, as far as the frame shows: hover and disabled. The button has no focus state.
 
-Each menu sits `brand.scale.100` (4px) from the control that opened it. On the shape toolbar the portal host is a zero-size box at the top of the layer, so the gap is measured from the painted pill. The bottom Shapes menu uses the same gap from the bottom toolbar. A menu moves above the control only when it would leave the board. The row adds no z-index. Each caller opens it in FloatingPanel on the dropdown layer. The shape-toolbar menu stays above a selected shape and a shape that is mid-drag.
+Each menu sits `brand.scale.4` (4px) from the control that opened it. On the shape toolbar the portal host is a zero-size box at the top of the layer, so the gap is measured from the painted pill. The bottom Shapes menu uses the same gap from the bottom toolbar. A menu moves above the control only when it would leave the board. The row adds no z-index. Each caller opens it in FloatingPanel on the dropdown layer. The shape-toolbar menu stays above a selected shape and a shape that is mid-drag.
 
 ## Main button
 
-Figma `button/main`, spec frame `main button`, node `288:2302`. Ticket NB-63. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`.
+Ticket NB-63. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`.
 
 A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the label and both icons, the width follows that content. The default type has four states. The destructive type has three.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Height | `brand.scale.1000` | 40px |
-| Width, icon only | `brand.scale.1000` | 40px. One 16px icon and 12px padding on each side |
-| Padding | `brand.scale.300` | 12px |
-| Gap | `brand.scale.200` | 8px between the left icon, the label, and the right icon |
+| Height | `brand.scale.40` | 40px |
+| Width, icon only | `brand.scale.40` | 40px. One 16px icon and 12px padding on each side |
+| Padding | `brand.scale.12` | 12px |
+| Gap | `brand.scale.8` | 8px between the left icon, the label, and the right icon |
 | Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the button has no stroke |
 | Font | `alias.font-family.body` | Geist |
 | Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token`. The label box measures 31 by 12 |
-| Icon | `brand.scale.400` | 16px, Lucide. Both slots are the case-sensitive glyph |
+| Icon | `brand.scale.16` | 16px, Lucide. Both slots are the case-sensitive glyph |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Fill, default hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
 | Fill, default selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
 | Fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
 | Fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
 | Text, default | `mapped.text.action` | `#303132` |
-| Text, default hover | `mapped.text.action-strong-hover` | `#FCFDFE` |
+| Text, default hover | `mapped.text.action-hover` | `#1E3B58` |
 | Text, default selected | `mapped.text.action-strong-selected` | `#FCFDFE` |
 | Text, disabled | `mapped.text.disabled` | `#909397` |
 | Text, destructive default and hover | `mapped.text.error`, `mapped.text.error-hover` | `#BE123C` |
 | Icon, default | `mapped.icon.action` | `#303132` |
-| Icon, default hover | `mapped.icon.action-strong-hover` | `#FCFDFE` |
+| Icon, default hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Icon, default selected | `mapped.icon.action-strong-selected` | `#FCFDFE` |
 | Icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
@@ -1098,11 +1077,9 @@ A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the 
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
-The hover fill is `mapped.surface.action-strong-hover`, `#6EA9E2`, with light text and icons. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with the same light foreground. Both colors were read off the painted buttons. The pale action hover used by the icon button is a different fill.
+The hover fill is `mapped.surface.action-strong-hover`, `#6EA9E2` (`alias.primary.400` at 100%). Hover text is `mapped.text.action-hover` and hover icons are `mapped.icon.action-hover`, both `#1E3B58`. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with light text and icons. The pale action hover used by the icon button is a different fill.
 
-The property panel was behind the Figma sign-up wall. The slots were read from the layer list.
-
-Figma properties, read from the variant grid and the layers:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |
@@ -1120,7 +1097,7 @@ This button is not a toolbar. The main toolbar places it. See Main toolbar.
 
 ## Main toolbar
 
-Figma `toolbar/main`, node `186:3425`. Ticket NB-64. Code `src/Toolbar.tsx`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
+Ticket NB-64. Code `src/Toolbar.tsx`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
 
 Every control is a main button with the label and the right icon turned off, so each one is 40 by 40. The row is select, hand, sticky note, text, image, shapes, noodle, and delete. Delete is the destructive type. The shapes control opens the same shape swatch the shape toolbar uses.
 
@@ -1128,19 +1105,19 @@ Every control is a main button with the label and the right icon turned off, so 
 | --- | --- | --- |
 | Height | none | hug. 4px padding and a 40px button make 48px, which is the frame label. The painted frame is 48px including the 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px |
 | Width | none | hug. The frame label is 342. Eight 40px buttons, seven 2px gaps, and 3px of padding on each side, plus the 1px stroke, make 342 |
-| Padding | `brand.scale.100` | 4px. Figma is 3px. `/* TODO token mismatch: Figma 3px */` |
-| Gap | `brand.scale.50` | 2px between buttons |
+| Padding | `brand.scale.4` | 4px. The painted frame is 3px, and no spacing token is 3px |
+| Gap | `brand.scale.2` | 2px between buttons |
 | Corner radius | `alias.border-radius.xl` | 12px |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Blur | not a token | the existing 24px blur |
 | Shadow | not a token | the existing `shadow-lg` |
 | Divider | none | the frame has no divider |
-| Control height | `brand.scale.1000` | 40px |
-| Control padding | `brand.scale.300` | 12px, so an icon-only button is 40 by 40 |
+| Control height | `brand.scale.40` | 40px |
+| Control padding | `brand.scale.12` | 12px, so an icon-only button is 40 by 40 |
 | Control radius | `alias.border-radius.lg` | 8px |
 | Control font | none | the label slot is off |
-| Control icon | `brand.scale.400` | 16px |
+| Control icon | `brand.scale.16` | 16px |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Control fill, hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
 | Control fill, selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
@@ -1148,7 +1125,7 @@ Every control is a main button with the label and the right icon turned off, so 
 | Control fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
 | Control text | none | the label slot is off |
 | Control icon, default | `mapped.icon.action` | `#303132` |
-| Control icon, hover | `mapped.icon.action-strong-hover` | `#FCFDFE` |
+| Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-strong-selected` | `#FCFDFE` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Control icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
@@ -1156,9 +1133,7 @@ Every control is a main button with the label and the right icon turned off, so 
 
 The icons are Lucide, except the noodle, which is `src/assets/icons/noodle-main.svg`. Select is `mouse-pointer-2`. Hand is `hand`. Sticky note is `sticky-note`. Text is `type`. Image is `image`. Shapes is `shapes`. Delete is `trash`.
 
-The property panel was behind the Figma sign-up wall. The slots were read from the painted frame.
-
-Figma properties, read from the frame:
+Properties:
 
 | Property | Kind | Values |
 | --- | --- | --- |

@@ -103,7 +103,7 @@ function TypefaceMenu({
           role="menu"
           ariaLabel="Font style"
           data-text-toolbar=""
-          className="flex w-[128px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          className="flex w-[128px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -168,7 +168,7 @@ function FontStyleMenu({
           role="menu"
           ariaLabel="Font style"
           data-text-toolbar=""
-          className="flex w-[104px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          className="flex w-[104px] flex-col rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -235,7 +235,7 @@ function AlignPopover({
           role="group"
           ariaLabel="Alignment"
           data-text-toolbar=""
-          className="flex items-center gap-brand-scale-50 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          className="flex items-center gap-brand-scale-2 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -510,7 +510,7 @@ function FontSizeField({
           role="menu"
           ariaLabel="Font size"
           data-text-toolbar=""
-          className="flex w-max flex-col gap-brand-scale-0 rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+          className="flex w-max flex-col gap-brand-scale-0 rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -525,7 +525,7 @@ function FontSizeField({
               size="sm"
               showCaption={false}
               showChevron={false}
-              widthClassName="w-brand-scale-900"
+              widthClassName="w-brand-scale-36"
               selected={value === String(preset)}
               onClick={() => {
                 const next = String(preset);
@@ -597,7 +597,7 @@ export default function TextToolbar({
     // Fill is mapped.surface.default at 80%. Blur is the existing 24px frost. Figma blur is ignored.
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-100 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-100 shadow-lg backdrop-blur-xl"
+      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();
@@ -606,7 +606,7 @@ export default function TextToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
-      <div className="flex items-center gap-brand-scale-50 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-100">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
       <TypefaceMenu
         title={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
         activeFamily={activeFamily}
@@ -648,7 +648,7 @@ export default function TextToolbar({
         }}
       />
       </div>
-      <div className="flex items-center gap-brand-scale-50">
+      <div className="flex items-center gap-brand-scale-2">
       <IconButton label="Bulleted list" pressed={bullet} icon={List} onClick={onBullet} />
       <IconButton label="Numbered list" pressed={numbered} icon={ListOrdered} onClick={onNumbered} />
       <IconButton label="Link" pressed={linkActive} icon={Link} onClick={onLink} />

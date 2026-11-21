@@ -105,7 +105,7 @@ const ringClass: Record<ColorSwatchState, string> = {
 };
 
 const discClass =
-  "group relative inline-flex size-brand-scale-600 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
+  "group relative inline-flex size-brand-scale-24 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 [outline-offset:0]";
 
 const hairlineClass =
   "pointer-events-none absolute inset-0 rounded-full group-focus-visible:hidden [box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-control)]";
@@ -140,7 +140,7 @@ export const ColorSwatch = forwardRef<HTMLButtonElement, ColorSwatchProps>(funct
     >
       {type === "none" ? (
         <span className="absolute inset-0 rounded-full bg-brand-foundation-white">
-          <span className="absolute left-1/2 top-1/2 h-brand-scale-50 w-brand-scale-500 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
+          <span className="absolute left-1/2 top-1/2 h-brand-scale-2 w-brand-scale-20 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
         </span>
       ) : null}
       {type === "color" ? (
@@ -150,7 +150,7 @@ export const ColorSwatch = forwardRef<HTMLButtonElement, ColorSwatchProps>(funct
         <>
           <span className="absolute inset-0 rounded-full" style={{ background: customWheel }} />
           <span
-            className="absolute left-1/2 top-1/2 box-border size-brand-scale-300 -translate-x-1/2 -translate-y-1/2 rounded-full border border-alias-border-width-xsm border-brand-foundation-white"
+            className="absolute left-1/2 top-1/2 box-border size-brand-scale-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-alias-border-width-xsm border-brand-foundation-white"
             style={{ background: color }}
           />
         </>
@@ -178,9 +178,9 @@ function SwatchScaleRow({
   onSelect: (family: SwatchFamily) => void;
 }) {
   return (
-    <div className="flex flex-col items-start gap-brand-scale-100">
+    <div className="flex flex-col items-start gap-brand-scale-4">
       <p className={captionClass}>{label}</p>
-      <div className="flex items-center gap-brand-scale-200">
+      <div className="flex items-center gap-brand-scale-8">
         {SWATCH_FAMILIES.map((family) => (
           <ColorSwatch
             key={family}
@@ -202,12 +202,12 @@ export function ColorSwatchPreview() {
   const [customSelected, setCustomSelected] = useState(false);
 
   return (
-    <main className="flex min-h-screen flex-col gap-brand-scale-600 bg-mapped-surface-page p-brand-scale-600 text-mapped-text-caption">
+    <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
       <p className={captionClass}>Color swatch</p>
-      <div className="flex flex-col gap-brand-scale-400">
+      <div className="flex flex-col gap-brand-scale-16">
         {previewTypes.map((type) => (
-          <div key={type} className="flex items-center gap-brand-scale-600">
-            <p className={`w-brand-scale-1200 ${captionClass}`}>{type}</p>
+          <div key={type} className="flex items-center gap-brand-scale-24">
+            <p className={`w-brand-scale-48 ${captionClass}`}>{type}</p>
             {previewStates.map((state) => (
               <ColorSwatch key={state} type={type} state={state} ariaLabel={`${type} ${state}`} />
             ))}
@@ -221,7 +221,7 @@ export function ColorSwatchPreview() {
         selected={stroke}
         onSelect={setStroke}
       />
-      <div className="flex flex-col items-start gap-brand-scale-100">
+      <div className="flex flex-col items-start gap-brand-scale-4">
         <p className={captionClass}>Custom</p>
         <ColorSwatch
           type="custom"
