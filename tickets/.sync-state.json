@@ -360,6 +360,11 @@
       "id": "a4f3cdd8-2baf-4d06-b598-70de2f632a77",
       "identifier": "ERI-80",
       "url": "https://linear.app/ericar/issue/ERI-80/main-toolbar"
+    },
+    "NB-65": {
+      "id": "e7c1dfaf-f6a0-429e-800c-1e410970f0a6",
+      "identifier": "ERI-81",
+      "url": "https://linear.app/ericar/issue/ERI-81/update-shape-rendering-and-text-layout"
     }
   }
 }

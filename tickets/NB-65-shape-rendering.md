@@ -1,14 +1,14 @@
 ---
 id: NB-65
 title: Update shape rendering and text layout
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, Canvas]
 parent: NB-E6
 blockedBy: []
 estimate: 2
-linear_id:
-linear_url:
+linear_id: ERI-81
+linear_url: https://linear.app/ericar/issue/ERI-81/update-shape-rendering-and-text-layout
 ---
 
 ## Context
