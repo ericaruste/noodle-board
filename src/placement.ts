@@ -1,5 +1,4 @@
-import type { ShapeKind } from "./shapeData";
-import { SHAPE_DEFAULT_HEIGHT, SHAPE_DEFAULT_WIDTH } from "./shapeData";
+import { shapeDefaultSize, type ShapeKind } from "./shapeData";
 import type { StickyColor } from "./StickyNode";
 
 export const STICKY_PLACE_WIDTH = 180;
@@ -23,7 +22,7 @@ export function placementSize(placement: Placement): { width: number; height: nu
     case "text":
       return { width: TEXT_PLACE_WIDTH, height: TEXT_PLACE_HEIGHT };
     case "shape":
-      return { width: SHAPE_DEFAULT_WIDTH, height: SHAPE_DEFAULT_HEIGHT };
+      return shapeDefaultSize(placement.shape);
     case "image":
       return { width: placement.width, height: placement.height };
   }

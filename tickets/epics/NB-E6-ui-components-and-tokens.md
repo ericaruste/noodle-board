@@ -47,8 +47,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-61 Shape swatch](../NB-61-shape-swatch.md)
 - [NB-63 Main button](../NB-63-main-button.md)
 - [NB-64 Main toolbar](../NB-64-main-toolbar.md)
+- [NB-65 Update shape rendering and text layout](../NB-65-shape-rendering.md)
 
-NB-57, NB-58, and NB-59 are behavior tickets, not components. The next component ticket is the next free id after NB-64, parented to NB-E6, and titled with the component name.
+NB-57, NB-58, NB-59, and NB-65 are behavior tickets, not components. The next component ticket is the next free id after NB-65, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 

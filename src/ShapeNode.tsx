@@ -8,14 +8,15 @@ import ShapeToolbar from "./ShapeToolbar";
 import {
   DEFAULT_SHAPE_FILL,
   DEFAULT_SHAPE_STROKE,
+  SHAPE_CORNER_RADIUS,
   SHAPE_DEFAULT_HEIGHT,
-  SHAPE_DEFAULT_WIDTH,
   SHAPE_LABELS,
   SHAPE_MIN_SIZE,
   STROKE_WIDTH,
   isShapeColor,
   roundRectRadius,
   isShapeKind,
+  shapeDefaultSize,
   shapeFillOpacity,
   shapeHeightForText,
   shapeLineStyle,
@@ -73,12 +74,75 @@ function publishHeight(id: string, height: number) {
 
 export { ShapeKindIcon } from "./shapeKindIcon";
 
-function insetPolygon(points: Array<[number, number]>, width: number, height: number, inset: number) {
+function insetPoints(points: Array<[number, number]>, width: number, height: number, inset: number) {
   const cx = width / 2;
   const cy = height / 2;
   const sx = width > inset * 2 ? (width - inset * 2) / width : 0;
   const sy = height > inset * 2 ? (height - inset * 2) / height : 0;
-  return points.map(([x, y]) => `${cx + (x - cx) * sx},${cy + (y - cy) * sy}`).join(" ");
+  return points.map(([x, y]): [number, number] => [cx + (x - cx) * sx, cy + (y - cy) * sy]);
+}
+
+function pathNum(value: number) {
+  return String(Math.round(value * 1000) / 1000);
+}
+
+/** Circular fillet of `radius` px at each vertex. The straight edges stay put. */
+function roundedPolygonPath(points: Array<[number, number]>, radius: number) {
+  const count = points.length;
+  if (count < 3) return "";
+  if (!(radius > 0)) {
+    return `${points.map((point, index) => `${index === 0 ? "M" : "L"}${pathNum(point[0])} ${pathNum(point[1])}`).join(" ")} Z`;
+  }
+
+  const cuts = points.map((curr, index) => {
+    const prev = points[(index - 1 + count) % count];
+    const next = points[(index + 1) % count];
+    const toPrevX = prev[0] - curr[0];
+    const toPrevY = prev[1] - curr[1];
+    const toNextX = next[0] - curr[0];
+    const toNextY = next[1] - curr[1];
+    const lenPrev = Math.hypot(toPrevX, toPrevY);
+    const lenNext = Math.hypot(toNextX, toNextY);
+    if (lenPrev < 1e-6 || lenNext < 1e-6) {
+      return { start: curr, end: curr, r: 0, sweep: 1 as const };
+    }
+    const prevX = toPrevX / lenPrev;
+    const prevY = toPrevY / lenPrev;
+    const nextX = toNextX / lenNext;
+    const nextY = toNextY / lenNext;
+    const dot = Math.min(1, Math.max(-1, prevX * nextX + prevY * nextY));
+    const angle = Math.acos(dot);
+    const tanHalf = Math.tan(angle / 2);
+    let dist = tanHalf > 1e-6 ? radius / tanHalf : 0;
+    dist = Math.min(dist, lenPrev / 2, lenNext / 2);
+    const fitted = tanHalf > 1e-6 ? dist * tanHalf : 0;
+    const inX = curr[0] - prev[0];
+    const inY = curr[1] - prev[1];
+    const outX = next[0] - curr[0];
+    const outY = next[1] - curr[1];
+    const sweep = inX * outY - inY * outX >= 0 ? 1 : 0;
+    return {
+      start: [curr[0] + prevX * dist, curr[1] + prevY * dist] as [number, number],
+      end: [curr[0] + nextX * dist, curr[1] + nextY * dist] as [number, number],
+      r: fitted,
+      sweep: sweep as 0 | 1,
+    };
+  });
+
+  const arc = (cut: (typeof cuts)[number]) =>
+    cut.r > 0.05
+      ? `A ${pathNum(cut.r)} ${pathNum(cut.r)} 0 0 ${cut.sweep} ${pathNum(cut.end[0])} ${pathNum(cut.end[1])}`
+      : `L ${pathNum(cut.end[0])} ${pathNum(cut.end[1])}`;
+
+  const commands = [`M ${pathNum(cuts[0].end[0])} ${pathNum(cuts[0].end[1])}`];
+  for (let index = 1; index < count; index += 1) {
+    commands.push(`L ${pathNum(cuts[index].start[0])} ${pathNum(cuts[index].start[1])}`);
+    commands.push(arc(cuts[index]));
+  }
+  commands.push(`L ${pathNum(cuts[0].start[0])} ${pathNum(cuts[0].start[1])}`);
+  commands.push(arc(cuts[0]));
+  commands.push("Z");
+  return commands.join(" ");
 }
 
 type Paint = {
@@ -138,46 +202,26 @@ function ShapeGeometry({
     );
   }
 
-  if (kind === "triangle") {
-    return (
-      <polygon
-        points={insetPolygon(
-          [
+  if (kind === "triangle" || kind === "diamond") {
+    const vertices: Array<[number, number]> =
+      kind === "triangle"
+        ? [
             [width / 2, 0],
             [width, height],
             [0, height],
-          ],
-          width,
-          height,
-          inset,
-        )}
-        {...shared}
-      />
-    );
-  }
-
-  if (kind === "diamond") {
-    return (
-      <polygon
-        points={insetPolygon(
-          [
+          ]
+        : [
             [width / 2, 0],
             [width, height / 2],
             [width / 2, height],
             [0, height / 2],
-          ],
-          width,
-          height,
-          inset,
-        )}
-        {...shared}
-      />
-    );
+          ];
+    return <path d={roundedPolygonPath(insetPoints(vertices, width, height, inset), SHAPE_CORNER_RADIUS)} {...shared} />;
   }
 
   const innerWidth = Math.max(0, width - inset * 2);
   const innerHeight = Math.max(0, height - inset * 2);
-  const radius = kind === "round-rect" ? cornerRadius(width, height, paint.strokeWidth) : 0;
+  const radius = kind === "round-rect" ? cornerRadius(width, height, paint.strokeWidth) : SHAPE_CORNER_RADIUS;
 
   return <rect x={inset} y={inset} width={innerWidth} height={innerHeight} rx={radius} ry={radius} {...shared} />;
 }
@@ -229,8 +273,9 @@ function ShapeNode({ id, data, selected, width, height }: NodeProps<ShapeNodeTyp
   const lineStyle = shapeLineStyle(data);
   const strokeWidth = stroke ? shapeThicknessPx(thickness) : 0;
   const body = useMemo(() => coerceBody(data.paragraphs), [data.paragraphs]);
-  const boxWidth = width && width > 0 ? width : SHAPE_DEFAULT_WIDTH;
-  const boxHeight = height && height > 0 ? height : SHAPE_DEFAULT_HEIGHT;
+  const defaults = shapeDefaultSize(kind);
+  const boxWidth = width && width > 0 ? width : defaults.width;
+  const boxHeight = height && height > 0 ? height : defaults.height;
   const frame = shapeTextFrame(kind, boxWidth, boxHeight);
   const contentFloorRef = useRef(contentFloor);
   const manualHeightRef = useRef(data.manualHeight);

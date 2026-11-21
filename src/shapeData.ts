@@ -13,9 +13,19 @@ export const SHAPE_LABELS: Record<ShapeKind, string> = {
   diamond: "Diamond",
 };
 
-export const SHAPE_DEFAULT_WIDTH = 180;
+/** Every new shape is this tall. Width depends on the kind. */
 export const SHAPE_DEFAULT_HEIGHT = 140;
 export const SHAPE_MIN_SIZE = 48;
+
+/** Painted corner radius of a rectangle, a diamond, and a triangle. */
+export const SHAPE_CORNER_RADIUS = 8;
+
+/** Width and height of a newly placed shape. */
+export function shapeDefaultSize(kind: ShapeKind): { width: number; height: number } {
+  if (kind === "triangle") return { width: 160, height: SHAPE_DEFAULT_HEIGHT };
+  if (kind === "round-rect") return { width: 180, height: SHAPE_DEFAULT_HEIGHT };
+  return { width: 140, height: SHAPE_DEFAULT_HEIGHT };
+}
 
 /** A new shape starts on `alias.swatch.purple.200`. */
 export const DEFAULT_SHAPE_FILL = `#${swatchHex("purple", 200)}`;
@@ -60,7 +70,7 @@ export function roundRectRadius(width: number, height: number, strokeWidth = STR
   const inset = strokeWidth / 2;
   const innerWidth = Math.max(0, width - inset * 2);
   const innerHeight = Math.max(0, height - inset * 2);
-  return Math.min(28, innerWidth / 2, innerHeight / 2, width * 0.22, height * 0.22);
+  return Math.min(56, innerWidth / 2, innerHeight / 2);
 }
 
 export type ShapeData = {
@@ -98,13 +108,13 @@ const TEXT_BAND: Partial<Record<ShapeKind, { x: number; y: number; w: number; h:
 };
 
 const TEXT_PAD: Record<"rect" | "round-rect", number> = {
-  rect: 14,
-  "round-rect": 22,
+  rect: 12,
+  "round-rect": 24,
 };
 
-function boxPad(kind: ShapeKind, width: number) {
+function boxPad(kind: ShapeKind, width: number, height: number) {
   const preferred = TEXT_PAD[kind === "round-rect" ? "round-rect" : "rect"];
-  return Math.min(preferred, Math.max(8, width * 0.12));
+  return Math.min(preferred, Math.max(8, Math.min(width, height) * 0.2));
 }
 
 export function shapeTextFrame(kind: ShapeKind, width: number, height: number): ShapeTextFrame {
@@ -117,7 +127,7 @@ export function shapeTextFrame(kind: ShapeKind, width: number, height: number): 
       height: Math.max(1, height * band.h),
     };
   }
-  const pad = boxPad(kind, width);
+  const pad = boxPad(kind, width, height);
   return {
     left: pad,
     top: pad,
@@ -131,8 +141,14 @@ export function shapeHeightForText(kind: ShapeKind, width: number, textHeight: n
   const content = Math.max(textHeight, 1);
   const band = TEXT_BAND[kind];
   if (band) return content / band.h;
-  const pad = boxPad(kind, width);
-  return content + pad * 2;
+  // The pad reads the height it produces, so settle on that pair.
+  let height = content + boxPad(kind, width, width) * 2;
+  for (let step = 0; step < 6; step += 1) {
+    const next = content + boxPad(kind, width, height) * 2;
+    if (Math.abs(next - height) < 0.01) return next;
+    height = next;
+  }
+  return height;
 }
 
 export function isShapeKind(value: unknown): value is ShapeKind {
