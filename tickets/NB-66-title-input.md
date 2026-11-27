@@ -1,7 +1,7 @@
 ---
 id: NB-66
 title: Title input
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -31,15 +31,15 @@ Phase 2 needs the title field from `input/title`. The board has no shared title 
 
 ## Acceptance criteria
 
-- [ ] The field uses semantic tokens for fill, text, stroke, spacing, and corner radius
-- [ ] The control is 40px tall
-- [ ] The width follows the title and stops at 320px
-- [ ] A title wider than that is truncated
-- [ ] When the title is truncated, the resting field still offers the full project title
-- [ ] Default, hover, and focus match the painted variants
-- [ ] The title can be edited while the field is focused
-- [ ] The label uses the responsive desktop size and line height that match the Figma text style
-- [ ] The live board is unchanged when the trial page is absent
+- [x] The field uses semantic tokens for fill, text, stroke, spacing, and corner radius
+- [x] The control is 40px tall
+- [x] The width follows the title and stops at 320px
+- [x] A title wider than that is truncated
+- [x] When the title is truncated, the resting field still offers the full project title
+- [x] Default, hover, and focus match the painted variants
+- [x] The title can be edited while the field is focused
+- [x] The label uses the responsive desktop size and line height that match the Figma text style
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
