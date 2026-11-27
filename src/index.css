@@ -631,6 +631,54 @@ body,
   }
 }
 
+/* Save indicator. The disc is 8px in every slot. The ring can paint outside the slot. */
+.save-indicator-disc[data-motion="saved"] {
+  animation: save-indicator-breathe 3s ease-in-out infinite;
+}
+
+.save-indicator-disc[data-motion="saving"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--mapped-icon-success);
+  animation: save-indicator-ring 1.2s ease-out infinite;
+}
+
+@keyframes save-indicator-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    background-color: var(--alias-success-400);
+  }
+  50% {
+    transform: scale(1.1);
+    background-color: var(--mapped-icon-success);
+  }
+}
+
+@keyframes save-indicator-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-indicator-disc[data-motion="saved"],
+  .save-indicator-disc[data-motion="saving"]::after {
+    animation: none;
+  }
+
+  .save-indicator-disc[data-motion="saving"]::after {
+    content: none;
+  }
+}
+
 /* Hex field. The ring follows the real focus, including a click that lands on the #. */
 .noodle-hex-input:focus-within {
   background-color: var(--mapped-surface-default);

@@ -42,7 +42,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.16`. The thumb has two sizes. `sm` is 12px, `brand.scale.12`, and it is the default. `md` is 16px, `brand.scale.16`. The track has two sizes. `sm` is 8px, `brand.scale.8`. `md` is 12px, `brand.scale.12`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
 - The line weight and line type row is one component, `src/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 - `mapped.surface.action-strong-hover` is `alias.primary.50` (`#E5F0F9`) at 100% in this export. The main button and the main toolbar use that fill on hover. Default type hover text is `mapped.text.action-hover` (`#1E3B58`) and the icons are `mapped.icon.action-hover` (`#1E3B58`). Selected keeps the light foreground.
-- Success is `brand.green`, aliased as `alias.success`. `mapped.icon.success` is `alias.success.500` (`#16A34A`). `mapped.icon.success-light` is `alias.success.300` (`#72C68F`). No component paints them yet.
+- Success is `brand.green`, aliased as `alias.success`. `mapped.icon.success` is `alias.success.500` (`#16A34A`). `mapped.icon.success-light` is `alias.success.300` (`#72C68F`). The save indicator paints `mapped.icon.success` on the breath and the ring. Its resting disc is `alias.success.400` (`#45B46C`). `mapped.icon.success-light` is still unused.
 - `mapped.icon.action-light` is `alias.cool-neutral.700` (`#909397`). No component paints it yet.
 - The shape kind row is one component, `src/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
 - The shape toolbar’s fill opens the color picker at step 200, and its stroke opens the color picker at step 500. Both offer none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). A shape already saved keeps its own fill and stroke. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
@@ -1196,3 +1196,40 @@ Properties:
 Painted: one resting row. Select, hand, sticky, text, image, shapes, and noodle sit on the default type. Delete sits on the destructive type, red icon, clear fill.
 
 Not painted on this frame: hover, selected, and disabled. Those come from the main button when a tool is on, a pointer is over a button, or delete has nothing to remove. The button has no focus state. The frame paints no tooltip. The hover label above each tool stays the one the board already shows.
+
+## Save indicator
+
+Ticket NB-68. Code `src/SaveIndicator.tsx`. The trial page is `?trial=save-indicator`.
+
+A square slot with one disc centered in it. The disc is 8px at every size. The slot does not clip the saving ring.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Slot, `lg` | `brand.scale.40` | 40px |
+| Slot, `md` | `brand.scale.32` | 32px |
+| Slot, `sm` | `brand.scale.24` | 24px |
+| Disc | `brand.scale.8` | 8px, centered. The same disc at every slot |
+| Disc radius | none | a circle. `rounded-full` |
+| Success disc | `alias.success.400` | `#45B46C`. The caption names success-light (`#72C68F`). The painted disc is success 400. No mapped token uses that value |
+| Error disc | `mapped.icon.error` | `#BE123C` |
+| Saved breath | `alias.success.400` to `mapped.icon.success` | scale 1 to 1.1, `ease-in-out`, 3s, infinite |
+| Saving disc | `alias.success.400` | stays at scale 1 |
+| Saving ring | `mapped.icon.success` | covers the disc, `ease-out`, 1.2s, infinite. Scale 1 at opacity 0.5 to scale 2.4 at opacity 0 |
+| Stroke | none | the disc has no stroke |
+| Text | none | the component has no text |
+| Divider | none | the component has no divider |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| size | variant | `lg`, `md`, `sm`. Default `lg` |
+| type | variant | `success`, `error`. Default `success` |
+| saving | boolean | success plays the ring when true, and the breath when false. Error ignores it |
+
+Painted: success at rest, success breathing while saved, success with the ring while saving, and a still error disc. Reduced motion leaves the resting disc and drops both animations.
+
+Not painted: hover, disabled, and focus. Error has no animation. The file bar keeps its own dot.

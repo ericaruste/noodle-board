@@ -9,6 +9,7 @@ import { HexInputPreview } from "./HexInput";
 import { IconFitPreview } from "./IconFitPreview";
 import { IconButtonPreview } from "./IconButton";
 import { LogoButtonPreview } from "./LogoButton";
+import { SaveIndicatorPreview } from "./SaveIndicator";
 import { MainButtonPreview } from "./MainButton";
 import { MenuItemPreview } from "./MenuItem";
 import { SliderThumbPreview } from "./SliderThumb";
@@ -28,6 +29,8 @@ const showIconFitTrial = window.location.hash === "#icon-fit" || trial === "icon
 const showTitleInputTrial = window.location.hash === "#title-input" || trial === "title-input";
 const showIconButtonTrial = window.location.hash === "#icon-button" || trial === "icon-button";
 const showLogoButtonTrial = window.location.hash === "#logo-button" || trial === "logo-button";
+const showSaveIndicatorTrial =
+  window.location.hash === "#save-indicator" || trial === "save-indicator";
 const showMainButtonTrial = window.location.hash === "#main-button" || trial === "main-button";
 const showMenuItemTrial = window.location.hash === "#menu-item" || trial === "menu-item";
 const showContextualButtonTrial =
@@ -55,6 +58,8 @@ createRoot(document.getElementById("root")!).render(
       <IconButtonPreview />
     ) : showLogoButtonTrial ? (
       <LogoButtonPreview />
+    ) : showSaveIndicatorTrial ? (
+      <SaveIndicatorPreview />
     ) : showMainButtonTrial ? (
       <MainButtonPreview />
     ) : showMenuItemTrial ? (
