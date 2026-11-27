@@ -13,7 +13,7 @@ linear_url: https://linear.app/ericar/issue/ERI-82/title-input
 
 ## Context
 
-Building block for the project title. Figma component `input/title`, on the spec frame `input/title` node `509:2477`.
+Building block for the project title. Figma component `input/title`. The spec that was matched is node `381:2845`. Node `509:2477` is the save indicator frame, not this field.
 
 The control is 40px tall. The specimen text is "Title". States are default, hover, and focus. The frame says the maximum length is 320px, the title truncates, and a tooltip shows the entire project title.
 
@@ -45,13 +45,11 @@ Phase 2 needs the title field from `input/title`. The board has no shared title 
 
 [`src/TitleInput.tsx`](../src/TitleInput.tsx) is the component. `?trial=title-input` shows default, hover, focus, and a live field, including a title long enough to reach 320px. Register the trial in [`src/main.tsx`](../src/main.tsx) the same way as `?trial=hex-input`.
 
-The specimen word is "Title". Default has no fill and no stroke. Hover fills with the pale action surface, which reads as `mapped.surface.action-hover`. Focus fills with `mapped.surface.default` and draws a blue outside stroke that reads as `mapped.border.action-ring-focus` at `alias.border-width.sm`, the same treatment as the hex input. The text stays `mapped.text.default`. Confirm those colors on the component. Prefer a `mapped.surface` token for a fill, a `mapped.text` token for the title, and a `mapped.border` token for the focus stroke.
+The specimen word is "Title". Default has no fill and no stroke. Hover fills with `mapped.surface.action-hover`. Focus fills with `mapped.surface.default` and draws a blue outside stroke, `mapped.border.action-ring-focus` at `alias.border-width.sm`, the same treatment as the hex input. The text is `mapped.text.default`.
 
-Height is the red 40px note, `brand.scale.40`. The 320px cap is written on the frame. No spacing token is 320px. The corner is rounder than the hex field's 8px (`alias.border-radius.lg`). Check `alias.border-radius.xl` (12px) and `alias.border-radius.xxl` (16px) against the frame before choosing. Padding is not annotated. Match it from the component and use a `brand.scale` token.
+Height is `brand.scale.40` (40px). Horizontal padding is `brand.scale.12` (12px), and the title is centered in that height. The corner is `alias.border-radius.xl` (12px), rounder than the hex field's 8px. The 320px cap is written on the frame. No spacing token is 320px, so the cap is marked `/* TODO token mismatch: Figma 320px */`.
 
-The text style is not named on the frame. Font size and line height use the responsive desktop token. Paragraph spacing is not in the export, so it stays as drawn. The hex field uses `body/sm/tight` at 12px. This field is taller, so compare `responsive.desktop.body.md` (14px) before using a larger style. Record the text style in `docs/design-system-notes.md`.
-
-The Figma file request was rate limited, and Dev Mode was behind the sign-up wall. Confirm padding, corner radius, stroke width, and the text style against the component before painting. If no value matches exactly, use the nearest token and add `/* TODO token mismatch: Figma <value> */` beside it.
+The text style is `body/md/tight`: `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight` (14px / 14px). Paragraph spacing is not in the export, so it stays as drawn. That style is recorded in `docs/design-system-notes.md`.
 
 The width hugs the title plus that padding and stops at 320px. Overflow truncates. The frame does not paint a tooltip component. The resting field exposes the full title the way `ProjectName` already does, with the `title` attribute. Do not add a tooltip component.
 
