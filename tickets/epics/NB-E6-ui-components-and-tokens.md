@@ -50,6 +50,7 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-65 Update shape rendering and text layout](../NB-65-shape-rendering.md)
 - [NB-66 Title input](../NB-66-title-input.md)
 - [NB-67 Logo button](../NB-67-logo-button.md)
+- [NB-68 Save indicator](../NB-68-save-indicator.md)
 - [NB-69 Shape icons](../NB-69-shape-icons.md)
 - [NB-70 Icon fit](../NB-70-icon-fit.md)
 
