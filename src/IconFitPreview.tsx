@@ -25,7 +25,7 @@ type SlotIcon = ComponentType<{ className?: string }>;
 /**
  * Cropped view boxes. Each one pads the stroked ink by the Lucide margin,
  * 2 units for every 20 units of artwork, so the glyph fills a 16px slot the
- * way a Lucide icon does. The live icons keep their file view boxes.
+ * way a Lucide icon does. The live icons use these same boxes.
  */
 const FIT_VIEW_BOX = {
   square: "5.9 5.9 16.2 16.2",
@@ -212,8 +212,8 @@ export function IconFitPreview() {
       <h1 className={captionClass}>Icon fit</h1>
       <p className={captionClass}>
         The blue square is the 16px slot, brand.scale.16. The button under it is the contextual button. Lucide draws in
-        the inner 20 of a 24 box. These files keep a larger view box, so the same slot shows a smaller glyph. The live
-        board is unchanged.
+        the inner 20 of a 24 box. The rows below show each file as drawn and cropped. The live board uses the cropped
+        icons.
       </p>
       <Row
         title="Lucide"
@@ -243,7 +243,7 @@ export function IconFitPreview() {
         <h2 className={captionClass}>On the toolbars</h2>
         <p className={captionClass}>
           The shape swatch, then the shape toolbar, then the noodle toolbar. Open a menu to see the glyph on the button
-          and in the row. The live board is unchanged.
+          and in the row. As drawn is the old view box. Lucide box is what the live board uses.
         </p>
         <div className="flex flex-col gap-brand-scale-24">
           <ToolbarCheck

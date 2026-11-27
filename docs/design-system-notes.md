@@ -9,7 +9,6 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 ## Still to update
 
 - **[code] Underline and strikethrough.** They are drawn on the text toolbar and are not in the app. They wait for the text feature.
-- **[code] Toolbar icon fit.** Ticket NB-70. The five shape files and `line-weight-menu` draw their artwork inside a larger view box, so a 16px slot shows a smaller glyph than a Lucide icon. The shape stroke is 1.5. The line weight file leaves the stroke unset. The trial paints that stroke at the same weight as the shapes: 1.07 in the 20 box and 1.33 in the cropped box. Below the glyphs, the trial places them on the shape swatch, the shape toolbar, and the noodle toolbar. The trial is `?trial=icon-fit`. The live icons are unchanged.
 - **[token app] Color picker field height.** The saturation field, including the 12px black band, is 108px. No spacing token is 108px.
 - **[token app] Color picker toolbar width.** The swatch grid and the hex row are 152px: five 24px discs and four 8px gaps. No spacing token is 152px. The picker field stays 172px. No spacing token is 172px.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
@@ -21,6 +20,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
 - Shadow, blur, and the dot grid are `not a token`.
@@ -681,7 +681,7 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The line-weight control opens the line weight and line type menu. The icon-fit trial can pass `lineWeightIcon`. The board omits it and keeps the line-weight file. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
+The line-weight control opens the line weight and line type menu. The icon-fit trial can pass `lineWeightIcon`. The board omits it. The default glyph crops the line-weight file and sets the stroke to 1.33. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 ## Line weight and line type menu
 
@@ -955,7 +955,7 @@ Every control is a contextual button with the unused slots turned off, except th
 - Second group: stroke, then line weight and line type. A divider sits on the right of the group.
 - Third group: fill, then the fill opacity slider. The gap before the slider is 8px.
 
-Shape swap opens the shape swatch, the five kinds in the existing order. The closed button paints the current kind with `ShapeKindIcon`, and a diamond when the selection is mixed. The glyphs are `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Each file keeps its view box and fits in the 16px slot. The stroke follows the button icon color. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
+Shape swap opens the shape swatch, the five kinds in the existing order. The closed button paints the current kind with `ShapeKindIcon`, and a diamond when the selection is mixed. The glyphs are `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Each glyph uses a cropped view box so it fills the 16px slot the way a Lucide icon does. Wider files stay wider. The line-weight glyph uses the same crop, and its stroke is 1.33 so it paints like the shape stroke. The stroke follows the button icon color. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -1056,7 +1056,7 @@ The menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a
 
 Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
 
-Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`, from `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Square, circle, and diamond are 28 by 28. The triangle is 29 by 28 and the rounded rectangle is 31 by 28. Each file keeps its view box. The glyph fits in the 16px slot, `brand.scale.16`, and the wider files are not stretched to a square. The stroke follows the button icon color. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
+Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`, from `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Square, circle, and diamond start at 28 by 28. The triangle is 29 by 28 and the rounded rectangle is 31 by 28. Each glyph is cropped to the stroked path plus the Lucide margin, then fitted in the 16px slot, `brand.scale.16`. Wider files stay wider. The stroke follows the button icon color. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |
