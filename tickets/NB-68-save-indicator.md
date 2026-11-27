@@ -1,7 +1,7 @@
 ---
 id: NB-68
 title: Save indicator
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
