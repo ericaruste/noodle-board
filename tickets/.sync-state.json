@@ -405,6 +405,11 @@
       "id": "b3c9f9cf-8b8c-4de2-8dbb-7d23ec68fb00",
       "identifier": "ERI-89",
       "url": "https://linear.app/ericar/issue/ERI-89/project-menu"
+    },
+    "NB-75": {
+      "id": "fb47b9b5-371e-4626-8ec6-1d329786c9b7",
+      "identifier": "ERI-91",
+      "url": "https://linear.app/ericar/issue/ERI-91/project-menu-layout"
     }
   }
 }
