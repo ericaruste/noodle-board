@@ -16,6 +16,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Opacity track width.** The pill is 120px wide. No spacing token is 120px.
 - **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.4`.
 - **[token app] Main button hover fill.** This export maps `mapped.surface.action-strong-hover` to `alias.primary.400` (`#6EA9E2`). The previous export used `alias.primary.200` (`#B7D4F1`). The button follows this export. Hover text and icons stay `mapped.text.action-hover` and `mapped.icon.action-hover`.
+- **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
 
 ## Decisions already made
 
@@ -450,6 +451,48 @@ A click on the field focuses it and selects the hex code. A click outside the fi
 Not painted: disabled, selected, and pressed.
 
 This field is not a toolbar. The color toolbar that places it is its own component.
+
+## Title input
+
+Ticket NB-66. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
+
+A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. The resting field offers the full title on the `title` attribute. There is no tooltip component.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | hugs the title plus the padding, and stops at 320px. No spacing token is 320px |
+| Height | `brand.scale.40` | 40px |
+| Padding | `brand.scale.12` | 12px on the left and right. The title is centered in the 40px height |
+| Corner radius | `alias.border-radius.xl` | 12px. Rounder than the hex field’s 8px |
+| Font | `alias.font-family.body` | Geist |
+| Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 14px / 14px, text style `body/md/tight`. Paragraph spacing is `not a token` |
+| Text, every state | `mapped.text.default` | `#303132` |
+| Fill, default | none | the field has no fill |
+| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
+| Stroke, default and hover | none | those variants have no stroke |
+| Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+There is no icon and no divider.
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| state | variant | `default`, `hover`, `focus` |
+
+The title is a text layer, not a variant property. The spec shows `Title`.
+
+Painted states: `default`, `hover`, and `focus`.
+
+A click on the field focuses it. The title can be edited while the field is focused.
+
+Not painted: disabled, selected, and pressed.
+
+This field is not a toolbar or a popover. The file bar that places it is a later ticket.
 
 ## Color swatch
 

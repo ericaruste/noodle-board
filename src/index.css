@@ -639,6 +639,14 @@ body,
   outline-color: var(--mapped-border-action-ring-focus);
 }
 
+/* Title field. The ring follows the real focus, including a click on the padding. */
+.noodle-title-input:focus-within {
+  background-color: var(--mapped-surface-default);
+  outline-width: var(--alias-border-width-sm);
+  outline-style: solid;
+  outline-color: var(--mapped-border-action-ring-focus);
+}
+
 /* Color picker toolbar. HexColorPicker has no alpha slider. The rule hides one if it is ever rendered.
    108px is the saturation field, including the 12px black band. No spacing token is 108px. */
 .noodle-color-picker.react-colorful {

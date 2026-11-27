@@ -12,6 +12,7 @@ import { MainButtonPreview } from "./MainButton";
 import { MenuItemPreview } from "./MenuItem";
 import { SliderThumbPreview } from "./SliderThumb";
 import { SliderTrackPreview } from "./SliderTrack";
+import { TitleInputPreview } from "./TitleInput";
 import "./styles/tokens.css";
 import "./index.css";
 
@@ -22,6 +23,7 @@ const showSliderThumbTrial = window.location.hash === "#slider-thumb" || trial =
 const showColorPickerTrial = window.location.hash === "#color-picker" || trial === "color-picker";
 const showColorSwatchTrial = window.location.hash === "#color-swatch" || trial === "color-swatch";
 const showHexInputTrial = window.location.hash === "#hex-input" || trial === "hex-input";
+const showTitleInputTrial = window.location.hash === "#title-input" || trial === "title-input";
 const showIconButtonTrial = window.location.hash === "#icon-button" || trial === "icon-button";
 const showLogoButtonTrial = window.location.hash === "#logo-button" || trial === "logo-button";
 const showMainButtonTrial = window.location.hash === "#main-button" || trial === "main-button";
@@ -43,6 +45,8 @@ createRoot(document.getElementById("root")!).render(
       <ColorSwatchPreview />
     ) : showHexInputTrial ? (
       <HexInputPreview />
+    ) : showTitleInputTrial ? (
+      <TitleInputPreview />
     ) : showIconButtonTrial ? (
       <IconButtonPreview />
     ) : showLogoButtonTrial ? (
