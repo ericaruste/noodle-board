@@ -2,7 +2,7 @@
 
 How board shapes are drawn, and how the label sits inside each one. Code names: `rect` (Rectangle; a square only when width equals height), `ellipse` (Ellipse; a circle only when width equals height), `round-rect`, `triangle`, and `diamond`.
 
-Paint lives in `ShapeGeometry` in `src/ShapeNode.tsx`. The label frame is `shapeTextFrame` in `src/shapeData.ts`. Toolbar icons in `src/shapeKindIcon.tsx` are a separate 20×20 SVG set and are not the board shapes.
+Paint lives in `ShapeGeometry` in `src/ShapeNode.tsx`. The label frame is `shapeTextFrame` in `src/shapeData.ts`. Toolbar icons in `src/shapeKindIcon.tsx` are the files in `src/assets/icons` and are not the board shapes.
 
 ## How each shape is drawn
 

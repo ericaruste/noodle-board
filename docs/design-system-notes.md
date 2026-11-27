@@ -954,7 +954,7 @@ Every control is a contextual button with the unused slots turned off, except th
 - Second group: stroke, then line weight and line type. A divider sits on the right of the group.
 - Third group: fill, then the fill opacity slider. The gap before the slider is 8px.
 
-Shape swap opens the shape swatch, the five kinds in the existing order. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
+Shape swap opens the shape swatch, the five kinds in the existing order. The closed button paints the current kind with `ShapeKindIcon`, and a diamond when the selection is mixed. The glyphs are `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Each file keeps its view box and fits in the 16px slot. The stroke follows the button icon color. Fill opens the color picker toolbar at step 200, with none. Stroke opens the same picker at step 500, with none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). Line weight opens thin, medium, and thick, then solid and dashed. The weight menu stays open so both groups can be set. Choosing a kind closes that menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -1055,7 +1055,7 @@ The menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a
 
 Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
 
-Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
+Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`, from `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Square, circle, and diamond are 28 by 28. The triangle is 29 by 28 and the rounded rectangle is 31 by 28. Each file keeps its view box. The glyph fits in the 16px slot, `brand.scale.16`, and the wider files are not stretched to a square. The stroke follows the button icon color. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
 
 | Piece | Token | Value |
 | --- | --- | --- |

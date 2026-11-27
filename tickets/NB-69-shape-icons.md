@@ -1,7 +1,7 @@
 ---
 id: NB-69
 title: Shape icons
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -38,13 +38,13 @@ The shape swatch and the shape-swap button draw their own icons. They should use
 
 ## Acceptance criteria
 
-- [ ] Rectangle uses `src/assets/icons/shape-square.svg`
-- [ ] Ellipse uses `src/assets/icons/shape-circle.svg`
-- [ ] Rounded rectangle uses `src/assets/icons/shape-round-rectangle.svg`
-- [ ] Triangle uses `src/assets/icons/shape-triangle.svg`
-- [ ] Diamond uses `src/assets/icons/shape-diamond.svg`
-- [ ] Those glyphs show in the shape swatch and on the shape toolbar’s shape-swap button
-- [ ] The stroke follows the button icon color for default, hover, and selected
+- [x] Rectangle uses `src/assets/icons/shape-square.svg`
+- [x] Ellipse uses `src/assets/icons/shape-circle.svg`
+- [x] Rounded rectangle uses `src/assets/icons/shape-round-rectangle.svg`
+- [x] Triangle uses `src/assets/icons/shape-triangle.svg`
+- [x] Diamond uses `src/assets/icons/shape-diamond.svg`
+- [x] Those glyphs show in the shape swatch and on the shape toolbar’s shape-swap button
+- [x] The stroke follows the button icon color for default, hover, and selected
 
 ## Technical notes
 
