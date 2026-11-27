@@ -1,7 +1,7 @@
 ---
 id: NB-75
 title: Project menu layout
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
