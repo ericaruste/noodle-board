@@ -1,0 +1,20 @@
+---
+description: /ticket create writes a ticket only and does not implement it
+alwaysApply: true
+---
+
+`/ticket create` creates a ticket and stops. Read the current code, write how it works and how to implement the request, and leave the product code as it is.
+
+Do this when the user says `/ticket create` or asks to create a ticket. A list of changes in that message is the work for the ticket. It is not permission to edit `src/`, styles, tokens, or design docs.
+
+Follow the usual ticket process. Use the next free `NB-` id, copy `tickets/_template.md`, and set `parent` to `NB-E6` for Phase 2. Start from an up-to-date `phase-2` and use a branch named with the ticket id. Register the id in the NB-E6 epic, `tickets/linear.config.json` `buildOrder`, and the build order in `tickets/README.md`. Set `status` to `Todo`. Leave every acceptance box open. Run `npm run tickets:dry-run`, then `npm run tickets:push`. Commit only the ticket files on the ticket branch. Do not merge that branch.
+
+Before writing the ticket, read the code the request touches. Record that evaluation in the ticket:
+
+- Context names the files and the current behavior
+- Problem and repro say what is wrong
+- Acceptance criteria come from the request
+- Technical notes say where the behavior lives and the concrete way to implement the change. Keep those steps out of the acceptance list
+- Out of scope lists what must stay as it is
+
+The ticket is ready to build later. Do not change application code in this step, and do not mark the ticket in progress or done.
