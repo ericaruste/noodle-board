@@ -1,7 +1,7 @@
 ---
 id: NB-68
 title: Save indicator
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -33,16 +33,16 @@ Phase 2 has no save indicator. The file bar uses one green disc and scales that 
 
 ## Acceptance criteria
 
-- [ ] The size property is `lg`, `md`, and `sm`
-- [ ] `lg` is a 40px slot, `md` is 32px, and `sm` is 24px
-- [ ] The disc is centered in that slot and matches the disc drawn on the frame
-- [ ] Success rests on `mapped.icon.success-light`
-- [ ] While saved, the success disc breathes from `mapped.icon.success-light` to `mapped.icon.success`, scaling from 1 to 1.1 over 3s
-- [ ] While saving, the success disc stays on `mapped.icon.success-light` and a `mapped.icon.success` ring expands from scale 1 at half opacity to scale 2.4 at zero opacity over 1.2s
-- [ ] Error paints its disc at the same three sizes and stays still
-- [ ] Reduced motion shows a still disc
-- [ ] The trial page shows both types, all three sizes, and both success motions
-- [ ] The live board is unchanged when the trial page is absent
+- [x] The size property is `lg`, `md`, and `sm`
+- [x] `lg` is a 40px slot, `md` is 32px, and `sm` is 24px
+- [x] The disc is centered in that slot and matches the disc drawn on the frame
+- [x] Success rests on `alias.success.400` (`#45B46C`). The caption names success-light. The disc fill is success 400
+- [x] While saved, the success disc breathes from `alias.success.400` to `mapped.icon.success`, scaling from 1 to 1.1 over 3s
+- [x] While saving, the success disc stays on `alias.success.400` and a `mapped.icon.success` ring expands from scale 1 at half opacity to scale 2.4 at zero opacity over 1.2s
+- [x] Error paints its disc at the same three sizes and stays still
+- [x] Reduced motion shows a still disc
+- [x] The trial page shows both types, all three sizes, and both success motions
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
@@ -50,14 +50,14 @@ Phase 2 has no save indicator. The file bar uses one green disc and scales that 
 
 The slot uses `brand.scale.40`, `brand.scale.32`, and `brand.scale.24`. The disc does not stretch to the slot. On the frame the three discs look the same size. Measure that diameter on the component. Check it against `brand.scale.16` (16px) and `brand.scale.8` (8px). Use the step that matches the drawn disc. The Figma file request was rate limited, and inspect is behind the sign-up wall, so confirm the diameter there.
 
-Success color follows the frame note and the proposed caption. The resting disc is `mapped.icon.success-light` (`#72C68F`), the same value as `alias.success.300`. The breath and the ring use `mapped.icon.success` (`#16A34A`), the same value as `alias.success.500`. Prefer those `mapped.icon` tokens. Do not copy `#86efac` or `#22c55e` from the comparison file.
+The caption says the success default state, or phase 1, uses success-light. The disc fill samples as `#45B46C`, which is `alias.success.400`. There is no mapped token at that value, so the resting disc uses that alias. The breath and the ring use `mapped.icon.success` (`#16A34A`), the same value as `alias.success.500`. Do not copy `#86efac` or `#22c55e` from the comparison file.
 
 Saved animation, on the success disc, `ease-in-out`, 3s, infinite:
 
-- 0% and 100%: scale 1, `mapped.icon.success-light`
+- 0% and 100%: scale 1, `alias.success.400`
 - 50%: scale 1.1, `mapped.icon.success`
 
-Saving animation keeps the disc at scale 1 on `mapped.icon.success-light`. A ring painted in `mapped.icon.success` covers the disc (`inset: 0`, same radius) and runs `ease-out`, 1.2s, infinite:
+Saving animation keeps the disc at scale 1 on `alias.success.400`. A ring painted in `mapped.icon.success` covers the disc (`inset: 0`, same radius) and runs `ease-out`, 1.2s, infinite:
 
 - 0%: scale 1, opacity 0.5
 - 100%: scale 2.4, opacity 0
