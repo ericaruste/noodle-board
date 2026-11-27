@@ -631,17 +631,22 @@ body,
   }
 }
 
-/* Save indicator. The disc is 8px in every slot. The ring can paint outside the slot. */
-.save-indicator-disc[data-motion="saved"] {
-  animation: save-indicator-breathe 3s ease-in-out infinite;
-}
-
+/* Save indicator. Proposed column: rest on success-light, breathe to success, ring while saving. */
+.save-indicator-disc[data-motion="saved"]::after,
 .save-indicator-disc[data-motion="saving"]::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background-color: var(--mapped-icon-success);
+  opacity: 0;
+}
+
+.save-indicator-disc[data-motion="saved"] {
+  animation: save-indicator-breathe 3s ease-in-out infinite;
+}
+
+.save-indicator-disc[data-motion="saving"]::after {
   animation: save-indicator-ring 1.2s ease-out infinite;
 }
 
@@ -649,7 +654,7 @@ body,
   0%,
   100% {
     transform: scale(1);
-    background-color: var(--alias-success-400);
+    background-color: var(--mapped-icon-success-light);
   }
   50% {
     transform: scale(1.1);
@@ -672,10 +677,6 @@ body,
   .save-indicator-disc[data-motion="saved"],
   .save-indicator-disc[data-motion="saving"]::after {
     animation: none;
-  }
-
-  .save-indicator-disc[data-motion="saving"]::after {
-    content: none;
   }
 }
 

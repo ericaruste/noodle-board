@@ -1,0 +1,14 @@
+---
+description: Include a trial page link after every component change
+alwaysApply: true
+---
+
+After a component change, the reply includes a trial page link the user can open. This covers a new atom, a change to that atom, a larger component built from it, and an icon size change.
+
+The link is the running app with that component’s trial, both the query and the hash when the trial registers both:
+
+http://localhost:5173/?trial=save-indicator
+
+http://localhost:5173/#save-indicator
+
+Start the dev server when it is not already running, then give the link. If the component has no trial yet, register one the same way as the other trials in `src/main.tsx`, then give the link. A trial name alone is not the link.
