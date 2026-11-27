@@ -17,9 +17,12 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.4`.
 - **[token app] Main button hover fill.** This export maps `mapped.surface.action-strong-hover` to `alias.primary.50` (`#E5F0F9`). The previous export used `alias.primary.400` (`#6EA9E2`). The button follows this export. Hover text and icons stay `mapped.text.action-hover` and `mapped.icon.action-hover`.
 - **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
+- **[token app] Project toolbar title minimum.** The title slot on the project toolbar is at least 200px. No spacing token is 200px. The title input still hugs its text outside that bar.
+- **[token app] Project toolbar corner.** The corner measures about 10px. The bar uses `alias.border-radius.xl` (12px).
 
 ## Decisions already made
 
+- A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
@@ -457,7 +460,7 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 Ticket NB-66. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
 
-A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. The resting field offers the full title on the `title` attribute. There is no tooltip component.
+A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. Hovering or focusing that field shows the full title in the same hover label the main toolbar uses. It sits 8px above the field.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -473,11 +476,12 @@ A project title field. It is not the file bar. The width follows the title and s
 | Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Stroke, default and hover | none | those variants have no stroke |
 | Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box |
-| Shadow | not a token | excluded from the component |
+| Full title | the main toolbar hover label | shown only when the title is truncated. 8px above the field, centered. A long title wraps at 320px so the label stays over the field. `rounded-md`, `bg-slate-900`, `px-2 py-1`, `text-xs`, `font-medium`, white. These are the existing toolbar label, not design tokens |
+| Shadow | not a token | the hover label uses the existing `shadow-lg`. The field itself has none |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
-There is no icon and no divider.
+There is no icon and no divider. The full-title label is the same element the main toolbar paints above a tool.
 
 Properties:
 
@@ -1233,3 +1237,59 @@ Properties:
 Painted: success at rest, success breathing while saved, success with the ring while saving, and a still error disc. Reduced motion leaves the resting disc and drops both animations.
 
 Not painted: hover, disabled, and focus. Error has no animation. The file bar keeps its own dot.
+
+## Project toolbar
+
+Ticket NB-72. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`.
+
+The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The canvas still uses the file bar.
+
+The content box is 304 by 48 when the title is at its 200px minimum: 4px padding, a 40px logo, an 8px gap, a 200px title, an 8px gap, a 40px indicator, and 4px padding. The 1px stroke brings the outer size to 306 by 50. A longer title grows the slot up to 320px, then truncates. Hovering or focusing that field shows the full title in the main toolbar’s hover label.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.8` | 8px between the logo and the title, and between the title and the indicator |
+| Height | none | hug. 4px padding and a 40px slot make 48px inside the stroke. The outer height is 50px with the 1px stroke |
+| Width | none | hug. The specimen is 304px inside the stroke when the title is at 200px. The outer width is 306px |
+| Corner radius | `alias.border-radius.xl` | 12px. The corner measures about 10px. No radius token is 10px |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
+| Shadow | not a token | the existing `shadow-lg` |
+| Blur | not a token | the trial adds none. The white sheet shows none |
+| Dot grid | not a token | excluded from the component |
+| Divider | none | the frame has no divider |
+| Logo slot | `brand.scale.40` | 40px. The resting control is a circle. The radius is `brand.scale.20`. Hover and selected expand to `alias.border-radius.lg` (8px). The frame’s expanded corner is 6.2px |
+| Logo fill | none | `#B11F24`. The brand red is not a design token |
+| Logo text | none | the button has no text |
+| Logo icon | the noodle mark | `src/assets/icons/noodle-logo.svg`. The circle clips the chopstick. Hover and selected reveal it |
+| Title slot minimum | none | 200px. No spacing token is 200px. This minimum is on the bar only. The title input still hugs its text everywhere else |
+| Title slot maximum | none | 320px. No spacing token is 320px. A longer title truncates. The resting field offers the full title |
+| Title height | `brand.scale.40` | 40px |
+| Title padding | `brand.scale.12` | 12px on the left and right |
+| Title radius | `alias.border-radius.xl` | 12px |
+| Title font | `alias.font-family.body` | Geist |
+| Title type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 14px / 14px, text style `body/md/tight`. Paragraph spacing is `not a token` |
+| Title text | `mapped.text.default` | `#303132` |
+| Title fill, default | none | the field has no fill |
+| Title fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
+| Title fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% |
+| Title stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box |
+| Indicator slot | `brand.scale.40` | 40px, size `lg` |
+| Indicator disc | `brand.scale.8` | 8px, centered |
+| Indicator, saved | `mapped.icon.success-light` | `#72C68F`. It breathes to `mapped.icon.success` (`#16A34A`) |
+| Indicator, saving | `mapped.icon.success` | the ring. The disc stays `mapped.icon.success-light` |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| Logo | logo button | resting circle on this frame. Hover and selected stay on the button |
+| Title | title input | specimen `Project Title`. The field can be edited |
+| Save indicator | size `lg` | success. Saved breathes. Saving plays the ring |
+
+Painted on this frame: the resting circle, the resting title, and the saved disc. The trial also paints a title long enough to truncate, and the same bar while saving.
+
+Not painted on this frame: the logo’s expanded square, the title’s hover and focus fills, and the indicator’s error disc. Those stay on the logo button, the title input, and the save indicator.
+
+This trial is not on the canvas, so the bar is not in FloatingPanel. The later pass that places it upper left, with the project menu, uses FloatingPanel on the toolbar layer. The file bar stays on the board.
