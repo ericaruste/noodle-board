@@ -696,6 +696,11 @@ body,
   outline-color: var(--mapped-border-action-ring-focus);
 }
 
+/* Project toolbar title slot. The field still hugs its text everywhere else. */
+[data-project-toolbar] [data-title-input] {
+  min-width: 200px; /* TODO token mismatch: Figma 200px */
+}
+
 /* Color picker toolbar. HexColorPicker has no alpha slider. The rule hides one if it is ever rendered.
    108px is the saturation field, including the 12px black band. No spacing token is 108px. */
 .noodle-color-picker.react-colorful {

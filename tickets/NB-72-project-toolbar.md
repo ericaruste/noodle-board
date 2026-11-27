@@ -1,7 +1,7 @@
 ---
 id: NB-72
 title: Project toolbar
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
@@ -30,14 +30,14 @@ Phase 2 has the three pieces and no project toolbar. The upper-left chrome is st
 
 ## Acceptance criteria
 
-- [ ] The bar is the logo button, the title input, and the save indicator at `lg`, in that order
-- [ ] The title slot is at least 200px and stops at 320px
-- [ ] A title wider than 320px truncates, and the resting field still offers the full title
-- [ ] The logo on the bar is the resting 40px circle
-- [ ] The save indicator uses size `lg`
-- [ ] The bar uses the surface, border, spacing, and radius tokens from the frame
-- [ ] The trial page shows the resting bar, a title long enough to truncate, and the save indicator while saved and while saving
-- [ ] The live board is unchanged when the trial page is absent
+- [x] The bar is the logo button, the title input, and the save indicator at `lg`, in that order
+- [x] The title slot is at least 200px and stops at 320px
+- [x] A title wider than 320px truncates, and the resting field still offers the full title
+- [x] The logo on the bar is the resting 40px circle
+- [x] The save indicator uses size `lg`
+- [x] The bar uses the surface, border, spacing, and radius tokens from the frame
+- [x] The trial page shows the resting bar, a title long enough to truncate, and the save indicator while saved and while saving
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
