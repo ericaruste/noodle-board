@@ -9,6 +9,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 ## Still to update
 
 - **[code] Underline and strikethrough.** They are drawn on the text toolbar and are not in the app. They wait for the text feature.
+- **[code] Toolbar icon fit.** Ticket NB-70. The five shape files and `line-weight-menu` draw their artwork inside a larger view box, so a 16px slot shows a smaller glyph than a Lucide icon. The shape stroke is 1.5. The line weight file leaves the stroke unset. The trial paints that stroke at the same weight as the shapes: 1.07 in the 20 box and 1.33 in the cropped box. Below the glyphs, the trial places them on the shape swatch, the shape toolbar, and the noodle toolbar. The trial is `?trial=icon-fit`. The live icons are unchanged.
 - **[token app] Color picker field height.** The saturation field, including the 12px black band, is 108px. No spacing token is 108px.
 - **[token app] Color picker toolbar width.** The swatch grid and the hex row are 152px: five 24px discs and four 8px gaps. No spacing token is 152px. The picker field stays 172px. No spacing token is 172px.
 - **[token app] `brand.neutral` is not the swatch.** `brand.neutral.200` and `brand.neutral.500` are both `#5B4BDB`. `alias.swatch.neutral` does not use them. Step 200 is `alias.warm-neutral.100` (`#FDFBF7`) at 60%. Step 500 is `alias.cool-neutral.900` (`#303132`).
@@ -680,7 +681,7 @@ Painted on the bar: one resting frame. The buttons in that frame are `state=Defa
 
 Not painted on the bar: hover, selected, and disabled. Those states belong to the contextual button. The button has no focus state.
 
-The line-weight control opens the line weight and line type menu. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
+The line-weight control opens the line weight and line type menu. The icon-fit trial can pass `lineWeightIcon`. The board omits it and keeps the line-weight file. The noodle-type control opens the noodle type menu. Each arrow opens the arrow menu. The color control opens the color picker toolbar. That open color menu is not painted on the frame. Each menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a zero-size box at the top of the layer, so the gap is measured from the pill. A menu moves above the pill only when it would leave the board.
 
 ## Line weight and line type menu
 
@@ -986,7 +987,7 @@ Shape swap opens the shape swatch, the five kinds in the existing order. The clo
 | New shape fill | `alias.swatch.purple.200` | `#EBCFFF`. The fill grid is step 200. Choosing purple writes this hex and selects the purple disc |
 | New shape stroke | `alias.swatch.purple.500` | `#BF66FF`. The stroke grid is step 500. Choosing purple writes this hex and selects the purple disc |
 
-The component exposes no properties of its own. The buttons inside set the contextual button properties. The property panel was not opened. These were read from the frame:
+The board passes no icon of its own. The icon-fit trial can pass `kindIcons` and `lineWeightIcon`. The board omits both, so the bar keeps `ShapeKindIcon` and the line-weight file. The buttons inside set the contextual button properties. The property panel was not opened. These were read from the frame:
 
 | Control | Slots | Instance |
 | --- | --- | --- |
@@ -1084,6 +1085,7 @@ The property list was not opened. The code takes the current kind. Null means mi
 | Property | Kind | Values |
 | --- | --- | --- |
 | kind | the shape | `rect`, `ellipse`, `round-rect`, `triangle`, `diamond`. Null leaves every button unselected |
+| icons | code | optional. The board uses `ShapeKindIcon`. The icon-fit trial can pass another glyph |
 
 Painted: one resting row. The app paints the current kind with the button’s selected state. A mixed kind stays in the default look.
 

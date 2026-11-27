@@ -380,6 +380,11 @@
       "id": "eb6ed365-49e6-4c94-9f71-6126b0569d17",
       "identifier": "ERI-85",
       "url": "https://linear.app/ericar/issue/ERI-85/shape-icons"
+    },
+    "NB-70": {
+      "id": "c93737f9-1010-43af-a719-2a2f067cd5dc",
+      "identifier": "ERI-86",
+      "url": "https://linear.app/ericar/issue/ERI-86/icon-fit"
     }
   }
 }

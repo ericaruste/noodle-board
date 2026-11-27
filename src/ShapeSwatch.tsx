@@ -9,6 +9,8 @@ type ShapeSwatchProps = {
   /** The current kind. Null is a mixed selection, so no button is selected. */
   kind: ShapeKind | null;
   onKind: (kind: ShapeKind) => void;
+  /** The board uses ShapeKindIcon. The icon-fit trial can pass another glyph. */
+  icons?: (kind: ShapeKind) => SlotIcon;
 };
 
 function kindIcon(kind: ShapeKind): SlotIcon {
@@ -48,7 +50,7 @@ function IconChoice({
  * bottom Shapes tool both open this row. The caller owns the menu and decides
  * what a choice writes. Choosing a kind does not close the menu by itself.
  */
-export default function ShapeSwatch({ kind, onKind }: ShapeSwatchProps) {
+export default function ShapeSwatch({ kind, onKind, icons = kindIcon }: ShapeSwatchProps) {
   return (
     <div
       className="flex items-center gap-brand-scale-2 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
@@ -60,7 +62,7 @@ export default function ShapeSwatch({ kind, onKind }: ShapeSwatchProps) {
           key={option}
           label={SHAPE_LABELS[option]}
           pressed={kind === option}
-          icon={kindIcon(option)}
+          icon={icons(option)}
           onClick={() => onKind(option)}
         />
       ))}

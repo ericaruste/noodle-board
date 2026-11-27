@@ -24,6 +24,8 @@ type NoodleToolbarProps = {
   onWrite?: (patch: Partial<NoodleData>, history: boolean) => void;
   /** Keys whose values disagree across the selection. Those controls stay neutral. */
   mixed?: ReadonlySet<string>;
+  /** The board uses the line-weight file. The icon-fit trial can pass another glyph. */
+  lineWeightIcon?: SlotIcon;
 };
 
 type OpenMenu = "color" | "weight" | "shape" | "start" | "end";
@@ -133,7 +135,13 @@ function IconChoice({
   );
 }
 
-export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleToolbarProps) {
+export default function NoodleToolbar({
+  edgeId,
+  data,
+  onWrite,
+  mixed,
+  lineWeightIcon = LineWeightMenuIcon,
+}: NoodleToolbarProps) {
   const dataRef = useRef(data);
   dataRef.current = data;
   const [menu, setMenu] = useState<OpenMenu | null>(null);
@@ -234,7 +242,7 @@ export default function NoodleToolbar({ edgeId, data, onWrite, mixed }: NoodleTo
         </MenuButton>
         <MenuButton
           label="Line weight and line type"
-          icon={LineWeightMenuIcon}
+          icon={lineWeightIcon}
           open={menu === "weight"}
           onToggle={() => toggle("weight")}
         >

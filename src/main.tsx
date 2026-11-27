@@ -6,6 +6,7 @@ import { ColorPickerToolbarPreview } from "./ColorPickerToolbar";
 import { ContextualButtonPreview } from "./ContextualButton";
 import { FillOpacitySliderPreview } from "./FillOpacitySlider";
 import { HexInputPreview } from "./HexInput";
+import { IconFitPreview } from "./IconFitPreview";
 import { IconButtonPreview } from "./IconButton";
 import { LogoButtonPreview } from "./LogoButton";
 import { MainButtonPreview } from "./MainButton";
@@ -23,6 +24,7 @@ const showSliderThumbTrial = window.location.hash === "#slider-thumb" || trial =
 const showColorPickerTrial = window.location.hash === "#color-picker" || trial === "color-picker";
 const showColorSwatchTrial = window.location.hash === "#color-swatch" || trial === "color-swatch";
 const showHexInputTrial = window.location.hash === "#hex-input" || trial === "hex-input";
+const showIconFitTrial = window.location.hash === "#icon-fit" || trial === "icon-fit";
 const showTitleInputTrial = window.location.hash === "#title-input" || trial === "title-input";
 const showIconButtonTrial = window.location.hash === "#icon-button" || trial === "icon-button";
 const showLogoButtonTrial = window.location.hash === "#logo-button" || trial === "logo-button";
@@ -45,6 +47,8 @@ createRoot(document.getElementById("root")!).render(
       <ColorSwatchPreview />
     ) : showHexInputTrial ? (
       <HexInputPreview />
+    ) : showIconFitTrial ? (
+      <IconFitPreview />
     ) : showTitleInputTrial ? (
       <TitleInputPreview />
     ) : showIconButtonTrial ? (
