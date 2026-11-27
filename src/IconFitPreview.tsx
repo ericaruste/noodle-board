@@ -25,7 +25,7 @@ type SlotIcon = ComponentType<{ className?: string }>;
 /**
  * Cropped view boxes. Each one pads the stroked ink by the Lucide margin,
  * 2 units for every 20 units of artwork, so the glyph fills a 16px slot the
- * way a Lucide icon does. The live icons keep their file view boxes.
+ * way a Lucide icon does. The live icons use these same boxes.
  */
 const FIT_VIEW_BOX = {
   square: "5.9 5.9 16.2 16.2",

@@ -71,7 +71,8 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 35. **Logo button** — NB-67 (the brand mark is a 40px circle at rest; hover and selected expand the red into a rounded square and reveal the chopstick the circle clips). The red is not a design token. The live board is unchanged.
 36. **Save indicator** — NB-68 (`save-indicator` has sizes `lg` 40px, `md` 32px, and `sm` 24px; success rests on success-light and breathes to success 500, and saving emits a ring). The file bar keeps its own dot.
 37. **Shape icons** — NB-69 (the shape swatch and the shape-swap button use the five files in `src/assets/icons` instead of the drawn paths in `ShapeKindIcon`). Follows the shape swatch from NB-61.
-38. **Icon fit** — NB-70 (a trial compares the shape icons and the line-weight icon with Lucide, matches the line-weight stroke to the shape stroke, and places both on the shape swatch, the shape toolbar, and the noodle toolbar). The live icons stay as they are. Follows the shape icons from NB-69.
+38. **Icon fit** — NB-70 (a trial compares the shape icons and the line-weight icon with Lucide, matches the line-weight stroke to the shape stroke, and places both on the shape swatch, the shape toolbar, and the noodle toolbar). The trial leaves the live icons unchanged. Follows the shape icons from NB-69.
+39. **Live icon fit** — NB-71 (the shape swatch, the shape toolbar, and the noodle toolbar use the Lucide-margin crop, and the line-weight stroke is 1.33 so it paints like the shape stroke of 1.5). The trial still shows the uncropped files. Follows the icon fit trial from NB-70.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
