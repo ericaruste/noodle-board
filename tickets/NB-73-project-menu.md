@@ -1,7 +1,7 @@
 ---
 id: NB-73
 title: Project menu
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -44,18 +44,18 @@ Phase 2 has the menu item and no project menu. The file bar is still a row of te
 
 ## Acceptance criteria
 
-- [ ] The main menu lists New, Open, the Recent label, View all, the first three project names, Save, and Save as, in that order
-- [ ] New, Open, Save, and Save as are medium menu items with the left icon and the chevron off, and the captions are `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, and `Ctrl+Shift+S`
-- [ ] Recent is a label, with no icon, no caption, no chevron, and no row fill
-- [ ] View all is a medium menu item with the left icon, the caption, and the chevron off
-- [ ] Each project row is a medium menu item with the Lucide bowl-chopsticks icon, and the caption and the chevron off
-- [ ] The recent panel lists every project name passed in, and the main menu shows only the first three
-- [ ] The recent panel is open when View all is selected, and closed when View all is not selected
-- [ ] The open specimen paints View all selected, and paints the first recent row selected
+- [x] The main menu lists New, Open, the Recent label, View all, the first three project names, Save, and Save as, in that order
+- [x] New, Open, Save, and Save as are medium menu items with the left icon and the chevron off, and the captions are `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, and `Ctrl+Shift+S`
+- [x] Recent is a label, with no icon, no caption, no chevron, and no row fill
+- [x] View all is a medium menu item with the left icon, the caption, and the chevron off
+- [x] Each project row is a medium menu item with the Lucide bowl-chopsticks icon, and the caption and the chevron off
+- [x] The recent panel lists every project name passed in, and the main menu shows only the first three
+- [x] The recent panel is open when View all is selected, and closed when View all is not selected
+- [x] The open specimen paints View all selected, and paints the first recent row selected
 - [ ] The main menu hugs to 220 by 304 with the specimen strings, and the recent panel hugs to 200 by 200
-- [ ] Both panels use the surface, border, spacing, and radius tokens from the frames
-- [ ] The trial page shows the menu with View all selected and the recent panel open, and the same menu with View all not selected
-- [ ] The live board is unchanged when the trial page is absent
+- [x] Both panels use the surface, border, spacing, and radius tokens from the frames
+- [x] The trial page shows the menu with View all selected and the recent panel open, and the same menu with View all not selected
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
