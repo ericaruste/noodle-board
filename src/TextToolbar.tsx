@@ -120,6 +120,7 @@ function TypefaceMenu({
               size="sm"
               showCaption={false}
               showChevron={false}
+              showLeftIcon={false}
               selected={activeFamily === family}
               onClick={() => onPick(family)}
             />
@@ -184,6 +185,7 @@ function FontStyleMenu({
               size="sm"
               showCaption={false}
               showChevron={false}
+              showLeftIcon={false}
               selected={activeStyle === style}
               onClick={() => onPick(style)}
             />
@@ -525,6 +527,7 @@ function FontSizeField({
               size="sm"
               showCaption={false}
               showChevron={false}
+              showLeftIcon={false}
               widthClassName="w-brand-scale-36"
               selected={value === String(preset)}
               onClick={() => {

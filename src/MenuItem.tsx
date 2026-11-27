@@ -1,8 +1,10 @@
-import { forwardRef } from "react";
+import { type ComponentType, forwardRef } from "react";
 import { ChevronRight } from "lucide-react";
 
 export type MenuItemState = "default" | "hover" | "selected" | "disabled";
 export type MenuItemSize = "sm" | "md";
+
+type SlotIcon = ComponentType<{ className?: string }>;
 
 type MenuItemProps = {
   label?: string;
@@ -10,6 +12,9 @@ type MenuItemProps = {
   showLabel?: boolean;
   showCaption?: boolean;
   showChevron?: boolean;
+  showLeftIcon?: boolean;
+  /** Left-hand icon. Defaults to chevron-right. */
+  leftIcon?: SlotIcon;
   /** Extra classes for the label, such as an alias typeface. */
   labelClassName?: string;
   /** Replaces the full-width row. A scale width keeps every row in one menu the same size. */
@@ -50,6 +55,13 @@ const iconClass: Record<MenuItemState, string> = {
   disabled: "text-mapped-icon-disabled",
 };
 
+const leftIconClass: Record<MenuItemState, string> = {
+  default: "text-mapped-icon-action-light group-hover:text-mapped-icon-action-hover",
+  hover: "text-mapped-icon-action-hover",
+  selected: "text-mapped-icon-action-selected",
+  disabled: "text-mapped-icon-disabled",
+};
+
 function visualState(
   state: MenuItemState | undefined,
   selected: boolean | undefined,
@@ -68,6 +80,8 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     showLabel = true,
     showCaption = true,
     showChevron = true,
+    showLeftIcon = true,
+    leftIcon,
     labelClassName,
     widthClassName = "w-full",
     size = "md",
@@ -82,6 +96,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const isDisabled = disabled || visual === "disabled";
   const hoverClass = visual === "default" ? "enabled:hover:bg-mapped-surface-action-hover" : "";
   const heightClass = size === "sm" ? "h-brand-scale-28" : "h-brand-scale-32";
+  const LeftIcon = leftIcon ?? ChevronRight;
 
   return (
     <button
@@ -92,13 +107,14 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       onClick={onClick}
       className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-8 rounded-alias-border-radius-lg px-brand-scale-8 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
     >
-      {showLabel ? (
-        <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]} ${labelClassName ?? ""}`}>
-          {label}
-        </span>
-      ) : (
-        <span />
-      )}
+      <span className="flex min-w-0 items-center gap-brand-scale-8">
+        {showLeftIcon ? <LeftIcon className={`size-brand-scale-16 shrink-0 ${leftIconClass[visual]}`} aria-hidden /> : null}
+        {showLabel ? (
+          <span className={`whitespace-nowrap text-left text-[12px] leading-[1em] ${labelClass[visual]} ${labelClassName ?? ""}`}>
+            {label}
+          </span>
+        ) : null}
+      </span>
       {showCaption || showChevron ? (
         <span className="flex shrink-0 items-center gap-brand-scale-4">
           {showCaption ? (
@@ -132,9 +148,10 @@ export function MenuItemPreview() {
         ))}
       </div>
       <div className="flex w-48 flex-col gap-brand-scale-2" role="menu" aria-label="Menu item slots">
+        <MenuItem showLeftIcon={false} />
         <MenuItem showChevron={false} />
         <MenuItem showCaption={false} />
-        <MenuItem showCaption={false} showChevron={false} />
+        <MenuItem showCaption={false} showChevron={false} showLeftIcon={false} />
       </div>
     </main>
   );

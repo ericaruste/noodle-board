@@ -27,7 +27,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - Canvas text on a sticky, a noodle, and a shape defaults to Open Sans at `responsive.desktop.placeholder.md.size` (14px) and `responsive.desktop.placeholder.line-height` (16.8px). The empty hint uses `mapped.text.placeholder` (`alias.cool-neutral.800`, `#606264`). Typed sticky and shape text keeps the existing slate ink. A noodle label keeps the stroke color, and its weight stays 600. A text object stays at 14px with the family omitted. A run that sets its own family or size still wins.
 - Spacing steps are named with the pixel size. `brand.scale.4` is 4px and `brand.scale.8` is 8px. The range is `brand.scale.0` through `brand.scale.56`. `brand.scale.52` (52px) and `brand.scale.56` (56px) are new. The old names, such as `brand.scale.100` for 4px and `brand.scale.1200` for 48px, are gone.
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
-- Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px.
+- Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. The menu item left icon is `chevron-right` at 16px. Its default color is `mapped.icon.action-light`. Hover, selected, and disabled use the icon color that matches the label in that state.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
@@ -202,7 +202,7 @@ Not painted on this frame: hover and disabled. The button has no focus state. Th
 
 Ticket NB-41. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
 
-A single row for a dropdown. The label sits on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between the label and that pair.
+A single row for a dropdown. A left icon and the label sit on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between that pair and the caption group.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -217,6 +217,11 @@ A single row for a dropdown. The label sits on the left. The caption and the sub
 | Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px |
 | Caption size | `responsive.desktop.caption.md.size`, `responsive.desktop.caption.md.line-height-tight` | 10px / 10px. The row still writes 10px. Paragraph spacing is `not a token` |
 | Chevron | `brand.scale.12` | 12px, Lucide `chevron-right` |
+| Left icon | `brand.scale.16` | 16px, Lucide `chevron-right`. It sits `brand.scale.8` from the label |
+| Left icon, default | `mapped.icon.action-light` | `#909397`. A real hover uses `mapped.icon.action-hover` |
+| Left icon, hover | `mapped.icon.action-hover` | `#1E3B58`, the same value as the label |
+| Left icon, selected | `mapped.icon.action-selected` | `#1E3B58`, the same value as the label |
+| Left icon, disabled | `mapped.icon.disabled` | `#909397`, the same value as the label |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
@@ -241,19 +246,21 @@ Properties:
 | state | variant | `default`, `hover`, `selected`, `disabled` |
 | Label | text | default `Label`. It sits in the layer named `container` |
 | caption | text | default `caption` |
-| chevron | slot | `icon/lucide/chevron-right`. Shown unless turned off |
+| chevron | slot | `chevron-right`. Shown unless turned off |
+| Show left icon | boolean | default on |
+| Left icon | slot | Lucide component, default `chevron-right`. Shown unless turned off |
 
 The boolean names for hiding the caption and the chevron were not in the property panel.
 
-Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`.
+Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`. The left icon is on in those rows.
 
-Not painted: focus. A leading icon is not in the painted rows.
+Not painted: focus.
 
 ## Font style menu
 
 Ticket NB-42. Code `src/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
 
-Four small menu items, caption and chevron off. The order is Regular, Bold, Italic, Bold Italic. The labels stay in Geist. They are not drawn in bold or italic.
+Four small menu items, left icon, caption, and chevron off. The order is Regular, Bold, Italic, Bold Italic. The labels stay in Geist. They are not drawn in bold or italic.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -266,7 +273,7 @@ Four small menu items, caption and chevron off. The order is Regular, Bold, Ital
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Left icon, caption, and chevron are off |
 
 The first row is painted with the hover fill, `#E5F0F9`. The live menu marks the current weight with the selected fill.
 
@@ -276,7 +283,7 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 Ticket NB-43. Code `TypefaceMenu` in `src/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
 
-Five small menu items, caption and chevron off. The order is Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label uses its `alias.typeface` token. The menu item body font stays Geist on every other menu.
+Five small menu items, left icon, caption, and chevron off. The order is Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label uses its `alias.typeface` token. The menu item body font stays Geist on every other menu.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -289,7 +296,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Left icon, caption, and chevron are off |
 | Label, Geist Mono | `alias.typeface.geist-mono` | Geist Mono |
 | Label, Open Sans | `alias.typeface.open-sans` | Open Sans |
 | Label, Coming Soon | `alias.typeface.coming-soon` | Coming Soon |
@@ -306,7 +313,7 @@ Five small menu items, caption and chevron off. The order is Geist Mono, Open Sa
 
 The first row, Geist Mono, is painted with the hover fill, `#E5F0F9`. The live menu marks the current family with the selected fill.
 
-The rows use the menu item properties: size `sm`, caption off, chevron off. The frame itself exposes no properties.
+The rows use the menu item properties: size `sm`, left icon off, caption off, chevron off. The frame itself exposes no properties.
 
 Painted: one resting frame. Geist Mono is the hover example. The other four rows are default.
 
@@ -318,7 +325,7 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 Ticket NB-44. Code `FontSizeField` in `src/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
 
-Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.36` (36px) so the column does not change width with the digits. The labels stay in Geist.
+Twelve small menu items, left icon, caption, and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.36` (36px) so the column does not change width with the digits. The labels stay in Geist.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -332,7 +339,7 @@ Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 1
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same shadow the other menus already use |
 | Blur | not a token | the same blur the text toolbar already uses |
-| Row | menu item, `sm` | `brand.scale.28`, 28px. Caption and chevron are off |
+| Row | menu item, `sm` | `brand.scale.28`, 28px. Left icon, caption, and chevron are off |
 | Font | `alias.font-family.body` | Geist |
 | Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The row still writes 12px. Paragraph spacing is `not a token` |
 | Label, default | `mapped.text.action` | `#303132` |
@@ -343,11 +350,11 @@ Twelve small menu items, caption and chevron off. The order is 10, 12, 14, 16, 1
 | Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
 | Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
 
-There is no icon on this frame. Caption and chevron are off, so the menu item draws no caption color and no chevron.
+There is no icon on this frame. Left icon, caption, and chevron are off, so the menu item draws no left icon, no caption color, and no chevron.
 
 The frame has no divider.
 
-The rows use the menu item properties: size `sm`, caption off, chevron off, and a fixed width of `brand.scale.36`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
+The rows use the menu item properties: size `sm`, left icon off, caption off, chevron off, and a fixed width of `brand.scale.36`. The frame itself exposes no properties. A note on the sheet says each font size menu item is a fixed width of 36px.
 
 Painted: one resting frame. 14 is filled, and the toolbar above shows 14, so that row is the current size. The live menu marks the current size with the selected fill.
 
