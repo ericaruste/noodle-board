@@ -61,7 +61,10 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
       <div data-project-menu role="menu" aria-label="Project" className={panelClass}>
         <CommandRow label="New" caption="Ctrl+N" />
         <CommandRow label="Open" caption="Ctrl+O" />
-        <div className="flex h-brand-scale-32 items-center whitespace-nowrap px-brand-scale-8 font-alias-font-family-body text-[12px] leading-[1em] text-mapped-text-action">
+        <div
+          role="presentation"
+          className="flex h-brand-scale-32 items-center whitespace-nowrap px-brand-scale-8 font-alias-font-family-body text-[12px] leading-[1em] text-mapped-text-action"
+        >
           Recent
         </div>
         <MenuItem
@@ -72,8 +75,8 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
           showChevron={false}
           selected={viewAllSelected}
         />
-        {preview.map((name) => (
-          <ProjectRow key={name} label={name} />
+        {preview.map((name, index) => (
+          <ProjectRow key={`${name}-${index}`} label={name} />
         ))}
         <div className="h-brand-scale-8" aria-hidden />
         <CommandRow label="Save" caption="Ctrl+S" />
@@ -81,8 +84,8 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
       </div>
       {viewAllSelected ? (
         <div data-project-menu-recent role="menu" aria-label="Recent projects" className={panelClass}>
-          {projects.map((name) => (
-            <ProjectRow key={name} label={name} selected={name === selectedProject} />
+          {projects.map((name, index) => (
+            <ProjectRow key={`${name}-${index}`} label={name} selected={name === selectedProject} />
           ))}
         </div>
       ) : null}
