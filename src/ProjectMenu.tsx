@@ -79,7 +79,7 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
         >
           Recent
         </div>
-        <div className="h-brand-scale-1 -mx-brand-scale-4 bg-mapped-border-default" role="separator" />
+        <div className="h-brand-scale-1 bg-mapped-border-default" role="separator" />
         <div className="mt-brand-scale-4 mb-brand-scale-4">
           <MenuItem
             label="View all"

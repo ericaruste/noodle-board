@@ -23,6 +23,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
@@ -1316,7 +1317,7 @@ The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the 
 | Gap between rows | `brand.scale.0` | 0px |
 | Space above View all | `brand.scale.4` | 4px, between the divider and View all |
 | Space before Save | `brand.scale.4` | 4px, below the project rows. There is no divider in that space |
-| Divider | `mapped.border.default`, `brand.scale.1` | 1px. The line spans the menu width by cancelling the panel's horizontal padding |
+| Divider | `mapped.border.default`, `brand.scale.1` | 1px. The panel padding applies, so the line is the same width as a menu item |
 | Corner radius | `alias.border-radius.lg` | 8px. The corner was not measured on this frame. It is the same corner the other menus use |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
@@ -1330,7 +1331,7 @@ The divider and the two spaces belong to the main menu. View all and the three p
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Divider | `mapped.border.default`, `brand.scale.1` | 1px tall. The fill is `mapped.border.default`. The line spans the menu width by cancelling the panel's horizontal padding, `brand.scale.4` |
+| Divider | `mapped.border.default`, `brand.scale.1` | 1px tall. The fill is `mapped.border.default`. The panel's `brand.scale.4` padding applies, so the line is the same width as a menu item |
 | Space above View all | `brand.scale.4` | 4px, between the divider and View all |
 | Space before Save | `brand.scale.4` | 4px, below the project rows. There is no divider in that space |
 
