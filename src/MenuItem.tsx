@@ -19,6 +19,8 @@ type MenuItemProps = {
   labelClassName?: string;
   /** Replaces the full-width row. A scale width keeps every row in one menu the same size. */
   widthClassName?: string;
+  /** Left padding becomes brand.scale.32. The right padding stays brand.scale.8. The fill still covers the whole row. */
+  indent?: boolean;
   size?: MenuItemSize;
   /** Painted variant from the spec. Leave unset to follow selected, disabled, and real hover. */
   state?: MenuItemState;
@@ -84,6 +86,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     leftIcon,
     labelClassName,
     widthClassName = "w-full",
+    indent = false,
     size = "md",
     state,
     selected,
@@ -96,6 +99,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const isDisabled = disabled || visual === "disabled";
   const hoverClass = visual === "default" ? "enabled:hover:bg-mapped-surface-action-hover" : "";
   const heightClass = size === "sm" ? "h-brand-scale-28" : "h-brand-scale-32";
+  const paddingClass = indent ? "pl-brand-scale-32 pr-brand-scale-8" : "px-brand-scale-8";
   const LeftIcon = leftIcon ?? ChevronRight;
 
   return (
@@ -105,7 +109,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       role="menuitem"
       disabled={isDisabled}
       onClick={onClick}
-      className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-8 rounded-alias-border-radius-lg px-brand-scale-8 font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
+      className={`group flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-8 rounded-alias-border-radius-lg ${paddingClass} font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
     >
       <span className="flex min-w-0 items-center gap-brand-scale-8">
         {showLeftIcon ? <LeftIcon className={`size-brand-scale-16 shrink-0 ${leftIconClass[visual]}`} aria-hidden /> : null}
@@ -152,6 +156,10 @@ export function MenuItemPreview() {
         <MenuItem showChevron={false} />
         <MenuItem showCaption={false} />
         <MenuItem showCaption={false} showChevron={false} showLeftIcon={false} />
+      </div>
+      <div className="flex w-48 flex-col gap-brand-scale-2" role="menu" aria-label="Indented menu item">
+        <p className="font-alias-font-family-body text-[12px] leading-[1em]">indented</p>
+        <MenuItem indent />
       </div>
     </main>
   );

@@ -42,7 +42,15 @@ function CommandRow({ label, caption: shortcut }: { label: string; caption: stri
   );
 }
 
-function ProjectRow({ label, selected = false }: { label: string; selected?: boolean }) {
+function ProjectRow({
+  label,
+  selected = false,
+  indent = false,
+}: {
+  label: string;
+  selected?: boolean;
+  indent?: boolean;
+}) {
   return (
     <MenuItem
       label={label}
@@ -50,6 +58,7 @@ function ProjectRow({ label, selected = false }: { label: string; selected?: boo
       leftIcon={BowlChopsticks}
       showCaption={false}
       showChevron={false}
+      indent={indent}
       selected={selected}
     />
   );
@@ -70,19 +79,22 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
         >
           Recent
         </div>
-        <MenuItem
-          label="View all"
-          size="md"
-          showLeftIcon={false}
-          showCaption={false}
-          showChevron={false}
-          selected={recentOpen}
-          onClick={() => setRecentOpen((open) => !open)}
-        />
-        {preview.map((name, index) => (
-          <ProjectRow key={`${name}-${index}`} label={name} />
-        ))}
-        <div className="h-brand-scale-8" aria-hidden />
+        <div className="h-brand-scale-1 -mx-brand-scale-4 bg-mapped-border-default" role="separator" />
+        <div className="mt-brand-scale-4 mb-brand-scale-4">
+          <MenuItem
+            label="View all"
+            size="md"
+            showLeftIcon={false}
+            showCaption={false}
+            showChevron={false}
+            indent
+            selected={recentOpen}
+            onClick={() => setRecentOpen((open) => !open)}
+          />
+          {preview.map((name, index) => (
+            <ProjectRow key={`${name}-${index}`} label={name} indent />
+          ))}
+        </div>
         <CommandRow label="Save" caption="Ctrl+S" />
         <CommandRow label="Save as" caption="Ctrl+Shift+S" />
       </div>

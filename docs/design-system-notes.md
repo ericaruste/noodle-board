@@ -207,7 +207,7 @@ Not painted on this frame: hover and disabled. The button has no focus state. Th
 
 ## Menu item
 
-Ticket NB-41. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
+Ticket NB-41, NB-75. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
 
 A single row for a dropdown. A left icon and the label sit on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between that pair and the caption group.
 
@@ -215,7 +215,8 @@ A single row for a dropdown. A left icon and the label sit on the left. The capt
 | --- | --- | --- |
 | Height, md | `brand.scale.32` | 32px |
 | Height, sm | `brand.scale.28` | 28px |
-| Padding, horizontal | `brand.scale.8` | 8px |
+| Padding, left | `brand.scale.8` | 8px when indent is off. `brand.scale.32` when indent is on |
+| Padding, right | `brand.scale.8` | 8px |
 | Gap between label and the caption group | `brand.scale.8` | 8px, and the row pushes the caption group to the far side |
 | Gap between caption and chevron | `brand.scale.4` | 4px |
 | Corner radius | `alias.border-radius.lg` | 8px |
@@ -230,8 +231,8 @@ A single row for a dropdown. A left icon and the label sit on the left. The capt
 | Left icon, selected | `mapped.icon.action-selected` | `#1E3B58`, the same value as the label |
 | Left icon, disabled | `mapped.icon.disabled` | `#909397`, the same value as the label |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
-| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9` |
-| Fill, selected | `mapped.surface.action-selected` | `#DBEAF8` |
+| Fill, hover | `mapped.surface.action-hover` | `#E5F0F9`. The hover fill covers the full button |
+| Fill, selected | `mapped.surface.action-selected` | `#DBEAF8`. The selected fill covers the full button |
 | Label, default | `mapped.text.action` | `#303132` |
 | Label, hover | `mapped.text.action-hover` | `#1E3B58` |
 | Label, selected | `mapped.text.action-selected` | `#1E3B58` |
@@ -256,10 +257,11 @@ Properties:
 | chevron | slot | `chevron-right`. Shown unless turned off |
 | Show left icon | boolean | default on |
 | Left icon | slot | Lucide component, default `chevron-right`. Shown unless turned off |
+| indent | boolean | default off. Off keeps left padding at `brand.scale.8`. On sets left padding to `brand.scale.32`. Right padding stays `brand.scale.8` |
 
 The boolean names for hiding the caption and the chevron were not in the property panel.
 
-Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`. The left icon is on in those rows.
+Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`. The left icon is on in those rows. The size rows and the slot rows keep the default padding. One indented row is painted so the indent prop can be checked. The hover fill and the selected fill cover the full button, including the padding.
 
 Not painted: focus.
 
@@ -1298,7 +1300,7 @@ This trial is not on the canvas, so the bar is not in FloatingPanel. The later p
 
 ## Project menu
 
-Ticket NB-73. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`.
+Ticket NB-73, NB-75. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows.
 
 Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The canvas still uses the file bar.
 
@@ -1309,17 +1311,28 @@ The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Width | none | 220px. No spacing token is 220px |
-| Height | hug | 304px inside the stroke. Nine 32px rows, 4px padding on top and bottom, and one 8px gap before Save. The outer size is 306px with the 1px stroke |
+| Height | hug | 305px inside the stroke. Nine 32px rows, 4px padding on top and bottom, a 1px divider, and 4px of space above View all and below the project rows. The outer size is 307px with the 1px stroke |
 | Padding | `brand.scale.4` | 4px |
 | Gap between rows | `brand.scale.0` | 0px |
-| Gap before Save | `brand.scale.8` | 8px, between the third project row and Save |
+| Space above View all | `brand.scale.4` | 4px, between the divider and View all |
+| Space before Save | `brand.scale.4` | 4px, below the project rows. There is no divider in that space |
+| Divider | `mapped.border.default`, `brand.scale.1` | 1px. The line spans the menu width by cancelling the panel's horizontal padding |
 | Corner radius | `alias.border-radius.lg` | 8px. The corner was not measured on this frame. It is the same corner the other menus use |
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the same `shadow-lg` the font menus already use |
 | Blur | not a token | the same 24px blur the font menus already use |
-| Divider | none | the frame has no divider |
 | Dot grid | not a token | excluded from the component |
+
+### Divider and spaces
+
+The divider and the two spaces belong to the main menu. View all and the three project names sit in one wrapper. The wrapper's top margin is the space under the divider. The wrapper's bottom margin is the space before Save. The wrapper has no gap of its own.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Divider | `mapped.border.default`, `brand.scale.1` | 1px tall. The fill is `mapped.border.default`. The line spans the menu width by cancelling the panel's horizontal padding, `brand.scale.4` |
+| Space above View all | `brand.scale.4` | 4px, between the divider and View all |
+| Space before Save | `brand.scale.4` | 4px, below the project rows. There is no divider in that space |
 
 ### Recent label
 
@@ -1328,7 +1341,7 @@ The word Recent is a 32px row. It is not a menu item, so it has no hover fill an
 | Piece | Token | Value |
 | --- | --- | --- |
 | Height | `brand.scale.32` | 32px |
-| Padding, horizontal | `brand.scale.8` | 8px, so the word lines up with New, Open, and View all |
+| Padding, horizontal | `brand.scale.8` | 8px, so the word lines up with New, Open, Save, and Save as |
 | Gap | none | the row has no icon, caption, or chevron |
 | Corner radius | none | the row has no corner of its own |
 | Stroke | none | the row has no stroke |
@@ -1364,9 +1377,9 @@ The rows are the menu item at size `md`. Hover, selected, disabled, and the row 
 | Row | Slots |
 | --- | --- |
 | New, Open, Save, Save as | size `md`. Left icon off. Chevron off. Caption is `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, or `Ctrl+Shift+S` |
-| View all | size `md`. Left icon off. Caption off. Chevron off. Selected while the recent panel is open |
-| Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
-| Recent panel project | the same project row. The open specimen paints the first name selected. The copy in the main menu stays unselected |
+| View all | size `md`. Left icon off. Caption off. Chevron off. Indent on. Selected while the recent panel is open |
+| Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. Indent on for the three names in the main menu. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
+| Recent panel project | the same project row. Indent off. The open specimen paints the first name selected. The copy in the main menu stays unselected |
 
 Properties:
 
