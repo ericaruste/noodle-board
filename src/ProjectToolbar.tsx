@@ -8,6 +8,8 @@ type ProjectToolbarProps = {
   onTitleChange?: (title: string) => void;
   /** Success plays the ring while saving. */
   saving?: boolean;
+  onLogoClick?: () => void;
+  logoSelected?: boolean;
 };
 
 export function ProjectToolbar({
@@ -15,6 +17,8 @@ export function ProjectToolbar({
   defaultTitle = "Project Title",
   onTitleChange,
   saving = false,
+  onLogoClick,
+  logoSelected,
 }: ProjectToolbarProps) {
   return (
     <div
@@ -23,7 +27,7 @@ export function ProjectToolbar({
       aria-label="Project"
       className="inline-flex items-center gap-brand-scale-8 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg" // TODO token mismatch: Figma 10px
     >
-      <LogoButton />
+      <LogoButton onClick={onLogoClick} selected={logoSelected} />
       <TitleInput value={title} defaultValue={defaultTitle} onValueChange={onTitleChange} />
       <SaveIndicator size="lg" saving={saving} />
     </div>

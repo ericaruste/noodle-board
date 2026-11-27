@@ -1,7 +1,7 @@
 ---
 id: NB-74
 title: Project management toolbar
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
@@ -35,11 +35,11 @@ A person cannot use the project toolbar to rename the title and open the project
 
 ## Acceptance criteria
 
-- [ ] The trial uses the project toolbar, and the user can rename the project title on it
-- [ ] Clicking the logo button opens the project menu
-- [ ] Clicking View all opens the recent project menu
-- [ ] Pressing the logo button scales it to 0.90, and releasing it returns the scale to 1
-- [ ] The live board is unchanged when the trial page is absent
+- [x] The trial uses the project toolbar, and the user can rename the project title on it
+- [x] Clicking the logo button opens the project menu
+- [x] Clicking View all opens the recent project menu
+- [x] Pressing the logo button scales it to 0.90, and releasing it returns the scale to 1
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
