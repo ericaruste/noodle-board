@@ -46,7 +46,9 @@ export function ProjectToolbarPreview() {
       </section>
       <section className="flex flex-col items-start gap-brand-scale-8">
         <p className={caption}>Long title</p>
-        <ProjectToolbar defaultTitle={longTitle} />
+        <div className="pt-brand-scale-48">
+          <ProjectToolbar defaultTitle={longTitle} />
+        </div>
       </section>
       <section className="flex flex-col items-start gap-brand-scale-8">
         <p className={caption}>Saving</p>

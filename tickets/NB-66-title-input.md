@@ -35,7 +35,7 @@ Phase 2 needs the title field from `input/title`. The board has no shared title 
 - [x] The control is 40px tall
 - [x] The width follows the title and stops at 320px
 - [x] A title wider than that is truncated
-- [x] When the title is truncated, the resting field still offers the full project title
+- [x] When the title is truncated, hover or focus shows the full title in the main toolbar hover label
 - [x] Default, hover, and focus match the painted variants
 - [x] The title can be edited while the field is focused
 - [x] The label uses the responsive desktop size and line height that match the Figma text style
@@ -51,7 +51,7 @@ Height is `brand.scale.40` (40px). Horizontal padding is `brand.scale.12` (12px)
 
 The text style is `body/md/tight`: `responsive.desktop.body.md.size` and `responsive.desktop.body.md.line-height-tight` (14px / 14px). Paragraph spacing is not in the export, so it stays as drawn. That style is recorded in `docs/design-system-notes.md`.
 
-The width hugs the title plus that padding and stops at 320px. Overflow truncates. The frame does not paint a tooltip component. The resting field exposes the full title the way `ProjectName` already does, with the `title` attribute. Do not add a tooltip component.
+The width hugs the title plus that padding and stops at 320px. Overflow truncates. Hover or focus on a truncated title shows the full title in the same hover label the main toolbar uses, 8px above the field. A long title wraps at 320px so the label stays over the field. It is not the browser `title` attribute, and it is not a new tooltip component.
 
 A click focuses the field. The trial field accepts typing. This ticket does not change how the file bar commits a rename.
 

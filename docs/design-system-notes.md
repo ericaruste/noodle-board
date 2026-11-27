@@ -22,6 +22,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
@@ -459,7 +460,7 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 Ticket NB-66. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
 
-A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. The resting field offers the full title on the `title` attribute. There is no tooltip component.
+A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. Hovering or focusing that field shows the full title in the same hover label the main toolbar uses. It sits 8px above the field.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -475,11 +476,12 @@ A project title field. It is not the file bar. The width follows the title and s
 | Fill, focus | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Stroke, default and hover | none | those variants have no stroke |
 | Stroke, focus | `mapped.border.action-ring-focus`, `alias.border-width.sm` | `#4A94DB`, 2px, drawn outside the box |
-| Shadow | not a token | excluded from the component |
+| Full title | the main toolbar hover label | shown only when the title is truncated. 8px above the field, centered. A long title wraps at 320px so the label stays over the field. `rounded-md`, `bg-slate-900`, `px-2 py-1`, `text-xs`, `font-medium`, white. These are the existing toolbar label, not design tokens |
+| Shadow | not a token | the hover label uses the existing `shadow-lg`. The field itself has none |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
-There is no icon and no divider.
+There is no icon and no divider. The full-title label is the same element the main toolbar paints above a tool.
 
 Properties:
 
@@ -1242,7 +1244,7 @@ Ticket NB-72. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-t
 
 The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The canvas still uses the file bar.
 
-The content box is 304 by 48 when the title is at its 200px minimum: 4px padding, a 40px logo, an 8px gap, a 200px title, an 8px gap, a 40px indicator, and 4px padding. The 1px stroke brings the outer size to 306 by 50. A longer title grows the slot up to 320px, then truncates. The resting field offers the full title on the `title` attribute.
+The content box is 304 by 48 when the title is at its 200px minimum: 4px padding, a 40px logo, an 8px gap, a 200px title, an 8px gap, a 40px indicator, and 4px padding. The 1px stroke brings the outer size to 306 by 50. A longer title grows the slot up to 320px, then truncates. Hovering or focusing that field shows the full title in the main toolbar’s hover label.
 
 | Piece | Token | Value |
 | --- | --- | --- |
