@@ -69,6 +69,7 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 33. **Shape rendering** — NB-65 (each kind has its own default size; the rectangle, diamond, and triangle paint 8px corners; the rectangle and rounded rectangle use the shorter side for their text pad). Follows the shape text from NB-58.
 34. **Title input** — NB-66 (`input/title` is 40px tall, the width stops at 320px, a longer title truncates, and the resting field still offers the full project title). The file bar keeps its own name control.
 35. **Logo button** — NB-67 (the brand mark is a 40px circle at rest; hover and selected expand the red into a rounded square and reveal the chopstick the circle clips). The red is not a design token. The live board is unchanged.
+36. **Shape icons** — NB-69 (the shape swatch and the shape-swap button use the five files in `src/assets/icons` instead of the drawn paths in `ShapeKindIcon`). Follows the shape swatch from NB-61.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
