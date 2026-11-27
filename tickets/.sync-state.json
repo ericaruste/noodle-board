@@ -395,6 +395,11 @@
       "id": "49ebd488-7196-4074-965a-e3cece54921f",
       "identifier": "ERI-87",
       "url": "https://linear.app/ericar/issue/ERI-87/live-icon-fit"
+    },
+    "NB-73": {
+      "id": "b3c9f9cf-8b8c-4de2-8dbb-7d23ec68fb00",
+      "identifier": "ERI-89",
+      "url": "https://linear.app/ericar/issue/ERI-89/project-menu"
     }
   }
 }
