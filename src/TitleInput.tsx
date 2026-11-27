@@ -64,43 +64,52 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
   }
 
   return (
-    <label
-      data-title-input
-      title={fullTitle}
-      className={`${state ? "" : "noodle-title-input"} inline-grid h-brand-scale-40 max-w-[320px] cursor-text items-center rounded-alias-border-radius-xl px-brand-scale-12 ${fieldType} ${shellClass[visual]}`}
-      style={{ gridTemplateColumns: "minmax(0, max-content)", maxWidth: maxTitleWidthPx }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onMouseDown={onFieldMouseDown}
-    >
-      <span
-        ref={sizerRef}
-        aria-hidden="true"
-        className={`invisible col-start-1 row-start-1 min-w-0 overflow-hidden whitespace-nowrap ${fieldType}`}
+    <span className="group/tip relative">
+      <label
+        data-title-input
+        className={`${state ? "" : "noodle-title-input"} inline-grid h-brand-scale-40 max-w-[320px] cursor-text items-center rounded-alias-border-radius-xl px-brand-scale-12 ${fieldType} ${shellClass[visual]}`}
+        style={{ gridTemplateColumns: "minmax(0, max-content)", maxWidth: maxTitleWidthPx }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onMouseDown={onFieldMouseDown}
       >
-        {shown || "\u00a0"}
-      </span>
-      <input
-        ref={ref}
-        id={id}
-        value={shown}
-        readOnly={locked}
-        size={1}
-        spellCheck={false}
-        autoComplete="off"
-        autoCorrect="off"
-        title={fullTitle}
-        aria-label="Project title"
-        onChange={(event) => {
-          const next = event.target.value;
-          if (value === undefined) setDraft(next);
-          onValueChange?.(next);
-        }}
-        onFocus={onFocus}
-        onBlur={() => setFocused(false)}
-        className={`col-start-1 row-start-1 m-0 min-w-0 w-full truncate border-0 bg-transparent p-0 outline-none ${fieldType}`}
-      />
-    </label>
+        <span
+          ref={sizerRef}
+          aria-hidden="true"
+          className={`invisible col-start-1 row-start-1 min-w-0 overflow-hidden whitespace-nowrap ${fieldType}`}
+        >
+          {shown || "\u00a0"}
+        </span>
+        <input
+          ref={ref}
+          id={id}
+          value={shown}
+          readOnly={locked}
+          size={1}
+          spellCheck={false}
+          autoComplete="off"
+          autoCorrect="off"
+          aria-label="Project title"
+          onChange={(event) => {
+            const next = event.target.value;
+            if (value === undefined) setDraft(next);
+            onValueChange?.(next);
+          }}
+          onFocus={onFocus}
+          onBlur={() => setFocused(false)}
+          className={`col-start-1 row-start-1 m-0 min-w-0 w-full truncate border-0 bg-transparent p-0 outline-none ${fieldType}`}
+        />
+      </label>
+      {fullTitle ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 w-max -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-left text-xs font-medium text-white opacity-0 shadow-lg group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
+          style={{ maxWidth: maxTitleWidthPx }}
+        >
+          {shown}
+        </span>
+      ) : null}
+    </span>
   );
 });
 
@@ -131,7 +140,9 @@ export function TitleInputPreview() {
         <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
           Live
         </p>
-        <TitleInput value={live} onValueChange={setLive} />
+        <div className="pt-brand-scale-48">
+          <TitleInput value={live} onValueChange={setLive} />
+        </div>
       </div>
     </main>
   );

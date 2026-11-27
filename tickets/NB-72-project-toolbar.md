@@ -32,7 +32,7 @@ Phase 2 has the three pieces and no project toolbar. The upper-left chrome is st
 
 - [x] The bar is the logo button, the title input, and the save indicator at `lg`, in that order
 - [x] The title slot is at least 200px and stops at 320px
-- [x] A title wider than 320px truncates, and the resting field still offers the full title
+- [x] A title wider than 320px truncates, and hover or focus shows the full title in the main toolbar hover label
 - [x] The logo on the bar is the resting 40px circle
 - [x] The save indicator uses size `lg`
 - [x] The bar uses the surface, border, spacing, and radius tokens from the frame
@@ -48,6 +48,8 @@ The row is `LogoButton`, `TitleInput`, and `SaveIndicator` with `size="lg"`. Do 
 The content box is 304 by 48. A 1px stroke brings the outer size to 306 by 50. Padding is `brand.scale.4` (4px). The gap between the logo and the title, and between the title and the indicator, is `brand.scale.8` (8px). The logo and the indicator slot are 40px. The title slot in the specimen is the 200px minimum.
 
 No spacing token is 200px, so the minimum is marked `/* TODO token mismatch: Figma 200px */`. The 320px cap is the same mismatch already on the title input. Set the minimum on this bar's title slot. Leave `TitleInput` hugging its text everywhere else.
+
+A truncated title shows the full title in the main toolbar hover label, on hover and on focus. The label sits 8px above the field and wraps at 320px. `TitleInput` draws it, so the title-input trial uses the same label. It is not the browser `title` attribute.
 
 The stroke is `mapped.border.default` (`#D8DCE2`) at `alias.border-width.xsm` (1px). The fill is `mapped.surface.default` (`#F6F9FD` at 60%), the same surface as the main toolbar. On the white sheet the pixels sample near `#F8FAFD`. The corner measures about 10px. No radius token is 10px. The nearest bar radius is `alias.border-radius.xl` (12px), so use that and mark `/* TODO token mismatch: Figma 10px */`.
 
