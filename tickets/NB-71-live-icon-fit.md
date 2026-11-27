@@ -1,7 +1,7 @@
 ---
 id: NB-71
 title: Live icon fit
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
