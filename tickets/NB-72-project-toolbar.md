@@ -1,7 +1,7 @@
 ---
 id: NB-72
 title: Project toolbar
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
