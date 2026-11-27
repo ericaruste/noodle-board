@@ -1,7 +1,7 @@
 ---
 id: NB-75
 title: Project menu layout
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -41,16 +41,16 @@ The main menu runs from Recent straight into View all, and the only break before
 
 ## Acceptance criteria
 
-- [ ] A 1px divider in `mapped.border.default` sits directly below the Recent label on the main menu
-- [ ] The divider spans the full menu width
-- [ ] 4px of space sits between that divider and View all
-- [ ] View all and the project rows on the main menu sit in one wrapper, with a 4px gap below the wrapper before Save, and no divider there
-- [ ] Menu item gains an optional indent prop that adds 24px to the row's left padding
-- [ ] View all and the project rows on the main menu use that indent
-- [ ] A menu item that does not set indent keeps its current padding, and the existing menu-item trial rows stay that way
-- [ ] The hover fill and the selected fill each span the full width of the row
-- [ ] The 4px spaces, the 24px indent, and the 1px divider use spacing or border tokens, and View all and the project rows do not each carry their own pixel value
-- [ ] The live board is unchanged when the trial page is absent
+- [x] A 1px divider in `mapped.border.default` sits directly below the Recent label on the main menu
+- [x] The divider spans the full menu width
+- [x] 4px of space sits between that divider and View all
+- [x] View all and the project rows on the main menu sit in one wrapper, with a 4px gap below the wrapper before Save, and no divider there
+- [x] Menu item gains an optional indent prop that adds 24px to the row's left padding
+- [x] View all and the project rows on the main menu use that indent
+- [x] A menu item that does not set indent keeps its current padding, and the existing menu-item trial rows stay that way
+- [x] The hover fill and the selected fill each span the full width of the row
+- [x] The 4px spaces, the 24px indent, and the 1px divider use spacing or border tokens, and View all and the project rows do not each carry their own pixel value
+- [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
 
