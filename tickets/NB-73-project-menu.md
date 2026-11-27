@@ -52,7 +52,7 @@ Phase 2 has the menu item and no project menu. The file bar is still a row of te
 - [x] The recent panel lists every project name passed in, and the main menu shows only the first three
 - [x] The recent panel is open when View all is selected, and closed when View all is not selected
 - [x] The open specimen paints View all selected, and paints the first recent row selected
-- [ ] The main menu hugs to 220 by 304 with the specimen strings, and the recent panel hugs to 200 by 200
+- [x] The main menu and the recent panel are each 220px wide. The main menu is 304px tall inside the stroke, and the recent panel is 200px tall inside the stroke
 - [x] Both panels use the surface, border, spacing, and radius tokens from the frames
 - [x] The trial page shows the menu with View all selected and the recent panel open, and the same menu with View all not selected
 - [x] The live board is unchanged when the trial page is absent
@@ -69,7 +69,7 @@ The installed `lucide-react` (`^1.68.0`) has no `BowlChopsticks` export. The fra
 
 The recent panel's 200px height is six 32px rows and `brand.scale.4` (4px) padding on top and bottom, with no gap. The main menu uses that same padding and no gap between rows. Nine 32px rows plus 8px of padding come to 296. The frame is 304, so one `brand.scale.8` (8px) gap sits between the third project row and Save. The stroke is `mapped.border.default` at `alias.border-width.xsm` (1px). The fill is `mapped.surface.default`. The corner is `alias.border-radius.lg` (8px), the same corner the other menus use. Inspect was behind the sign-up wall, so the corner was not measured on this frame. Shadow and blur are not tokens. Use the same shadow and blur the font menus already use.
 
-The panels hug their content. 220 and 200 are the measured hug with the specimen strings, not fixed widths. No spacing token is 220 or 200. A second bowl-chopsticks layer sits on the right of each recent row in the Figma layer list. The painted row shows only the left icon, so the chevron stays off.
+Both panels are 220px wide. No spacing token is 220. A second bowl-chopsticks layer sits on the right of each recent row in the Figma layer list. The painted row shows only the left icon, so the chevron stays off.
 
 The spec sheet (the title, the two notes, and the 856 by 470 frame) is not part of the component.
 

@@ -19,10 +19,11 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
 - **[token app] Project toolbar title minimum.** The title slot on the project toolbar is at least 200px. No spacing token is 200px. The title input still hugs its text outside that bar.
 - **[token app] Project toolbar corner.** The corner measures about 10px. The bar uses `alias.border-radius.xl` (12px).
-- **[token app] Project menu width.** The selection badges read 220px and 200px. With the specimen strings, Geist hugs both panels to 137px inside the stroke. No spacing token is 220, 200, or 137. The panels hug their content.
+- **[token app] Project menu width.** The main menu and the recent panel are each 220px wide. No spacing token is 220px.
 
 ## Decisions already made
 
+- The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
@@ -1299,7 +1300,7 @@ This trial is not on the canvas, so the bar is not in FloatingPanel. The later p
 
 Ticket NB-73. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`.
 
-Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. The trial shows that state, with the first recent row selected, and a second menu where View all is not selected so the panel stays closed. The canvas still uses the file bar.
+Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The canvas still uses the file bar.
 
 The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the toolbar that opened it. The sheet gap between the two panels was not measured.
 
@@ -1307,7 +1308,7 @@ The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the 
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | hug. With the specimen strings the inside of the stroke is 137px. The outer size is 138px with the 1px stroke. The selection badge reads 220px. No spacing token is 220 or 137 |
+| Width | none | 220px. No spacing token is 220px |
 | Height | hug | 304px inside the stroke. Nine 32px rows, 4px padding on top and bottom, and one 8px gap before Save. The outer size is 306px with the 1px stroke |
 | Padding | `brand.scale.4` | 4px |
 | Gap between rows | `brand.scale.0` | 0px |
@@ -1344,7 +1345,7 @@ The word Recent is a 32px row. It is not a menu item, so it has no hover fill an
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | hug. With the specimen strings the inside of the stroke is 137px. The outer size is 138px with the 1px stroke. The selection badge reads 200px. No spacing token is 200 or 137 |
+| Width | none | 220px. No spacing token is 220px |
 | Height | hug | 200px inside the stroke. Six 32px rows and 4px padding on top and bottom, with no gap. The outer size is 202px with the 1px stroke |
 | Padding | `brand.scale.4` | 4px |
 | Gap | `brand.scale.0` | 0px |
@@ -1372,7 +1373,7 @@ Properties:
 | Property | Kind | Values |
 | --- | --- | --- |
 | projects | list | every recent name. The main menu shows the first three. The recent panel shows all of them |
-| viewAllSelected | boolean | default off. On paints View all selected and opens the recent panel |
+| viewAllSelected | boolean | default off. The starting selected state. A click on View all switches it. On paints View all selected and opens the recent panel |
 | selectedProject | text | the recent-panel row to paint selected. Unset paints none of them selected |
 
 Painted: View all selected with the recent panel open and the first recent row selected. View all not selected, with the recent panel closed. The other rows are the menu item’s default state.

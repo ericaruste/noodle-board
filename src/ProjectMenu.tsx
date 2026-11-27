@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createLucideIcon } from "lucide-react";
 import { MenuItem } from "./MenuItem";
 
@@ -10,8 +11,9 @@ export const BowlChopsticks = createLucideIcon("bowl-chopsticks", [
   ["path", { d: "M7 21h10" }],
 ]);
 
+// 220px is the menu width. No spacing token is 220px. TODO token mismatch: 220px
 const panelClass =
-  "grid w-max rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
+  "grid w-[220px] rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
 
 type ProjectMenuProps = {
   /** Every recent project. The main menu shows the first three. The recent panel shows all of them. */
@@ -54,6 +56,7 @@ function ProjectRow({ label, selected = false }: { label: string; selected?: boo
 }
 
 export function ProjectMenu({ projects, viewAllSelected = false, selectedProject }: ProjectMenuProps) {
+  const [recentOpen, setRecentOpen] = useState(viewAllSelected);
   const preview = projects.slice(0, 3);
 
   return (
@@ -73,7 +76,8 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
           showLeftIcon={false}
           showCaption={false}
           showChevron={false}
-          selected={viewAllSelected}
+          selected={recentOpen}
+          onClick={() => setRecentOpen((open) => !open)}
         />
         {preview.map((name, index) => (
           <ProjectRow key={`${name}-${index}`} label={name} />
@@ -82,7 +86,7 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
         <CommandRow label="Save" caption="Ctrl+S" />
         <CommandRow label="Save as" caption="Ctrl+Shift+S" />
       </div>
-      {viewAllSelected ? (
+      {recentOpen ? (
         <div data-project-menu-recent role="menu" aria-label="Recent projects" className={panelClass}>
           {projects.map((name, index) => (
             <ProjectRow key={`${name}-${index}`} label={name} selected={name === selectedProject} />
