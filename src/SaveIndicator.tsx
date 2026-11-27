@@ -29,7 +29,7 @@ export function SaveIndicator({ size = "lg", type = "success", saving = false }:
     >
       <span
         className={`save-indicator-disc relative size-brand-scale-8 shrink-0 rounded-full ${
-          type === "error" ? "bg-mapped-icon-error" : "bg-alias-success-400"
+          type === "error" ? "bg-mapped-icon-error" : "bg-mapped-icon-success-light"
         }`}
         data-motion={motion}
       />
