@@ -42,7 +42,7 @@ The main menu runs from Recent straight into View all, and the only break before
 ## Acceptance criteria
 
 - [x] A 1px divider in `mapped.border.default` sits directly below the Recent label on the main menu
-- [x] The divider spans the full menu width
+- [x] The divider stays inside the panel padding and is the same width as a menu item
 - [x] 4px of space sits between that divider and View all
 - [x] View all and the project rows on the main menu sit in one wrapper, with a 4px gap below the wrapper before Save, and no divider there
 - [x] Menu item gains an optional indent prop that adds 24px to the row's left padding
@@ -58,13 +58,13 @@ Keep the work in [`src/ProjectMenu.tsx`](../src/ProjectMenu.tsx) and [`src/MenuI
 
 On `MenuItem`, add `indent`, defaulting to false. Leave the default class as `px-brand-scale-8`. When `indent` is set, the left padding is `brand.scale.32` and the right padding stays `brand.scale.8`. `brand.scale.32` is the current 8px plus `brand.scale.24`. Do not write a raw 24px or 32px length on the button, and do not pass a padding class from `ProjectMenu`. The prop is the only switch.
 
-Add that space as `padding-left` on the button that already paints the fill. Do not indent with margin, and do not change `widthClassName`. The button stays `w-full`, so the hover fill and the selected fill still cover the whole row, including the added padding. The corner stays `alias.border-radius.lg`. The panel's `brand.scale.4` padding still insets the row from the stroke. The highlight fills that row. It does not have to cross the panel padding. The divider is the piece that does.
+Add that space as `padding-left` on the button that already paints the fill. Do not indent with margin, and do not change `widthClassName`. The button stays `w-full`, so the hover fill and the selected fill still cover the whole row, including the added padding. The corner stays `alias.border-radius.lg`. The panel's `brand.scale.4` padding still insets the row from the stroke. The highlight fills that row. The divider stays inside that same padding. It is the same width as a menu item.
 
 `CommandRow` does not pass `indent`. `ProjectRow` takes an `indent` flag and passes it through, because the recent panel uses the same component. The three names in the main menu set the flag. The recent panel does not, so those six rows keep the current padding. View all sets `indent` on its own `MenuItem`.
 
 In the main menu, put the divider immediately after the Recent label, then a wrapper around View all and the three names. The divider is a sibling of the wrapper, so the wrapper's top space does not open a gap above the line.
 
-The divider is 1px tall, `h-brand-scale-1`, and its fill is `bg-mapped-border-default`. A normal grid child stops 4px short of the stroke because the panel padding is `p-brand-scale-4`. Cancel that horizontal padding on the divider with the same token, `-mx-brand-scale-4`, so the line meets both inner edges of the stroke. Do not give the divider its own pixel width.
+The divider is 1px tall, `h-brand-scale-1`, and its fill is `bg-mapped-border-default`. It is a normal grid child, so the panel padding `p-brand-scale-4` applies and the line is the same width as a menu item. Do not cancel that padding, and do not give the divider its own pixel width.
 
 The 4px before View all is the wrapper's top margin, `mt-brand-scale-4`. The 4px before Save is the wrapper's bottom margin, `mb-brand-scale-4`. Remove the `h-brand-scale-8` spacer. Do not put a margin on View all or on each project row. The wrapper has no gap of its own, so View all and the names keep the current 0px row gap. No divider between the wrapper and Save.
 
@@ -72,7 +72,7 @@ The main menu's inside height changes. Nine 32px rows are 288px, and the 8px of 
 
 On the menu item trial, leave the size rows and the slot rows at the default padding. Add one indented row so the prop can be checked. That row is the only new specimen there.
 
-Update the Project menu section and the Menu item section in [`docs/design-system-notes.md`](../docs/design-system-notes.md). Name NB-75 beside NB-73 for the layout this ticket adds. In the main menu table, replace the 8px gap before Save with the divider and the two 4px spaces, and record the 305px inside height. The divider row names `mapped.border.default` and `brand.scale.1`, and says the line spans the menu width by cancelling the panel's horizontal padding. The Recent label still lines up with New, Open, Save, and Save as. In the rows table, View all and the main-menu project names set indent. The recent-panel project row does not. In the Menu item section, add the indent property, default off, and the left padding: `brand.scale.8` when indent is off, `brand.scale.32` when it is on. The right padding stays `brand.scale.8`. Say the hover and selected fills cover the full button. Give the project menu its own table for the divider and the two spaces. Do not say that table matches the menu item, and do not say the menu item matches the project menu.
+Update the Project menu section and the Menu item section in [`docs/design-system-notes.md`](../docs/design-system-notes.md). Name NB-75 beside NB-73 for the layout this ticket adds. In the main menu table, replace the 8px gap before Save with the divider and the two 4px spaces, and record the 305px inside height. The divider row names `mapped.border.default` and `brand.scale.1`, and says the panel padding applies, so the line is the same width as a menu item. The Recent label still lines up with New, Open, Save, and Save as. In the rows table, View all and the main-menu project names set indent. The recent-panel project row does not. In the Menu item section, add the indent property, default off, and the left padding: `brand.scale.8` when indent is off, `brand.scale.32` when it is on. The right padding stays `brand.scale.8`. Say the hover and selected fills cover the full button. Give the project menu its own table for the divider and the two spaces. Do not say that table matches the menu item, and do not say the menu item matches the project menu.
 
 This trial is not on the canvas, so the panels stay out of FloatingPanel. The later pass that places the menu uses FloatingPanel on the dropdown layer and checks it against a selected element and an element that is mid-drag.
 
