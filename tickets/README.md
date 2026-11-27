@@ -73,8 +73,9 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 37. **Shape icons** — NB-69 (the shape swatch and the shape-swap button use the five files in `src/assets/icons` instead of the drawn paths in `ShapeKindIcon`). Follows the shape swatch from NB-61.
 38. **Icon fit** — NB-70 (a trial compares the shape icons and the line-weight icon with Lucide, matches the line-weight stroke to the shape stroke, and places both on the shape swatch, the shape toolbar, and the noodle toolbar). The trial leaves the live icons unchanged. Follows the shape icons from NB-69.
 39. **Live icon fit** — NB-71 (the shape swatch, the shape toolbar, and the noodle toolbar use the Lucide-margin crop, and the line-weight stroke is 1.33 so it paints like the shape stroke of 1.5). The trial still shows the uncropped files. Follows the icon fit trial from NB-70.
-40. **Project toolbar** — NB-72 (`toolbar/project` is the logo button, the title input, and the save indicator at `lg`; the title slot is at least 200px and stops at 320px). The trial leaves the upper-left file bar unchanged. Placing the bar on the canvas waits for the project menu in NB-73.
+40. **Project toolbar** — NB-72 (`toolbar/project` is the logo button, the title input, and the save indicator at `lg`; the title slot is at least 200px and stops at 320px). The trial leaves the upper-left file bar unchanged.
 41. **Project menu** — NB-73 (`toolbar/project/menu` is medium menu items: New, Open, a Recent label, View all, three project names, Save, and Save as; View all opens `toolbar/project/menu/recent`). The trial leaves the upper-left file bar unchanged.
+42. **Project management toolbar** — NB-74 (the project toolbar trial where the title can be renamed, the logo opens the project menu, and View all opens the recent panel; a press scales the logo to 0.90 and a release returns it to 1). Follows the project toolbar from NB-72 and the project menu from NB-73. The trial leaves the upper-left file bar unchanged.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
