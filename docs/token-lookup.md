@@ -53,7 +53,7 @@ Shadows, frosted glass, and the dot grid are not listed. Paragraph spacing is no
 | #DBEAF8 | `bg-mapped-surface-action-selected` | `mapped.surface.action-selected` | color |
 | #FCFDFE | `bg-mapped-surface-action-solid` | `mapped.surface.action-solid` | color |
 | #6EA9E2 / 0% | `bg-mapped-surface-action-strong` | `mapped.surface.action-strong` | color |
-| #6EA9E2 | `bg-mapped-surface-action-strong-hover` | `mapped.surface.action-strong-hover` | color |
+| #E5F0F9 | `bg-mapped-surface-action-strong-hover` | `mapped.surface.action-strong-hover` | color |
 | #4A94DB | `bg-mapped-surface-action-strong-selected` | `mapped.surface.action-strong-selected` | color |
 | #F6F9FD / 60% | `bg-mapped-surface-default` | `mapped.surface.default` | color |
 | #F1DEE0 / 0% | `bg-mapped-surface-error` | `mapped.surface.error` | color |
@@ -310,7 +310,7 @@ These values are shared by more than one token, so a Figma value on its own is a
 | #606264 | `mapped.text.caption`, `mapped.text.placeholder`, `alias.cool-neutral.800`, `brand.cool-gray.800` |
 | #656463 | `alias.warm-neutral.700`, `brand.warm-gray.700` |
 | #66C7FF | `alias.swatch.sky.500`, `brand.sky.500` |
-| #6EA9E2 | `mapped.border.action-ring-pressed`, `mapped.surface.action-strong-hover`, `alias.primary.400`, `brand.blue.400` |
+| #6EA9E2 | `mapped.border.action-ring-pressed`, `alias.primary.400`, `brand.blue.400` |
 | #720B24 | `alias.error.700`, `brand.red.700` |
 | #72C68F | `mapped.icon.success-light`, `alias.success.300`, `brand.green.300` |
 | #7E7D7B | `alias.warm-neutral.600`, `brand.warm-gray.600` |
@@ -334,7 +334,7 @@ These values are shared by more than one token, so a Figma value on its own is a
 | #DBEAF8 | `mapped.surface.action-selected`, `alias.primary.100`, `brand.blue.100` |
 | #E49EAC | `alias.error.200`, `brand.red.200` |
 | #E4E2DE | `alias.warm-neutral.200`, `brand.warm-gray.200` |
-| #E5F0F9 | `mapped.surface.action-hover`, `alias.primary.50`, `brand.blue.50` |
+| #E5F0F9 | `mapped.surface.action-hover`, `mapped.surface.action-strong-hover`, `alias.primary.50`, `brand.blue.50` |
 | #E6F2E6 | `alias.success.50`, `brand.green.50` |
 | #E9FFDB | `alias.swatch.lime.200`, `brand.lime.200` |
 | #EBCFFF | `alias.swatch.purple.200`, `brand.purple.200` |

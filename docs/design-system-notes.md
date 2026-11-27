@@ -15,7 +15,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Placeholder line height sits beside `md`.** The path is `responsive.desktop.placeholder.line-height`, not `responsive.desktop.placeholder.md.line-height`. `md` has a size only. `responsive.desktop.body.lg` has no `line-height-tight`.
 - **[token app] Opacity track width.** The pill is 120px wide. No spacing token is 120px.
 - **[token app] Main toolbar padding.** The 342 by 48 hug includes a 1px stroke, so the space inside the stroke is 3px. No spacing token is 3px. The bar uses 4px, `brand.scale.4`.
-- **[token app] Main button hover fill.** This export maps `mapped.surface.action-strong-hover` to `alias.primary.400` (`#6EA9E2`). The previous export used `alias.primary.200` (`#B7D4F1`). The button follows this export. Hover text and icons stay `mapped.text.action-hover` and `mapped.icon.action-hover`.
+- **[token app] Main button hover fill.** This export maps `mapped.surface.action-strong-hover` to `alias.primary.50` (`#E5F0F9`). The previous export used `alias.primary.400` (`#6EA9E2`). The button follows this export. Hover text and icons stay `mapped.text.action-hover` and `mapped.icon.action-hover`.
 - **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
 
 ## Decisions already made
@@ -40,7 +40,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
 - The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.16`. The thumb has two sizes. `sm` is 12px, `brand.scale.12`, and it is the default. `md` is 16px, `brand.scale.16`. The track has two sizes. `sm` is 8px, `brand.scale.8`. `md` is 12px, `brand.scale.12`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
 - The line weight and line type row is one component, `src/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
-- `mapped.surface.action-strong-hover` is `alias.primary.400` (`#6EA9E2`) at 100% in this export. The main button and the main toolbar use that fill on hover. Default type hover text is `mapped.text.action-hover` (`#1E3B58`) and the icons are `mapped.icon.action-hover` (`#1E3B58`). Selected keeps the light foreground.
+- `mapped.surface.action-strong-hover` is `alias.primary.50` (`#E5F0F9`) at 100% in this export. The main button and the main toolbar use that fill on hover. Default type hover text is `mapped.text.action-hover` (`#1E3B58`) and the icons are `mapped.icon.action-hover` (`#1E3B58`). Selected keeps the light foreground.
 - Success is `brand.green`, aliased as `alias.success`. `mapped.icon.success` is `alias.success.500` (`#16A34A`). `mapped.icon.success-light` is `alias.success.300` (`#72C68F`). No component paints them yet.
 - `mapped.icon.action-light` is `alias.cool-neutral.700` (`#909397`). No component paints it yet.
 - The shape kind row is one component, `src/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
@@ -1109,7 +1109,7 @@ A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the 
 | Type size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. Paragraph spacing is `not a token`. The label box measures 31 by 12 |
 | Icon | `brand.scale.16` | 16px, Lucide. Both slots are the case-sensitive glyph |
 | Fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
-| Fill, default hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
+| Fill, default hover | `mapped.surface.action-strong-hover` | `#E5F0F9` |
 | Fill, default selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
 | Fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
 | Fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
@@ -1127,7 +1127,7 @@ A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the 
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
 
-The hover fill is `mapped.surface.action-strong-hover`, `#6EA9E2` (`alias.primary.400` at 100%). Hover text is `mapped.text.action-hover` and hover icons are `mapped.icon.action-hover`, both `#1E3B58`. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with light text and icons. The pale action hover used by the icon button is a different fill.
+The hover fill is `mapped.surface.action-strong-hover`, `#E5F0F9` (`alias.primary.50` at 100%). Hover text is `mapped.text.action-hover` and hover icons are `mapped.icon.action-hover`, both `#1E3B58`. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with light text and icons. The pale action hover used by the icon button is a different fill.
 
 Properties:
 
@@ -1169,7 +1169,7 @@ Every control is a main button with the label and the right icon turned off, so 
 | Control font | none | the label slot is off |
 | Control icon | `brand.scale.16` | 16px |
 | Control fill, default and disabled | `mapped.surface.action` | `#E5F0F9` at 0% |
-| Control fill, hover | `mapped.surface.action-strong-hover` | `#6EA9E2` |
+| Control fill, hover | `mapped.surface.action-strong-hover` | `#E5F0F9` |
 | Control fill, selected | `mapped.surface.action-strong-selected` | `#4A94DB` |
 | Control fill, destructive default and disabled | `mapped.surface.error` | `#F1DEE0` at 0% |
 | Control fill, destructive hover | `mapped.surface.error-hover` | `#F1DEE0` |
