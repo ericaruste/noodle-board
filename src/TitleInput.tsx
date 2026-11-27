@@ -1,4 +1,4 @@
-import { forwardRef, useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 
 export type TitleInputState = "default" | "hover" | "focus";
 
@@ -51,9 +51,8 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
     return () => observer.disconnect();
   }, [shown]);
 
-  function onFocus(event: FocusEvent<HTMLInputElement>) {
+  function onFocus() {
     setFocused(true);
-    event.currentTarget.scrollLeft = 0;
   }
 
   function onFieldMouseDown(event: MouseEvent<HTMLLabelElement>) {
@@ -77,7 +76,7 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
       <span
         ref={sizerRef}
         aria-hidden="true"
-        className={`invisible col-start-1 row-start-1 min-w-0 overflow-hidden whitespace-pre ${fieldType}`}
+        className={`invisible col-start-1 row-start-1 min-w-0 overflow-hidden whitespace-nowrap ${fieldType}`}
       >
         {shown || "\u00a0"}
       </span>
