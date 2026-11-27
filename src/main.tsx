@@ -7,6 +7,7 @@ import { ContextualButtonPreview } from "./ContextualButton";
 import { FillOpacitySliderPreview } from "./FillOpacitySlider";
 import { HexInputPreview } from "./HexInput";
 import { IconButtonPreview } from "./IconButton";
+import { LogoButtonPreview } from "./LogoButton";
 import { MainButtonPreview } from "./MainButton";
 import { MenuItemPreview } from "./MenuItem";
 import { SliderThumbPreview } from "./SliderThumb";
@@ -22,6 +23,7 @@ const showColorPickerTrial = window.location.hash === "#color-picker" || trial =
 const showColorSwatchTrial = window.location.hash === "#color-swatch" || trial === "color-swatch";
 const showHexInputTrial = window.location.hash === "#hex-input" || trial === "hex-input";
 const showIconButtonTrial = window.location.hash === "#icon-button" || trial === "icon-button";
+const showLogoButtonTrial = window.location.hash === "#logo-button" || trial === "logo-button";
 const showMainButtonTrial = window.location.hash === "#main-button" || trial === "main-button";
 const showMenuItemTrial = window.location.hash === "#menu-item" || trial === "menu-item";
 const showContextualButtonTrial =
@@ -43,6 +45,8 @@ createRoot(document.getElementById("root")!).render(
       <HexInputPreview />
     ) : showIconButtonTrial ? (
       <IconButtonPreview />
+    ) : showLogoButtonTrial ? (
+      <LogoButtonPreview />
     ) : showMainButtonTrial ? (
       <MainButtonPreview />
     ) : showMenuItemTrial ? (
