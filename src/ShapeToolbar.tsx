@@ -30,6 +30,10 @@ type ShapeToolbarProps = {
   onFillOpacity: (value: number, history: boolean) => void;
   onThickness: (thickness: ShapeThickness) => void;
   onLineStyle: (lineStyle: ShapeLineStyle) => void;
+  /** The board uses ShapeKindIcon. The icon-fit trial can pass another glyph. */
+  kindIcons?: (kind: ShapeKind) => SlotIcon;
+  /** The board uses the line-weight file. The icon-fit trial can pass another glyph. */
+  lineWeightIcon?: SlotIcon;
 };
 
 type OpenMenu = "kind" | "stroke" | "weight" | "fill";
@@ -106,6 +110,8 @@ export default function ShapeToolbar({
   onFillOpacity,
   onThickness,
   onLineStyle,
+  kindIcons,
+  lineWeightIcon = LineWeightMenuIcon,
 }: ShapeToolbarProps) {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   const opacityDrag = useRef(false);
@@ -164,12 +170,13 @@ export default function ShapeToolbar({
       <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <MenuButton
           label={kind ? `Shape, ${SHAPE_LABELS[kind]}` : "Shape, mixed"}
-          icon={kindIcon(kind ?? "diamond")}
+          icon={(kindIcons ?? kindIcon)(kind ?? "diamond")}
           open={menu === "kind"}
           onToggle={() => toggle("kind")}
         >
           <ShapeSwatch
             kind={kind}
+            icons={kindIcons}
             onKind={(option) => {
               setMenu(null);
               onKind(option);
@@ -189,7 +196,7 @@ export default function ShapeToolbar({
         </MenuButton>
         <MenuButton
           label="Line weight and line type"
-          icon={LineWeightMenuIcon}
+          icon={lineWeightIcon}
           open={menu === "weight"}
           onToggle={() => toggle("weight")}
         >
