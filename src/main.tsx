@@ -9,6 +9,7 @@ import { HexInputPreview } from "./HexInput";
 import { IconFitPreview } from "./IconFitPreview";
 import { IconButtonPreview } from "./IconButton";
 import { LogoButtonPreview } from "./LogoButton";
+import { ProjectMenuPreview } from "./ProjectMenu";
 import { ProjectToolbarPreview } from "./ProjectToolbar";
 import { SaveIndicatorPreview } from "./SaveIndicator";
 import { MainButtonPreview } from "./MainButton";
@@ -34,6 +35,7 @@ const showSaveIndicatorTrial =
   window.location.hash === "#save-indicator" || trial === "save-indicator";
 const showProjectToolbarTrial =
   window.location.hash === "#project-toolbar" || trial === "project-toolbar";
+const showProjectMenuTrial = window.location.hash === "#project-menu" || trial === "project-menu";
 const showMainButtonTrial = window.location.hash === "#main-button" || trial === "main-button";
 const showMenuItemTrial = window.location.hash === "#menu-item" || trial === "menu-item";
 const showContextualButtonTrial =
@@ -65,6 +67,8 @@ createRoot(document.getElementById("root")!).render(
       <SaveIndicatorPreview />
     ) : showProjectToolbarTrial ? (
       <ProjectToolbarPreview />
+    ) : showProjectMenuTrial ? (
+      <ProjectMenuPreview />
     ) : showMainButtonTrial ? (
       <MainButtonPreview />
     ) : showMenuItemTrial ? (

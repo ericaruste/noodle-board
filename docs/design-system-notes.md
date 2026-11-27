@@ -19,9 +19,11 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
 - **[token app] Project toolbar title minimum.** The title slot on the project toolbar is at least 200px. No spacing token is 200px. The title input still hugs its text outside that bar.
 - **[token app] Project toolbar corner.** The corner measures about 10px. The bar uses `alias.border-radius.xl` (12px).
+- **[token app] Project menu width.** The main menu and the recent panel are each 220px wide. No spacing token is 220px.
 
 ## Decisions already made
 
+- The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
@@ -1293,3 +1295,89 @@ Painted on this frame: the resting circle, the resting title, and the saved disc
 Not painted on this frame: the logo’s expanded square, the title’s hover and focus fills, and the indicator’s error disc. Those stay on the logo button, the title input, and the save indicator.
 
 This trial is not on the canvas, so the bar is not in FloatingPanel. The later pass that places it upper left, with the project menu, uses FloatingPanel on the toolbar layer. The file bar stays on the board.
+
+## Project menu
+
+Ticket NB-73. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`.
+
+Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The canvas still uses the file bar.
+
+The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the toolbar that opened it. The sheet gap between the two panels was not measured.
+
+### Main menu
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 220px. No spacing token is 220px |
+| Height | hug | 304px inside the stroke. Nine 32px rows, 4px padding on top and bottom, and one 8px gap before Save. The outer size is 306px with the 1px stroke |
+| Padding | `brand.scale.4` | 4px |
+| Gap between rows | `brand.scale.0` | 0px |
+| Gap before Save | `brand.scale.8` | 8px, between the third project row and Save |
+| Corner radius | `alias.border-radius.lg` | 8px. The corner was not measured on this frame. It is the same corner the other menus use |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
+| Shadow | not a token | the same `shadow-lg` the font menus already use |
+| Blur | not a token | the same 24px blur the font menus already use |
+| Divider | none | the frame has no divider |
+| Dot grid | not a token | excluded from the component |
+
+### Recent label
+
+The word Recent is a 32px row. It is not a menu item, so it has no hover fill and no selected fill.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | `brand.scale.32` | 32px |
+| Padding, horizontal | `brand.scale.8` | 8px, so the word lines up with New, Open, and View all |
+| Gap | none | the row has no icon, caption, or chevron |
+| Corner radius | none | the row has no corner of its own |
+| Stroke | none | the row has no stroke |
+| Fill | none | no row fill |
+| Font | `alias.font-family.body` | Geist |
+| Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The label still writes 12px. Paragraph spacing is `not a token` |
+| Label color | `mapped.text.action` | `#303132`, the menu item’s default label |
+| Icon | none | no left icon and no chevron |
+| Caption | none | no shortcut |
+| Shadow | not a token | the row adds none |
+| Blur | not a token | the row adds none |
+
+### Recent panel
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Width | none | 220px. No spacing token is 220px |
+| Height | hug | 200px inside the stroke. Six 32px rows and 4px padding on top and bottom, with no gap. The outer size is 202px with the 1px stroke |
+| Padding | `brand.scale.4` | 4px |
+| Gap | `brand.scale.0` | 0px |
+| Corner radius | `alias.border-radius.lg` | 8px. The same corner as the main menu |
+| Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
+| Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
+| Shadow | not a token | the same `shadow-lg` the font menus already use |
+| Blur | not a token | the same 24px blur the font menus already use |
+| Divider | none | the frame has no divider |
+| Dot grid | not a token | excluded from the component |
+
+### Rows
+
+The rows are the menu item at size `md`. Hover, selected, disabled, and the row colors stay on the menu item section.
+
+| Row | Slots |
+| --- | --- |
+| New, Open, Save, Save as | size `md`. Left icon off. Chevron off. Caption is `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, or `Ctrl+Shift+S` |
+| View all | size `md`. Left icon off. Caption off. Chevron off. Selected while the recent panel is open |
+| Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
+| Recent panel project | the same project row. The open specimen paints the first name selected. The copy in the main menu stays unselected |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| projects | list | every recent name. The main menu shows the first three. The recent panel shows all of them |
+| viewAllSelected | boolean | default off. The starting selected state. A click on View all switches it. On paints View all selected and opens the recent panel |
+| selectedProject | text | the recent-panel row to paint selected. Unset paints none of them selected |
+
+Painted: View all selected with the recent panel open and the first recent row selected. View all not selected, with the recent panel closed. The other rows are the menu item’s default state.
+
+Not painted on this frame: hover and disabled. Those stay on the menu item. The menu item has no focus state. The Recent label has no hover fill and no selected fill.
+
+This trial is not on the canvas, so the panels are not in FloatingPanel. The later pass that places the menu, with the project toolbar, uses FloatingPanel on the dropdown layer and checks it against a selected element and an element that is mid-drag. The file bar stays on the board.
