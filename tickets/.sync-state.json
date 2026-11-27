@@ -410,6 +410,11 @@
       "id": "59e2818f-f111-4758-ade2-6fb179cc1a43",
       "identifier": "ERI-90",
       "url": "https://linear.app/ericar/issue/ERI-90/project-management-toolbar"
+    },
+    "NB-75": {
+      "id": "fb47b9b5-371e-4626-8ec6-1d329786c9b7",
+      "identifier": "ERI-91",
+      "url": "https://linear.app/ericar/issue/ERI-91/project-menu-layout"
     }
   }
 }
