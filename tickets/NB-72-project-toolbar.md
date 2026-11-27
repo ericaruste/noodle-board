@@ -21,7 +21,7 @@ The live board still paints the file bar. [`src/SaveToolbar.tsx`](../src/SaveToo
 
 ## Problem
 
-Phase 2 has the three pieces and no project toolbar. The upper-left chrome is still the file bar. This bar is the one that will sit there, after the project dropdown menu exists. This ticket does not put it on the canvas.
+Phase 2 has the three pieces and no project toolbar. The upper-left chrome is still the file bar. The project menu is [NB-73](NB-73-project-menu.md). This bar is built with that menu. This ticket does not put it on the canvas.
 
 ## Repro
 
@@ -57,7 +57,7 @@ The painted disc samples `#45B46C`. NB-68 already rests the indicator on `mapped
 
 Record a Project toolbar section in [`docs/design-system-notes.md`](../docs/design-system-notes.md): the ticket, the code path, a token table for the bar, the logo, the title, and the indicator, the three slots, and which states the frame paints. The logo, the title, and the indicator keep the states already recorded on their own sections.
 
-This ticket renders the bar on the trial page. It does not mount it over the canvas, so it does not use FloatingPanel yet. The later pass that places it upper left, together with the project dropdown, uses FloatingPanel on the toolbar layer and checks it against a selected element and an element that is mid-drag.
+This ticket renders the bar on the trial page. It does not mount it over the canvas, so it does not use FloatingPanel yet. The later pass that places it upper left, together with the project menu from NB-73, uses FloatingPanel on the toolbar layer and checks it against a selected element and an element that is mid-drag.
 
 Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index tokens in src/layers.ts (canvas, selection, toolbar, dropdown, modal), and a ticket is not done until those panels have been checked against selected and mid-drag elements. Drag-feedback overlays (port fill, edge outline, edge marker) read their layer from the selection token and add no z-index numbers of their own.
 
@@ -65,4 +65,4 @@ The Figma file request was rate limited, and inspect is behind the sign-up wall.
 
 ## Out of scope
 
-Placing the bar on the canvas. Replacing `SaveToolbar`. The project dropdown menu, and which control opens it. The frame paints no menu and no chevron. New, Open, Save, Save As, and Recent. The rename rules in `renameProject`. The upper-right "Noodle Board" wordmark. Changing the logo button, the title input, or the save indicator except for the 200px minimum on this bar. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.
+Placing the bar on the canvas. Replacing `SaveToolbar`. The project menu in NB-73, and which control opens it. The frame paints no menu and no chevron. New, Open, Save, Save As, and Recent. The rename rules in `renameProject`. The upper-right "Noodle Board" wordmark. Changing the logo button, the title input, or the save indicator except for the 200px minimum on this bar. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.

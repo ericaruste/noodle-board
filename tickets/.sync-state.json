@@ -400,6 +400,11 @@
       "id": "4c4713a7-0d44-4587-b2eb-a20d37932564",
       "identifier": "ERI-88",
       "url": "https://linear.app/ericar/issue/ERI-88/project-toolbar"
+    },
+    "NB-73": {
+      "id": "b3c9f9cf-8b8c-4de2-8dbb-7d23ec68fb00",
+      "identifier": "ERI-89",
+      "url": "https://linear.app/ericar/issue/ERI-89/project-menu"
     }
   }
 }
