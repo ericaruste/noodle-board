@@ -435,6 +435,11 @@
       "id": "ce859339-0106-4bbd-927b-6fc224fb2c91",
       "identifier": "ERI-95",
       "url": "https://linear.app/ericar/issue/ERI-95/sliding-pill-on-contextual-toolbars-and-popovers"
+    },
+    "NB-80": {
+      "id": "1d9fb04b-695d-46ea-8704-a260527f6818",
+      "identifier": "ERI-96",
+      "url": "https://linear.app/ericar/issue/ERI-96/project-toolbar-frosted-blur"
     }
   }
 }

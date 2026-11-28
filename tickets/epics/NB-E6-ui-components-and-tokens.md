@@ -62,8 +62,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-77 Motion list and component animations](../NB-77-motion-list-and-component-animations.md)
 - [NB-78 Project management toolbar on the board](../NB-78-project-management-toolbar-on-the-board.md)
 - [NB-79 Sliding pill on contextual toolbars and popovers](../NB-79-sliding-pill-on-contextual-toolbars.md)
+- [NB-80 Project toolbar frosted blur](../NB-80-project-toolbar-frosted-blur.md)
 
-NB-57, NB-58, NB-59, and NB-65 are behavior tickets, not components. The next component ticket is the next free id after NB-79, parented to NB-E6, and titled with the component name.
+NB-57, NB-58, NB-59, and NB-65 are behavior tickets, not components. The next component ticket is the next free id after NB-80, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 
