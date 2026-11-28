@@ -40,19 +40,19 @@ Press, release, hover, highlight, nudge, glide, and fade are either missing or w
 
 ## Acceptance criteria
 
-- [ ] `src/styles/motion.css` is hand-written, sits next to the token stylesheet, and is imported with it. `npm run tokens` leaves the file in place
-- [ ] The file names press (80ms snappy), release (280ms springy), hover (200ms snappy), highlight (60ms), nudge (120ms gentle), glide (130ms gentle), and fade (120ms gentle)
-- [ ] A component calls a motion by that name. The durations and the curves live in the motion file
-- [ ] With reduced motion on, every name in that file is off, and that switch is in the motion file
-- [ ] LogoButton keeps the corner change and the noodle dip. The press, the release, and the JavaScript that waits out the release use the motion names
-- [ ] MenuItem owns the hover nudge, 3px to the right, and the background highlight. An indented row nudges from its own left padding
-- [ ] MainButton stays a plain building block. The sliding pill is absent from that file
-- [ ] The main toolbar owns the pill. The pill glides between tools and fades out when the pointer leaves. The pill logic is a hook other toolbars can call
-- [ ] The pill skips a disabled tool. With nothing selected, moving onto Delete fades the pill out. No red pill shows, and the pill does not stay on the previous tool
-- [ ] The toolbar turns off its buttons' own hover fill in one named place, so only the pill shows on hover
-- [ ] While Delete is disabled, its tooltip reads "Select something to delete". Once an element is selected, it reads "Delete"
-- [ ] The Logo button, Menu item, Main button, and Main toolbar sections in `docs/design-system-notes.md` each have a Motion row: what moves, what triggers it, and which motion name it uses
-- [ ] The logo's return to rest stays the open choice below. The notes list both timings
+- [x] `src/styles/motion.css` is hand-written, sits next to the token stylesheet, and is imported with it. `npm run tokens` leaves the file in place
+- [x] The file names press (80ms snappy), release (280ms springy), hover (200ms snappy), highlight (60ms), nudge (120ms gentle), glide (130ms gentle), and fade (120ms gentle)
+- [x] A component calls a motion by that name. The durations and the curves live in the motion file
+- [x] With reduced motion on, every name in that file is off, and that switch is in the motion file
+- [x] LogoButton keeps the corner change and the noodle dip. The press, the release, and the JavaScript that waits out the release use the motion names
+- [x] MenuItem owns the hover nudge, 3px to the right, and the background highlight. An indented row nudges from its own left padding
+- [x] MainButton stays a plain building block. The sliding pill is absent from that file
+- [x] The main toolbar owns the pill. The pill glides between tools and fades out when the pointer leaves. The pill logic is a hook other toolbars can call
+- [x] The pill skips a disabled tool. With nothing selected, moving onto Delete fades the pill out. No red pill shows, and the pill does not stay on the previous tool
+- [x] The toolbar turns off its buttons' own hover fill in one named place, so only the pill shows on hover
+- [x] While Delete is disabled, its tooltip reads "Select something to delete". Once an element is selected, it reads "Delete"
+- [x] The Logo button, Menu item, Main button, and Main toolbar sections in `docs/design-system-notes.md` each have a Motion row: what moves, what triggers it, and which motion name it uses
+- [x] The logo's return to rest stays the open choice below. The notes list both timings
 
 ## Technical notes
 

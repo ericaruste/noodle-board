@@ -50,6 +50,16 @@ body,
   }
 }
 
+/* The sliding pill is the hover. Later controls paint above it. Selected keeps its fill. */
+.pill-row > :not(:first-child) {
+  position: relative;
+  isolation: isolate;
+}
+
+.pill-row button:not([aria-pressed="true"]):hover {
+  background-color: transparent;
+}
+
 .react-flow {
   --xy-edge-stroke: var(--alias-swatch-neutral-500);
   --xy-edge-stroke-width: 2;

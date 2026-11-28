@@ -1,0 +1,105 @@
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+
+export type SlidingPillBox = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type SlidingPill = {
+  box: SlidingPillBox | null;
+  /** The control under the pointer or focus. Null hides the pill. */
+  active: HTMLElement | null;
+};
+
+function boxFor(row: HTMLElement, button: HTMLElement): SlidingPillBox {
+  const rowBox = row.getBoundingClientRect();
+  const buttonBox = button.getBoundingClientRect();
+  return {
+    x: buttonBox.left - rowBox.left,
+    y: buttonBox.top - rowBox.top,
+    width: buttonBox.width,
+    height: buttonBox.height,
+  };
+}
+
+/** Hit-test the row. A disabled button is not a target, and offsetLeft is wrong inside a relative tip. */
+function buttonUnder(row: HTMLElement, x: number, y: number): HTMLButtonElement | null {
+  for (const node of row.querySelectorAll("button")) {
+    if (!(node instanceof HTMLButtonElement)) continue;
+    const box = node.getBoundingClientRect();
+    if (x >= box.left && x < box.right && y >= box.top && y < box.bottom) return node;
+  }
+  return null;
+}
+
+export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPill {
+  const [pill, setPill] = useState<SlidingPill>({ box: null, active: null });
+  const [row, setRow] = useState<HTMLElement | null>(null);
+  const visibleRef = useRef(false);
+  const activeRef = useRef<HTMLButtonElement | null>(null);
+
+  // The toolbar row is portaled, so the ref is empty on the first effect.
+  useLayoutEffect(() => {
+    const node = rowRef.current;
+    setRow((current) => (current === node ? current : node));
+  });
+
+  useEffect(() => {
+    if (!row) return;
+
+    const show = (button: HTMLButtonElement) => {
+      if (visibleRef.current && activeRef.current === button) return;
+      activeRef.current = button;
+      visibleRef.current = true;
+      setPill({ box: boxFor(row, button), active: button });
+    };
+
+    const hide = () => {
+      if (!visibleRef.current) return;
+      visibleRef.current = false;
+      activeRef.current = null;
+      setPill((current) => ({ box: current.box, active: null }));
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const button = buttonUnder(row, event.clientX, event.clientY);
+      if (!button) return;
+      if (button.disabled) {
+        hide();
+        return;
+      }
+      show(button);
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const button = target.closest("button");
+      if (!(button instanceof HTMLButtonElement) || !row.contains(button) || button.disabled) return;
+      show(button);
+    };
+
+    const onFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && row.contains(next)) return;
+      hide();
+    };
+
+    row.addEventListener("pointermove", onPointerMove);
+    row.addEventListener("pointerleave", hide);
+    row.addEventListener("focusin", onFocusIn);
+    row.addEventListener("focusout", onFocusOut);
+    return () => {
+      visibleRef.current = false;
+      activeRef.current = null;
+      row.removeEventListener("pointermove", onPointerMove);
+      row.removeEventListener("pointerleave", hide);
+      row.removeEventListener("focusin", onFocusIn);
+      row.removeEventListener("focusout", onFocusOut);
+    };
+  }, [row]);
+
+  return pill;
+}

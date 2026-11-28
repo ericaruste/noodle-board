@@ -33,21 +33,25 @@ const pressedRadius = "16.8px";
 /** 1.6px on the 64px reference, scaled to this 40px button. It is not a design token. */
 const glyphDip = "translateY(1px)";
 const glyphRest = "translateY(0)";
-/** Release spring from the shape-press transition. It is not a design token. */
-const releaseMs = 280;
-
 const circleRadius = "var(--brand-scale-20)";
 // TODO token mismatch: Figma 6.2px
 const expandedRadius = "var(--alias-border-radius-lg)";
 
 type RadiusMotion = "rest" | "press" | "release";
 
+/** The release length comes from the motion list. The 80ms buffer stays here. */
+function releaseWaitMs(node: HTMLElement | null) {
+  const raw = getComputedStyle(node ?? document.documentElement).getPropertyValue("--motion-release-duration");
+  const releaseMs = parseFloat(raw);
+  return (Number.isFinite(releaseMs) ? releaseMs : 0) + 80;
+}
+
 function assignRef(ref: ForwardedRef<HTMLButtonElement>, node: HTMLButtonElement | null) {
   if (typeof ref === "function") ref(node);
   else if (ref) ref.current = node;
 }
 
-function LogoMark({ dipped, quick }: { dipped: boolean; quick: boolean }) {
+function LogoMark({ dipped, motion }: { dipped: boolean; motion: RadiusMotion }) {
   const id = useId().replace(/:/g, "");
   const svg = logoRaw
     .replace(/<path d="M0 20C0 8\.95431[^"]*" fill="#B11F24"\/>\s*/, "")
@@ -56,11 +60,7 @@ function LogoMark({ dipped, quick }: { dipped: boolean; quick: boolean }) {
     .replace("<svg", `<svg class="size-full" aria-hidden="true"`);
   return (
     <span
-      className={`block size-full motion-reduce:!transition-none ${
-        quick
-          ? "transition-transform duration-[80ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-          : "transition-transform duration-[280ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-      }`}
+      className={`block size-full transition-transform ${motion === "press" ? "motion-press" : "motion-release"}`}
       style={{ transform: dipped ? glyphDip : glyphRest }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
@@ -82,7 +82,7 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
   useEffect(() => {
     if (radiusMotion !== "release") return;
     // The spring is already running. This only restores the hover ease if the transition never ends.
-    const id = window.setTimeout(() => setRadiusMotion("rest"), releaseMs + 80);
+    const id = window.setTimeout(() => setRadiusMotion("rest"), releaseWaitMs(buttonRef.current));
     return () => window.clearTimeout(id);
   }, [radiusMotion]);
 
@@ -119,10 +119,12 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
 
   const radiusMotionClass =
     radiusMotion === "press"
-      ? "transition-[border-radius] duration-[80ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+      ? "transition-[border-radius] motion-press"
       : radiusMotion === "release"
-        ? "transition-[border-radius] duration-[280ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-        : "transition-[border-radius] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
+        ? "transition-[border-radius] motion-release"
+        : expanded
+          ? "transition-[border-radius] motion-hover"
+          : "transition-[border-radius] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
   return (
     <button
@@ -145,13 +147,13 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
       onPointerLeave={() => {
         if (!painted) setHovered(false);
       }}
-      className={`inline-flex size-brand-scale-40 shrink-0 items-center justify-center overflow-hidden border-0 p-0 motion-reduce:!transition-none ${radiusMotionClass}`}
+      className={`inline-flex size-brand-scale-40 shrink-0 items-center justify-center overflow-hidden border-0 p-0 ${radiusMotionClass}`}
       style={{
         backgroundColor: brandRed,
         borderRadius: pressed ? pressedRadius : expanded ? expandedRadius : circleRadius,
       }}
     >
-      <LogoMark dipped={pressed} quick={radiusMotion === "press"} />
+      <LogoMark dipped={pressed} motion={radiusMotion} />
     </button>
   );
 });

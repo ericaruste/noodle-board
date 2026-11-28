@@ -20,10 +20,11 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Project toolbar title minimum.** The title slot on the project toolbar is at least 200px. No spacing token is 200px. The title input still hugs its text outside that bar.
 - **[token app] Project toolbar corner.** The corner measures about 10px. The bar uses `alias.border-radius.xl` (12px).
 - **[token app] Project menu width.** The main menu and the recent panel are each 220px wide. No spacing token is 220px.
+- **[code] Logo return to the circle.** The button returns with 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That curve has no motion name. The other timing is `motion-release`. The choice is open.
 
 ## Decisions already made
 
-- A press on the logo button pulls the corner toward the circle and dips the mark, then both spring back. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. The hover and selected square still eases over 700ms.
+- A press on the logo button pulls the corner toward the circle and dips the mark. Press is `motion-press`. Release is `motion-release`. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that choice is open.
 - A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
@@ -211,7 +212,7 @@ Not painted on this frame: hover and disabled. The button has no focus state. Th
 
 ## Menu item
 
-Ticket NB-41, NB-75, NB-76. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`. NB-76 clips a label when `truncateLabel` is on.
+Ticket NB-41, NB-75, NB-76, NB-77. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`. NB-76 clips a label when `truncateLabel` is on. NB-77 nudges a default row on hover.
 
 A single row for a dropdown. A left icon and the label sit on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between that pair and the caption group.
 
@@ -219,7 +220,7 @@ A single row for a dropdown. A left icon and the label sit on the left. The capt
 | --- | --- | --- |
 | Height, md | `brand.scale.32` | 32px |
 | Height, sm | `brand.scale.28` | 28px |
-| Padding, left | `brand.scale.8` | 8px when indent is off. `brand.scale.32` when indent is on |
+| Padding, left | `brand.scale.8` | 8px when indent is off. `brand.scale.32` when indent is on. Hover on a default row adds 3px. That 3px is not a spacing token |
 | Padding, right | `brand.scale.8` | 8px |
 | Gap between label and the caption group | `brand.scale.8` | 8px, and the row pushes the caption group to the far side |
 | Gap between caption and chevron | `brand.scale.4` | 4px |
@@ -247,6 +248,7 @@ A single row for a dropdown. A left icon and the label sit on the left. The capt
 | Chevron, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Chevron, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Chevron, disabled | `mapped.icon.disabled` | `#909397` |
+| Motion | not a token | Hover moves a default row, and the painted hover row, 3px to the right. The 3px is added to that row's own left padding, `brand.scale.8` or `brand.scale.32` when indent is on. Padding uses `motion-nudge`. The fill uses `motion-highlight`. Selected and disabled stay put. The 3px is not a spacing token |
 
 The component set is two columns and four rows. The columns are the sizes. The rows are the states.
 
@@ -1115,7 +1117,7 @@ Each menu sits `brand.scale.4` (4px) from the control that opened it. On the sha
 
 ## Main button
 
-Ticket NB-63. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`.
+Ticket NB-63, NB-77. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`. NB-77 leaves this button still. The pill stays on the main toolbar.
 
 A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the label and both icons, the width follows that content. The default type has four states. The destructive type has three.
 
@@ -1148,6 +1150,7 @@ A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the 
 | Shadow | not a token | excluded from the component |
 | Blur | not a token | excluded from the component |
 | Dot grid | not a token | excluded from the component |
+| Motion | none | The button does not move. The sliding pill belongs to the main toolbar |
 
 The hover fill is `mapped.surface.action-strong-hover`, `#E5F0F9` (`alias.primary.50` at 100%). Hover text is `mapped.text.action-hover` and hover icons are `mapped.icon.action-hover`, both `#1E3B58`. The selected fill is `mapped.surface.action-strong-selected`, `#4A94DB`, with light text and icons. The pale action hover used by the icon button is a different fill.
 
@@ -1169,7 +1172,7 @@ This button is not a toolbar. The main toolbar places it. See Main toolbar.
 
 ## Main toolbar
 
-Ticket NB-64. Code `src/Toolbar.tsx`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
+Ticket NB-64, NB-77. Code `src/Toolbar.tsx`. The pill hook is `src/useSlidingPill.ts`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
 
 Every control is a main button with the label and the right icon turned off, so each one is 40 by 40. The row is select, hand, sticky note, text, image, shapes, noodle, and delete. Delete is the destructive type. The shapes control opens the same shape swatch the shape toolbar uses.
 
@@ -1202,8 +1205,11 @@ Every control is a main button with the label and the right icon turned off, so 
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Control icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
 | Dot grid | not a token | excluded from the component |
+| Motion | not a token | One pill glides between tools with `motion-glide` and fades with `motion-fade` when the pointer leaves the row, when focus leaves the row, or when the pointer is on a disabled tool. The hook is `useSlidingPill`. The pill fill is `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. `.pill-row` clears the hover fill on a button that is not pressed, so the pill is the hover. A selected button keeps its fill |
 
 The icons are Lucide, except the noodle, which is `src/assets/icons/noodle-main.svg`. Select is `mouse-pointer-2`. Hand is `hand`. Sticky note is `sticky-note`. Text is `type`. Image is `image`. Shapes is `shapes`. Delete is `trash`.
+
+Delete's hover label is "Delete" when an element is selected, and "Select something to delete" while the button is disabled. The label sits on the span around the button, so it still shows while the button is disabled. The button's accessible name stays "Delete".
 
 Properties:
 
@@ -1256,11 +1262,11 @@ Not painted: hover, disabled, and focus. Error has no animation. The file bar ke
 
 ## Logo button
 
-Ticket NB-67. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`.
+Ticket NB-67, NB-77. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`. The timings live in `src/styles/motion.css`.
 
-The brand mark. The button is 40px. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square over 700ms and reveal the chopstick.
+The brand mark. The button is 40px. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square with `motion-hover` and reveal the chopstick.
 
-A press pulls the corner toward the circle and dips the glyph. The press takes 80ms. The release springs both back over 280ms. The spring is `cubic-bezier(0.34, 1.56, 0.64, 1)`. The pointer is captured on the press, so the press holds if the pointer leaves before the release. A cancelled pointer releases the same way. The 700ms ease is for hover and selected. It is used again after the release spring ends.
+A press pulls the corner toward the circle and dips the glyph. The press uses `motion-press`. The release uses `motion-release`. The pointer is captured on the press, so the press holds if the pointer leaves before the release. A cancelled pointer releases the same way. The release reads `--motion-release-duration` and waits that long plus 80ms if the transition does not end. The return from the square to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That curve has no motion name. The other timing is `motion-release`. That choice is open.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -1270,9 +1276,7 @@ A press pulls the corner toward the circle and dips the glyph. The press takes 8
 | Radius, rest | `brand.scale.20` | 20px, a circle |
 | Radius, hover and selected | `alias.border-radius.lg` | 8px. The frame’s expanded corner is 6.2px |
 | Radius, pressed | not a token | 16.8px, 42% of the 40px button, between the square and the circle |
-| Radius ease, hover and selected | not a token | 700ms, `cubic-bezier(0.22, 1, 0.36, 1)` |
-| Radius ease, press | not a token | 80ms, the same spring as the release |
-| Radius ease, release | not a token | 280ms, `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| Motion | not a token | The corner and the mark. A press uses `motion-press`. A release uses `motion-release`. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that curve has no motion name. The other timing is `motion-release`, 280ms, `cubic-bezier(0.34, 1.56, 0.64, 1)`. That choice is open |
 | Fill | none | `#B11F24`. The brand red is not a design token |
 | Icon, every state | none | white, from the asset. The press dips the mark 1px. The reference dip is 1.6px on a 64px button |
 | Glyph dip | not a token | 1px down while pressed, then the spring back. The red plate stays put |
@@ -1462,7 +1466,7 @@ Ticket NB-74. Code `src/ProjectManagementToolbar.tsx`. The trial page is `?trial
 
 The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
 
-The press lives on the logo button. A press pulls the corner to 16.8px and dips the mark 1px, both in 80ms. A release, or a cancelled pointer, springs them back over 280ms. The pointer is captured on the press, so the press holds if the pointer leaves the button before the release. The spring is separate from the 700ms radius ease. While the menu is open, a press pulls the expanded square toward the circle and the release springs that square back. The square stays until the menu closes. The logo trial uses the same button, so a press plays there too. The live button on that trial does not open a menu.
+The press lives on the logo button. A press pulls the corner to 16.8px and dips the mark 1px with `motion-press`. A release, or a cancelled pointer, uses `motion-release`. The pointer is captured on the press, so the press holds if the pointer leaves the button before the release. Hover and selected expand the corner with `motion-hover`. The return to the circle stays the 700ms curve, and that choice is open. While the menu is open, a press pulls the expanded square toward the circle and the release springs that square back. The square stays until the menu closes. The logo trial uses the same button, so a press plays there too. The live button on that trial does not open a menu.
 
 The bar keeps the table in the Project toolbar section. The main menu and the recent panel keep the tables in the Project menu section. This table is the gap under the bar and the logo press.
 
