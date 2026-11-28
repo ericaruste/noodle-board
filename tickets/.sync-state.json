@@ -420,6 +420,11 @@
       "id": "6f129d2c-29e1-4591-bb94-a92b95b47eea",
       "identifier": "ERI-92",
       "url": "https://linear.app/ericar/issue/ERI-92/project-menu-title-clip"
+    },
+    "NB-77": {
+      "id": "bafa24c6-dd10-4038-8082-b82239f79990",
+      "identifier": "ERI-93",
+      "url": "https://linear.app/ericar/issue/ERI-93/motion-list-and-component-animations"
     }
   }
 }
