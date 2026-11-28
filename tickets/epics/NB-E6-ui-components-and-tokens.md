@@ -58,8 +58,9 @@ Sync UI components from Figma into Noodle Board, styled with the design tokens, 
 - [NB-73 Project menu](../NB-73-project-menu.md)
 - [NB-74 Project management toolbar](../NB-74-project-management-toolbar.md)
 - [NB-75 Project menu layout](../NB-75-project-menu-layout.md)
+- [NB-76 Project menu title clip](../NB-76-project-menu-title-clip.md)
 
-NB-57, NB-58, NB-59, and NB-65 are behavior tickets, not components. The next component ticket is the next free id after NB-75, parented to NB-E6, and titled with the component name.
+NB-57, NB-58, NB-59, and NB-65 are behavior tickets, not components. The next component ticket is the next free id after NB-76, parented to NB-E6, and titled with the component name.
 
 ## Success looks like
 
