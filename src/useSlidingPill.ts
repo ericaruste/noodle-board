@@ -105,6 +105,10 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
     const remeasure = () => {
       const button = activeRef.current;
       if (!button || !visibleRef.current || !row.contains(button)) return;
+      if (button.disabled) {
+        hide();
+        return;
+      }
       const box = boxFor(row, button);
       setPill((current) => {
         if (
@@ -123,6 +127,8 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
 
     const observer = new ResizeObserver(remeasure);
     observer.observe(row);
+    const disabled = new MutationObserver(remeasure);
+    disabled.observe(row, { subtree: true, attributes: true, attributeFilter: ["disabled"] });
     window.addEventListener("resize", remeasure);
     const onPointer = (event: PointerEvent) => placeFromPoint(event.clientX, event.clientY);
     row.addEventListener("pointermove", onPointer);
@@ -135,6 +141,7 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
       visibleRef.current = false;
       activeRef.current = null;
       observer.disconnect();
+      disabled.disconnect();
       window.removeEventListener("resize", remeasure);
       row.removeEventListener("pointermove", onPointer);
       row.removeEventListener("pointerenter", onPointer);
