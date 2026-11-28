@@ -1314,24 +1314,24 @@ Not painted: hover, disabled, and focus. Error has no animation. The board uses 
 
 ## Logo button
 
-Ticket NB-67, NB-77. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`. The timings live in `src/styles/motion.css`.
+Ticket NB-67, NB-77, sizes NB-82. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`. The timings live in `src/styles/motion.css`.
 
-The brand mark. The button is 40px. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square with `motion-hover` and reveal the chopstick.
+The brand mark. The button is 40px on `lg` and 32px on `md`. The glyph scales with the button. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square with `motion-hover` and reveal the chopstick.
 
 A press pulls the corner toward the circle and dips the glyph. The press uses `motion-press`. The release uses `motion-release`. The pointer is captured on the press, so the press holds if the pointer leaves before the release. A cancelled pointer releases the same way. The release reads `--motion-release-duration` and waits that long plus 80ms if the transition does not end. The return from the square to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That curve has no motion name. The other timing is `motion-release`. That choice is open.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Size | `brand.scale.40` | 40px |
+| Size | `brand.scale.40`, `brand.scale.32` | 40px on `lg`, 32px on `md` |
 | Padding | none | 0 |
 | Gap | none | the button has no gap |
-| Radius, rest | `brand.scale.20` | 20px, a circle |
-| Radius, hover and selected | `alias.border-radius.lg` | 8px. The frame’s expanded corner is 6.2px |
-| Radius, pressed | not a token | 16.8px, 42% of the 40px button, between the square and the circle |
+| Radius, rest | `brand.scale.20`, `brand.scale.16` | half the button, a circle: 20px on `lg`, 16px on `md` |
+| Radius, hover and selected | `alias.border-radius.lg` | 8px on both sizes. The `lg` frame’s expanded corner is 6.2px. The 8px on `md` is a design choice |
+| Radius, pressed | not a token | 42% of the button, between the square and the circle: 16.8px on `lg`, 13.44px on `md` |
 | Motion | not a token | The corner and the mark. A press uses `motion-press`. A release uses `motion-release`. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that curve has no motion name. The other timing is `motion-release`, 280ms, `cubic-bezier(0.34, 1.56, 0.64, 1)`. That choice is open |
 | Fill | none | `#B11F24`. The brand red is not a design token |
-| Icon, every state | none | white, from the asset. The press dips the mark 1px. The reference dip is 1.6px on a 64px button |
-| Glyph dip | not a token | 1px down while pressed, then the spring back. The red plate stays put |
+| Icon, every state | none | white, from the asset, drawn on a 40 by 40 view box and scaled to the button. The reference dip is 1.6px on a 64px button |
+| Glyph dip | not a token | 1px on `lg`, 0.8px on `md`, down while pressed, then the spring back. The red plate stays put |
 | Stroke | none | the button has no stroke |
 | Text | none | the button has no text |
 | Divider | none | the button has no divider |
@@ -1345,8 +1345,9 @@ Properties:
 | --- | --- | --- |
 | state | painted variant | `default`, `hover`, `selected`. Unset follows the pointer and `selected` |
 | selected | boolean | the rounded square. A click on the live button switches it |
+| size | variant | `lg` (default, 40px), `md` (32px) |
 
-Painted: the resting circle, the hover square, and the selected square. A press on any of them plays the shape press.
+Painted: the resting circle, the hover square, and the selected square, on each size. A press on any of them plays the shape press. The project toolbar uses `lg`.
 
 Not painted: a focus ring, and a disabled state.
 

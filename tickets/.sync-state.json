@@ -445,6 +445,11 @@
       "id": "17cbdeca-1004-4a21-9afd-e2b9960d8dff",
       "identifier": "ERI-97",
       "url": "https://linear.app/ericar/issue/ERI-97/title-input-size"
+    },
+    "NB-82": {
+      "id": "905737ef-7733-4a9a-81d4-740de73099a6",
+      "identifier": "ERI-98",
+      "url": "https://linear.app/ericar/issue/ERI-98/logo-button-size"
     }
   }
 }

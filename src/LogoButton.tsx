@@ -12,8 +12,11 @@ import {
 import logoRaw from "./assets/icons/noodle-logo.svg?raw";
 
 export type LogoButtonState = "default" | "hover" | "selected";
+export type LogoButtonSize = "lg" | "md";
 
 type LogoButtonProps = {
+  /** Unset is `lg`, the 40px button. */
+  size?: LogoButtonSize;
   /** Painted variant. Leave unset to follow selected and real hover. */
   state?: LogoButtonState;
   selected?: boolean;
@@ -26,15 +29,15 @@ type LogoButtonProps = {
 const brandRed = "#B11F24";
 
 /**
- * Pressed corner, 42% of the 40px button. A length, so it can spring back to the
- * square. It is not a design token.
+ * The pressed corner is 42% of the button, as a length so it can spring back to the square.
+ * The dip is the 1.6px dip on the 64px reference, scaled to the button. Neither is a design token.
  */
-const pressedRadius = "16.8px";
-/** 1.6px on the 64px reference, scaled to this 40px button. It is not a design token. */
-const glyphDip = "translateY(1px)";
+const sizes: Record<LogoButtonSize, { className: string; circle: string; pressed: string; dip: string }> = {
+  lg: { className: "size-brand-scale-40", circle: "var(--brand-scale-20)", pressed: "16.8px", dip: "translateY(1px)" },
+  md: { className: "size-brand-scale-32", circle: "var(--brand-scale-16)", pressed: "13.44px", dip: "translateY(0.8px)" },
+};
 const glyphRest = "translateY(0)";
-const circleRadius = "var(--brand-scale-20)";
-// TODO token mismatch: Figma 6.2px
+// TODO token mismatch: Figma 6.2px on lg
 const expandedRadius = "var(--alias-border-radius-lg)";
 
 type RadiusMotion = "rest" | "press" | "release";
@@ -51,7 +54,7 @@ function assignRef(ref: ForwardedRef<HTMLButtonElement>, node: HTMLButtonElement
   else if (ref) ref.current = node;
 }
 
-function LogoMark({ dipped, motion }: { dipped: boolean; motion: RadiusMotion }) {
+function LogoMark({ dipped, dip, motion }: { dipped: boolean; dip: string; motion: RadiusMotion }) {
   const id = useId().replace(/:/g, "");
   const svg = logoRaw
     .replace(/<path d="M0 20C0 8\.95431[^"]*" fill="#B11F24"\/>\s*/, "")
@@ -61,16 +64,17 @@ function LogoMark({ dipped, motion }: { dipped: boolean; motion: RadiusMotion })
   return (
     <span
       className={`block size-full transition-transform ${motion === "press" ? "motion-press" : "motion-release"}`}
-      style={{ transform: dipped ? glyphDip : glyphRest }}
+      style={{ transform: dipped ? dip : glyphRest }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 }
 
 export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(function LogoButton(
-  { state, selected = false, onClick, ariaLabel = "Noodle", title },
+  { size = "lg", state, selected = false, onClick, ariaLabel = "Noodle", title },
   ref,
 ) {
+  const shape = sizes[size];
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [radiusMotion, setRadiusMotion] = useState<RadiusMotion>("rest");
@@ -147,37 +151,45 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
       onPointerLeave={() => {
         if (!painted) setHovered(false);
       }}
-      className={`inline-flex size-brand-scale-40 shrink-0 items-center justify-center overflow-hidden border-0 p-0 ${radiusMotionClass}`}
+      data-size={size}
+      className={`inline-flex ${shape.className} shrink-0 items-center justify-center overflow-hidden border-0 p-0 ${radiusMotionClass}`}
       style={{
         backgroundColor: brandRed,
-        borderRadius: pressed ? pressedRadius : expanded ? expandedRadius : circleRadius,
+        borderRadius: pressed ? shape.pressed : expanded ? expandedRadius : shape.circle,
       }}
     >
-      <LogoMark dipped={pressed} motion={radiusMotion} />
+      <LogoMark dipped={pressed} dip={shape.dip} motion={radiusMotion} />
     </button>
   );
 });
 
-export function LogoButtonPreview() {
-  const [selected, setSelected] = useState(false);
+const previewSizes: LogoButtonSize[] = ["lg", "md"];
 
+const previewCaption =
+  "font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight";
+
+function LiveLogo({ size }: { size: LogoButtonSize }) {
+  const [selected, setSelected] = useState(false);
+  return (
+    <LogoButton size={size} selected={selected} ariaLabel={`Live ${size} logo`} onClick={() => setSelected((on) => !on)} />
+  );
+}
+
+export function LogoButtonPreview() {
   return (
     <main className="flex min-h-screen flex-col gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24 text-mapped-text-caption">
-      <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
-        Logo button
-      </p>
-      <div className="flex items-center gap-brand-scale-16">
-        <LogoButton state="default" ariaLabel="Default" />
-        <LogoButton state="hover" ariaLabel="Hover" />
-        <LogoButton state="selected" ariaLabel="Selected" />
-      </div>
-      <div className="flex items-center gap-brand-scale-16">
-        <LogoButton
-          selected={selected}
-          ariaLabel="Live logo"
-          onClick={() => setSelected((on) => !on)}
-        />
-      </div>
+      <p className={previewCaption}>Logo button</p>
+      {previewSizes.map((size) => (
+        <section key={size} className="flex flex-col gap-brand-scale-8">
+          <p className={previewCaption}>{size}</p>
+          <div className="flex items-center gap-brand-scale-16">
+            <LogoButton size={size} state="default" ariaLabel={`${size} default`} />
+            <LogoButton size={size} state="hover" ariaLabel={`${size} hover`} />
+            <LogoButton size={size} state="selected" ariaLabel={`${size} selected`} />
+            <LiveLogo size={size} />
+          </div>
+        </section>
+      ))}
     </main>
   );
 }
