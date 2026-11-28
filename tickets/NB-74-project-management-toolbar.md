@@ -1,7 +1,7 @@
 ---
 id: NB-74
 title: Project management toolbar
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
@@ -39,6 +39,7 @@ A person cannot use the project toolbar to rename the title and open the project
 - [x] Clicking the logo button opens the project menu
 - [x] Clicking View all opens the recent project menu
 - [x] Pressing the logo button scales it to 0.90, and releasing it returns the scale to 1
+- [x] Clicking anywhere outside the menu closes it
 - [x] The live board is unchanged when the trial page is absent
 
 ## Technical notes
@@ -49,7 +50,7 @@ The trial renders `ProjectToolbar` and, when the menu is open, `ProjectMenu` und
 
 The title stays the uncontrolled `TitleInput` already on the bar. The trial starts from `Project Title`. Typing replaces that text in the field. Do not pass a controlled `value`, and do not call `renameProject`. An empty field stays empty on this trial. The 200px minimum and the 320px cap stay on the bar.
 
-Menu state starts closed. A click on the logo opens `ProjectMenu`. A second click closes it, which removes the recent panel with it. Pass `selected` to the logo while the menu is open so the existing expanded square stays. The press scale is separate from that square.
+Menu state starts closed. A click on the logo opens `ProjectMenu`. A second click closes it, which removes the recent panel with it. A pointer down outside the menu closes it the same way. A pointer down inside the main menu or the recent panel leaves the menu open. A pointer down on the logo still switches the menu, so that press is not an outside close. Pass `selected` to the logo while the menu is open so the existing expanded square stays. The press scale is separate from that square.
 
 Pass the six specimen names, `Project name #1` through `Project name #6`. Do not export a new list if the preview can pass those strings. The main menu still shows the first three, and the recent panel still shows all six. Start with View all not selected. The click that opens the recent panel is the one already on View all inside `ProjectMenu`. Do not add a second toggle.
 
@@ -67,4 +68,4 @@ Every new toolbar, dropdown, and popover uses FloatingPanel and the z-index toke
 
 ## Out of scope
 
-Replacing `SaveToolbar` on the board. Calling `renameProject`, `newProject`, `openProject`, `saveProject`, or the recent-file list. A Ctrl+N shortcut. Changing the menu rows, the captions, the Recent label, or the panel sizes. The divider, the indent, and the spacing in [NB-75](NB-75-project-menu-layout.md). Changing the title minimum, the 320px cap, or the truncation label. The logo's 700ms radius ease, the brand red, and the hover and selected shape. The save indicator. The upper-right "Noodle Board" wordmark. The trials at `?trial=project-toolbar`, `?trial=project-menu`, and `?trial=logo-button`. Closing the menu by clicking outside it. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.
+Replacing `SaveToolbar` on the board. Calling `renameProject`, `newProject`, `openProject`, `saveProject`, or the recent-file list. A Ctrl+N shortcut. Changing the menu rows, the captions, the Recent label, or the panel sizes. The divider, the indent, and the spacing in [NB-75](NB-75-project-menu-layout.md). Changing the title minimum, the 320px cap, or the truncation label. The logo's 700ms radius ease, the brand red, and the hover and selected shape. The save indicator. The upper-right "Noodle Board" wordmark. The trials at `?trial=project-toolbar`, `?trial=project-menu`, and `?trial=logo-button`. Shadows, frosted glass, and the dot grid. Paragraph spacing is not in the token export.

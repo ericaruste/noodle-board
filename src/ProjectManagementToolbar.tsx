@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProjectMenu } from "./ProjectMenu";
 import { ProjectToolbar } from "./ProjectToolbar";
 
@@ -16,15 +16,39 @@ const caption =
 
 export function ProjectManagementToolbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (menuRef.current?.contains(target)) return;
+      const logo = rootRef.current?.querySelector("[data-project-toolbar] button");
+      if (logo?.contains(target)) return;
+      setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [menuOpen]);
 
   return (
-    <div data-project-management-toolbar className="inline-flex flex-col items-start gap-brand-scale-4">
+    <div
+      ref={rootRef}
+      data-project-management-toolbar
+      className="inline-flex flex-col items-start gap-brand-scale-4"
+    >
       <ProjectToolbar
         defaultTitle="Project Title"
         onLogoClick={() => setMenuOpen((open) => !open)}
         logoSelected={menuOpen}
       />
-      {menuOpen ? <ProjectMenu projects={specimenProjects} /> : null}
+      {menuOpen ? (
+        <div ref={menuRef} className="contents">
+          <ProjectMenu projects={specimenProjects} />
+        </div>
+      ) : null}
     </div>
   );
 }
