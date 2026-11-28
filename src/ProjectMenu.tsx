@@ -24,8 +24,11 @@ type ProjectMenuProps = {
   selectedProject?: string;
 };
 
+const longProjectName =
+  "Noodle Board project title that is long enough to pass the three hundred twenty pixel cap";
+
 const specimenProjects = [
-  "Project name #1",
+  longProjectName,
   "Project name #2",
   "Project name #3",
   "Project name #4",
@@ -59,6 +62,7 @@ function ProjectRow({
       showCaption={false}
       showChevron={false}
       indent={indent}
+      truncateLabel
       selected={selected}
     />
   );
@@ -80,7 +84,7 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
           Recent
         </div>
         <div className="h-brand-scale-1 bg-mapped-border-default" role="separator" />
-        <div className="mt-brand-scale-4 mb-brand-scale-4">
+        <div className="mt-brand-scale-4 mb-brand-scale-4 min-w-0">
           <MenuItem
             label="View all"
             size="md"

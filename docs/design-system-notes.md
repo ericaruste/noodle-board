@@ -28,6 +28,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
+- A project name in the project menu clips to the row. Hover or focus on a clipped name shows the full title in that same hover label, 8px above the row. The label wraps at the row, and it never grows past 320px. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
 - Heading, body, and caption are Geist. The placeholder face is Open Sans, `alias.font-family.placeholder`. SF Pro is gone from the token export.
 - The spec sheet around a component (state names, the red height notes, the purple dashed frame, the title, and the description) is documentation. It is not part of the component.
@@ -210,7 +211,7 @@ Not painted on this frame: hover and disabled. The button has no focus state. Th
 
 ## Menu item
 
-Ticket NB-41, NB-75. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`.
+Ticket NB-41, NB-75, NB-76. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`. NB-76 clips a label when `truncateLabel` is on.
 
 A single row for a dropdown. A left icon and the label sit on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between that pair and the caption group.
 
@@ -261,10 +262,18 @@ Properties:
 | Show left icon | boolean | default on |
 | Left icon | slot | Lucide component, default `chevron-right`. Shown unless turned off |
 | indent | boolean | default off. Off keeps left padding at `brand.scale.8`. On sets left padding to `brand.scale.32`. Right padding stays `brand.scale.8` |
+| truncateLabel | boolean | default off. On clips the label to the row. A clipped label shows the full text in the hover label |
 
 The boolean names for hiding the caption and the chevron were not in the property panel.
 
-Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`. The left icon is on in those rows. The size rows and the slot rows keep the default padding. One indented row is painted so the indent prop can be checked. The hover fill and the selected fill cover the full button, including the padding.
+The hover label is the one the main toolbar already uses. It is drawn only while `truncateLabel` is on and the label is clipped.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Full label | none | 8px above the row, centered. It wraps at the row, and the cap is 320px. `rounded-md`, `bg-slate-900`, `px-2 py-1`, `text-xs`, `font-medium`, white. These are the existing toolbar label, not design tokens |
+| Shadow | not a token | `shadow-lg` |
+
+Painted states: `default`, `hover`, `selected`, `disabled`, in both `sm` and `md`. The left icon is on in those rows. The size rows and the slot rows keep the default padding. One indented row is painted so the indent prop can be checked. One truncated row is painted in a 220px column, indented, with a title long enough to clip. The hover fill and the selected fill cover the full button, including the padding. The hover label is not a painted state. It shows on hover or focus when the label is clipped.
 
 Not painted: focus.
 
@@ -1303,7 +1312,7 @@ This trial is not on the canvas, so the bar is not in FloatingPanel. The later p
 
 ## Project menu
 
-Ticket NB-73, NB-75. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows.
+Ticket NB-73, NB-75, NB-76. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
 
 Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The canvas still uses the file bar.
 
@@ -1381,8 +1390,15 @@ The rows are the menu item at size `md`. Hover, selected, disabled, and the row 
 | --- | --- |
 | New, Open, Save, Save as | size `md`. Left icon off. Chevron off. Caption is `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, or `Ctrl+Shift+S` |
 | View all | size `md`. Left icon off. Caption off. Chevron off. Indent on. Selected while the recent panel is open |
-| Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. Indent on for the three names in the main menu. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
-| Recent panel project | the same project row. Indent off. The open specimen paints the first name selected. The copy in the main menu stays unselected |
+| Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. Indent on for the three names in the main menu. `truncateLabel` on. A name longer than the row clips. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
+| Recent panel project | the same project row. Indent off. `truncateLabel` on. The open specimen paints the first name selected, and that name is long enough to clip. The copy in the main menu stays unselected |
+
+A clipped project name shows the full title in the main toolbar hover label. The label sits 8px above that row. It wraps at the row so it stays over the menu, and it stops at 320px. Short names that fit the row show no label.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Full title | none | shown only when the project name is clipped. 8px above the row, centered. It wraps at the row, and the cap is 320px. `rounded-md`, `bg-slate-900`, `px-2 py-1`, `text-xs`, `font-medium`, white. These are the existing toolbar label, not design tokens |
+| Shadow | not a token | `shadow-lg` |
 
 Properties:
 
@@ -1392,7 +1408,7 @@ Properties:
 | viewAllSelected | boolean | default off. The starting selected state. A click on View all switches it. On paints View all selected and opens the recent panel |
 | selectedProject | text | the recent-panel row to paint selected. Unset paints none of them selected |
 
-Painted: View all selected with the recent panel open and the first recent row selected. View all not selected, with the recent panel closed. The other rows are the menu item’s default state.
+Painted: View all selected with the recent panel open and the first recent row selected. That first name is long enough to clip in both panels. View all not selected, with the recent panel closed. The other rows are the menu item’s default state. The hover label is not a painted state. It shows on hover or focus when the name is clipped.
 
 Not painted on this frame: hover and disabled. Those stay on the menu item. The menu item has no focus state. The Recent label has no hover fill and no selected fill.
 
