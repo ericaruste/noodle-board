@@ -1,11 +1,11 @@
 ---
-description: When ticket work is finished, report what is not synced and ask with a selection form
+description: When ticket work is finished, report merge and update status, then ask about open steps
 alwaysApply: true
 ---
 
-When the work for a ticket is finished, check the closeout before the reply ends. This includes `/ticket NB-xx` after the acceptance work, and any later pass that changes that ticket.
+When the work for a ticket is finished, or the user asks whether a ticket is done, merged, or updated, check the closeout before the reply ends. This includes `/ticket NB-xx` after the acceptance work, a later pass that changes that ticket, and a question about a ticket that is already finished.
 
-Check each item. Say in the reply which ones are still open. Name local, Linear, or both. Name commit, push, and merge only when that step has not happened.
+Check each item. Say in the reply which ones are still open. Name local, Linear, or both.
 
 - **Local.** The ticket file still has an open acceptance box for work that was verified, or `status` is not `Done` after that work.
 - **Linear.** The local description or status was not sent after the last edit. Description uses `node scripts/linear-sync.mjs push-one <id>`. Status uses `node scripts/linear-sync.mjs set-status <id> Done --push`.
@@ -13,7 +13,12 @@ Check each item. Say in the reply which ones are still open. Name local, Linear,
 - **Push.** The ticket branch is ahead of its remote, or has no upstream.
 - **Merge.** A Phase 2 ticket (`parent: NB-E6`) is not on `phase-2`. Merge that branch into `phase-2` only. Any other ticket is not on `main`.
 
-If every item is done, say that in one sentence and do not ask.
+Always end that reply with these two lines, even when both are already done. Do not hide a finished merge or a finished update inside one sentence that leaves those words out.
+
+- **Updated.** Local: `Done` or not, and whether every verified acceptance box is checked. Linear: whether the description and the status were sent after the last edit. Name local, Linear, or both.
+- **Merged.** A Phase 2 ticket (`parent: NB-E6`) is on `phase-2` or not, and whether `origin/phase-2` has that commit. Any other ticket is on `main` or not. Name the branch.
+
+If every item is done, say that, then still write the Updated and Merged lines. Do not ask.
 
 If any item is open, use AskQuestion before doing those steps. `allow_multiple` is true. Offer only the open steps, in this order, plus the two choices below. Put "Do the remaining steps" first.
 
