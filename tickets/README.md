@@ -86,6 +86,7 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 50. **Logo button size** — NB-82 (the logo gains `size`: `lg` 40px as today and `md` 32px, with the same 8px hover corner, a 42% press, and a scaled dip). Follows the logo button from NB-67 and NB-77. The project toolbar stays `lg`.
 51. **Project management toolbar size** — NB-83 (the project toolbar, project menu, and their composite gain `size`: `lg` as today and `md` with 32px parts and 180px menu panels, shown on the trial page). Follows NB-81 and NB-82. The board stays `lg`.
 52. **Medium project management toolbar on the canvas** — NB-84 (the board uses the `md` project management toolbar: 32px parts and 180px menu panels). Follows the size from NB-83. The trial still shows `lg` and `md`. An unset size stays `lg`.
+53. **Group src into folders by role** — NB-85 (`src/` splits into `components/`, `toolbars/`, `canvas/`, `hooks/`, and `lib/`, with no change inside any file beyond its imports). Starts after NB-84 is on `phase-2`.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

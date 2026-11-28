@@ -460,6 +460,11 @@
       "id": "ca754289-4a54-4bd0-aa9a-1f63b2a883ab",
       "identifier": "ERI-100",
       "url": "https://linear.app/ericar/issue/ERI-100/medium-project-management-toolbar-on-the-canvas"
+    },
+    "NB-85": {
+      "id": "022ab8bc-7796-431e-8dd2-1b0758ae278b",
+      "identifier": "ERI-101",
+      "url": "https://linear.app/ericar/issue/ERI-101/group-src-into-folders-by-role"
     }
   }
 }
