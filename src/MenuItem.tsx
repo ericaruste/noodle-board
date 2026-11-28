@@ -107,7 +107,18 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const isDisabled = disabled || visual === "disabled";
   const hoverClass = visual === "default" ? "enabled:hover:bg-mapped-surface-action-hover" : "";
   const heightClass = size === "sm" ? "h-brand-scale-28" : "h-brand-scale-32";
-  const paddingClass = indent ? "pl-brand-scale-32 pr-brand-scale-8" : "px-brand-scale-8";
+  // 3px is the hover nudge. It is not a spacing token. Selected and disabled stay put.
+  const parked = visual === "selected" || visual === "disabled";
+  const paintedHover = visual === "hover";
+  const paddingClass = parked
+    ? indent
+      ? "pl-brand-scale-32 pr-brand-scale-8"
+      : "pl-brand-scale-8 pr-brand-scale-8"
+    : paintedHover
+      ? "pr-brand-scale-8"
+      : indent
+        ? "pl-brand-scale-32 pr-brand-scale-8 enabled:hover:pl-[calc(var(--brand-scale-32)+3px)]"
+        : "pl-brand-scale-8 pr-brand-scale-8 enabled:hover:pl-[calc(var(--brand-scale-8)+3px)]";
   const LeftIcon = leftIcon ?? ChevronRight;
   const fullLabel = truncateLabel && truncated && label.length > 0 ? label : undefined;
 
@@ -130,6 +141,16 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       disabled={isDisabled}
       onClick={onClick}
       className={`group ${truncateLabel ? "group/tip relative min-w-0" : ""} flex ${widthClassName} shrink-0 items-center justify-between gap-brand-scale-8 rounded-alias-border-radius-lg ${paddingClass} font-alias-font-family-body ${heightClass} ${surfaceClass[visual]} ${hoverClass}`}
+      style={{
+        transitionProperty: "background-color, padding-left",
+        transitionDuration: "var(--motion-highlight-duration), var(--motion-nudge-duration)",
+        transitionTimingFunction: "var(--motion-highlight-ease), var(--motion-nudge-ease)",
+        paddingLeft: paintedHover
+          ? indent
+            ? "calc(var(--brand-scale-32) + 3px)"
+            : "calc(var(--brand-scale-8) + 3px)"
+          : undefined,
+      }}
     >
       <span className="flex min-w-0 items-center gap-brand-scale-8">
         {showLeftIcon ? <LeftIcon className={`size-brand-scale-16 shrink-0 ${leftIconClass[visual]}`} aria-hidden /> : null}

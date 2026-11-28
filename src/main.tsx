@@ -20,6 +20,7 @@ import { SliderTrackPreview } from "./SliderTrack";
 import { TitleInputPreview } from "./TitleInput";
 import "./styles/tokens.css";
 import "./index.css";
+import "./styles/motion.css";
 
 const trial = new URLSearchParams(window.location.search).get("trial");
 const showFillOpacityTrial = window.location.hash === "#fill-opacity" || trial === "fill-opacity";

@@ -1,0 +1,65 @@
+/* Hand-written. npm run tokens does not write this file. */
+
+:root {
+  --motion-press-duration: 80ms;
+  --motion-press-ease: cubic-bezier(0.3, 0.7, 0.2, 1);
+  --motion-release-duration: 280ms;
+  --motion-release-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-hover-duration: 200ms;
+  --motion-hover-ease: cubic-bezier(0.3, 0.7, 0.2, 1);
+  --motion-highlight-duration: 60ms;
+  --motion-highlight-ease: ease;
+  --motion-nudge-duration: 120ms;
+  --motion-nudge-ease: ease-out;
+  --motion-glide-duration: 130ms;
+  --motion-glide-ease: ease-out;
+  --motion-fade-duration: 120ms;
+  --motion-fade-ease: ease-out;
+}
+
+.motion-press {
+  transition-duration: var(--motion-press-duration);
+  transition-timing-function: var(--motion-press-ease);
+}
+
+.motion-release {
+  transition-duration: var(--motion-release-duration);
+  transition-timing-function: var(--motion-release-ease);
+}
+
+.motion-hover {
+  transition-duration: var(--motion-hover-duration);
+  transition-timing-function: var(--motion-hover-ease);
+}
+
+.motion-highlight {
+  transition-duration: var(--motion-highlight-duration);
+  transition-timing-function: var(--motion-highlight-ease);
+}
+
+.motion-nudge {
+  transition-duration: var(--motion-nudge-duration);
+  transition-timing-function: var(--motion-nudge-ease);
+}
+
+.motion-glide {
+  transition-duration: var(--motion-glide-duration);
+  transition-timing-function: var(--motion-glide-ease);
+}
+
+.motion-fade {
+  transition-duration: var(--motion-fade-duration);
+  transition-timing-function: var(--motion-fade-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-press-duration: 0s;
+    --motion-release-duration: 0s;
+    --motion-hover-duration: 0s;
+    --motion-highlight-duration: 0s;
+    --motion-nudge-duration: 0s;
+    --motion-glide-duration: 0s;
+    --motion-fade-duration: 0s;
+  }
+}

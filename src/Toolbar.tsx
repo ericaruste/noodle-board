@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { MainButton } from "./MainButton";
+import { useSlidingPill } from "./useSlidingPill";
 import { NoodleMainIcon } from "./noodleIcons";
 import type { PlacementKind } from "./placement";
 import type { ShapeKind } from "./shapeData";
@@ -71,6 +72,16 @@ export default function Toolbar({
   const [shapesOpen, setShapesOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const shapesButtonRef = useRef<HTMLButtonElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  const pill = useSlidingPill(rowRef);
+  const pillTone = useRef<HTMLElement | null>(null);
+  // Remember the control in this render so a fade keeps its fill. An effect would paint one frame late.
+  if (pill.active) pillTone.current = pill.active;
+  const pillFill =
+    (pill.active ?? pillTone.current) === deleteRef.current
+      ? "bg-mapped-surface-error-hover"
+      : "bg-mapped-surface-action-strong-hover";
   const { menuRef: shapesMenuRef, box: shapesBox } = useAnchoredBox(shapesOpen, shapesButtonRef, "center");
   const idle = placement == null;
 
@@ -100,13 +111,28 @@ export default function Toolbar({
       className="board-toolbar rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma padding 3px
     >
       <div
-        className="flex items-center gap-brand-scale-2"
+        ref={rowRef}
+        className="pill-row relative flex items-center gap-brand-scale-2"
         onPointerDown={(event) => {
           const target = event.target;
           if (target instanceof Element && target.closest("[data-shapes-menu]")) return;
           setShapesOpen(false);
         }}
       >
+      {pill.box ? (
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute left-0 top-0 rounded-alias-border-radius-lg ${pillFill}`}
+          style={{
+            width: pill.box.width,
+            height: pill.box.height,
+            transform: `translate(${pill.box.x}px, ${pill.box.y}px)`,
+            opacity: pill.active ? 1 : 0,
+            transition:
+              "transform var(--motion-glide-duration) var(--motion-glide-ease), width var(--motion-glide-duration) var(--motion-glide-ease), height var(--motion-glide-duration) var(--motion-glide-ease), opacity var(--motion-fade-duration) var(--motion-fade-ease)",
+          }}
+        />
+      ) : null}
       <Tip label="Select">
         <MainButton
           showLabel={false}
@@ -223,8 +249,9 @@ export default function Toolbar({
           onClick={() => onTool(idle && tool === "arrow" ? "select" : "arrow")}
         />
       </Tip>
-      <Tip label="Delete">
+      <Tip label={canDelete ? "Delete" : "Select something to delete"}>
         <MainButton
+          ref={deleteRef}
           type="destructive"
           showLabel={false}
           showRightIcon={false}
