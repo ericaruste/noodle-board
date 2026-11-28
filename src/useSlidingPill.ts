@@ -80,7 +80,11 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
       const target = event.target;
       if (!(target instanceof Element)) return;
       const button = target.closest("button");
-      if (!(button instanceof HTMLButtonElement) || !row.contains(button) || button.disabled) return;
+      if (!(button instanceof HTMLButtonElement) || !row.contains(button)) return;
+      if (button.disabled) {
+        hide();
+        return;
+      }
       show(button);
     };
 

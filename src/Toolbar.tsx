@@ -76,6 +76,7 @@ export default function Toolbar({
   const deleteRef = useRef<HTMLButtonElement>(null);
   const pill = useSlidingPill(rowRef);
   const pillTone = useRef<HTMLElement | null>(null);
+  // Remember the control in this render so a fade keeps its fill. An effect would paint one frame late.
   if (pill.active) pillTone.current = pill.active;
   const pillFill =
     (pill.active ?? pillTone.current) === deleteRef.current
