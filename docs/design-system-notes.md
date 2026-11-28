@@ -23,6 +23,8 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- A press on the logo button sets the scale to 0.90, and a release or a cancelled pointer sets it back to 1. The scale is not a token. It is separate from the 700ms radius ease.
+- A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
@@ -1395,3 +1397,37 @@ Painted: View all selected with the recent panel open and the first recent row s
 Not painted on this frame: hover and disabled. Those stay on the menu item. The menu item has no focus state. The Recent label has no hover fill and no selected fill.
 
 This trial is not on the canvas, so the panels are not in FloatingPanel. The later pass that places the menu, with the project toolbar, uses FloatingPanel on the dropdown layer and checks it against a selected element and an element that is mid-drag. The file bar stays on the board.
+
+## Project management toolbar
+
+Ticket NB-74. Code `src/ProjectManagementToolbar.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+
+The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
+
+The press scale lives on the logo button. A press sets the scale to 0.90. A release, or a cancelled pointer, sets it back to 1. The pointer is captured on the press, so the scale stays at 0.90 when the pointer leaves the button before the release. The scale changes when the press starts and when it ends. It is separate from the 700ms radius ease. While the menu is open, a press scales the expanded square to 0.90 and the release returns that square to 1. The square stays until the menu closes. The logo trial uses the same button, so a press scales those specimens too. Their resting size stays 1 until that press. The live button on that trial does not open a menu.
+
+The bar keeps the table in the Project toolbar section. The main menu and the recent panel keep the tables in the Project menu section. This table is the gap under the bar and the logo scale.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Gap under the bar | `brand.scale.4` | 4px, between the bar and the menu. The menu's left edge lines up with the bar's left edge |
+| Logo scale, pressed | not a token | 0.90. It is set when the press starts |
+| Logo scale, released | not a token | 1. It is set when the press ends or the pointer is cancelled |
+| Shadow | not a token | this trial adds none of its own |
+| Blur | not a token | this trial adds none of its own |
+| Dot grid | not a token | excluded from the component |
+| Divider | none | this trial adds no divider |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| Title | text | starts as `Project Title`. Typing replaces the text. An empty field stays empty |
+| Menu | open or closed | starts closed. The logo click switches it. A pointer down outside the menu closes it. Open keeps the logo selected |
+| Recent panel | open or closed | starts closed. View all's click switches it. Closing the menu removes the panel |
+
+Painted: the bar with the menu closed, the menu open, the menu open with the recent panel, and the logo while it is pressed.
+
+Not painted on this frame: hover, the title fills, and the menu-item states. Those stay on the logo button, the title input, and the menu item.
+
+This trial is not on the canvas, so the bar and the menus are not in FloatingPanel. The later pass that places them on the board uses FloatingPanel, the toolbar layer for the bar and the dropdown layer for the menus, and checks both against a selected element and an element that is mid-drag. The file bar stays on the board.

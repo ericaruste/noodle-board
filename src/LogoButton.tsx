@@ -1,4 +1,4 @@
-import { forwardRef, useId, useState } from "react";
+import { forwardRef, useId, useState, type PointerEvent } from "react";
 import logoRaw from "./assets/icons/noodle-logo.svg?raw";
 
 export type LogoButtonState = "default" | "hover" | "selected";
@@ -14,6 +14,10 @@ type LogoButtonProps = {
 
 /** Brand red for the logo mark. It is not a design token. */
 const brandRed = "#B11F24";
+
+/** Pressed scale. It is not a design token. */
+const pressedScale = "scale(0.9)";
+const releasedScale = "scale(1)";
 
 const circleRadius = "var(--brand-scale-20)";
 // TODO token mismatch: Figma 6.2px
@@ -34,8 +38,23 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
   ref,
 ) {
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const painted = state != null;
   const expanded = painted ? state === "hover" || state === "selected" : hovered || selected;
+
+  function onPointerDown(event: PointerEvent<HTMLButtonElement>) {
+    setPressed(true);
+    // Keep the press if the pointer leaves the button before the release.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // The pointer can already be gone. Pointer up and pointer cancel still return the scale to 1.
+    }
+  }
+
+  function releasePress() {
+    setPressed(false);
+  }
 
   return (
     <button
@@ -45,6 +64,9 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
       title={title}
       aria-pressed={painted ? state === "selected" : selected}
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerUp={releasePress}
+      onPointerCancel={releasePress}
       onPointerEnter={() => {
         if (!painted) setHovered(true);
       }}
@@ -55,6 +77,7 @@ export const LogoButton = forwardRef<HTMLButtonElement, LogoButtonProps>(functio
       style={{
         backgroundColor: brandRed,
         borderRadius: expanded ? expandedRadius : circleRadius,
+        transform: pressed ? pressedScale : releasedScale,
       }}
     >
       <LogoMark />
