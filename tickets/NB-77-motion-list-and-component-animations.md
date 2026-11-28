@@ -1,7 +1,7 @@
 ---
 id: NB-77
 title: Motion list and component animations
-status: In Progress
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
