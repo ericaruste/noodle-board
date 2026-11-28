@@ -508,16 +508,16 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 ## Title input
 
-Ticket NB-66. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
+Ticket NB-66, sizes NB-81. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
 
 A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. Hovering or focusing that field shows the full title in the same hover label the main toolbar uses. It sits 8px above the field.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Width | none | hugs the title plus the padding, and stops at 320px. No spacing token is 320px |
-| Height | `brand.scale.40` | 40px |
-| Padding | `brand.scale.12` | 12px on the left and right. The title is centered in the 40px height |
-| Corner radius | `alias.border-radius.xl` | 12px. Rounder than the hex field’s 8px |
+| Height | `brand.scale.40`, `brand.scale.32`, `brand.scale.28` | 40px on `lg`, 32px on `md`, 28px on `sm` |
+| Padding | `brand.scale.12` | 12px on the left and right on every size. The title is centered in the height |
+| Corner radius | `alias.border-radius.xl`, `alias.border-radius.lg` | 12px on `lg`. 8px on `md` and `sm` |
 | Font | `alias.font-family.body` | Geist |
 | Type size | `responsive.desktop.body.md.size`, `responsive.desktop.body.md.line-height-tight` | 14px / 14px, text style `body/md/tight`. Paragraph spacing is `not a token` |
 | Text, every state | `mapped.text.default` | `#303132` |
@@ -538,10 +538,21 @@ Properties:
 | Property | Kind | Values |
 | --- | --- | --- |
 | state | variant | `default`, `hover`, `focus` |
+| size | variant | `lg` (default), `md`, `sm` |
+
+Sizes:
+
+| Size | Height | Corner radius | Padding | Type |
+| --- | --- | --- | --- | --- |
+| `lg` | `brand.scale.40` (40px) | `alias.border-radius.xl` (12px) | `brand.scale.12` | `body/md/tight` |
+| `md` | `brand.scale.32` (32px) | `alias.border-radius.lg` (8px) | `brand.scale.12` | `body/md/tight` |
+| `sm` | `brand.scale.28` (28px) | `alias.border-radius.lg` (8px) | `brand.scale.12` | `body/md/tight` |
+
+The Figma label beside the `sm` row reads 32px. The drawn row is 28px, and 28px is the size. Fill, stroke, text color, the focus ring, the 320px cap, and the full-title label are the same on every size.
 
 The title is a text layer, not a variant property. The spec shows `Title`.
 
-Painted states: `default`, `hover`, and `focus`.
+Painted states: `default`, `hover`, and `focus`, on each size. The project toolbar uses `lg`.
 
 A click on the field focuses it. The title can be edited while the field is focused.
 

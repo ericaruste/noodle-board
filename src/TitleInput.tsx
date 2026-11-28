@@ -1,8 +1,11 @@
-import { forwardRef, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { Fragment, forwardRef, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 export type TitleInputState = "default" | "hover" | "focus";
+export type TitleInputSize = "lg" | "md" | "sm";
 
 type TitleInputProps = {
+  /** Height and corner. Unset is `lg`, the 40px field. */
+  size?: TitleInputSize;
   value?: string;
   defaultValue?: string;
   onValueChange?: (title: string) => void;
@@ -26,11 +29,17 @@ const shellClass: Record<TitleInputState, string> = {
   focus: focusRing,
 };
 
+const sizeClass: Record<TitleInputSize, string> = {
+  lg: "h-brand-scale-40 rounded-alias-border-radius-xl",
+  md: "h-brand-scale-32 rounded-alias-border-radius-lg",
+  sm: "h-brand-scale-28 rounded-alias-border-radius-lg",
+};
+
 const fieldType =
   "font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default";
 
 export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function TitleInput(
-  { value, defaultValue = "Title", onValueChange, onCommit, state, readOnly = false, id },
+  { size = "lg", value, defaultValue = "Title", onValueChange, onCommit, state, readOnly = false, id },
   ref,
 ) {
   const [draft, setDraft] = useState(defaultValue);
@@ -104,7 +113,8 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
     <span className="group/tip relative">
       <label
         data-title-input
-        className={`${state ? "" : "noodle-title-input"} inline-grid h-brand-scale-40 max-w-[320px] cursor-text items-center rounded-alias-border-radius-xl px-brand-scale-12 ${fieldType} ${shellClass[visual]}`}
+        data-size={size}
+        className={`${state ? "" : "noodle-title-input"} inline-grid max-w-[320px] cursor-text items-center px-brand-scale-12 ${sizeClass[size]} ${fieldType} ${shellClass[visual]}`}
         style={{ gridTemplateColumns: "minmax(0, max-content)", maxWidth: maxTitleWidthPx }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -155,6 +165,7 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
 });
 
 const previewStates: TitleInputState[] = ["default", "hover", "focus"];
+const previewSizes: TitleInputSize[] = ["lg", "md", "sm"];
 
 const longTitle =
   "Noodle Board project title that is long enough to pass the three hundred twenty pixel cap";
@@ -167,14 +178,21 @@ export function TitleInputPreview() {
       <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
         Title input
       </p>
-      <div className="flex items-end gap-brand-scale-24">
+      <div
+        className="grid w-max items-center gap-x-brand-scale-24 gap-y-brand-scale-16 font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight"
+        style={{ gridTemplateColumns: `auto repeat(${previewStates.length}, max-content)` }}
+      >
+        <span />
         {previewStates.map((state) => (
-          <div key={state} className="flex flex-col items-start gap-brand-scale-4">
-            <p className="font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight">
-              {state}
-            </p>
-            <TitleInput state={state} />
-          </div>
+          <p key={state}>{state}</p>
+        ))}
+        {previewSizes.map((size) => (
+          <Fragment key={size}>
+            <p>{size}</p>
+            {previewStates.map((state) => (
+              <TitleInput key={state} size={size} state={state} />
+            ))}
+          </Fragment>
         ))}
       </div>
       <div className="flex max-w-full flex-col items-start gap-brand-scale-4">

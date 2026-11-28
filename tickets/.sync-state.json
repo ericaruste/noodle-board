@@ -440,6 +440,11 @@
       "id": "1d9fb04b-695d-46ea-8704-a260527f6818",
       "identifier": "ERI-96",
       "url": "https://linear.app/ericar/issue/ERI-96/project-toolbar-frosted-blur"
+    },
+    "NB-81": {
+      "id": "17cbdeca-1004-4a21-9afd-e2b9960d8dff",
+      "identifier": "ERI-97",
+      "url": "https://linear.app/ericar/issue/ERI-97/title-input-size"
     }
   }
 }

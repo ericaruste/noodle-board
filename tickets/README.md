@@ -82,6 +82,7 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 46. **Project management toolbar on the board** — NB-78 (the board replaces the file bar with the project management toolbar: the logo opens the menu, the rows run the board's file actions, the title renames on Enter or blur, and the upper-right wordmark goes away). Follows the project management toolbar from NB-74. The trial pages stay as they are.
 47. **Sliding pill on contextual toolbars and popovers** — NB-79 (one shared pill row uses `useSlidingPill` on the text, shape, and noodle toolbars and on their contextual popovers; the fill is the contextual hover, and `ContextualButton` stays free of the pill). Follows the motion list from NB-77.
 48. **Project toolbar frosted blur** — NB-80 (the project toolbar gets the same 24px frost as every other floating bar, and the notes stop recording the missing blur as a decision). Follows the project management toolbar on the board from NB-78.
+49. **Title input size** — NB-81 (the title field gains `size`: `lg` 40px as today, `md` 32px, and `sm` 28px, with an 8px corner on `md` and `sm`). Follows the title input from NB-66. The project toolbar stays `lg`.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 
