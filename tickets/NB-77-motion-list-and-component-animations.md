@@ -1,7 +1,7 @@
 ---
 id: NB-77
 title: Motion list and component animations
-status: Todo
+status: In Progress
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -17,11 +17,9 @@ The timing reference is `D:\ui-design\noodle-board-UI\animation transition\Noodl
 
 There is no shared motion list. [`scripts/build-tokens.js`](../scripts/build-tokens.js) writes [`src/styles/tokens.css`](../src/styles/tokens.css) and [`src/styles/tailwind-theme.js`](../src/styles/tailwind-theme.js). [`src/main.tsx`](../src/main.tsx) imports the token stylesheet, then [`src/index.css`](../src/index.css). [`src/index.css`](../src/index.css) holds the save-dot and save-indicator animations, and each of those has its own `prefers-reduced-motion` block.
 
-[`src/LogoButton.tsx`](../src/LogoButton.tsx) on `phase-2` scales the button to `scale(0.9)` while pressed and back to `scale(1)` on release. The radius is the only transition: `duration-700` and `cubic-bezier(0.22, 1, 0.36, 1)`, with `motion-reduce:transition-none`. The pointer is captured on the press. There is no glyph dip and no duration in JavaScript.
+[`src/LogoButton.tsx`](../src/LogoButton.tsx) is the button this ticket keeps. A press sets the radius to `16.8px` (42% of the 40px button) and `translateY(1px)` on the mark. The press classes are 80ms and the release classes are 280ms, both with `cubic-bezier(0.34, 1.56, 0.64, 1)`. `releaseMs` is `280`. A timeout of `releaseMs + 80` returns the motion to rest if `transitionend` does not. The rest class is `duration-700` and `cubic-bezier(0.22, 1, 0.36, 1)`. That class eases the corner out to the square on hover and selected, and it is applied again after the release spring ends. The release waits until that timing is in the DOM, then clears the press. The pointer is captured on the press. `?trial=logo-button` and `#logo-button` show the painted states and one live button.
 
-The working copy of that file, not on `phase-2`, is the button this ticket keeps. A press sets the radius to `16.8px` (42% of the 40px button) and `translateY(1px)` on the mark. The press classes are 80ms and the release classes are 280ms, both with `cubic-bezier(0.34, 1.56, 0.64, 1)`. `releaseMs` is `280`. A timeout of `releaseMs + 80` returns the motion to rest if `transitionend` does not. The rest class is `duration-700` and `cubic-bezier(0.22, 1, 0.36, 1)`. That class eases the corner out to the square on hover and selected, and it is applied again after the release spring ends. The release waits until that timing is in the DOM, then clears the press. `?trial=logo-button` and `#logo-button` show the painted states and one live button.
-
-`phase-2` has no Logo button section in [`docs/design-system-notes.md`](../docs/design-system-notes.md). Decisions already made, and the Project management toolbar section, still say a press scales the logo to 0.90. The working copy of the notes adds a Logo button section for the corner and the dip, and rewrites those scale lines.
+[`docs/design-system-notes.md`](../docs/design-system-notes.md) has a Logo button section for the corner and the dip. Decisions already made, and the Project management toolbar section, name that corner and that dip. They do not name a motion yet.
 
 [`src/MenuItem.tsx`](../src/MenuItem.tsx) is the row from [NB-41](NB-41-menu-item.md). A default row uses `enabled:hover:bg-mapped-surface-action-hover`. The fill is instant. Left padding is `px-brand-scale-8`, or `pl-brand-scale-32` when `indent` is set. The right padding stays `brand.scale.8`. Nothing nudges. The caption and the chevron sit in the trailing group. `?trial=menu-item` paints the states, one indented row, and one truncated row. The notes say focus is not painted.
 
@@ -63,7 +61,7 @@ Each name is a pair of custom properties, `--motion-press-duration` and `--motio
 
 One `prefers-reduced-motion: reduce` block in this file sets every duration property to `0s`. That is the switch. Take `motion-reduce:transition-none` and `motion-reduce:!transition-none` off the logo transitions so they are not a second switch.
 
-The logo starts from the corner-and-dip button. On `phase-2`, replace `scale(0.9)` with that press. The pressed corner is `16.8px`. The mark dips `translateY(1px)`. The HTML dip is `1.6px` on a 64px button. Both lengths stay off the token list. The pointer capture stays. The release still waits until the release timing is in the DOM, then clears the press. Press uses `motion-press` on the corner and on the mark. Release uses `motion-release` on both. The working copy's press curve is the spring. The list says press is snappy, which is what the HTML keeps when `:active` only shortens the duration. Use the list.
+The corner-and-dip press is already in `LogoButton`. The pressed corner is `16.8px`. The mark dips `translateY(1px)`. The HTML dip is `1.6px` on a 64px button. Both lengths stay off the token list. The pointer capture stays. The release still waits until the release timing is in the DOM, then clears the press. Press uses `motion-press` on the corner and on the mark. Release uses `motion-release` on both. The button's press curve is the spring today. The list says press is snappy, which is what the HTML keeps when `:active` only shortens the duration. Use the list.
 
 `releaseMs` is the raw `280`. Read `--motion-release-duration` from the motion properties and use that in the timeout. `parseFloat` of `280ms` is 280, and `parseFloat` of `0s` is 0, so reduced motion shortens the wait with the same read. Keep the extra 80ms buffer the timeout already adds. The buffer stays in the component. The 280 does not.
 
@@ -79,15 +77,15 @@ The pill stays inside the toolbar's `FloatingPanel`. It adds no z-index of its o
 
 The toolbar is already a FloatingPanel on the toolbar layer. The pill is not a new panel. Check the bar against a selected element and an element that is mid-drag, the same check the toolbar already has. Drag-feedback overlays read their layer from the selection token and add no z-index numbers of their own.
 
-`phase-2` has no Logo button section. Add that section when it is missing, with the ticket and `src/LogoButton.tsx`, then the Motion row. When the working-copy section is already there, add the row to it. Menu item, Main button, and Main toolbar already have sections. Each Motion row says what moves, what triggers it, and which name it uses. The Main button row says the button does not move and the pill belongs to the toolbar. The logo row lists both return timings from the open question.
+The Logo button section is already in the notes. Add its Motion row. Menu item, Main button, and Main toolbar already have sections. Each Motion row says what moves, what triggers it, and which name it uses. The Main button row says the button does not move and the pill belongs to the toolbar. The logo row lists both return timings from the open question.
 
-Decisions already made, and the Project management toolbar section, still describe the 0.90 scale on `phase-2`. Point those lines at the corner, the dip, and the motion names, so they agree with the logo button. Leave the rest of that toolbar's table as it is.
+Decisions already made, and the Project management toolbar section, already name the corner and the dip. Point those lines at the motion names when the names exist. Leave the rest of that toolbar's table as it is.
 
 Trials stay `?trial=logo-button`, `?trial=menu-item`, and `?trial=main-button`. The pill is on the board's main toolbar. The main-button trial has no pill.
 
 ## Open question
 
-LogoButton returns to the resting circle with 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That is the rest class on the working-copy button, and it is the only radius ease on `phase-2`.
+LogoButton returns to the resting circle with 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That is the rest class on the logo button.
 
 The HTML returns the logo to the circle with the 280ms spring, `cubic-bezier(0.34, 1.56, 0.64, 1)`, which is the release motion in this list.
 
