@@ -1,0 +1,15 @@
+---
+description: Where a new source file goes in src
+globs: src/**
+alwaysApply: false
+---
+
+`src/` is grouped by role. A new file goes in the folder that matches it. Do not add source files to the top of `src/`.
+
+- `components/` — building blocks: buttons, inputs, swatches, sliders, menu items, FloatingPanel, icon helpers, and their trial previews.
+- `toolbars/` — composites built from the blocks: toolbars, menus, and their placement logic.
+- `canvas/` — what lives on the board: nodes, noodles, ports, selection and group chrome, guides, the marquee.
+- `hooks/` — reusable React behavior, named `useSomething`.
+- `lib/` — logic and data with no visuals: geometry, routing, files, text handling, `layers.ts`.
+
+`App.tsx`, `main.tsx`, `index.css`, the `.d.ts` files, `assets/`, and `styles/` stay at the top.

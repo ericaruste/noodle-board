@@ -6,7 +6,7 @@ Code names: `sticky`, `image`, `text`, and `shape` with kinds `rect` (Rectangle;
 
 ## Where they are drawn
 
-Every sticky, image, text, and shape node renders the same `ObjectPorts` (`src/ObjectPorts.tsx`). Each side is a React Flow `Handle`, a `div.react-flow__handle`, not SVG and not a custom dot.
+Every sticky, image, text, and shape node renders the same `ObjectPorts` (`src/canvas/ObjectPorts.tsx`). Each side is a React Flow `Handle`, a `div.react-flow__handle`, not SVG and not a custom dot.
 
 ```tsx
 <Handle
@@ -38,7 +38,7 @@ From `src/index.css`:
 
 Bottom, left, and right use the same outset on the other axis.
 
-`--noodle-port-size` and `--noodle-handle-outset` come from the node’s resize style in `src/NoodleResizer.tsx`, not from the node’s width or height. At zoom 1 the dot is 8px and the outset is 14px. Zoom-out multiplies those by `max(1/zoom, 1) ** 0.65`, so the dots shrink only partway.
+`--noodle-port-size` and `--noodle-handle-outset` come from the node’s resize style in `src/canvas/NoodleResizer.tsx`, not from the node’s width or height. At zoom 1 the dot is 8px and the outset is 14px. Zoom-out multiplies those by `max(1/zoom, 1) ** 0.65`, so the dots shrink only partway.
 
 ```ts
 const HIT_PX = 16;
@@ -94,7 +94,7 @@ From `src/index.css`:
 
 Hovering a visible dot does not change its size or color. The cursor is React Flow’s `crosshair` (`.connectionindicator`). The node body stays `grab`.
 
-During a noodle drag, React state (`HoverTarget` in `src/portHot.ts`) swaps classes:
+During a noodle drag, React state (`HoverTarget` in `src/lib/portHot.ts`) swaps classes:
 
 | Class | When | Look |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ During a noodle drag, React state (`HoverTarget` in `src/portHot.ts`) swaps clas
 | `noodle-port-hot` | This handle is the moving attachment | Handle forced to `opacity: 0` |
 | `clickconnecting` | Arrow tool has armed a click on this handle | 1.45×, `#0f172a`, 4px ring |
 
-The hot dot is redrawn as a separate `div.noodle-port-marker` in a `ViewportPortal`: 14px, `#0f172a`, 4px ring, `pointer-events: none`, `z-index: layers.selection`. That 14px is not the zoom-compensated port size. `DragLanding` in `src/PortMagnet.tsx` draws a `#334155` rectangle around the node box (2px stroke). On a free-edge landing it also draws an 8px screen-size marker (`8 / zoom` flow px).
+The hot dot is redrawn as a separate `div.noodle-port-marker` in a `ViewportPortal`: 14px, `#0f172a`, 4px ring, `pointer-events: none`, `z-index: layers.selection`. That 14px is not the zoom-compensated port size. `DragLanding` in `src/canvas/PortMagnet.tsx` draws a `#334155` rectangle around the node box (2px stroke). On a free-edge landing it also draws an 8px screen-size marker (`8 / zoom` flow px).
 
 The start hit is the visible circle only. `selectedPortPress` keeps the press when the pointer is inside that element’s radius. There is no larger invisible pad for starting a noodle.
 
@@ -115,15 +115,15 @@ A noodle that is already moving uses a larger zone, in screen pixels, converted 
 | `PORT_SNAP_EXIT_PX` | 58 | Leave that snap (`PORT_SCREEN_RADIUS + 10`) |
 | `EDGE_BAND_PX` | 14 | Still “over” the element just outside the outline |
 | `LANDING_BAND_SCREEN_PX` | 28 | In a gap, the nearest side can still catch the end |
-| `DRAG_START` | 5 | Arrow-tool movement before a click becomes a drag (`src/ConnectMode.tsx`) |
+| `DRAG_START` | 5 | Arrow-tool movement before a click becomes a drag (`src/canvas/ConnectMode.tsx`) |
 
 `PORT_SCREEN_RADIUS` does not start a noodle. It only applies once a noodle is already moving.
 
 ## Click, press, and drag
 
-Nothing on a port copies a node or shows a spawned-node ghost. `PlacementGhost` is the toolbar placement preview. Duplicate is Ctrl+D (`DUPLICATE_GAP` = 32 flow px in `src/duplicate.ts`) or Alt-drag of the node. The handle’s `nodrag` class keeps a port drag off that path.
+Nothing on a port copies a node or shows a spawned-node ghost. `PlacementGhost` is the toolbar placement preview. Duplicate is Ctrl+D (`DUPLICATE_GAP` = 32 flow px in `src/lib/duplicate.ts`) or Alt-drag of the node. The handle’s `nodrag` class keeps a port drag off that path.
 
-**Select tool.** `PortMagnet` listens on pointerdown. If the sole selected node’s visible port is under the pointer, it stops the event, pins the source at fraction `0.5`, and `forwardEndDrag` sends a synthetic mousedown to that handle. React Flow then runs a connection. The preview is `NoodleConnectionLine` (`src/connectionLine.tsx`): an elbow path, 2px, default noodle color, with an SVG arrow marker. It is not a node ghost.
+**Select tool.** `PortMagnet` listens on pointerdown. If the sole selected node’s visible port is under the pointer, it stops the event, pins the source at fraction `0.5`, and `forwardEndDrag` sends a synthetic mousedown to that handle. React Flow then runs a connection. The preview is `NoodleConnectionLine` (`src/canvas/connectionLine.tsx`): an elbow path, 2px, default noodle color, with an SVG arrow marker. It is not a node ghost.
 
 Release goes through `onConnect` / `onConnectEnd` in `src/App.tsx`. A new edge is `type: "smoothstep"` so `NoodleEdge` draws it, with `data.shape: "elbow"`, `markerEnd: "arrow"` in edge data, and `markerEnd` on the edge object cleared. Source fraction is always `0.5`. Target fraction is the drop point along that side, or `0.5` when the landing mode is a port. `connectionMode` is `ConnectionMode.Loose`. A click that never leaves the same point is rejected by `sameAttachmentPoint`. Dropping in empty space does not create a node or a noodle.
 

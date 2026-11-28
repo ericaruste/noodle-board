@@ -11,7 +11,7 @@ linear_url: https://linear.app/ericar/issue/ERI-8/uiux-chrome
 
 ## Context
 
-Chrome today: a top-center text toolbar (`bg-white/95 backdrop-blur` in [`src/Toolbar.tsx`](../../src/Toolbar.tsx)), a solid title chip and MiniMap in [`src/App.tsx`](../../src/App.tsx). No alignment guides. The 10/29 notes ask for Google Stitch–style frosted glass, a FigJam/Wodle bottom icon bar, and Miro/Figma smart guides.
+Chrome today: a top-center text toolbar (`bg-white/95 backdrop-blur` in [`src/toolbars/Toolbar.tsx`](../../src/toolbars/Toolbar.tsx)), a solid title chip and MiniMap in [`src/App.tsx`](../../src/App.tsx). No alignment guides. The 10/29 notes ask for Google Stitch–style frosted glass, a FigJam/Wodle bottom icon bar, and Miro/Figma smart guides.
 
 Child tickets: [NB-10](../NB-10-frosted-glass-nav.md), [NB-11](../NB-11-bottom-icon-toolbar.md), [NB-12](../NB-12-smart-alignment-guides.md), [NB-14](../NB-14-fixed-screen-selection-chrome.md), [NB-15](../NB-15-equal-spacing-guides.md), [NB-19](../NB-19-shared-floating-layer.md), [NB-24](../NB-24-noodle-text-on-line.md), [NB-25](../NB-25-cursor-placement.md).
 

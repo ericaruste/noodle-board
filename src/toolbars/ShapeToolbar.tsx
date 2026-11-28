@@ -1,0 +1,403 @@
+import { useEffect, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
+import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar";
+import { swatchFamilyForHex, swatchHex, type SwatchScale } from "../components/ColorSwatch";
+import { ContextualButton } from "../components/ContextualButton";
+import FillOpacitySlider from "../components/FillOpacitySlider";
+import { PillRow } from "../components/PillRow";
+import { FloatingPanel, useAnchoredBox } from "../components/FloatingPanel";
+import { LineWeightMenuIcon } from "../components/noodleIcons";
+import { SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "../lib/shapeData";
+import { ShapeKindIcon } from "../components/shapeKindIcon";
+import ShapeSwatch from "../components/ShapeSwatch";
+import StrokeProperty from "../components/StrokeProperty";
+
+type ShapeToolbarProps = {
+  kind: ShapeKind | null;
+  fill: string | null;
+  stroke: string | null;
+  fillOpacity: number;
+  thickness: ShapeThickness;
+  lineStyle: ShapeLineStyle;
+  fillMixed?: boolean;
+  strokeMixed?: boolean;
+  opacityMixed?: boolean;
+  thicknessMixed?: boolean;
+  lineStyleMixed?: boolean;
+  /** Track color when the fill itself is mixed or missing. */
+  sliderColor?: string;
+  onKind: (kind: ShapeKind) => void;
+  onFill: (value: string | null, history: boolean) => void;
+  onStroke: (value: string | null, history: boolean) => void;
+  onFillOpacity: (value: number, history: boolean) => void;
+  onThickness: (thickness: ShapeThickness) => void;
+  onLineStyle: (lineStyle: ShapeLineStyle) => void;
+  /** The board uses ShapeKindIcon. The icon-fit trial can pass another glyph. */
+  kindIcons?: (kind: ShapeKind) => SlotIcon;
+  /** The board uses the line-weight file. The icon-fit trial can pass another glyph. */
+  lineWeightIcon?: SlotIcon;
+};
+
+type OpenMenu = "kind" | "stroke" | "weight" | "fill";
+
+type SlotIcon = ComponentType<{ className?: string }>;
+
+/** Fill stays on the step-200 grid. Stroke uses step 500, the same step as a noodle. */
+const FILL_SWATCH_SCALE: SwatchScale = 200;
+const STROKE_SWATCH_SCALE: SwatchScale = 500;
+const CUSTOM_DISC_HEX = "EBCFFF";
+const NONE_SLIDER_COLOR = "#C0C4C9";
+
+function shapeColorChoice(color: string | null, scale: SwatchScale): ColorPickerChoice {
+  if (color == null) return { kind: "none" };
+  const family = swatchFamilyForHex(color, scale);
+  return family ? { kind: "swatch", family } : { kind: "custom" };
+}
+
+function shapeCustomHex(color: string | null, choice: ColorPickerChoice) {
+  if (choice.kind !== "custom") return CUSTOM_DISC_HEX;
+  const digits = (color ?? "").replace(/#/g, "").toUpperCase();
+  return /^[0-9A-F]{6}$/.test(digits) ? digits : CUSTOM_DISC_HEX;
+}
+
+function shapeColorValue(choice: ColorPickerChoice, hex: string, scale: SwatchScale) {
+  if (choice.kind === "none" || choice.kind === "mixed") return null;
+  if (choice.kind === "swatch") return `#${swatchHex(choice.family, scale)}`;
+  if (choice.kind === "custom" && /^[0-9A-F]{6}$/.test(hex)) return `#${hex}`;
+  return null;
+}
+
+/**
+ * The color swatch's default paint, at 16px. The swatch is a button and a 24px
+ * disc, and neither fits the contextual button's icon slot.
+ */
+function PaintMark({ className, type, color }: { className?: string; type: "none" | "color"; color?: string }) {
+  return (
+    <span className={`relative inline-flex shrink-0 items-center justify-center ${className ?? ""}`}>
+      <span className="pointer-events-none absolute left-1/2 top-1/2 size-brand-scale-24 origin-center -translate-x-1/2 -translate-y-1/2 scale-[0.6667]">
+        {type === "none" ? (
+          <span className="absolute inset-0 rounded-full bg-brand-foundation-white">
+            <span className="absolute left-1/2 top-1/2 h-brand-scale-2 w-brand-scale-20 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-mapped-icon-disabled" />
+          </span>
+        ) : (
+          <span className="absolute inset-0 rounded-full" style={{ background: color }} />
+        )}
+        <span className="pointer-events-none absolute inset-0 rounded-full [box-shadow:inset_0_0_0_var(--alias-border-width-xsm)_var(--mapped-border-control)]" />
+      </span>
+    </span>
+  );
+}
+
+function kindIcon(kind: ShapeKind): SlotIcon {
+  return function KindIcon({ className }: { className?: string }) {
+    return <ShapeKindIcon kind={kind} className={className} />;
+  };
+}
+
+export default function ShapeToolbar({
+  kind,
+  fill,
+  stroke,
+  fillOpacity,
+  thickness,
+  lineStyle,
+  fillMixed = false,
+  strokeMixed = false,
+  thicknessMixed = false,
+  lineStyleMixed = false,
+  sliderColor,
+  onKind,
+  onFill,
+  onStroke,
+  onFillOpacity,
+  onThickness,
+  onLineStyle,
+  kindIcons,
+  lineWeightIcon = LineWeightMenuIcon,
+}: ShapeToolbarProps) {
+  const [menu, setMenu] = useState<OpenMenu | null>(null);
+  const opacityDrag = useRef(false);
+  const opacityGesture = useRef(false);
+
+  useEffect(() => {
+    if (!menu) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-shape-colors]")) return;
+      setMenu(null);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setMenu(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menu]);
+
+  const toggle = (next: OpenMenu) => {
+    setMenu((current) => (current === next ? null : next));
+  };
+
+  function FillIcon({ className }: { className?: string }) {
+    if (fillMixed || fill == null) return <PaintMark className={className} type={fillMixed ? "color" : "none"} />;
+    return <PaintMark className={className} type="color" color={fill} />;
+  }
+
+  function StrokeIcon({ className }: { className?: string }) {
+    if (strokeMixed || stroke == null) return <PaintMark className={className} type={strokeMixed ? "color" : "none"} />;
+    return <PaintMark className={className} type="color" color={stroke} />;
+  }
+
+  const track = sliderColor ?? fill ?? NONE_SLIDER_COLOR;
+
+  return (
+    <div
+      data-shape-colors=""
+      className="nodrag nopan nowheel flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      onPointerDown={(event) => event.stopPropagation()}
+      onMouseDown={(event) => {
+        const target = event.target;
+        if (target instanceof Element && target.closest("[data-fill-opacity], input, textarea")) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onClick={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => event.stopPropagation()}
+    >
+      <PillRow className="flex items-center gap-brand-scale-4">
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
+        <MenuButton
+          label={kind ? `Shape, ${SHAPE_LABELS[kind]}` : "Shape, mixed"}
+          icon={(kindIcons ?? kindIcon)(kind ?? "diamond")}
+          open={menu === "kind"}
+          onToggle={() => toggle("kind")}
+        >
+          <ShapeSwatch
+            kind={kind}
+            icons={kindIcons}
+            onKind={(option) => {
+              setMenu(null);
+              onKind(option);
+            }}
+          />
+        </MenuButton>
+      </div>
+      <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
+        <MenuButton
+          label="Stroke"
+          text="Stroke"
+          icon={StrokeIcon}
+          open={menu === "stroke"}
+          onToggle={() => toggle("stroke")}
+        >
+          <ShapeColorMenu color={stroke} mixed={strokeMixed} scale={STROKE_SWATCH_SCALE} onColor={onStroke} />
+        </MenuButton>
+        <MenuButton
+          label="Line weight and line type"
+          icon={lineWeightIcon}
+          open={menu === "weight"}
+          onToggle={() => toggle("weight")}
+        >
+          <StrokeProperty
+            thickness={thickness}
+            lineStyle={lineStyle}
+            thicknessMixed={thicknessMixed}
+            lineStyleMixed={lineStyleMixed}
+            onThickness={onThickness}
+            onLineStyle={onLineStyle}
+          />
+        </MenuButton>
+      </div>
+      <div className="flex items-center gap-brand-scale-8">
+        <MenuButton label="Fill" text="Fill" icon={FillIcon} open={menu === "fill"} onToggle={() => toggle("fill")}>
+          <ShapeColorMenu color={fill} mixed={fillMixed} scale={FILL_SWATCH_SCALE} onColor={onFill} />
+        </MenuButton>
+        <div
+          className="flex items-center"
+          onPointerDownCapture={() => {
+            opacityDrag.current = true;
+            opacityGesture.current = false;
+          }}
+          onPointerUp={() => {
+            opacityDrag.current = false;
+            opacityGesture.current = false;
+          }}
+          onPointerCancel={() => {
+            opacityDrag.current = false;
+            opacityGesture.current = false;
+          }}
+        >
+          <FillOpacitySlider
+            size="sm"
+            value={fillOpacity}
+            color={track}
+            onValueChange={(value) => {
+              const history = !opacityDrag.current || !opacityGesture.current;
+              if (opacityDrag.current) opacityGesture.current = true;
+              onFillOpacity(value, history);
+            }}
+          />
+        </div>
+      </div>
+      </PillRow>
+    </div>
+  );
+}
+
+function ShapeColorMenu({
+  color,
+  mixed,
+  scale,
+  onColor,
+}: {
+  color: string | null;
+  mixed: boolean;
+  scale: SwatchScale;
+  onColor: (value: string | null, history: boolean) => void;
+}) {
+  const initial = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
+  const [choice, setChoice] = useState<ColorPickerChoice>(initial);
+  const [hex, setHex] = useState(() => shapeCustomHex(color, initial));
+  const written = useRef(color);
+  const mixedRef = useRef(mixed);
+  const applied = useRef<string | null>(null);
+  const gesture = useRef(false);
+  const pending = useRef<{ choice: ColorPickerChoice; hex: string } | null>(null);
+  const scheduled = useRef(false);
+  const hexRef = useRef(hex);
+  const onColorRef = useRef(onColor);
+  onColorRef.current = onColor;
+
+  if (color !== written.current || mixed !== mixedRef.current) {
+    const fromUs = applied.current === color;
+    written.current = color;
+    mixedRef.current = mixed;
+    applied.current = null;
+    if (!fromUs) {
+      const nextChoice = mixed ? ({ kind: "mixed" } as const) : shapeColorChoice(color, scale);
+      const nextHex = shapeCustomHex(color, nextChoice);
+      setChoice(nextChoice);
+      setHex(nextHex);
+      hexRef.current = nextHex;
+    }
+  }
+
+  function flush() {
+    scheduled.current = false;
+    const next = pending.current;
+    pending.current = null;
+    if (!next || next.choice.kind === "mixed") return;
+    const value = shapeColorValue(next.choice, next.hex, scale);
+    if (next.choice.kind !== "none" && value == null) return;
+    const recordHistory = !gesture.current;
+    gesture.current = true;
+    applied.current = value;
+    written.current = value;
+    onColorRef.current(value, recordHistory);
+  }
+
+  function schedule(next: { choice: ColorPickerChoice; hex: string }) {
+    setChoice(next.choice);
+    setHex(next.hex);
+    hexRef.current = next.hex;
+    pending.current = next;
+    if (scheduled.current) return;
+    scheduled.current = true;
+    queueMicrotask(flush);
+  }
+
+  return (
+    <div
+      data-shape-colors=""
+      onMouseDownCapture={() => {
+        gesture.current = false;
+      }}
+    >
+      <ColorPickerToolbar
+        scale={scale}
+        leading="none"
+        choice={choice}
+        customHex={hex}
+        onChoiceChange={(next) => schedule({ choice: next, hex: hexRef.current })}
+        onCustomHexChange={(nextHex) => {
+          hexRef.current = nextHex;
+          schedule({ choice: { kind: "custom" }, hex: nextHex });
+        }}
+      />
+    </div>
+  );
+}
+
+function MenuButton({
+  label,
+  text,
+  icon,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  text?: string;
+  icon: SlotIcon;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  return (
+    <div className="relative">
+      <ContextualButton
+        ref={buttonRef}
+        label={text}
+        ariaLabel={label}
+        title={label}
+        ariaExpanded={open}
+        ariaHasPopup="menu"
+        onClick={onToggle}
+        showLeftIcon={false}
+        showLabel={text != null}
+        showRightIcon
+        showDropdownIcon
+        icon={icon}
+      />
+      <AnchoredMenu open={open} anchorRef={buttonRef} label={label}>
+        {children}
+      </AnchoredMenu>
+    </div>
+  );
+}
+
+function AnchoredMenu({
+  open,
+  anchorRef,
+  label,
+  children,
+}: {
+  open: boolean;
+  anchorRef: RefObject<HTMLButtonElement | null>;
+  label: string;
+  children: ReactNode;
+}) {
+  const { menuRef, box } = useAnchoredBox(open, anchorRef, "start");
+  if (!open) return null;
+  return (
+    <FloatingPanel
+      layer="dropdown"
+      panelRef={menuRef}
+      ariaLabel={label}
+      data-shape-colors=""
+      style={{
+        position: "absolute",
+        top: box?.top ?? 0,
+        left: box?.left ?? 0,
+        visibility: box ? "visible" : "hidden",
+      }}
+    >
+      {children}
+    </FloatingPanel>
+  );
+}

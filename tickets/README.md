@@ -11,9 +11,9 @@ Vite + React + Tailwind on `@xyflow/react` v12. Toolbar actions: **Add Sticky No
 | Area | File |
 | --- | --- |
 | Board state, save, delete, undo | [`src/App.tsx`](../src/App.tsx) |
-| Top-center text toolbar | [`src/Toolbar.tsx`](../src/Toolbar.tsx) |
-| Sticky note + resizer | [`src/StickyNode.tsx`](../src/StickyNode.tsx) |
-| Image node + resizer | [`src/ImageNode.tsx`](../src/ImageNode.tsx) |
+| Top-center text toolbar | [`src/toolbars/Toolbar.tsx`](../src/toolbars/Toolbar.tsx) |
+| Sticky note + resizer | [`src/canvas/StickyNode.tsx`](../src/canvas/StickyNode.tsx) |
+| Image node + resizer | [`src/canvas/ImageNode.tsx`](../src/canvas/ImageNode.tsx) |
 
 ## How to pick and build
 

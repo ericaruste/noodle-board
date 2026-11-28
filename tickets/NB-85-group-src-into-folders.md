@@ -1,7 +1,7 @@
 ---
 id: NB-85
 title: Group src into folders by role
-status: Todo
+status: Done
 priority: 3
 labels: [Feature]
 parent: NB-E6
@@ -26,12 +26,12 @@ A flat folder makes a file hard to find and hides which files are building block
 
 ## Acceptance criteria
 
-- [ ] `src/components/`, `src/toolbars/`, `src/canvas/`, `src/hooks/`, and `src/lib/` hold the files in the map below
-- [ ] `App.tsx`, `main.tsx`, `index.css`, `vite-env.d.ts`, `svg-raw.d.ts`, `assets/`, and `styles/` stay where they are
-- [ ] Files move with `git mv`, so their history follows them. No file changes beyond its import paths
-- [ ] `npx tsc -b` shows no new errors, and `npm run build` passes
-- [ ] The board and every trial page look and behave the same as before
-- [ ] `docs/`, `.cursor/rules/`, `tickets/_template.md`, the epics, and `tickets/README.md` point at the new paths. Older ticket files keep the paths they had
+- [x] `src/components/`, `src/toolbars/`, `src/canvas/`, `src/hooks/`, and `src/lib/` hold the files in the map below
+- [x] `App.tsx`, `main.tsx`, `index.css`, `vite-env.d.ts`, `svg-raw.d.ts`, `assets/`, and `styles/` stay where they are
+- [x] Files move with `git mv`, so their history follows them. No file changes beyond its import paths
+- [x] `npx tsc -b` shows no new errors, and `npx vite build` bundles. `npm run build` still stops at the three type errors that were already on `phase-2`
+- [x] The board and every trial page look and behave the same as before
+- [x] `docs/`, `.cursor/rules/`, `tickets/_template.md`, the epics, and `tickets/README.md` point at the new paths. Older ticket files keep the paths they had
 
 ## Technical notes
 
@@ -43,7 +43,7 @@ A flat folder makes a file hard to find and hides which files are building block
 | `hooks/` | reusable behavior | `useSlidingPill` |
 | `lib/` | logic and data with no visuals | `alignSnap`, `attachment`, `drawnNoodle`, `duplicate`, `editorZoom`, `groupScale`, `layers`, `marqueeGeometry`, `noodleData`, `noodleEnds`, `noodleFile`, `noodleLabel`, `noodleRoute`, `placement`, `portHot`, `recents`, `resizeMath`, `selectionChromeLayout`, `selectionMove`, `selectionScope`, `shapeData`, `shiftAspect`, `textBody`, `textDom`, `textEdit`, `textEditSelection` |
 
-A file added after this ticket goes in the matching folder. `src/layers.ts` becomes `src/lib/layers.ts`, so the FloatingPanel rule and the ticket template name the new path.
+A file added after this ticket goes in the matching folder. `.cursor/rules/src-folders.mdc` says so whenever a file in `src/` is open. `src/layers.ts` becomes `src/lib/layers.ts`, so the FloatingPanel rule and the ticket template name the new path.
 
 Start after NB-84 is on `phase-2`, then move everything in one pass so no other branch is open against the old paths. Asset and CSS imports (`./assets/...`, `./styles/...`, `?raw` SVGs) gain a `../`. `scripts/build-tokens.js` writes to `src/styles/` and `scripts/lint-tokens.js` scans `src/**/*.css`, so neither changes.
 

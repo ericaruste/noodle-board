@@ -25,22 +25,22 @@ import {
   type OnNodesChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import AlignmentGuides from "./AlignmentGuides";
-import GroupSelection, { applyGroupStyle, GROUP_STYLE_EVENT, type GroupStyleDetail } from "./GroupSelection";
-import { GROUP_GEOMETRY_EVENT, type GroupGeometryDetail } from "./groupScale";
-import Marquee from "./Marquee";
+import AlignmentGuides from "./canvas/AlignmentGuides";
+import GroupSelection, { applyGroupStyle, GROUP_STYLE_EVENT, type GroupStyleDetail } from "./canvas/GroupSelection";
+import { GROUP_GEOMETRY_EVENT, type GroupGeometryDetail } from "./lib/groupScale";
+import Marquee from "./canvas/Marquee";
 import {
   alignNodeChanges,
   sameOverlay,
   type DragAxisLock,
   type FlowBox,
   type GuideOverlay,
-} from "./alignSnap";
-import { bindBoardZoom } from "./editorZoom";
-import { cancelTextEdit, clearRetainedSelection, consumeRetainedSelection, retainSelectionAfterEdit } from "./textEditSelection";
-import { FloatingLayer } from "./FloatingPanel";
-import { layers } from "./layers";
-import PlacementGhost from "./PlacementGhost";
+} from "./lib/alignSnap";
+import { bindBoardZoom } from "./lib/editorZoom";
+import { cancelTextEdit, clearRetainedSelection, consumeRetainedSelection, retainSelectionAfterEdit } from "./lib/textEditSelection";
+import { FloatingLayer } from "./components/FloatingPanel";
+import { layers } from "./lib/layers";
+import PlacementGhost from "./canvas/PlacementGhost";
 import {
   isCanvasPlacementTarget,
   placementSize,
@@ -48,10 +48,10 @@ import {
   TEXT_PLACE_HEIGHT,
   TEXT_PLACE_WIDTH,
   type Placement,
-} from "./placement";
-import { armTextEdit } from "./textEdit";
-import { ProjectManagementToolbar } from "./ProjectManagementToolbar";
-import Toolbar, { type BoardTool } from "./Toolbar";
+} from "./lib/placement";
+import { armTextEdit } from "./lib/textEdit";
+import { ProjectManagementToolbar } from "./toolbars/ProjectManagementToolbar";
+import Toolbar, { type BoardTool } from "./toolbars/Toolbar";
 import {
   ensureReadWritePermission,
   isMissingFileError,
@@ -63,27 +63,27 @@ import {
   visibleOpenError,
   writeBoundNoodleFile,
   type NoodleViewport,
-} from "./noodleFile";
-import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./recents";
-import StickyNode, { NEW_STICKY_COLOR, NEW_STICKY_PAINT } from "./StickyNode";
-import ShapeNode from "./ShapeNode";
+} from "./lib/noodleFile";
+import { listRecents, markRecentUnavailable, rememberRecent, type RecentProject } from "./lib/recents";
+import StickyNode, { NEW_STICKY_COLOR, NEW_STICKY_PAINT } from "./canvas/StickyNode";
+import ShapeNode from "./canvas/ShapeNode";
 import {
   DEFAULT_SHAPE_FILL,
   DEFAULT_SHAPE_STROKE,
   type ShapeKind,
-} from "./shapeData";
-import TextNode from "./TextNode";
-import { emptyBody } from "./textBody";
-import ImageNode from "./ImageNode";
-import EndpointNode from "./EndpointNode";
-import NoodleEdge from "./NoodleEdge";
-import ConnectMode from "./ConnectMode";
-import NoodleConnectionLine from "./connectionLine";
-import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./PortMagnet";
-import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./attachment";
-import { DEFAULT_NOODLE_COLOR, NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./noodleData";
-import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./noodleLabel";
-import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setArrowTool, setConnectionOrigin, setHotPort, type HoverTarget } from "./portHot";
+} from "./lib/shapeData";
+import TextNode from "./canvas/TextNode";
+import { emptyBody } from "./lib/textBody";
+import ImageNode from "./canvas/ImageNode";
+import EndpointNode from "./canvas/EndpointNode";
+import NoodleEdge from "./canvas/NoodleEdge";
+import ConnectMode from "./canvas/ConnectMode";
+import NoodleConnectionLine from "./canvas/connectionLine";
+import PortMagnet, { dragKind, hoverForRelease, nearestHandleOnNode, nearestPort, pointerToFlow, portAtClient, portFromHover } from "./canvas/PortMagnet";
+import { isSide, reflowAttachments, sameAttachmentPoint, sameFraction } from "./lib/attachment";
+import { DEFAULT_NOODLE_COLOR, NOODLE_EDGE_EVENT, applyNoodleData, defaultNoodleData, noodleStrokeStyle, readNoodle } from "./lib/noodleData";
+import { closeNoodleLabel, noodleLabelEditingId, openNoodleLabel, releaseNoodleLabel } from "./lib/noodleLabel";
+import { armClickSwallow, clearConnectionOrigin, clearReleaseLanding, getHotPort, holdSelection, selectionHeld, setArrowTool, setConnectionOrigin, setHotPort, type HoverTarget } from "./lib/portHot";
 import {
   END_RADIUS,
   ENDPOINT_SIZE,
@@ -99,9 +99,9 @@ import {
   pruneEndpoints,
   releaseEndDrag,
   sameEnds,
-} from "./noodleEnds";
-import { carryDraggedNoodles } from "./selectionMove";
-import { selectedObjectCount } from "./selectionScope";
+} from "./lib/noodleEnds";
+import { carryDraggedNoodles } from "./lib/selectionMove";
+import { selectedObjectCount } from "./lib/selectionScope";
 import {
   NODE_CLIPBOARD_MARKER,
   appendMissing,
@@ -112,7 +112,7 @@ import {
   takeClipboard,
   type NodeClipboard,
   type RepeatMemory,
-} from "./duplicate";
+} from "./lib/duplicate";
 
 const STORAGE_KEY = "noodle-board";
 const MAX_HISTORY = 50;

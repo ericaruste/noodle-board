@@ -43,7 +43,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. The menu item left icon is `chevron-right` at 16px. Its default color is `mapped.icon.action-light`. Hover, selected, and disabled use the icon color that matches the label in that state.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
-- Contextual toolbars and their popovers share one sliding pill row, `src/PillRow.tsx`. The pill fill on those rows is `mapped.surface.action-hover`. The main toolbar uses the same row and keeps `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. The contextual button itself has no pill. A selected button keeps `mapped.surface.action-selected`. A font size field that is being edited is not a target.
+- Contextual toolbars and their popovers share one sliding pill row, `src/components/PillRow.tsx`. The pill fill on those rows is `mapped.surface.action-hover`. The main toolbar uses the same row and keeps `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. The contextual button itself has no pill. A selected button keeps `mapped.surface.action-selected`. A font size field that is being edited is not a target.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
 - Each font size row is `brand.scale.36` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
@@ -53,17 +53,17 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - The noodle toolbar’s color control is a 16px disc, `brand.scale.16`, the contextual button’s icon slot. The button is 32px with 8px padding, so the 24px color swatch does not fit in that slot. The open control is the color picker toolbar at step 500. The leading disc is `alias.swatch.neutral.500` (`#303132`). A new noodle, and the connect preview, start on that color. A saved hex that is not a step-500 swatch stays on the stroke and selects custom.
 - A transparent sticky is the neutral 200 swatch. The fill is `alias.swatch.neutral.200`, `alias.warm-neutral.100` (`#FDFBF7`) at 60%, and the blur is the existing 24px frost. Blur is not a token. The sticky toolbar’s leading disc is that swatch. The color picker trial keeps none. A new note starts on `alias.swatch.purple.200` (`#EBCFFF`). A saved none stays clear, with no frost. Another swatch or a custom color stays as stored. `data.color` stays a legacy name so older files still open.
 - The fill opacity slider is the track, the thumb, and a percent label. Dragging the thumb sets 0 to 100. A double click on the percent edits the number, the same gesture as the font size button. Enter commits. Escape restores. The percent slot is the width of `100%` in tabular figures, and the number is left-aligned in that slot, so `0%` sits next to the slider and the row does not change width. The gap before the percent is 16px, `brand.scale.16`. The thumb has two sizes. `sm` is 12px, `brand.scale.12`, and it is the default. `md` is 16px, `brand.scale.16`. The track has two sizes. `sm` is 8px, `brand.scale.8`. `md` is 12px, `brand.scale.12`. The slider default is the `sm` pair. At 100% the 12px thumb hangs 6px past the track, so the 16px gap still leaves room before the number. The sheet label over the pressed thumb says focus. The variant property is pressed. The track stays centered on the thumb.
-- The line weight and line type row is one component, `src/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
+- The line weight and line type row is one component, `src/components/StrokeProperty.tsx`. A noodle toolbar and a shape toolbar both open it. Each toolbar still owns the open state and writes its own thickness and line style. The row is thin, medium, and thick, a divider, then solid and dashed. A mixed value leaves that group unselected. Choosing a weight or a line style leaves the menu open. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 - `mapped.surface.action-strong-hover` is `alias.primary.50` (`#E5F0F9`) at 100% in this export. The main button and the main toolbar use that fill on hover. Default type hover text is `mapped.text.action-hover` (`#1E3B58`) and the icons are `mapped.icon.action-hover` (`#1E3B58`). Selected keeps the light foreground.
 - Success is `brand.green`, aliased as `alias.success`. `mapped.icon.success` is `alias.success.500` (`#16A34A`). `mapped.icon.success-light` is `alias.success.300` (`#72C68F`). The save indicator rests on success-light and breathes to success. The ring uses success.
 - `mapped.icon.action-light` is `alias.cool-neutral.700` (`#909397`). No component paints it yet.
-- The shape kind row is one component, `src/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
+- The shape kind row is one component, `src/components/ShapeSwatch.tsx`. The shape toolbar and the bottom Shapes tool both open it. Each caller owns the open state. On a selected shape, choosing a kind changes that shape and closes the menu. On the bottom tool, choosing a kind places it and closes the menu. The row is rectangle, ellipse, rounded rectangle, triangle, and diamond. A mixed kind leaves every button unselected. The row has no divider.
 - The shape toolbar’s fill opens the color picker at step 200, and its stroke opens the color picker at step 500. Both offer none. A new shape’s fill is `alias.swatch.purple.200` (`#EBCFFF`) and its stroke is `alias.swatch.purple.500` (`#BF66FF`). A shape already saved keeps its own fill and stroke. The disc on the button is the color swatch’s default paint, type none or color, drawn at 16px because that is the contextual button’s icon slot. A shape saved before the slider, and a new shape, stays at 100% opacity. The specimen on the frame reads 50%. Medium weight is the 2px stroke a shape already paints. Dashed uses the same `8 6` dash as a noodle.
 - Color swatches and the custom swatch are separate choices. A color swatch uses `alias.swatch`. Fill and sticky notes use step 200. Stroke and noodles use step 500. The custom swatch can be selected on its own. Its color comes from the color picker (react-colorful), not from `alias.swatch`. Choosing a palette swatch does not change the custom color. Opening the custom swatch while a palette color is selected copies that palette into the picker, so the fill stays the color already chosen and the picker shows it. The custom disc stays on the default color `EBCFFF` until custom is the selection. A drag, a hex edit, or the pipette is what changes the fill after that. The toolbar keeps one selection at a time. The extended frame paints a ring on none and on custom together. Custom is the selection while the picker is open. The picker is its own panel, `brand.scale.4` (4px) from the toolbar’s outer edge, top aligned. It sits on the right when that side fits, and on the left when the toolbar is against the right edge of the board. It is out of the toolbar’s box, so opening it does not move the centered bar. Both panels use 8px padding, `brand.scale.8`.
 
 ## Canvas text
 
-The tokens are `alias.font-family.placeholder`, `responsive.desktop.placeholder`, and `mapped.text.placeholder`. Code: `src/RichText.tsx` (`canvasDefault` on a sticky and a shape), `src/PlacementGhost.tsx` for the sticky ghost, and `.noodle-edge-label` in `src/index.css`. A text object does not use this style.
+The tokens are `alias.font-family.placeholder`, `responsive.desktop.placeholder`, and `mapped.text.placeholder`. Code: `src/canvas/RichText.tsx` (`canvasDefault` on a sticky and a shape), `src/canvas/PlacementGhost.tsx` for the sticky ghost, and `.noodle-edge-label` in `src/index.css`. A text object does not use this style.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -79,7 +79,7 @@ The empty hint and the typed default share the font and the size. A run that set
 
 ## Contextual button
 
-Ticket NB-38, NB-79. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`. NB-79 leaves this button still. The sliding pill belongs to the row.
+Ticket NB-38, NB-79. Code `src/components/ContextualButton.tsx`. The trial page is `?trial=contextual-button`. NB-79 leaves this button still. The sliding pill belongs to the row.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -129,7 +129,7 @@ This button is not a toolbar. A toolbar that places it is its own component.
 
 ## Sliding pill row
 
-Ticket NB-79. Code `src/PillRow.tsx`. The hook is `src/useSlidingPill.ts`. The trial page is `?trial=pill-row`.
+Ticket NB-79. Code `src/components/PillRow.tsx`. The hook is `src/hooks/useSlidingPill.ts`. The trial page is `?trial=pill-row`.
 
 One row wraps a line of controls and paints one pill as its first child. The pill adds no z-index. DOM order keeps it behind the controls. `.pill-row` clears the hover fill on a resting button and on a resting group, so the pill is the hover. A control with `aria-pressed="true"`, or with the selected fill, keeps that fill. The text toolbar, the shape toolbar, and the noodle toolbar each put one row around the whole bar, so the pill can cross a divider. The text align popover, the shape swatch, the noodle type menu, each arrow menu, and the line weight and line type menu each have their own row. A menu is portaled, so leaving the toolbar fades that bar's pill and the menu shows its own. The main toolbar uses this row too. Its fill is not the default below.
 
@@ -154,7 +154,7 @@ Painted: the pill while a control is under the pointer or focused. Not painted: 
 
 ## Text toolbar
 
-Ticket NB-39, NB-79. Code `src/TextToolbar.tsx`. The pill row is `src/PillRow.tsx`.
+Ticket NB-39, NB-79. Code `src/toolbars/TextToolbar.tsx`. The pill row is `src/components/PillRow.tsx`.
 
 Every control is a contextual button with the unused slots turned off.
 
@@ -208,7 +208,7 @@ The typeface control opens the typeface menu. The size control opens the font si
 
 ## Text align popover
 
-Ticket NB-40, NB-79. Code `AlignPopover` in `src/TextToolbar.tsx`. The pill row is `src/PillRow.tsx`.
+Ticket NB-40, NB-79. Code `AlignPopover` in `src/toolbars/TextToolbar.tsx`. The pill row is `src/components/PillRow.tsx`.
 
 The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four contextual buttons, icon only: left, center, right, and justify. The current alignment is the selected button. The popover opens above a selected element and above an element while it is dragged. This frame has no divider.
 
@@ -244,7 +244,7 @@ Not painted on this frame: hover and disabled. The button has no focus state. Th
 
 ## Menu item
 
-Ticket NB-41, NB-75, NB-76, NB-77. Code `src/MenuItem.tsx`. The trial page is `?trial=menu-item`. NB-76 clips a label when `truncateLabel` is on. NB-77 nudges a default row on hover.
+Ticket NB-41, NB-75, NB-76, NB-77. Code `src/components/MenuItem.tsx`. The trial page is `?trial=menu-item`. NB-76 clips a label when `truncateLabel` is on. NB-77 nudges a default row on hover.
 
 A single row for a dropdown. A left icon and the label sit on the left. The caption and the submenu chevron sit on the right. In a wide row the space falls between that pair and the caption group.
 
@@ -313,7 +313,7 @@ Not painted: focus.
 
 ## Font style menu
 
-Ticket NB-42. Code `src/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
+Ticket NB-42. Code `src/toolbars/TextToolbar.tsx`, opened from the weight control. The frame is 104 by 120.
 
 Four small menu items, left icon, caption, and chevron off. The order is Regular, Bold, Italic, Bold Italic. The labels stay in Geist. They are not drawn in bold or italic.
 
@@ -336,7 +336,7 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 ## Typeface menu
 
-Ticket NB-43. Code `TypefaceMenu` in `src/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
+Ticket NB-43. Code `TypefaceMenu` in `src/toolbars/TextToolbar.tsx`, opened from the typeface control. The frame is 128 by 148.
 
 Five small menu items, left icon, caption, and chevron off. The order is Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label uses its `alias.typeface` token. The menu item body font stays Geist on every other menu.
 
@@ -378,7 +378,7 @@ The layer name above the frame was cut off. It starts with `toolbar/contextual`.
 
 ## Font size menu
 
-Ticket NB-44. Code `FontSizeField` in `src/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
+Ticket NB-44. Code `FontSizeField` in `src/toolbars/TextToolbar.tsx`, opened from the size control. The frame is 44 by 344 hug.
 
 Twelve small menu items, left icon, caption, and chevron off. The order is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. Each row is a fixed `brand.scale.36` (36px) so the column does not change width with the digits. The labels stay in Geist.
 
@@ -417,7 +417,7 @@ Not painted on this frame: hover and disabled. Those states belong to the menu i
 
 ## Icon button
 
-Ticket NB-46. Code `src/IconButton.tsx`. The trial page is `?trial=icon-button`.
+Ticket NB-46. Code `src/components/IconButton.tsx`. The trial page is `?trial=icon-button`.
 
 A square button whose only content is an icon. It is not a contextual button with the label turned off. Large is 32px, medium is 28px, and small is 20px. The default type has four states. The destructive type has three.
 
@@ -465,7 +465,7 @@ This button is not a toolbar. A toolbar that places it is its own component.
 
 ## Hex input
 
-Ticket NB-47. Code `src/HexInput.tsx`. The trial page is `?trial=hex-input`.
+Ticket NB-47. Code `src/components/HexInput.tsx`. The trial page is `?trial=hex-input`.
 
 A hex field for the color toolbar that comes later. It is not that toolbar. Two labels sit in the box. `#` is constant. The hex code is the value the user types or pastes.
 
@@ -508,7 +508,7 @@ This field is not a toolbar. The color toolbar that places it is its own compone
 
 ## Title input
 
-Ticket NB-66, sizes NB-81. Code `src/TitleInput.tsx`. The trial page is `?trial=title-input`.
+Ticket NB-66, sizes NB-81. Code `src/components/TitleInput.tsx`. The trial page is `?trial=title-input`.
 
 A project title field. It is not the file bar. The width follows the title and stops at 320px. A longer title truncates. Hovering or focusing that field shows the full title in the same hover label the main toolbar uses. It sits 8px above the field.
 
@@ -562,7 +562,7 @@ This field is not a toolbar or a popover. The file bar that places it is a later
 
 ## Color swatch
 
-Ticket NB-48. Code `src/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
+Ticket NB-48. Code `src/components/ColorSwatch.tsx`. The trial page is `?trial=color-swatch`.
 
 A round color choice for the fill and stroke toolbar, and for the color picker that comes later. It is not that toolbar. The disc is 24px. The action ring sits outside it.
 
@@ -610,7 +610,7 @@ This swatch is not a toolbar. The color picker toolbar that places it is its own
 
 ## Color picker toolbar
 
-Ticket NB-49. Code `src/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
+Ticket NB-49. Code `src/toolbars/ColorPickerToolbar.tsx`. The trial page is `?trial=color-picker`.
 
 The toolbar that sits below a selected sticky note, and the menu the noodle color control opens. Shape fill and stroke still use the Phase 1 bars. Two frames are painted. Collapsed is the swatch grid, the hex field, and the copy and pipette buttons. Extended adds the picker. The picker is its own panel beside the toolbar. It opens from the custom swatch and does not move the toolbar. It sits on the right when that side fits, and on the left when the toolbar is against the right edge.
 
@@ -673,7 +673,7 @@ The toolbar adds no z-index. Selection chrome already uses FloatingPanel. This t
 
 ## Transparent sticky
 
-Ticket NB-51. Code `src/StickyNode.tsx`, with the sticky toolbar in `StickyColorToolbar` passing `leading="neutral"` and `scale={200}` to `src/ColorPickerToolbar.tsx`. A new note is placed from `beginSticky` in `src/App.tsx`.
+Ticket NB-51. Code `src/canvas/StickyNode.tsx`, with the sticky toolbar in `StickyColorToolbar` passing `leading="neutral"` and `scale={200}` to `src/toolbars/ColorPickerToolbar.tsx`. A new note is placed from `beginSticky` in `src/App.tsx`.
 
 The first disc on a sticky is `alias.swatch.neutral.200`. Choosing it stores `{ "kind": "swatch", "family": "neutral" }`. The note paints that color-mix and the same 24px frost the toolbars already use. A saved `{ "kind": "none" }` stays clear, with no frost, and no disc is selected. Another swatch or a custom color stays as stored. A new note stores `{ "kind": "swatch", "family": "purple" }`, so the purple disc is selected. `data.color` stays `yellow`, `pink`, `blue`, or `green` so older files still open. The new note’s legacy name is `yellow`. The paint is what shows.
 
@@ -697,7 +697,7 @@ The toolbar and the picker are the color picker toolbar inside selection chrome.
 
 ## Noodle toolbar
 
-Ticket NB-50, NB-79. Code `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The bar slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar.
+Ticket NB-50, NB-79. Code `src/toolbars/NoodleToolbar.tsx`. The pill row is `src/components/PillRow.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The bar slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar.
 
 Every control is a contextual button with the unused slots turned off.
 
@@ -751,7 +751,7 @@ The line-weight control opens the line weight and line type menu. The icon-fit t
 
 ## Line weight and line type menu
 
-Ticket NB-50, NB-60, NB-79. The row is `src/StrokeProperty.tsx`. The pill row is `src/PillRow.tsx`. `src/NoodleToolbar.tsx` opens it and writes the noodle.
+Ticket NB-50, NB-60, NB-79. The row is `src/components/StrokeProperty.tsx`. The pill row is `src/components/PillRow.tsx`. `src/toolbars/NoodleToolbar.tsx` opens it and writes the noodle.
 
 Three weight icons, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. Choosing one leaves the menu open, so the other group can be set too.
 
@@ -787,7 +787,7 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Noodle type menu
 
-Ticket NB-50, NB-79. Code is the shape menu in `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`.
+Ticket NB-50, NB-79. Code is the shape menu in `src/toolbars/NoodleToolbar.tsx`. The pill row is `src/components/PillRow.tsx`.
 
 Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `type-elbow`, and `type-curve`. The current shape is the selected button. Choosing one closes the menu. This frame has no divider.
 
@@ -822,7 +822,7 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Arrow menu
 
-Ticket NB-50, NB-79. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`.
+Ticket NB-50, NB-79. Code is `ArrowMenu` in `src/toolbars/NoodleToolbar.tsx`. The pill row is `src/components/PillRow.tsx`.
 
 Six icon buttons, one for each arrowhead the noodle already has: none, arrow, open, triangle, circle, and diamond. The glyphs are the current arrow icons. The current end is the selected button. Choosing one closes the menu. Start and end open the same menu with their own selection. This frame has no divider.
 
@@ -859,7 +859,7 @@ The toolbar and these menus add no z-index. The bar is already in FloatingPanel 
 
 ## Noodle stroke color
 
-Ticket NB-52. Code is `NoodleColorMenu` in `src/NoodleToolbar.tsx`. It opens `src/ColorPickerToolbar.tsx` with `scale={500}` and `leading="neutral"`. A new noodle comes from `defaultNoodleData` in `src/noodleData.ts`. The connect preview in `src/connectionLine.tsx` and `src/ConnectMode.tsx` uses that same color.
+Ticket NB-52. Code is `NoodleColorMenu` in `src/toolbars/NoodleToolbar.tsx`. It opens `src/toolbars/ColorPickerToolbar.tsx` with `scale={500}` and `leading="neutral"`. A new noodle comes from `defaultNoodleData` in `src/lib/noodleData.ts`. The connect preview in `src/canvas/connectionLine.tsx` and `src/canvas/ConnectMode.tsx` uses that same color.
 
 The color control on the noodle bar stays a contextual button. Its 16px disc paints the stroke. Opening it shows the color picker toolbar, `brand.scale.4` (4px) under the painted pill. The first disc is `alias.swatch.neutral.500`, which is `alias.cool-neutral.900` (`#303132`). None is not offered. The other discs are `alias.swatch` at step 500, then custom. A new noodle stores `#303132`, and the neutral disc is selected. The connect preview uses that hex.
 
@@ -908,7 +908,7 @@ The toolbar and the picker sit in the color menu’s FloatingPanel on the dropdo
 
 ## Thumb
 
-Ticket NB-53. Code `src/SliderThumb.tsx`. The trial page is `?trial=slider-thumb`.
+Ticket NB-53. Code `src/components/SliderThumb.tsx`. The trial page is `?trial=slider-thumb`.
 
 A disc for the fill opacity slider. It is not that slider. The ring sits outside the disc. `sm` is 12px and is the default. `md` is 16px, the disc on the sheet.
 
@@ -945,7 +945,7 @@ This thumb is not a slider. The fill opacity slider that places it is its own co
 
 ## Track
 
-Ticket NB-54. Code `src/SliderTrack.tsx`. The trial page is `?trial=slider-track`.
+Ticket NB-54. Code `src/components/SliderTrack.tsx`. The trial page is `?trial=slider-track`.
 
 A 120px pill. A checker sits under a fade from clear to the swatch color. It is not the slider. `sm` is 8px. `md` is 12px and is the default.
 
@@ -976,7 +976,7 @@ This track is not a slider. The fill opacity slider that places it is its own co
 
 ## Fill opacity slider
 
-Ticket NB-55. Code `src/FillOpacitySlider.tsx`. The trial page is `?trial=fill-opacity`.
+Ticket NB-55. Code `src/components/FillOpacitySlider.tsx`. The trial page is `?trial=fill-opacity`.
 
 The row in the shape toolbar, after the fill control, uses the `sm` track. The specimen is 154 by 16 and reads 50% on the `md` track. Dragging the thumb sets the percent. A double click on the percent edits the number. Enter commits. Escape restores the previous number.
 
@@ -1014,11 +1014,11 @@ Painted: one resting row at 50% in `md`, with the 16px thumb in default. The tri
 
 Not painted: hover, pressed, disabled, and editing. Hover and pressed belong to the thumb. Disabled uses the disabled thumb and `mapped.text.disabled`. Editing is the font size gesture: a double click, then a number.
 
-This slider is not a toolbar. The shape toolbar places it and uses FloatingPanel and the z-index tokens in `src/layers.ts`. The trial does not put a copy on the board.
+This slider is not a toolbar. The shape toolbar places it and uses FloatingPanel and the z-index tokens in `src/lib/layers.ts`. The trial does not put a copy on the board.
 
 ## Shape toolbar
 
-Ticket NB-56, NB-79. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. The pill row is `src/PillRow.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
+Ticket NB-56, NB-79. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/toolbars/ShapeToolbar.tsx`. The pill row is `src/components/PillRow.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
 
 Every control is a contextual button with the unused slots turned off, except the fill opacity slider, which is the slider component.
 
@@ -1068,7 +1068,7 @@ The board passes no icon of its own. The icon-fit trial can pass `kindIcons` and
 | Line weight | left icon off, label off, right icon on, dropdown on | `line-weight-menu` |
 | Fill | left icon off, label on (`Fill`), right icon on, dropdown on | the disc is type color on the specimen |
 
-The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`, drawn by `src/ShapeSwatch.tsx`. The bottom Shapes tool opens the same row. The kinds are rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind closes the menu. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
+The shape-swap popover is `toolbar/contextual/shape/pop-over/shape-swatch`, drawn by `src/components/ShapeSwatch.tsx`. The bottom Shapes tool opens the same row. The kinds are rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind closes the menu. The stroke popover is `toolbar/contextual/shape/pop-over/stroke-property`, drawn by `src/components/StrokeProperty.tsx`. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons.
 
 The open fill menu is the color picker toolbar at step 200, with none. Choosing purple writes `#EBCFFF` and selects the purple disc. The open stroke menu is the same picker at step 500, with none. Choosing purple writes `#BF66FF` and selects the purple disc. A saved hex that is not on that menu’s step selects custom and keeps that paint, including `#bfdbfe` and `#334155`. Clearing fill or stroke clears only that paint. The button disc stays type color for a hex, and type none when that paint is cleared. The note on the frame says the disc is not hover, not selected, and not the custom type.
 
@@ -1082,7 +1082,7 @@ The toolbar and these menus add no z-index. The bar is already in FloatingPanel 
 
 ## Stroke property
 
-Ticket NB-60, NB-79. Code `src/StrokeProperty.tsx`. The pill row is `src/PillRow.tsx`. `src/ShapeToolbar.tsx` and `src/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
+Ticket NB-60, NB-79. Code `src/components/StrokeProperty.tsx`. The pill row is `src/components/PillRow.tsx`. `src/toolbars/ShapeToolbar.tsx` and `src/toolbars/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
 
 Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. A mixed value leaves that group unselected. Choosing one leaves the menu open, so the other group can be set too. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 
@@ -1127,7 +1127,7 @@ The menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a
 
 ## Shape swatch
 
-Ticket NB-61, NB-79. Code `src/ShapeSwatch.tsx`. The pill row is `src/PillRow.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
+Ticket NB-61, NB-79. Code `src/components/ShapeSwatch.tsx`. The pill row is `src/components/PillRow.tsx`. `src/toolbars/ShapeToolbar.tsx` opens it from the shape-swap control. `src/toolbars/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
 
 Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`, from `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Square, circle, and diamond start at 28 by 28. The triangle is 29 by 28 and the rounded rectangle is 31 by 28. Each glyph is cropped to the stroked path plus the Lucide margin, then fitted in the 16px slot, `brand.scale.16`. Wider files stay wider. The stroke follows the button icon color. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
 
@@ -1169,7 +1169,7 @@ Each menu sits `brand.scale.4` (4px) from the control that opened it. On the sha
 
 ## Main button
 
-Ticket NB-63, NB-77. Code `src/MainButton.tsx`. The trial page is `?trial=main-button`. NB-77 leaves this button still. The pill stays on the main toolbar.
+Ticket NB-63, NB-77. Code `src/components/MainButton.tsx`. The trial page is `?trial=main-button`. NB-77 leaves this button still. The pill stays on the main toolbar.
 
 A 40px toolbar button. With only the icon showing, it is 40px by 40px. With the label and both icons, the width follows that content. The default type has four states. The destructive type has three.
 
@@ -1224,7 +1224,7 @@ This button is not a toolbar. The main toolbar places it. See Main toolbar.
 
 ## Main toolbar
 
-Ticket NB-64, NB-77, NB-79. Code `src/Toolbar.tsx`. The shared row is `src/PillRow.tsx`. The pill hook is `src/useSlidingPill.ts`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
+Ticket NB-64, NB-77, NB-79. Code `src/toolbars/Toolbar.tsx`. The shared row is `src/components/PillRow.tsx`. The pill hook is `src/hooks/useSlidingPill.ts`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
 
 Every control is a main button with the label and the right icon turned off, so each one is 40 by 40. The row is select, hand, sticky note, text, image, shapes, noodle, and delete. Delete is the destructive type. The shapes control opens the same shape swatch the shape toolbar uses.
 
@@ -1277,7 +1277,7 @@ Not painted on this frame: hover, selected, and disabled. Those come from the ma
 
 ## Save indicator
 
-Ticket NB-68. Code `src/SaveIndicator.tsx`. The trial page is `?trial=save-indicator`.
+Ticket NB-68. Code `src/components/SaveIndicator.tsx`. The trial page is `?trial=save-indicator`.
 
 A square slot with one disc centered in it. The disc is 8px at every size. The slot does not clip the saving ring.
 
@@ -1314,7 +1314,7 @@ Not painted: hover, disabled, and focus. Error has no animation. The board uses 
 
 ## Logo button
 
-Ticket NB-67, NB-77, sizes NB-82. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`. The timings live in `src/styles/motion.css`.
+Ticket NB-67, NB-77, sizes NB-82. Code `src/components/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`. The timings live in `src/styles/motion.css`.
 
 The brand mark. The button is 40px on `lg` and 32px on `md`. The glyph scales with the button. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square with `motion-hover` and reveal the chopstick.
 
@@ -1355,7 +1355,7 @@ The button is not a toolbar or a popover. It does not use FloatingPanel.
 
 ## Project toolbar
 
-Ticket NB-72, NB-80, sizes NB-83, board size NB-84. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
+Ticket NB-72, NB-80, sizes NB-83, board size NB-84. Code `src/toolbars/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
 
 The upper-left project bar. The row is the logo button, the title input, and the save indicator. `size` passes the same size to all three: `lg` (default) is 40px parts, `md` is 32px parts. The trial shows both. The board places this bar from the project management toolbar at `md`. The table below is `lg`.
 
@@ -1414,7 +1414,7 @@ This trial is not on the canvas, so this preview is not in FloatingPanel. The bo
 
 ## Project menu
 
-Ticket NB-73, NB-75, NB-76, sizes NB-83. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
+Ticket NB-73, NB-75, NB-76, sizes NB-83. Code `src/toolbars/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
 
 `size` sets the width of both panels: `lg` (default) is 220px, `md` is 180px. No spacing token is 180px. The rows are the menu item at `md` (32px) on both sizes, so the heights below hold on both. The trial adds an `md` menu with View all selected.
 
@@ -1524,7 +1524,7 @@ This trial is not on the canvas, so these panels are not in FloatingPanel. The b
 
 ## Project management toolbar
 
-Ticket NB-74, NB-78, sizes NB-83, board size NB-84. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+Ticket NB-74, NB-78, sizes NB-83, board size NB-84. Code `src/toolbars/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
 
 `size` passes down to the project toolbar and the project menu. `lg` (default) is 40px parts and 220px panels. `md` is 32px parts and 180px panels, with the logo press at 13.44px and a 0.8px dip. The trial shows `lg` and then `md`, each with its own menu. The board uses `md`: 32px parts and 180px panels. An unset size stays `lg`.
 

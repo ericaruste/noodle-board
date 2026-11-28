@@ -2,7 +2,7 @@
 
 How board shapes are drawn, and how the label sits inside each one. Code names: `rect` (Rectangle; a square only when width equals height), `ellipse` (Ellipse; a circle only when width equals height), `round-rect`, `triangle`, and `diamond`.
 
-Paint lives in `ShapeGeometry` in `src/ShapeNode.tsx`. The label frame is `shapeTextFrame` in `src/shapeData.ts`. Toolbar icons in `src/shapeKindIcon.tsx` are the files in `src/assets/icons` and are not the board shapes.
+Paint lives in `ShapeGeometry` in `src/canvas/ShapeNode.tsx`. The label frame is `shapeTextFrame` in `src/lib/shapeData.ts`. Toolbar icons in `src/components/shapeKindIcon.tsx` are the files in `src/assets/icons` and are not the board shapes.
 
 ## How each shape is drawn
 
@@ -101,7 +101,7 @@ Hardcoded pixels:
 - Text pad floor: 8
 - Rectangle, diamond, and triangle corner radius: 8
 - Rounded-rectangle corner-radius cap: 56
-- Default stroke: 2; thickness steps 1.25 / 2 / 3.5 in `src/shapeData.ts`
+- Default stroke: 2; thickness steps 1.25 / 2 / 3.5 in `src/lib/shapeData.ts`
 - Stroke inset is half of that thickness, in px
 - Round-rect hit clip radius is that computed px value (`inset(0 round ${radius}px)`)
 - Dashed stroke pattern `"8 6"` in `ShapeNode`

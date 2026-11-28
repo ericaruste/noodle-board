@@ -1,6 +1,6 @@
 # `.noodle.json`
 
-Version 1 project file written by **Save** and **Save As**, and read by **Open**. Types live in [`src/noodleFile.ts`](../src/noodleFile.ts) (`NoodleDocument`, `NoodleSnapshot`, `NOODLE_FILE_VERSION`). `parseNoodleFile` accepts this shape and rejects anything else.
+Version 1 project file written by **Save** and **Save As**, and read by **Open**. Types live in [`src/lib/noodleFile.ts`](../src/lib/noodleFile.ts) (`NoodleDocument`, `NoodleSnapshot`, `NOODLE_FILE_VERSION`). `parseNoodleFile` accepts this shape and rejects anything else.
 
 ## Schema
 
