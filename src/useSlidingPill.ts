@@ -103,10 +103,21 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
     };
 
     const remeasure = () => {
+      const point = pointerRef.current;
+      if (row.matches(":hover") && point) {
+        const under = buttonUnder(row, point.x, point.y);
+        if (!under || under.disabled) {
+          if (visibleRef.current) hide();
+          return;
+        }
+        if (!visibleRef.current || activeRef.current !== under) {
+          show(under);
+          return;
+        }
+      }
       const button = activeRef.current;
-      if (!button || !visibleRef.current || !row.contains(button)) return;
-      if (button.disabled) {
-        hide();
+      if (!button || !visibleRef.current || !row.contains(button) || button.disabled) {
+        if (button?.disabled && visibleRef.current) hide();
         return;
       }
       const box = boxFor(row, button);
