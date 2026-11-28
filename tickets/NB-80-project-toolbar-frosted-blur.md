@@ -1,7 +1,7 @@
 ---
 id: NB-80
 title: Project toolbar frosted blur
-status: Todo
+status: Done
 priority: 3
 labels: [Bug, UX, Toolbar]
 parent: NB-E6
@@ -33,9 +33,9 @@ The project toolbar is the only floating bar on the board with no frost. The dot
 
 ## Acceptance criteria
 
-- [ ] The project toolbar on the board blurs the canvas behind it with the same frost as the main toolbar
-- [ ] The project toolbar trial and the project management toolbar trial show the same bar, with the blur
-- [ ] The Project toolbar and Project management toolbar sections in `docs/design-system-notes.md` record the blur as the existing 24px blur, `not a token`
+- [x] The project toolbar on the board blurs the canvas behind it with the same frost as the main toolbar
+- [x] The project toolbar trial and the project management toolbar trial show the same bar, with the blur
+- [x] The Project toolbar and Project management toolbar sections in `docs/design-system-notes.md` record the blur as the existing 24px blur, `not a token`
 
 ## Technical notes
 

@@ -30,7 +30,7 @@ export function ProjectToolbar({
       data-project-toolbar
       role="toolbar"
       aria-label="Project"
-      className="inline-flex items-center gap-brand-scale-8 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg" // TODO token mismatch: Figma 10px
+      className="inline-flex items-center gap-brand-scale-8 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma 10px
     >
       <LogoButton onClick={onLogoClick} selected={logoSelected} />
       <TitleInput

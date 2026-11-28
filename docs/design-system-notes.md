@@ -24,6 +24,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- The project toolbar blurs the canvas with the existing 24px frost, the same blur as the main toolbar. Blur is not a token.
 - The board shows the project management toolbar in place of the file bar. The bar is a FloatingPanel on the toolbar layer, 16px from the top and the left (`brand.scale.16`). The menus share one FloatingPanel on the dropdown layer, 4px under the bar. The title commits on Enter or blur, Escape cancels, and an empty name becomes `Untitled`. The board's New row has no caption. Open, Save, and Save as keep theirs. An empty recent list reads "No recent boards yet." The word Recent is a disabled menu item: label only, no hover fill, and no nudge. The wrapper around the two panels ignores pointer events, so a press in the gap or under the recent panel reaches the canvas and closes the menu.
 - A press on the logo button pulls the corner toward the circle and dips the mark. Press is `motion-press`. Release is `motion-release`. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that choice is open.
 - A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open. The wrapper around the two panels ignores pointer events, so a press in the gap or under the shorter panel counts as outside.
@@ -1342,7 +1343,7 @@ The button is not a toolbar or a popover. It does not use FloatingPanel.
 
 ## Project toolbar
 
-Ticket NB-72. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`.
+Ticket NB-72, NB-80. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
 
 The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The board places this bar from the project management toolbar.
 
@@ -1358,7 +1359,7 @@ The content box is 304 by 48 when the title is at its 200px minimum: 4px padding
 | Stroke | `mapped.border.default`, `alias.border-width.xsm` | `#D8DCE2`, 1px |
 | Fill | `mapped.surface.default` | `#F6F9FD` at 60% (`alias.cool-neutral.200`) |
 | Shadow | not a token | the existing `shadow-lg` |
-| Blur | not a token | the trial adds none. The white sheet shows none |
+| Blur | not a token | the existing 24px blur |
 | Dot grid | not a token | excluded from the component |
 | Divider | none | the frame has no divider |
 | Logo slot | `brand.scale.40` | 40px. The resting control is a circle. The radius is `brand.scale.20`. Hover and selected expand to `alias.border-radius.lg` (8px). The frame’s expanded corner is 6.2px |
@@ -1571,7 +1572,7 @@ The save indicator shows the board's save pulse. The ring is on `::after`, and t
 | Empty recents | `mapped.text.action` | "No recent boards yet." keeps the previous type, 12px / 12px. It is not the disabled row |
 | Menu hit area | none | the wrapper and the dropdown panel ignore pointer events. Only the two panels receive them. A press in the gap or under the recent panel reaches the canvas and closes the menu |
 | Shadow | not a token | the bar and the menus keep their own |
-| Blur | not a token | the bar and the menus keep their own |
+| Blur | not a token | the existing 24px blur |
 | Dot grid | not a token | excluded from the component |
 | Divider | none | this placement adds no divider |
 
