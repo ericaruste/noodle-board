@@ -19,7 +19,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - **[token app] Title input width.** The field stops at 320px. No spacing token is 320px.
 - **[token app] Project toolbar title minimum.** The title slot on the project toolbar is at least 200px. No spacing token is 200px. The title input still hugs its text outside that bar.
 - **[token app] Project toolbar corner.** The corner measures about 10px. The bar uses `alias.border-radius.xl` (12px).
-- **[token app] Project menu width.** The main menu and the recent panel are each 220px wide. No spacing token is 220px.
+- **[token app] Project menu width.** The main menu and the recent panel are each 220px wide on `lg` and 180px on `md`. No spacing token is 220px or 180px.
 - **[code] Logo return to the circle.** The button returns with 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`. That curve has no motion name. The other timing is `motion-release`. The choice is open.
 
 ## Decisions already made
@@ -29,7 +29,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A press on the logo button pulls the corner toward the circle and dips the mark. Press is `motion-press`. Release is `motion-release`. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that choice is open.
 - A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open. The wrapper around the two panels ignores pointer events, so a press in the gap or under the shorter panel counts as outside.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
-- The project menu and the recent panel are each 220px wide. No spacing token is 220px.
+- The project menu and the recent panel are each 220px wide on `lg` and 180px on `md`. No spacing token is 220px or 180px. The board uses `lg`.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - A project name in the project menu clips to the row. Hover or focus on a clipped name shows the full title in that same hover label, 8px above the row. The label wraps at the row, and it never grows past 320px. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
@@ -1355,9 +1355,11 @@ The button is not a toolbar or a popover. It does not use FloatingPanel.
 
 ## Project toolbar
 
-Ticket NB-72, NB-80. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
+Ticket NB-72, NB-80, sizes NB-83. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
 
-The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The board places this bar from the project management toolbar.
+The upper-left project bar. The row is the logo button, the title input, and the save indicator. `size` passes the same size to all three: `lg` (default) is 40px parts, `md` is 32px parts. The trial shows both. The board places this bar from the project management toolbar at `lg`. The table below is `lg`.
+
+On `md` the logo, title, and indicator are 32px, so the bar is 40 inside the stroke and 42 outside. The padding, gap, corner, stroke, fill, shadow, blur, and the 200px title minimum stay the same. Figma frame 570:3082 could not be read yet, so the shell values on `md` are not checked against it.
 
 The content box is 304 by 48 when the title is at its 200px minimum: 4px padding, a 40px logo, an 8px gap, a 200px title, an 8px gap, a 40px indicator, and 4px padding. The 1px stroke brings the outer size to 306 by 50. A longer title grows the slot up to 320px, then truncates. Hovering or focusing that field shows the full title in the main toolbar’s hover label.
 
@@ -1402,6 +1404,7 @@ Properties:
 | Logo | logo button | resting circle on this frame. Hover and selected stay on the button |
 | Title | title input | specimen `Project Title`. The field can be edited |
 | Save indicator | size `lg` | success. Saved breathes. Saving plays the ring |
+| size | variant | `lg` (default, 40px parts), `md` (32px parts). Passed to the logo, the title input, and the save indicator |
 
 Painted on this frame: the resting circle, the resting title, and the saved disc. The trial also paints a title long enough to truncate, and the same bar while saving.
 
@@ -1411,7 +1414,9 @@ This trial is not on the canvas, so this preview is not in FloatingPanel. The bo
 
 ## Project menu
 
-Ticket NB-73, NB-75, NB-76. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
+Ticket NB-73, NB-75, NB-76, sizes NB-83. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
+
+`size` sets the width of both panels: `lg` (default) is 220px, `md` is 180px. No spacing token is 180px. The rows are the menu item at `md` (32px) on both sizes, so the heights below hold on both. The trial adds an `md` menu with View all selected.
 
 Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The board opens this menu from the project management toolbar.
 
@@ -1421,7 +1426,7 @@ The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the 
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | 220px. No spacing token is 220px |
+| Width | none | 220px on `lg`, 180px on `md`. No spacing token is 220px or 180px |
 | Height | hug | 305px inside the stroke. Nine 32px rows, 4px padding on top and bottom, a 1px divider, and 4px of space above View all and below the project rows. The outer size is 307px with the 1px stroke |
 | Padding | `brand.scale.4` | 4px |
 | Gap between rows | `brand.scale.0` | 0px |
@@ -1469,7 +1474,7 @@ The word Recent is a disabled menu item at size `md`. Label only. Left icon off.
 
 | Piece | Token | Value |
 | --- | --- | --- |
-| Width | none | 220px. No spacing token is 220px |
+| Width | none | 220px on `lg`, 180px on `md`. No spacing token is 220px or 180px |
 | Height | hug | 200px inside the stroke. Six 32px rows and 4px padding on top and bottom, with no gap. The outer size is 202px with the 1px stroke |
 | Padding | `brand.scale.4` | 4px |
 | Gap | `brand.scale.0` | 0px |
@@ -1507,6 +1512,7 @@ Properties:
 | projects | list | every recent name. The main menu shows the first three. The recent panel shows all of them |
 | viewAllSelected | boolean | default off. The starting selected state. A click on View all switches it. On paints View all selected and opens the recent panel |
 | selectedProject | text | the recent-panel row to paint selected. Unset paints none of them selected |
+| size | variant | `lg` (default, 220px panels), `md` (180px panels). Rows stay `md` |
 
 Painted: View all selected with the recent panel open and the first recent row selected. That first name is long enough to clip in both panels. View all not selected, with the recent panel closed. The other rows are the menu item’s default state. The hover label is not a painted state. It shows on hover or focus when the name is clipped.
 
@@ -1518,7 +1524,9 @@ This trial is not on the canvas, so these panels are not in FloatingPanel. The b
 
 ## Project management toolbar
 
-Ticket NB-74, NB-78. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+Ticket NB-74, NB-78, sizes NB-83. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+
+`size` passes down to the project toolbar and the project menu. `lg` (default) is 40px parts and 220px panels. `md` is 32px parts and 180px panels, with the logo press at 13.44px and a 0.8px dip. The trial shows `lg` and then `md`, each with its own menu. The board stays `lg`.
 
 The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
 
@@ -1545,6 +1553,7 @@ Properties:
 | Title | text | starts as `Project Title`. Typing replaces the text. An empty field stays empty |
 | Menu | open or closed | starts closed. The logo click switches it. A pointer down outside the menu closes it. Open keeps the logo selected |
 | Recent panel | open or closed | starts closed. View all's click switches it. Closing the menu removes the panel |
+| size | variant | `lg` (default), `md`. Passed to the project toolbar and the project menu |
 
 Painted: the bar with the menu closed, the menu open, the menu open with the recent panel, and the logo while it is pressed.
 

@@ -11,9 +11,16 @@ export const BowlChopsticks = createLucideIcon("bowl-chopsticks", [
   ["path", { d: "M7 21h10" }],
 ]);
 
-// 220px is the menu width. No spacing token is 220px. TODO token mismatch: 220px
+export type ProjectMenuSize = "lg" | "md";
+
+// No spacing token is 220px or 180px. TODO token mismatch: 220px, 180px
+const panelWidth: Record<ProjectMenuSize, string> = {
+  lg: "w-[220px]",
+  md: "w-[180px]",
+};
+
 const panelClass =
-  "pointer-events-auto grid w-[220px] rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
+  "pointer-events-auto grid rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
 
 type RecentEntry = {
   id: string;
@@ -21,6 +28,8 @@ type RecentEntry = {
 };
 
 type ProjectMenuProps = {
+  /** Panel width for the main and recent panels. Unset is `lg`, 220px. Rows are `md` on both. */
+  size?: ProjectMenuSize;
   /** Specimen names. Used when `recents` is unset. The main menu shows the first three. */
   projects: string[];
   /** Board recents. An empty array shows no names. Unset keeps `projects`. */
@@ -109,6 +118,7 @@ function ProjectRow({
 }
 
 export function ProjectMenu({
+  size = "lg",
   projects,
   recents,
   viewAllSelected = false,
@@ -128,10 +138,11 @@ export function ProjectMenu({
     : projects.map((name, index) => ({ id: `${name}-${index}`, name }));
   const preview = rows.slice(0, 3);
   const openRecent = usingRecents && onOpenRecent ? (id: string) => onOpenRecent(id) : undefined;
+  const panel = `${panelClass} ${panelWidth[size]}`;
 
   return (
-    <div className="pointer-events-none inline-flex items-start gap-brand-scale-4">
-      <div data-project-menu role="menu" aria-label="Project" className={panelClass}>
+    <div data-size={size} className="pointer-events-none inline-flex items-start gap-brand-scale-4">
+      <div data-project-menu role="menu" aria-label="Project" className={panel}>
         <CommandRow label="New" caption="Ctrl+N" showCaption={showNewCaption} onClick={onNew} />
         <CommandRow label="Open" caption="Ctrl+O" onClick={onOpen} />
         <MenuItem label="Recent" size="md" showLeftIcon={false} showCaption={false} showChevron={false} disabled />
@@ -160,7 +171,7 @@ export function ProjectMenu({
         <CommandRow label="Save as" caption="Ctrl+Shift+S" onClick={onSaveAs} />
       </div>
       {recentOpen ? (
-        <div data-project-menu-recent role="menu" aria-label="Recent projects" className={panelClass}>
+        <div data-project-menu-recent role="menu" aria-label="Recent projects" className={panel}>
           {rows.length === 0 ? (
             <p className={recentLabelClass}>No recent boards yet.</p>
           ) : (
@@ -190,6 +201,10 @@ export function ProjectMenuPreview() {
       <section className="flex flex-col items-start gap-brand-scale-8">
         <p className={caption}>View all not selected</p>
         <ProjectMenu projects={specimenProjects} />
+      </section>
+      <section className="flex flex-col items-start gap-brand-scale-8">
+        <p className={caption}>md, View all selected</p>
+        <ProjectMenu size="md" projects={specimenProjects} viewAllSelected selectedProject={specimenProjects[0]} />
       </section>
     </main>
   );

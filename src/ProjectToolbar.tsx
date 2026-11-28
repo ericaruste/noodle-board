@@ -2,7 +2,11 @@ import { LogoButton } from "./LogoButton";
 import { SaveIndicator } from "./SaveIndicator";
 import { TitleInput } from "./TitleInput";
 
+export type ProjectToolbarSize = "lg" | "md";
+
 type ProjectToolbarProps = {
+  /** Passed to the logo, title input, and save indicator. Unset is `lg`, 40px parts. */
+  size?: ProjectToolbarSize;
   title?: string;
   defaultTitle?: string;
   onTitleChange?: (title: string) => void;
@@ -16,6 +20,7 @@ type ProjectToolbarProps = {
 };
 
 export function ProjectToolbar({
+  size = "lg",
   title,
   defaultTitle = "Project Title",
   onTitleChange,
@@ -28,18 +33,20 @@ export function ProjectToolbar({
   return (
     <div
       data-project-toolbar
+      data-size={size}
       role="toolbar"
       aria-label="Project"
       className="inline-flex items-center gap-brand-scale-8 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl" // TODO token mismatch: Figma 10px
     >
-      <LogoButton onClick={onLogoClick} selected={logoSelected} />
+      <LogoButton size={size} onClick={onLogoClick} selected={logoSelected} />
       <TitleInput
+        size={size}
         value={title}
         defaultValue={defaultTitle}
         onValueChange={onTitleChange}
         onCommit={onTitleCommit}
       />
-      <SaveIndicator size="lg" saving={saving} onSavePulseIteration={onSavePulseIteration} />
+      <SaveIndicator size={size} saving={saving} onSavePulseIteration={onSavePulseIteration} />
     </div>
   );
 }
@@ -67,6 +74,10 @@ export function ProjectToolbarPreview() {
       <section className="flex flex-col items-start gap-brand-scale-8">
         <p className={caption}>Saving</p>
         <ProjectToolbar defaultTitle="Project Title" saving />
+      </section>
+      <section className="flex flex-col items-start gap-brand-scale-8">
+        <p className={caption}>md</p>
+        <ProjectToolbar size="md" defaultTitle="Project Title" />
       </section>
     </main>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { ProjectMenu } from "./ProjectMenu";
-import { ProjectToolbar } from "./ProjectToolbar";
+import { ProjectToolbar, type ProjectToolbarSize } from "./ProjectToolbar";
 import type { RecentProject } from "./recents";
 
 const specimenProjects = [
@@ -17,6 +17,8 @@ const caption =
   "font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-caption";
 
 type ProjectManagementToolbarProps = {
+  /** Passed to the toolbar and the menu. Unset is `lg`: 40px parts and 220px panels. `md` is 32px parts and 180px panels. */
+  size?: ProjectToolbarSize;
   documentName?: string;
   saving?: boolean;
   recents?: RecentProject[];
@@ -35,6 +37,7 @@ type ProjectManagementToolbarProps = {
 };
 
 export function ProjectManagementToolbar({
+  size = "lg",
   documentName,
   saving = false,
   recents,
@@ -97,6 +100,7 @@ export function ProjectManagementToolbar({
   const toolbar = (
     <div onPointerDown={onToolbarPointerDown}>
       <ProjectToolbar
+        size={size}
         title={documentName}
         defaultTitle="Project Title"
         saving={saving}
@@ -110,6 +114,7 @@ export function ProjectManagementToolbar({
 
   const menu = (
     <ProjectMenu
+      size={size}
       projects={specimenProjects}
       recents={recents?.map((recent) => ({ id: recent.id, name: recent.name }))}
       selectedRecentId={selectedRecentId}
@@ -185,7 +190,14 @@ export function ProjectManagementToolbarPreview() {
   return (
     <main className="flex min-h-screen flex-col items-start gap-brand-scale-24 bg-mapped-surface-page p-brand-scale-24">
       <p className={caption}>Project management toolbar</p>
-      <ProjectManagementToolbar />
+      <section className="flex flex-col items-start gap-brand-scale-8">
+        <p className={caption}>lg</p>
+        <ProjectManagementToolbar />
+      </section>
+      <section className="flex flex-col items-start gap-brand-scale-8">
+        <p className={caption}>md</p>
+        <ProjectManagementToolbar size="md" />
+      </section>
     </main>
   );
 }
