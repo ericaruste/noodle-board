@@ -65,6 +65,7 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
 
     const onPointerMove = (event: PointerEvent) => {
       const button = buttonUnder(row, event.clientX, event.clientY);
+      // A gap between tools keeps the current pill. Leaving the row is what fades it.
       if (!button) return;
       if (button.disabled) {
         hide();
@@ -87,13 +88,38 @@ export function useSlidingPill(rowRef: RefObject<HTMLElement | null>): SlidingPi
       hide();
     };
 
+    const remeasure = () => {
+      const button = activeRef.current;
+      if (!button || !visibleRef.current || !row.contains(button)) return;
+      const box = boxFor(row, button);
+      setPill((current) => {
+        if (
+          current.box &&
+          current.box.x === box.x &&
+          current.box.y === box.y &&
+          current.box.width === box.width &&
+          current.box.height === box.height &&
+          current.active === button
+        ) {
+          return current;
+        }
+        return { box, active: button };
+      });
+    };
+
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(row);
+    window.addEventListener("resize", remeasure);
     row.addEventListener("pointermove", onPointerMove);
+    // The reference clears the pill on mouseleave, including while a button stays focused.
     row.addEventListener("pointerleave", hide);
     row.addEventListener("focusin", onFocusIn);
     row.addEventListener("focusout", onFocusOut);
     return () => {
       visibleRef.current = false;
       activeRef.current = null;
+      observer.disconnect();
+      window.removeEventListener("resize", remeasure);
       row.removeEventListener("pointermove", onPointerMove);
       row.removeEventListener("pointerleave", hide);
       row.removeEventListener("focusin", onFocusIn);
