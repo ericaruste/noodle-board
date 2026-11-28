@@ -455,6 +455,11 @@
       "id": "c1d1e760-f499-4261-9d9d-1f4f93b4ed0c",
       "identifier": "ERI-99",
       "url": "https://linear.app/ericar/issue/ERI-99/project-management-toolbar-size"
+    },
+    "NB-84": {
+      "id": "ca754289-4a54-4bd0-aa9a-1f63b2a883ab",
+      "identifier": "ERI-100",
+      "url": "https://linear.app/ericar/issue/ERI-100/medium-project-management-toolbar-on-the-canvas"
     }
   }
 }
