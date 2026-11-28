@@ -48,6 +48,9 @@ Press, release, hover, highlight, nudge, glide, and fade are either missing or w
 - [ ] MenuItem owns the hover nudge, 3px to the right, and the background highlight. An indented row nudges from its own left padding
 - [ ] MainButton stays a plain building block. The sliding pill is absent from that file
 - [ ] The main toolbar owns the pill. The pill glides between tools and fades out when the pointer leaves. The pill logic is a hook other toolbars can call
+- [ ] The pill skips a disabled tool. With nothing selected, moving onto Delete fades the pill out. No red pill shows, and the pill does not stay on the previous tool
+- [ ] The toolbar turns off its buttons' own hover fill in one named place, so only the pill shows on hover
+- [ ] While Delete is disabled, its tooltip reads "Select something to delete". Once an element is selected, it reads "Delete"
 - [ ] The Logo button, Menu item, Main button, and Main toolbar sections in `docs/design-system-notes.md` each have a Motion row: what moves, what triggers it, and which motion name it uses
 - [ ] The logo's return to rest stays the open choice below. The notes list both timings
 
@@ -73,7 +76,11 @@ MainButton gains no pill prop, no motion class, and no glide. Its hover fill sta
 
 The pill hook is [`src/useSlidingPill.ts`](../src/useSlidingPill.ts). It takes the row, tracks the tool under the pointer, and returns the pill's box and the active element. Position comes from the two `getBoundingClientRect` boxes. `offsetLeft` on a button is the wrong number here, because each `Tip` span is `relative`. The hook does not name a tool. The toolbar sets the fill: `mapped.surface.action-strong-hover` on a tool, and `mapped.surface.error-hover` while the active control is the destructive button. The pill is the first child of the relative row, `pointer-events-none`, with the button radius `alias.border-radius.lg`. Transform, width, and height use glide. Opacity uses fade, and the opacity goes to 0 when the pointer leaves the row. The HTML also shows the pill on focus and clears it when focus leaves the row. The hook does the same.
 
-The pill stays inside the toolbar's `FloatingPanel`. It adds no z-index of its own. DOM order keeps it behind the buttons. A selected button keeps `aria-pressed="true"` and its selected fill. The row clears the hover background on a button that is not pressed, so the pill shows through the resting fill. That clear lives in the toolbar. The selected fill stays.
+A disabled control is not a target. When the pointer is over a disabled button, the hook treats it like leaving the row and the opacity goes to 0. Browsers can drop pointer events on a disabled button, so the hook resolves the target from the row's own pointer events, not from events on the button. Check in the browser that moving from Noodle onto a disabled Delete fades the pill out and does not leave it on Noodle. Delete is the only control that disables today, and the rule covers any tool that disables later.
+
+The pill stays inside the toolbar's `FloatingPanel`. It adds no z-index of its own. DOM order keeps it behind the buttons. A selected button keeps `aria-pressed="true"` and its selected fill. The row clears the hover background on a button that is not pressed, so the pill shows through the resting fill. That clear lives in one named place in the toolbar: a `pill-row` class on the row and one rule for it in [`src/index.css`](../src/index.css). No other file overrides the button's hover. The selected fill stays.
+
+Delete's `Tip` label follows `canDelete`: "Delete" when an element is selected, "Select something to delete" while the button is disabled. The `Tip` span wraps the button, so the label still shows on hover while the button is disabled. The `ariaLabel` stays "Delete".
 
 The toolbar is already a FloatingPanel on the toolbar layer. The pill is not a new panel. Check the bar against a selected element and an element that is mid-drag, the same check the toolbar already has. Drag-feedback overlays read their layer from the selection token and add no z-index numbers of their own.
 
