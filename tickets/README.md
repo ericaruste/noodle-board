@@ -79,6 +79,7 @@ Each component is a ticket. The title is the component name, the parent is NB-E6
 43. **Project menu layout** — NB-75 (the main menu puts a 1px `mapped.border.default` divider under Recent, then 4px before a group of View all and the project rows, and 4px below that group before Save with no divider; View all and those rows use a menu-item indent that adds 24px of left padding). The default menu item, the recent panel, and the upper-left file bar stay as they are. Follows the project menu from NB-73.
 44. **Project menu title clip** — NB-76 (a project name under Recent and a name in the View all panel clip to the row; hover or focus on a clipped name shows the full title in the main toolbar hover label). Follows the project menu layout from NB-75. The live board stays unchanged.
 45. **Motion list and component animations** — NB-77 (one hand-written motion list names press, release, hover, highlight, nudge, glide, and fade; the logo button, the menu item, and the main toolbar call those names, and the main button stays free of the sliding pill). Follows the logo button, the menu item, and the main toolbar.
+46. **Sliding pill on contextual toolbars and popovers** — NB-79 (one shared pill row uses `useSlidingPill` on the text, shape, and noodle toolbars and on their contextual popovers; the fill is the contextual hover, and `ContextualButton` stays free of the pill). Follows the motion list from NB-77.
 
 NB-11 can ship with Sticky / Image / Delete and enable Text / Shape / Arrow as those tickets complete.
 

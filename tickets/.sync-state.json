@@ -425,6 +425,11 @@
       "id": "bafa24c6-dd10-4038-8082-b82239f79990",
       "identifier": "ERI-93",
       "url": "https://linear.app/ericar/issue/ERI-93/motion-list-and-component-animations"
+    },
+    "NB-79": {
+      "id": "ce859339-0106-4bbd-927b-6fc224fb2c91",
+      "identifier": "ERI-95",
+      "url": "https://linear.app/ericar/issue/ERI-95/sliding-pill-on-contextual-toolbars-and-popovers"
     }
   }
 }
