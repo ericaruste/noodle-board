@@ -56,7 +56,8 @@ body,
   isolation: isolate;
 }
 
-.pill-row button:not([aria-pressed="true"]):hover {
+.pill-row button:not([aria-pressed="true"]):not(.bg-mapped-surface-action-selected):hover,
+.pill-row [role="group"]:not([aria-pressed="true"]):not(.bg-mapped-surface-action-selected):hover {
   background-color: transparent;
 }
 

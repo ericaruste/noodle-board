@@ -3,6 +3,7 @@ import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar
 import { NEUTRAL_SWATCH_HEX, swatchFamilyForHex, swatchHex } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
+import { PillRow } from "./PillRow";
 import { LineWeightMenuIcon, TypeCurveIcon, TypeElbowIcon, TypeStraightIcon } from "./noodleIcons";
 import StrokeProperty from "./StrokeProperty";
 import {
@@ -107,7 +108,7 @@ function ColorMark({ className, color }: { className?: string; color?: string })
 }
 
 const menuChrome =
-  "flex items-center rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
+  "flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
 
 function IconChoice({
   label,
@@ -201,7 +202,7 @@ export default function NoodleToolbar({
     <div
       data-noodle-toolbar
       data-noodle-menu={menu ? "" : undefined}
-      className="nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      className="nodrag nopan nowheel flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         event.preventDefault();
@@ -209,6 +210,7 @@ export default function NoodleToolbar({
       }}
       onClick={(event) => event.stopPropagation()}
     >
+      <PillRow className="flex items-center gap-brand-scale-4">
       <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <ContextualButton
           ariaLabel="Text"
@@ -261,7 +263,8 @@ export default function NoodleToolbar({
           open={menu === "shape"}
           onToggle={() => toggle("shape")}
         >
-          <div className={`${menuChrome} gap-brand-scale-2`} role="menu" aria-label="Noodle type">
+          <div className={menuChrome} role="menu" aria-label="Noodle type">
+            <PillRow className="flex items-center gap-brand-scale-2">
             {(
               [
                 ["straight", "Straight"],
@@ -277,6 +280,7 @@ export default function NoodleToolbar({
                 onClick={pick("shape", shape)}
               />
             ))}
+            </PillRow>
           </div>
         </MenuButton>
       </div>
@@ -304,6 +308,7 @@ export default function NoodleToolbar({
           }}
         />
       </div>
+      </PillRow>
     </div>
   );
 }
@@ -495,7 +500,8 @@ function ArrowMenu({
         icon={ARROW_ICONS[neutral ? "none" : value]}
       />
       <AnchoredMenu open={open} anchorRef={buttonRef} label={label}>
-        <div className={`${menuChrome} gap-brand-scale-2`} role="menu" aria-label={label}>
+        <div className={menuChrome} role="menu" aria-label={label}>
+          <PillRow className="flex items-center gap-brand-scale-2">
           {NOODLE_ARROWS.map((kind) => (
             <IconChoice
               key={kind}
@@ -505,6 +511,7 @@ function ArrowMenu({
               onClick={() => onPick(kind)}
             />
           ))}
+          </PillRow>
         </div>
       </AnchoredMenu>
     </div>

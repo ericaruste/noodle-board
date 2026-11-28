@@ -15,6 +15,7 @@ import { ProjectToolbarPreview } from "./ProjectToolbar";
 import { SaveIndicatorPreview } from "./SaveIndicator";
 import { MainButtonPreview } from "./MainButton";
 import { MenuItemPreview } from "./MenuItem";
+import { PillRowPreview } from "./PillRow";
 import { SliderThumbPreview } from "./SliderThumb";
 import { SliderTrackPreview } from "./SliderTrack";
 import { TitleInputPreview } from "./TitleInput";
@@ -44,6 +45,7 @@ const showMainButtonTrial = window.location.hash === "#main-button" || trial ===
 const showMenuItemTrial = window.location.hash === "#menu-item" || trial === "menu-item";
 const showContextualButtonTrial =
   window.location.hash === "#contextual-button" || trial === "contextual-button";
+const showPillRowTrial = window.location.hash === "#pill-row" || trial === "pill-row";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -81,6 +83,8 @@ createRoot(document.getElementById("root")!).render(
       <MenuItemPreview />
     ) : showContextualButtonTrial ? (
       <ContextualButtonPreview />
+    ) : showPillRowTrial ? (
+      <PillRowPreview />
     ) : (
       <App />
     )}

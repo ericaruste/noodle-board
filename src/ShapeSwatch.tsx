@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { ContextualButton } from "./ContextualButton";
+import { PillRow } from "./PillRow";
 import { SHAPE_KINDS, SHAPE_LABELS, type ShapeKind } from "./shapeData";
 import { ShapeKindIcon } from "./shapeKindIcon";
 
@@ -53,10 +54,11 @@ function IconChoice({
 export default function ShapeSwatch({ kind, onKind, icons = kindIcon }: ShapeSwatchProps) {
   return (
     <div
-      className="flex items-center gap-brand-scale-2 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      className="flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       role="menu"
       aria-label="Shape"
     >
+      <PillRow className="flex items-center gap-brand-scale-2">
       {SHAPE_KINDS.map((option) => (
         <IconChoice
           key={option}
@@ -66,6 +68,7 @@ export default function ShapeSwatch({ kind, onKind, icons = kindIcon }: ShapeSwa
           onClick={() => onKind(option)}
         />
       ))}
+      </PillRow>
     </div>
   );
 }

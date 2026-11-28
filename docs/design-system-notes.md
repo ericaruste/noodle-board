@@ -42,6 +42,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A selection that mixes two values (two alignments, two weights) is not a painted variant. The control stays in the default look.
 - Icons are Lucide. The spec shows a case-sensitive icon and a chevron. The app draws those with Lucide, 16px for the main icon and 8px for the chevron. The menu item chevron is `chevron-right` at 12px. The menu item left icon is `chevron-right` at 16px. Its default color is `mapped.icon.action-light`. Hover, selected, and disabled use the icon color that matches the label in that state.
 - The contextual button has no focus state. The description that names focus was a mistake. Do not paint a focus ring, and do not use `mapped.border.action-ring-focus` on this button. The menu item has no focus state either. Its painted set is default, hover, selected, and disabled.
+- Contextual toolbars and their popovers share one sliding pill row, `src/PillRow.tsx`. The pill fill on those rows is `mapped.surface.action-hover`. The main toolbar uses the same row and keeps `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. The contextual button itself has no pill. A selected button keeps `mapped.surface.action-selected`. A font size field that is being edited is not a target.
 - The font size button opens its preset menu on a single click of the number or the chevron. A double click edits the number.
 - The typeface menu lists the `alias.typeface` collection, in that order: Geist Mono, Open Sans, Coming Soon, Noto Serif, Montserrat. Each label is drawn in its own `alias.typeface` token. Other menus keep Geist.
 - Each font size row is `brand.scale.36` (36px). The menu hugs that width. A row that hugged its label would change width between 10 and 72. The list is 10, 12, 14, 16, 18, 24, 32, 36, 40, 48, 64, 72. 40 is in the frame and was not in the Phase 1 list.
@@ -77,7 +78,7 @@ The empty hint and the typed default share the font and the size. A run that set
 
 ## Contextual button
 
-Ticket NB-38. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`.
+Ticket NB-38, NB-79. Code `src/ContextualButton.tsx`. The trial page is `?trial=contextual-button`. NB-79 leaves this button still. The sliding pill belongs to the row.
 
 | Piece | Token | Value |
 | --- | --- | --- |
@@ -102,6 +103,7 @@ Ticket NB-38. Code `src/ContextualButton.tsx`. The trial page is `?trial=context
 | Icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Motion | none | The button does not move. The sliding pill belongs to the row that places it. This button has no pill |
 
 The icon nodes did not return a fill of their own. The icon color is the label color for that state.
 
@@ -124,9 +126,34 @@ There is no focus state. The description that names focus was a mistake.
 
 This button is not a toolbar. A toolbar that places it is its own component.
 
+## Sliding pill row
+
+Ticket NB-79. Code `src/PillRow.tsx`. The hook is `src/useSlidingPill.ts`. The trial page is `?trial=pill-row`.
+
+One row wraps a line of controls and paints one pill as its first child. The pill adds no z-index. DOM order keeps it behind the controls. `.pill-row` clears the hover fill on a resting button and on a resting group, so the pill is the hover. A control with `aria-pressed="true"`, or with the selected fill, keeps that fill. The text toolbar, the shape toolbar, and the noodle toolbar each put one row around the whole bar, so the pill can cross a divider. The text align popover, the shape swatch, the noodle type menu, each arrow menu, and the line weight and line type menu each have their own row. A menu is portaled, so leaving the toolbar fades that bar's pill and the menu shows its own. The main toolbar uses this row too. Its fill is not the default below.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Height | none | the control under the pointer or focus |
+| Width | none | that same control |
+| Corner radius | `alias.border-radius.lg` | 8px |
+| Stroke | none | the pill has no stroke |
+| Fill | `mapped.surface.action-hover` | `#E5F0F9`. The main toolbar passes `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while the active control is Delete |
+| Shadow | not a token | the pill has no shadow |
+| Blur | not a token | the pill has no blur |
+| Divider | none | this row does not draw one. A bar keeps its divider on the group |
+| Motion | not a token | The pill glides with `motion-glide` and fades with `motion-fade` when the pointer or focus leaves the row, when the pointer is on a disabled button, or while a marked control asks to be skipped. A gap between controls keeps the current pill. Leaving the row is what fades it |
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| fill | class or function | default `mapped.surface.action-hover`. A function reads the active control, including while the pill fades |
+| children | the controls | the buttons and groups in the row |
+
+Painted: the pill while a control is under the pointer or focused. Not painted: a row the pointer has left, a disabled button, and a font size field while that field is being edited. The fill opacity slider is not a target.
+
 ## Text toolbar
 
-Ticket NB-39. Code `src/TextToolbar.tsx`.
+Ticket NB-39, NB-79. Code `src/TextToolbar.tsx`. The pill row is `src/PillRow.tsx`.
 
 Every control is a contextual button with the unused slots turned off.
 
@@ -159,6 +186,7 @@ Every control is a contextual button with the unused slots turned off.
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Type size on the labels | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight` |
+| Motion | not a token | One pill glides across the whole bar, including over the divider, with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves the row, when the pointer is on a disabled button, and while the font size field is being edited. The pill fill is `mapped.surface.action-hover`. The row is `PillRow` |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties:
 
@@ -179,7 +207,7 @@ The typeface control opens the typeface menu. The size control opens the font si
 
 ## Text align popover
 
-Ticket NB-40. Code `AlignPopover` in `src/TextToolbar.tsx`.
+Ticket NB-40, NB-79. Code `AlignPopover` in `src/TextToolbar.tsx`. The pill row is `src/PillRow.tsx`.
 
 The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four contextual buttons, icon only: left, center, right, and justify. The current alignment is the selected button. The popover opens above a selected element and above an element while it is dragged. This frame has no divider.
 
@@ -202,8 +230,10 @@ The frame is 142 by 40. That is padding 4, four 32px buttons, and 2px gaps. Four
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Divider | none | this popover has no divider |
+| Motion | not a token | One pill glides across the four alignment buttons with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this popover, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. This popover has its own `PillRow`. Moving here fades the text toolbar pill and shows this one |
 
-The four buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
+The four buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on. The current alignment passes `pressed`, so that button keeps `mapped.surface.action-selected` while hovered.
 
 The property list on this component was not in the saved frame read. It is not confirmed whether the popover exposes `state`, `type`, `selected`, or its own slots.
 
@@ -655,7 +685,7 @@ The toolbar and the picker are the color picker toolbar inside selection chrome.
 
 ## Noodle toolbar
 
-Ticket NB-50. Code `src/NoodleToolbar.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The pill slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar.
+Ticket NB-50, NB-79. Code `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`. It sits in the selection chrome, on the side of the stroke nearest the midpoint, with the 16px screen gap from NB-33. The bar slides to the pane edge only when the near spot would leave the board or cover the bottom toolbar.
 
 Every control is a contextual button with the unused slots turned off.
 
@@ -686,6 +716,7 @@ The bar is 40px high and hugs its width. The specimen measures 277px wide. That 
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Color disc | `brand.scale.16` | 16px, the contextual button icon slot. It paints the noodle color. It is not the 24px color swatch |
 | Color disc stroke | `mapped.border.control`, `alias.border-width.xsm` | `#C0C4C9`, 1px |
+| Motion | not a token | One pill glides across the whole bar, including over the divider, with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves the row, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. The row is `PillRow` |
 
 The component exposes no properties of its own. The buttons inside set the contextual button properties. These were read from the property panel:
 
@@ -708,7 +739,7 @@ The line-weight control opens the line weight and line type menu. The icon-fit t
 
 ## Line weight and line type menu
 
-Ticket NB-50. The row is `src/StrokeProperty.tsx`, ticket NB-60. `src/NoodleToolbar.tsx` opens it and writes the noodle.
+Ticket NB-50, NB-60, NB-79. The row is `src/StrokeProperty.tsx`. The pill row is `src/PillRow.tsx`. `src/NoodleToolbar.tsx` opens it and writes the noodle.
 
 Three weight icons, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. Choosing one leaves the menu open, so the other group can be set too.
 
@@ -732,6 +763,7 @@ Three weight icons, a divider, then solid and dashed. The icons are `type-thin`,
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Motion | not a token | One pill glides across the weights, the divider, and the line types with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this menu, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. This menu has its own `PillRow` |
 
 The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
 
@@ -743,7 +775,7 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Noodle type menu
 
-Ticket NB-50. Code is the shape menu in `src/NoodleToolbar.tsx`.
+Ticket NB-50, NB-79. Code is the shape menu in `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`.
 
 Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `type-elbow`, and `type-curve`. The current shape is the selected button. Choosing one closes the menu. This frame has no divider.
 
@@ -765,6 +797,8 @@ Three icon buttons: straight, elbow, and curve. The icons are `type-straight`, `
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Divider | none | this menu has no divider |
+| Motion | not a token | One pill glides across the three shape buttons with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this menu, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. This menu has its own `PillRow` |
 
 The three buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
 
@@ -776,7 +810,7 @@ Not painted, as far as the frame shows: hover and disabled. The button has no fo
 
 ## Arrow menu
 
-Ticket NB-50. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`.
+Ticket NB-50, NB-79. Code is `ArrowMenu` in `src/NoodleToolbar.tsx`. The pill row is `src/PillRow.tsx`.
 
 Six icon buttons, one for each arrowhead the noodle already has: none, arrow, open, triangle, circle, and diamond. The glyphs are the current arrow icons. The current end is the selected button. Choosing one closes the menu. Start and end open the same menu with their own selection. This frame has no divider.
 
@@ -798,6 +832,8 @@ Six icon buttons, one for each arrowhead the noodle already has: none, arrow, op
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Divider | none | this menu has no divider |
+| Motion | not a token | One pill glides across the six arrowhead buttons with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this menu, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. This menu has its own `PillRow` |
 
 The six buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
 
@@ -970,7 +1006,7 @@ This slider is not a toolbar. The shape toolbar places it and uses FloatingPanel
 
 ## Shape toolbar
 
-Ticket NB-56. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
+Ticket NB-56, NB-79. The purple fill, the purple stroke, and the two grids are ticket NB-59. Code `src/ShapeToolbar.tsx`. The pill row is `src/PillRow.tsx`. It sits in the selection chrome, under a selected shape, and under a group of shapes.
 
 Every control is a contextual button with the unused slots turned off, except the fill opacity slider, which is the slider component.
 
@@ -1009,6 +1045,7 @@ Shape swap opens the shape swatch, the five kinds in the existing order. The clo
 | Slider | fill opacity slider, `sm` | 8px track, `brand.scale.8`, centered on the 12px thumb, `brand.scale.12`. The track uses the fill. No fill uses `#C0C4C9`. The percent is left-aligned in a slot the width of `100%`, with 16px before it |
 | New shape fill | `alias.swatch.purple.200` | `#EBCFFF`. The fill grid is step 200. Choosing purple writes this hex and selects the purple disc |
 | New shape stroke | `alias.swatch.purple.500` | `#BF66FF`. The stroke grid is step 500. Choosing purple writes this hex and selects the purple disc |
+| Motion | not a token | One pill glides across the whole bar, including over both dividers, with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves the row, or when the pointer is on a disabled button. The fill opacity slider is not a target, so the pill is not drawn on it. The pill fill is `mapped.surface.action-hover`. The row is `PillRow` |
 
 The board passes no icon of its own. The icon-fit trial can pass `kindIcons` and `lineWeightIcon`. The board omits both, so the bar keeps `ShapeKindIcon` and the line-weight file. The buttons inside set the contextual button properties. The property panel was not opened. These were read from the frame:
 
@@ -1033,7 +1070,7 @@ The toolbar and these menus add no z-index. The bar is already in FloatingPanel 
 
 ## Stroke property
 
-Ticket NB-60. Code `src/StrokeProperty.tsx`. `src/ShapeToolbar.tsx` and `src/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
+Ticket NB-60, NB-79. Code `src/StrokeProperty.tsx`. The pill row is `src/PillRow.tsx`. `src/ShapeToolbar.tsx` and `src/NoodleToolbar.tsx` each open it from the line-weight control. Each toolbar owns the open state and writes its own thickness and line style.
 
 Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-thin`, `type-medium`, `type-thick`, `type-straight`, and `type-dashed`. The current weight and the current line style are the selected buttons. A mixed value leaves that group unselected. Choosing one leaves the menu open, so the other group can be set too. Noodle thickness and shape thickness stay the pixel sizes they already paint. Dashed stays `8 6`.
 
@@ -1057,6 +1094,7 @@ Thin, medium, and thick, a divider, then solid and dashed. The icons are `type-t
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Motion | not a token | One pill glides across the weight group, the divider, and the line-type group with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this row, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. `StrokeProperty` owns this `PillRow` |
 
 The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on.
 
@@ -1077,7 +1115,7 @@ The menu sits `brand.scale.4` (4px) under the painted pill. The portal host is a
 
 ## Shape swatch
 
-Ticket NB-61. Code `src/ShapeSwatch.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
+Ticket NB-61, NB-79. Code `src/ShapeSwatch.tsx`. The pill row is `src/PillRow.tsx`. `src/ShapeToolbar.tsx` opens it from the shape-swap control. `src/Toolbar.tsx` opens it from the bottom Shapes tool. Each caller owns the open state. The shape toolbar writes the selected shape’s kind. The bottom tool places that kind.
 
 Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The icons are `ShapeKindIcon`, from `src/assets/icons/shape-square.svg`, `shape-circle.svg`, `shape-round-rectangle.svg`, `shape-triangle.svg`, and `shape-diamond.svg`. Square, circle, and diamond start at 28 by 28. The triangle is 29 by 28 and the rounded rectangle is 31 by 28. Each glyph is cropped to the stroked path plus the Lucide margin, then fitted in the 16px slot, `brand.scale.16`. Wider files stay wider. The stroke follows the button icon color. On a selected shape, the current kind is the selected button. A mixed kind leaves every button unselected. Choosing a kind on a selected shape changes that shape and closes the menu. Choosing a kind on the bottom tool places that kind and closes the menu. The row has no divider.
 
@@ -1100,6 +1138,7 @@ Rectangle, ellipse, rounded rectangle, triangle, and diamond, in that order. The
 | Control icon, hover | `mapped.icon.action-hover` | `#1E3B58` |
 | Control icon, selected | `mapped.icon.action-selected` | `#1E3B58` |
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
+| Motion | not a token | One pill glides across the five kind buttons with `motion-glide`. It fades with `motion-fade` when the pointer or focus leaves this menu, or when the pointer is on a disabled button. The pill fill is `mapped.surface.action-hover`. `ShapeSwatch` owns this `PillRow`, so the shape toolbar and the main toolbar's Shapes menu both show it |
 
 The five buttons use the contextual button slots: label off, left icon off, dropdown off, right icon on. Each icon is 16px, `brand.scale.16`.
 
@@ -1173,7 +1212,7 @@ This button is not a toolbar. The main toolbar places it. See Main toolbar.
 
 ## Main toolbar
 
-Ticket NB-64, NB-77. Code `src/Toolbar.tsx`. The pill hook is `src/useSlidingPill.ts`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
+Ticket NB-64, NB-77, NB-79. Code `src/Toolbar.tsx`. The shared row is `src/PillRow.tsx`. The pill hook is `src/useSlidingPill.ts`. It stays at the bottom center of the board, in FloatingPanel on the toolbar layer.
 
 Every control is a main button with the label and the right icon turned off, so each one is 40 by 40. The row is select, hand, sticky note, text, image, shapes, noodle, and delete. Delete is the destructive type. The shapes control opens the same shape swatch the shape toolbar uses.
 
@@ -1206,7 +1245,7 @@ Every control is a main button with the label and the right icon turned off, so 
 | Control icon, disabled | `mapped.icon.disabled` | `#909397` |
 | Control icon, destructive default and hover | `mapped.icon.error`, `mapped.icon.error-hover` | `#BE123C` |
 | Dot grid | not a token | excluded from the component |
-| Motion | not a token | One pill glides between tools with `motion-glide` and fades with `motion-fade` when the pointer leaves the row, when focus leaves the row, or when the pointer is on a disabled tool. The hook is `useSlidingPill`. The pill fill is `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. `.pill-row` clears the hover fill on a button that is not pressed, so the pill is the hover. A selected button keeps its fill |
+| Motion | not a token | One pill glides between tools with `motion-glide` and fades with `motion-fade` when the pointer leaves the row, when focus leaves the row, or when the pointer is on a disabled tool. The row is `PillRow`. The hook is `useSlidingPill`. The pill fill is `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run. `.pill-row` clears the hover fill on a button that is not pressed, so the pill is the hover. A selected button keeps its fill |
 
 The icons are Lucide, except the noodle, which is `src/assets/icons/noodle-main.svg`. Select is `mouse-pointer-2`. Hand is `hand`. Sticky note is `sticky-note`. Text is `type`. Image is `image`. Shapes is `shapes`. Delete is `trash`.
 

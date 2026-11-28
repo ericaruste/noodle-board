@@ -3,6 +3,7 @@ import ColorPickerToolbar, { type ColorPickerChoice } from "./ColorPickerToolbar
 import { swatchFamilyForHex, swatchHex, type SwatchScale } from "./ColorSwatch";
 import { ContextualButton } from "./ContextualButton";
 import FillOpacitySlider from "./FillOpacitySlider";
+import { PillRow } from "./PillRow";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
 import { LineWeightMenuIcon } from "./noodleIcons";
 import { SHAPE_LABELS, type ShapeKind, type ShapeLineStyle, type ShapeThickness } from "./shapeData";
@@ -156,7 +157,7 @@ export default function ShapeToolbar({
   return (
     <div
       data-shape-colors=""
-      className="nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      className="nodrag nopan nowheel flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onPointerDown={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         const target = event.target;
@@ -167,6 +168,7 @@ export default function ShapeToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
+      <PillRow className="flex items-center gap-brand-scale-4">
       <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         <MenuButton
           label={kind ? `Shape, ${SHAPE_LABELS[kind]}` : "Shape, mixed"}
@@ -241,6 +243,7 @@ export default function ShapeToolbar({
           />
         </div>
       </div>
+      </PillRow>
     </div>
   );
 }

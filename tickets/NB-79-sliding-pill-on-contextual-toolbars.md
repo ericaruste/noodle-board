@@ -1,7 +1,7 @@
 ---
 id: NB-79
 title: Sliding pill on contextual toolbars and popovers
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX]
 parent: NB-E6
@@ -46,19 +46,19 @@ Hover on these bars is still each button's own fill. There is no shared pill, so
 
 ## Acceptance criteria
 
-- [ ] One shared pill row wraps a row of buttons and adds the pill. The text toolbar, the shape toolbar, and the noodle toolbar use it. The text align popover, the shape swatch, the noodle type menu, the arrow menus, and the line weight and line type menu use it. Each of those does not set up the hook on its own
-- [ ] `ContextualButton` stays a plain building block. It gains no pill
-- [ ] The pill fill on these rows is `mapped.surface.action-hover`. It is not the main toolbar's `mapped.surface.action-strong-hover`
-- [ ] One pill glides across the whole bar, including over the divider between groups
-- [ ] A selected button keeps `mapped.surface.action-selected` while hovered. A selected contextual button that does not set `aria-pressed="true"` is fixed so that fill is not lost. The current alignment is one to check
-- [ ] The pill skips a disabled button, as on the main toolbar
-- [ ] The pill lines up on the button at every zoom, on a toolbar that follows a selected element
-- [ ] While the font size is being edited as a field, the pill does not cover that field
-- [ ] A popover has its own pill. Moving from the toolbar into that popover fades the toolbar pill and shows the popover's
-- [ ] The shape swatch pill also shows in the main toolbar's Shapes dropdown, with `mapped.surface.action-hover`
-- [ ] The main toolbar can move onto the shared row only when that is a pure swap. Its pill fill stays `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run
-- [ ] Each affected section in `docs/design-system-notes.md` has a Motion row: what moves, what triggers it, and which motion name it uses
-- [ ] Each of these toolbars and popovers has been checked against a selected element and one element that is mid-drag
+- [x] One shared pill row wraps a row of buttons and adds the pill. The text toolbar, the shape toolbar, and the noodle toolbar use it. The text align popover, the shape swatch, the noodle type menu, the arrow menus, and the line weight and line type menu use it. Each of those does not set up the hook on its own
+- [x] `ContextualButton` stays a plain building block. It gains no pill
+- [x] The pill fill on these rows is `mapped.surface.action-hover`. It is not the main toolbar's `mapped.surface.action-strong-hover`
+- [x] One pill glides across the whole bar, including over the divider between groups
+- [x] A selected button keeps `mapped.surface.action-selected` while hovered. A selected contextual button that does not set `aria-pressed="true"` is fixed so that fill is not lost. The current alignment is one to check
+- [x] The pill skips a disabled button, as on the main toolbar
+- [x] The pill lines up on the button at every zoom, on a toolbar that follows a selected element
+- [x] While the font size is being edited as a field, the pill does not cover that field
+- [x] A popover has its own pill. Moving from the toolbar into that popover fades the toolbar pill and shows the popover's
+- [x] The shape swatch pill also shows in the main toolbar's Shapes dropdown, with `mapped.surface.action-hover`
+- [x] The main toolbar can move onto the shared row only when that is a pure swap. Its pill fill stays `mapped.surface.action-strong-hover`, or `mapped.surface.error-hover` while Delete can run
+- [x] Each affected section in `docs/design-system-notes.md` has a Motion row: what moves, what triggers it, and which motion name it uses
+- [x] Each of these toolbars and popovers has been checked against a selected element and one element that is mid-drag
 
 ## Technical notes
 

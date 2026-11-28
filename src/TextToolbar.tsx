@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { ContextualButton } from "./ContextualButton";
 import { FloatingPanel, useAnchoredBox } from "./FloatingPanel";
+import { PillRow } from "./PillRow";
+import { PILL_TARGET_ATTR } from "./useSlidingPill";
 import { MenuItem } from "./MenuItem";
 import {
   ALIGN_LABELS,
@@ -237,7 +239,7 @@ function AlignPopover({
           role="group"
           ariaLabel="Alignment"
           data-text-toolbar=""
-          className="flex items-center gap-brand-scale-2 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+          className="flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
           style={{
             position: "absolute",
             top: box?.top ?? 0,
@@ -245,20 +247,22 @@ function AlignPopover({
             visibility: box ? "visible" : "hidden",
           }}
         >
-          {TEXT_ALIGNS.map((align) => (
-            <ContextualButton
-              key={align}
-              ariaLabel={ALIGN_LABELS[align]}
-              title={ALIGN_LABELS[align]}
-              pressed={activeAlign === align}
-              onClick={() => onPick(align)}
-              showLeftIcon={false}
-              showLabel={false}
-              showDropdownIcon={false}
-              showRightIcon
-              icon={ALIGN_ICONS[align]}
-            />
-          ))}
+          <PillRow className="flex items-center gap-brand-scale-2">
+            {TEXT_ALIGNS.map((align) => (
+              <ContextualButton
+                key={align}
+                ariaLabel={ALIGN_LABELS[align]}
+                title={ALIGN_LABELS[align]}
+                pressed={activeAlign === align}
+                onClick={() => onPick(align)}
+                showLeftIcon={false}
+                showLabel={false}
+                showDropdownIcon={false}
+                showRightIcon
+                icon={ALIGN_ICONS[align]}
+              />
+            ))}
+          </PillRow>
         </FloatingPanel>
       ) : null}
     </div>
@@ -409,6 +413,7 @@ function FontSizeField({
     <div
       ref={anchorRef}
       className="relative"
+      {...{ [PILL_TARGET_ATTR]: editing ? "skip" : "" }}
       onPointerDownCapture={(event) => {
         if (event.button !== 0) return;
         const target = event.target;
@@ -600,7 +605,7 @@ export default function TextToolbar({
     // Fill is mapped.surface.default at 80%. Blur is the existing 24px frost. Figma blur is ignored.
     <div
       data-text-toolbar
-      className="noodle-text-toolbar nodrag nopan nowheel flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      className="noodle-text-toolbar nodrag nopan nowheel flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       onMouseDown={(event) => {
         if ((event.target as HTMLElement).closest("input, textarea")) return;
         event.preventDefault();
@@ -609,6 +614,7 @@ export default function TextToolbar({
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
     >
+      <PillRow className="flex items-center gap-brand-scale-4">
       <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
       <TypefaceMenu
         title={activeFamily === "mixed" ? "Mixed" : activeFamily === "none" ? "Font style" : activeFamily}
@@ -656,6 +662,7 @@ export default function TextToolbar({
       <IconButton label="Numbered list" pressed={numbered} icon={ListOrdered} onClick={onNumbered} />
       <IconButton label="Link" pressed={linkActive} icon={Link} onClick={onLink} />
       </div>
+      </PillRow>
     </div>
   );
 }

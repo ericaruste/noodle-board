@@ -123,7 +123,13 @@ export const ContextualButton = forwardRef<HTMLElement, ContextualButtonProps>(f
 
   if (labelControl) {
     return (
-      <div ref={ref as Ref<HTMLDivElement>} className={classes} role="group" aria-label={ariaLabel}>
+      <div
+        ref={ref as Ref<HTMLDivElement>}
+        className={classes}
+        role="group"
+        aria-label={ariaLabel}
+        aria-pressed={ariaPressed}
+      >
         {icons}
         {showDropdownIcon ? (
           <button

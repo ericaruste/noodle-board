@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { ContextualButton } from "./ContextualButton";
+import { PillRow } from "./PillRow";
 import { TypeDashedIcon, TypeMediumIcon, TypeStraightIcon, TypeThickIcon, TypeThinIcon } from "./noodleIcons";
 
 export const STROKE_THICKNESS = ["thin", "medium", "thick"] as const;
@@ -82,10 +83,11 @@ export default function StrokeProperty({
 }: StrokePropertyProps) {
   return (
     <div
-      className="flex items-center gap-brand-scale-4 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
+      className="flex rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl"
       role="menu"
       aria-label="Line weight and line type"
     >
+      <PillRow className="flex items-center gap-brand-scale-4">
       <div className="flex items-center gap-brand-scale-2 border-r border-r-alias-border-width-xsm border-mapped-border-default pr-brand-scale-4">
         {STROKE_THICKNESS.map((option) => (
           <IconChoice
@@ -108,6 +110,7 @@ export default function StrokeProperty({
           />
         ))}
       </div>
+      </PillRow>
     </div>
   );
 }
