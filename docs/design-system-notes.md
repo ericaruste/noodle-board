@@ -29,7 +29,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 - A press on the logo button pulls the corner toward the circle and dips the mark. Press is `motion-press`. Release is `motion-release`. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that choice is open.
 - A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open. The wrapper around the two panels ignores pointer events, so a press in the gap or under the shorter panel counts as outside.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
-- The project menu and the recent panel are each 220px wide on `lg` and 180px on `md`. No spacing token is 220px or 180px. The board uses `lg`.
+- The project menu and the recent panel are each 220px wide on `lg` and 180px on `md`. No spacing token is 220px or 180px. The board uses `md`.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
 - A project name in the project menu clips to the row. Hover or focus on a clipped name shows the full title in that same hover label, 8px above the row. The label wraps at the row, and it never grows past 320px. It is not the browser’s native title tooltip.
 - The shape icons and the line-weight icon crop their view boxes so a 16px slot matches a Lucide icon. Wider shape files stay wider. The line-weight stroke is 1.33, the same painted weight as the shape stroke of 1.5. The trial at `?trial=icon-fit` still shows the uncropped files.
@@ -1347,7 +1347,7 @@ Properties:
 | selected | boolean | the rounded square. A click on the live button switches it |
 | size | variant | `lg` (default, 40px), `md` (32px) |
 
-Painted: the resting circle, the hover square, and the selected square, on each size. A press on any of them plays the shape press. The project toolbar uses `lg`.
+Painted: the resting circle, the hover square, and the selected square, on each size. A press on any of them plays the shape press. The project toolbar trial's resting bar uses `lg`. The board's bar uses `md`.
 
 Not painted: a focus ring, and a disabled state.
 
@@ -1355,9 +1355,9 @@ The button is not a toolbar or a popover. It does not use FloatingPanel.
 
 ## Project toolbar
 
-Ticket NB-72, NB-80, sizes NB-83. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
+Ticket NB-72, NB-80, sizes NB-83, board size NB-84. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`. NB-80 adds the existing 24px blur.
 
-The upper-left project bar. The row is the logo button, the title input, and the save indicator. `size` passes the same size to all three: `lg` (default) is 40px parts, `md` is 32px parts. The trial shows both. The board places this bar from the project management toolbar at `lg`. The table below is `lg`.
+The upper-left project bar. The row is the logo button, the title input, and the save indicator. `size` passes the same size to all three: `lg` (default) is 40px parts, `md` is 32px parts. The trial shows both. The board places this bar from the project management toolbar at `md`. The table below is `lg`.
 
 On `md` the logo, title, and indicator are 32px, so the bar is 40 inside the stroke and 42 outside. The padding, gap, corner, stroke, fill, shadow, blur, and the 200px title minimum stay the same. Figma frame 570:3082 could not be read yet, so the shell values on `md` are not checked against it.
 
@@ -1524,9 +1524,9 @@ This trial is not on the canvas, so these panels are not in FloatingPanel. The b
 
 ## Project management toolbar
 
-Ticket NB-74, NB-78, sizes NB-83. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+Ticket NB-74, NB-78, sizes NB-83, board size NB-84. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
 
-`size` passes down to the project toolbar and the project menu. `lg` (default) is 40px parts and 220px panels. `md` is 32px parts and 180px panels, with the logo press at 13.44px and a 0.8px dip. The trial shows `lg` and then `md`, each with its own menu. The board stays `lg`.
+`size` passes down to the project toolbar and the project menu. `lg` (default) is 40px parts and 220px panels. `md` is 32px parts and 180px panels, with the logo press at 13.44px and a 0.8px dip. The trial shows `lg` and then `md`, each with its own menu. The board uses `md`: 32px parts and 180px panels. An unset size stays `lg`.
 
 The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
 
@@ -1561,7 +1561,7 @@ Not painted on this frame: hover, the title fills, and the menu-item states. Tho
 
 ### Board
 
-The board replaces the file bar with this toolbar. The upper-right wordmark is gone. The logo is the brand mark.
+The board replaces the file bar with this toolbar. The upper-right wordmark is gone. The logo is the brand mark. The board passes `md`: 32px logo, title, and save indicator, and 180px menu panels. An unset size stays `lg`.
 
 The bar is a FloatingPanel on the toolbar layer. It sits 16px from the top and the left. The open menu is one FloatingPanel on the dropdown layer. The menu's left edge lines up with the bar, and the gap under the bar is 4px. `data-canvas-chrome` is on the bar, so the open menu does not become the noodle obstacle. Both panels stay above a selected element and an element that is mid-drag.
 
@@ -1607,6 +1607,7 @@ Properties:
 | selectedRecentId | id | the recent-panel row for the open project. A new Untitled board has none |
 | showNewCaption | boolean | default on. The board turns it off |
 | placed | boolean | default off. The board turns it on and uses FloatingPanel |
+| size | variant | `md` on the board. 32px parts and 180px panels. Unset stays `lg` |
 
 The trial table above stays the trial: specimen names, an empty field that stays empty, and New's `Ctrl+N` caption.
 

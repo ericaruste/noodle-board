@@ -2374,6 +2374,7 @@ function Board() {
       >
         <ProjectManagementToolbar
           placed
+          size="md"
           documentName={documentName}
           saving={savePulse}
           recents={recents}

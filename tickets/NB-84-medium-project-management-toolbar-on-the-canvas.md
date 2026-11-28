@@ -1,7 +1,7 @@
 ---
 id: NB-84
 title: Medium project management toolbar on the canvas
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
@@ -31,11 +31,11 @@ The canvas still shows the large project management toolbar. The medium bar exis
 
 ## Acceptance criteria
 
-- [ ] The board shows the project management toolbar at `md`: 32px logo, title, and save indicator, and 180px menu panels
-- [ ] The logo menu, the file actions, the title rename, and the save pulse still work at that size
-- [ ] The bar stays a FloatingPanel on the toolbar layer and the menus stay on the dropdown layer, above a selected element and an element that is mid-drag
-- [ ] The trial pages still show `lg` and `md`. An unset size stays `lg`
-- [ ] The project toolbar and project management toolbar sections in `docs/design-system-notes.md` record that the board uses `md`
+- [x] The board shows the project management toolbar at `md`: 32px logo, title, and save indicator, and 180px menu panels
+- [x] The logo menu, the file actions, the title rename, and the save pulse still work at that size
+- [x] The bar stays a FloatingPanel on the toolbar layer and the menus stay on the dropdown layer, above a selected element and an element that is mid-drag
+- [x] The trial pages still show `lg` and `md`. An unset size stays `lg`
+- [x] The project toolbar and project management toolbar sections in `docs/design-system-notes.md` record that the board uses `md`
 
 ## Technical notes
 
