@@ -425,6 +425,11 @@
       "id": "bafa24c6-dd10-4038-8082-b82239f79990",
       "identifier": "ERI-93",
       "url": "https://linear.app/ericar/issue/ERI-93/motion-list-and-component-animations"
+    },
+    "NB-78": {
+      "id": "748817ac-f986-4625-8058-acbf06b8850b",
+      "identifier": "ERI-94",
+      "url": "https://linear.app/ericar/issue/ERI-94/project-management-toolbar-on-the-board"
     }
   }
 }
