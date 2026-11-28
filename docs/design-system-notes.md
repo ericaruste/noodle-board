@@ -23,7 +23,7 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
-- A press on the logo button sets the scale to 0.90, and a release or a cancelled pointer sets it back to 1. The scale is not a token. It is separate from the 700ms radius ease.
+- A press on the logo button pulls the corner toward the circle and dips the mark, then both spring back. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. The hover and selected square still eases over 700ms.
 - A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
@@ -1254,6 +1254,48 @@ Painted: success at rest, success breathing while saved, success with the ring w
 
 Not painted: hover, disabled, and focus. Error has no animation. The file bar keeps its own dot.
 
+## Logo button
+
+Ticket NB-67. Code `src/LogoButton.tsx`. The trial page is `?trial=logo-button` and `#logo-button`.
+
+The brand mark. The button is 40px. The fill is the brand red. The glyph is `src/assets/icons/noodle-logo.svg`. The red plate in that file is not drawn. The circle clips the chopstick. Hover and selected ease the corner from the circle to the rounded square over 700ms and reveal the chopstick.
+
+A press pulls the corner toward the circle and dips the glyph. The press takes 80ms. The release springs both back over 280ms. The spring is `cubic-bezier(0.34, 1.56, 0.64, 1)`. The pointer is captured on the press, so the press holds if the pointer leaves before the release. A cancelled pointer releases the same way. The 700ms ease is for hover and selected. It is used again after the release spring ends.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Size | `brand.scale.40` | 40px |
+| Padding | none | 0 |
+| Gap | none | the button has no gap |
+| Radius, rest | `brand.scale.20` | 20px, a circle |
+| Radius, hover and selected | `alias.border-radius.lg` | 8px. The frame’s expanded corner is 6.2px |
+| Radius, pressed | not a token | 16.8px, 42% of the 40px button, between the square and the circle |
+| Radius ease, hover and selected | not a token | 700ms, `cubic-bezier(0.22, 1, 0.36, 1)` |
+| Radius ease, press | not a token | 80ms, the same spring as the release |
+| Radius ease, release | not a token | 280ms, `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| Fill | none | `#B11F24`. The brand red is not a design token |
+| Icon, every state | none | white, from the asset. The press dips the mark 1px. The reference dip is 1.6px on a 64px button |
+| Glyph dip | not a token | 1px down while pressed, then the spring back. The red plate stays put |
+| Stroke | none | the button has no stroke |
+| Text | none | the button has no text |
+| Divider | none | the button has no divider |
+| Shadow | not a token | excluded from the component |
+| Blur | not a token | excluded from the component |
+| Dot grid | not a token | excluded from the component |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| state | painted variant | `default`, `hover`, `selected`. Unset follows the pointer and `selected` |
+| selected | boolean | the rounded square. A click on the live button switches it |
+
+Painted: the resting circle, the hover square, and the selected square. A press on any of them plays the shape press.
+
+Not painted: a focus ring, and a disabled state.
+
+The button is not a toolbar or a popover. It does not use FloatingPanel.
+
 ## Project toolbar
 
 Ticket NB-72. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`.
@@ -1306,7 +1348,7 @@ Properties:
 
 Painted on this frame: the resting circle, the resting title, and the saved disc. The trial also paints a title long enough to truncate, and the same bar while saving.
 
-Not painted on this frame: the logo’s expanded square, the title’s hover and focus fills, and the indicator’s error disc. Those stay on the logo button, the title input, and the save indicator.
+Not painted on this frame: the logo’s expanded square, the logo’s press, the title’s hover and focus fills, and the indicator’s error disc. Those stay on the logo button, the title input, and the save indicator.
 
 This trial is not on the canvas, so the bar is not in FloatingPanel. The later pass that places it upper left, with the project menu, uses FloatingPanel on the toolbar layer. The file bar stays on the board.
 
@@ -1420,15 +1462,17 @@ Ticket NB-74. Code `src/ProjectManagementToolbar.tsx`. The trial page is `?trial
 
 The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
 
-The press scale lives on the logo button. A press sets the scale to 0.90. A release, or a cancelled pointer, sets it back to 1. The pointer is captured on the press, so the scale stays at 0.90 when the pointer leaves the button before the release. The scale changes when the press starts and when it ends. It is separate from the 700ms radius ease. While the menu is open, a press scales the expanded square to 0.90 and the release returns that square to 1. The square stays until the menu closes. The logo trial uses the same button, so a press scales those specimens too. Their resting size stays 1 until that press. The live button on that trial does not open a menu.
+The press lives on the logo button. A press pulls the corner to 16.8px and dips the mark 1px, both in 80ms. A release, or a cancelled pointer, springs them back over 280ms. The pointer is captured on the press, so the press holds if the pointer leaves the button before the release. The spring is separate from the 700ms radius ease. While the menu is open, a press pulls the expanded square toward the circle and the release springs that square back. The square stays until the menu closes. The logo trial uses the same button, so a press plays there too. The live button on that trial does not open a menu.
 
-The bar keeps the table in the Project toolbar section. The main menu and the recent panel keep the tables in the Project menu section. This table is the gap under the bar and the logo scale.
+The bar keeps the table in the Project toolbar section. The main menu and the recent panel keep the tables in the Project menu section. This table is the gap under the bar and the logo press.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Gap under the bar | `brand.scale.4` | 4px, between the bar and the menu. The menu's left edge lines up with the bar's left edge |
-| Logo scale, pressed | not a token | 0.90. It is set when the press starts |
-| Logo scale, released | not a token | 1. It is set when the press ends or the pointer is cancelled |
+| Logo corner, pressed | not a token | 16.8px. The release springs back to the square while the menu is open, and to the circle when the menu is closed and the pointer has left |
+| Logo mark, pressed | not a token | 1px down. The release springs it back. The red plate stays put |
+| Press in | not a token | 80ms |
+| Press release | not a token | 280ms, `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 | Shadow | not a token | this trial adds none of its own |
 | Blur | not a token | this trial adds none of its own |
 | Dot grid | not a token | excluded from the component |
