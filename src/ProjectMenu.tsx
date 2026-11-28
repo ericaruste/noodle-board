@@ -13,15 +13,31 @@ export const BowlChopsticks = createLucideIcon("bowl-chopsticks", [
 
 // 220px is the menu width. No spacing token is 220px. TODO token mismatch: 220px
 const panelClass =
-  "grid w-[220px] rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
+  "pointer-events-auto grid w-[220px] rounded-alias-border-radius-lg border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg backdrop-blur-xl";
+
+type RecentEntry = {
+  id: string;
+  name: string;
+};
 
 type ProjectMenuProps = {
-  /** Every recent project. The main menu shows the first three. The recent panel shows all of them. */
+  /** Specimen names. Used when `recents` is unset. The main menu shows the first three. */
   projects: string[];
+  /** Board recents. An empty array shows no names. Unset keeps `projects`. */
+  recents?: RecentEntry[];
   /** View all's selected state. The recent panel is open only while this is set. */
   viewAllSelected?: boolean;
-  /** Recent-panel row to paint selected. The copy in the main menu stays unselected. */
+  /** Recent-panel row to paint selected by name. The trial uses this. The copy in the main menu stays unselected. */
   selectedProject?: string;
+  /** Recent-panel row to paint selected by id. The copies under View all stay unselected. */
+  selectedRecentId?: string | null;
+  /** New's shortcut. The trial shows `Ctrl+N`. The board turns it off. */
+  showNewCaption?: boolean;
+  onNew?: () => void;
+  onOpen?: () => void;
+  onSave?: () => void;
+  onSaveAs?: () => void;
+  onOpenRecent?: (id: string) => void;
 };
 
 const longProjectName =
@@ -39,9 +55,30 @@ const specimenProjects = [
 const caption =
   "font-alias-font-family-body text-responsive-desktop-body-sm-size leading-responsive-desktop-body-sm-line-height-tight text-mapped-text-caption";
 
-function CommandRow({ label, caption: shortcut }: { label: string; caption: string }) {
+const recentLabelClass =
+  "flex h-brand-scale-32 items-center whitespace-nowrap px-brand-scale-8 font-alias-font-family-body text-[12px] leading-[1em] text-mapped-text-action";
+
+function CommandRow({
+  label,
+  caption: shortcut,
+  showCaption = true,
+  onClick,
+}: {
+  label: string;
+  caption: string;
+  showCaption?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <MenuItem label={label} caption={shortcut} size="md" showLeftIcon={false} showChevron={false} />
+    <MenuItem
+      label={label}
+      caption={shortcut}
+      showCaption={showCaption}
+      size="md"
+      showLeftIcon={false}
+      showChevron={false}
+      onClick={onClick}
+    />
   );
 }
 
@@ -49,10 +86,12 @@ function ProjectRow({
   label,
   selected = false,
   indent = false,
+  onClick,
 }: {
   label: string;
   selected?: boolean;
   indent?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <MenuItem
@@ -64,25 +103,38 @@ function ProjectRow({
       indent={indent}
       truncateLabel
       selected={selected}
+      onClick={onClick}
     />
   );
 }
 
-export function ProjectMenu({ projects, viewAllSelected = false, selectedProject }: ProjectMenuProps) {
+export function ProjectMenu({
+  projects,
+  recents,
+  viewAllSelected = false,
+  selectedProject,
+  selectedRecentId = null,
+  showNewCaption = true,
+  onNew,
+  onOpen,
+  onSave,
+  onSaveAs,
+  onOpenRecent,
+}: ProjectMenuProps) {
   const [recentOpen, setRecentOpen] = useState(viewAllSelected);
-  const preview = projects.slice(0, 3);
+  const usingRecents = recents !== undefined;
+  const rows: RecentEntry[] = usingRecents
+    ? recents
+    : projects.map((name, index) => ({ id: `${name}-${index}`, name }));
+  const preview = rows.slice(0, 3);
+  const openRecent = usingRecents && onOpenRecent ? (id: string) => onOpenRecent(id) : undefined;
 
   return (
-    <div className="inline-flex items-start gap-brand-scale-4">
+    <div className="pointer-events-none inline-flex items-start gap-brand-scale-4">
       <div data-project-menu role="menu" aria-label="Project" className={panelClass}>
-        <CommandRow label="New" caption="Ctrl+N" />
-        <CommandRow label="Open" caption="Ctrl+O" />
-        <div
-          role="presentation"
-          className="flex h-brand-scale-32 items-center whitespace-nowrap px-brand-scale-8 font-alias-font-family-body text-[12px] leading-[1em] text-mapped-text-action"
-        >
-          Recent
-        </div>
+        <CommandRow label="New" caption="Ctrl+N" showCaption={showNewCaption} onClick={onNew} />
+        <CommandRow label="Open" caption="Ctrl+O" onClick={onOpen} />
+        <MenuItem label="Recent" size="md" showLeftIcon={false} showCaption={false} showChevron={false} disabled />
         <div className="h-brand-scale-1 bg-mapped-border-default" role="separator" />
         <div className="mt-brand-scale-4 mb-brand-scale-4 min-w-0">
           <MenuItem
@@ -95,18 +147,32 @@ export function ProjectMenu({ projects, viewAllSelected = false, selectedProject
             selected={recentOpen}
             onClick={() => setRecentOpen((open) => !open)}
           />
-          {preview.map((name, index) => (
-            <ProjectRow key={`${name}-${index}`} label={name} indent />
+          {preview.map((row) => (
+            <ProjectRow
+              key={row.id}
+              label={row.name}
+              indent
+              onClick={openRecent ? () => openRecent(row.id) : undefined}
+            />
           ))}
         </div>
-        <CommandRow label="Save" caption="Ctrl+S" />
-        <CommandRow label="Save as" caption="Ctrl+Shift+S" />
+        <CommandRow label="Save" caption="Ctrl+S" onClick={onSave} />
+        <CommandRow label="Save as" caption="Ctrl+Shift+S" onClick={onSaveAs} />
       </div>
       {recentOpen ? (
         <div data-project-menu-recent role="menu" aria-label="Recent projects" className={panelClass}>
-          {projects.map((name, index) => (
-            <ProjectRow key={`${name}-${index}`} label={name} selected={name === selectedProject} />
-          ))}
+          {rows.length === 0 ? (
+            <p className={recentLabelClass}>No recent boards yet.</p>
+          ) : (
+            rows.map((row) => (
+              <ProjectRow
+                key={row.id}
+                label={row.name}
+                selected={usingRecents ? row.id === selectedRecentId : row.name === selectedProject}
+                onClick={openRecent ? () => openRecent(row.id) : undefined}
+              />
+            ))
+          )}
         </div>
       ) : null}
     </div>

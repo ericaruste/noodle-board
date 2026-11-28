@@ -24,8 +24,9 @@ Shadow, blur, and the dot grid are left out of the token build. In the table the
 
 ## Decisions already made
 
+- The board shows the project management toolbar in place of the file bar. The bar is a FloatingPanel on the toolbar layer, 16px from the top and the left (`brand.scale.16`). The menus share one FloatingPanel on the dropdown layer, 4px under the bar. The title commits on Enter or blur, Escape cancels, and an empty name becomes `Untitled`. The board's New row has no caption. Open, Save, and Save as keep theirs. An empty recent list reads "No recent boards yet." The word Recent is a disabled menu item: label only, no hover fill, and no nudge. The wrapper around the two panels ignores pointer events, so a press in the gap or under the recent panel reaches the canvas and closes the menu.
 - A press on the logo button pulls the corner toward the circle and dips the mark. Press is `motion-press`. Release is `motion-release`. The pressed corner is 16.8px, 42% of the 40px button, and the dip is 1px. Neither is a token. Hover and selected expand the corner with `motion-hover`. The return to the circle stays 700ms, `cubic-bezier(0.22, 1, 0.36, 1)`, and that choice is open.
-- A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open.
+- A pointer down outside the project menu closes that menu. A pointer down on the logo switches it. A pointer down inside the main menu or the recent panel leaves it open. The wrapper around the two panels ignores pointer events, so a press in the gap or under the shorter panel counts as outside.
 - The divider under Recent stays inside the project menu padding. It is the same width as a menu item.
 - The project menu and the recent panel are each 220px wide. No spacing token is 220px.
 - A truncated project title shows the full title in the main toolbar’s hover label, 8px above the field. It is not the browser’s native title tooltip.
@@ -1258,7 +1259,7 @@ Properties:
 
 Painted: success at rest, success breathing while saved, success with the ring while saving, and a still error disc. Reduced motion leaves the resting disc and drops both animations.
 
-Not painted: hover, disabled, and focus. Error has no animation. The file bar keeps its own dot.
+Not painted: hover, disabled, and focus. Error has no animation. The board uses this indicator for the save pulse. A ring iteration counts only while saving. The breath does not.
 
 ## Logo button
 
@@ -1304,7 +1305,7 @@ The button is not a toolbar or a popover. It does not use FloatingPanel.
 
 Ticket NB-72. Code `src/ProjectToolbar.tsx`. The trial page is `?trial=project-toolbar` and `#project-toolbar`.
 
-The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The canvas still uses the file bar.
+The upper-left project bar. The row is the logo button, the title input, and the save indicator at `lg`. The trial shows it. The board places this bar from the project management toolbar.
 
 The content box is 304 by 48 when the title is at its 200px minimum: 4px padding, a 40px logo, an 8px gap, a 200px title, an 8px gap, a 40px indicator, and 4px padding. The 1px stroke brings the outer size to 306 by 50. A longer title grows the slot up to 320px, then truncates. Hovering or focusing that field shows the full title in the main toolbar’s hover label.
 
@@ -1354,13 +1355,13 @@ Painted on this frame: the resting circle, the resting title, and the saved disc
 
 Not painted on this frame: the logo’s expanded square, the logo’s press, the title’s hover and focus fills, and the indicator’s error disc. Those stay on the logo button, the title input, and the save indicator.
 
-This trial is not on the canvas, so the bar is not in FloatingPanel. The later pass that places it upper left, with the project menu, uses FloatingPanel on the toolbar layer. The file bar stays on the board.
+This trial is not on the canvas, so this preview is not in FloatingPanel. The board places the bar in a FloatingPanel on the toolbar layer. That placement is recorded in the project management toolbar section.
 
 ## Project menu
 
 Ticket NB-73, NB-75, NB-76. Code `src/ProjectMenu.tsx`. The trial page is `?trial=project-menu` and `#project-menu`. NB-75 adds the divider, the two spaces, and the indent on View all and the main-menu project rows. NB-76 clips a project name that is longer than its row.
 
-Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The canvas still uses the file bar.
+Two panels. The main menu lists New, Open, a Recent label, View all, the first three project names, Save, and Save as. The recent panel lists every project name passed in. It is open when View all is selected. A click on View all switches that state, so the click opens the recent panel and the next click closes it. The trial starts with one menu selected, the first recent row selected, and a second menu where View all is not selected so the panel starts closed. The board opens this menu from the project management toolbar.
 
 The panels sit 4px apart, `brand.scale.4`, the same offset a menu uses from the toolbar that opened it. The sheet gap between the two panels was not measured.
 
@@ -1394,19 +1395,19 @@ The divider and the two spaces belong to the main menu. View all and the three p
 
 ### Recent label
 
-The word Recent is a 32px row. It is not a menu item, so it has no hover fill and no selected fill.
+The word Recent is a disabled menu item at size `md`. Label only. Left icon off. Caption off. Chevron off. Indent off. It uses the disabled label color and the disabled fill. It does not take a hover fill, and it does not nudge. "No recent boards yet." is not this row. That sentence keeps the previous type: `mapped.text.action`, 12px / 12px.
 
 | Piece | Token | Value |
 | --- | --- | --- |
 | Height | `brand.scale.32` | 32px |
-| Padding, horizontal | `brand.scale.8` | 8px, so the word lines up with New, Open, Save, and Save as |
-| Gap | none | the row has no icon, caption, or chevron |
-| Corner radius | none | the row has no corner of its own |
+| Padding, horizontal | `brand.scale.8` | 8px, so the word lines up with New, Open, Save, and Save as. Disabled stays put, so there is no 3px nudge |
+| Gap | `brand.scale.8` | 8px on the menu item. The right slot is off, so nothing sits in it |
+| Corner radius | `alias.border-radius.lg` | 8px |
 | Stroke | none | the row has no stroke |
-| Fill | none | no row fill |
+| Fill | `mapped.surface.action` | `#E5F0F9` at 0%, the menu item disabled fill. Hover does not paint `mapped.surface.action-hover` |
 | Font | `alias.font-family.body` | Geist |
 | Label size | `responsive.desktop.body.sm.size`, `responsive.desktop.body.sm.line-height-tight` | 12px / 12px, text style `body/sm/tight`. The label still writes 12px. Paragraph spacing is `not a token` |
-| Label color | `mapped.text.action` | `#303132`, the menu item’s default label |
+| Label color | `mapped.text.disabled` | `#909397` |
 | Icon | none | no left icon and no chevron |
 | Caption | none | no shortcut |
 | Shadow | not a token | the row adds none |
@@ -1435,6 +1436,7 @@ The rows are the menu item at size `md`. Hover, selected, disabled, and the row 
 | Row | Slots |
 | --- | --- |
 | New, Open, Save, Save as | size `md`. Left icon off. Chevron off. Caption is `Ctrl+N`, `Ctrl+O`, `Ctrl+S`, or `Ctrl+Shift+S` |
+| Recent | size `md`. Left icon off. Caption off. Chevron off. Indent off. Disabled. Label only |
 | View all | size `md`. Left icon off. Caption off. Chevron off. Indent on. Selected while the recent panel is open |
 | Project name | size `md`. Left icon is Lucide `bowl-chopsticks` at `brand.scale.16`. Caption off. Chevron off. Indent on for the three names in the main menu. `truncateLabel` on. A name longer than the row clips. The installed `lucide-react` package has no `BowlChopsticks` export, so the glyph is brought in under that name |
 | Recent panel project | the same project row. Indent off. `truncateLabel` on. The open specimen paints the first name selected, and that name is long enough to clip. The copy in the main menu stays unselected |
@@ -1456,13 +1458,15 @@ Properties:
 
 Painted: View all selected with the recent panel open and the first recent row selected. That first name is long enough to clip in both panels. View all not selected, with the recent panel closed. The other rows are the menu item’s default state. The hover label is not a painted state. It shows on hover or focus when the name is clipped.
 
-Not painted on this frame: hover and disabled. Those stay on the menu item. The menu item has no focus state. The Recent label has no hover fill and no selected fill.
+Not painted on this frame: hover. That stays on the menu item. The menu item has no focus state. The Recent label is painted disabled: no hover fill and no nudge.
 
-This trial is not on the canvas, so the panels are not in FloatingPanel. The later pass that places the menu, with the project toolbar, uses FloatingPanel on the dropdown layer and checks it against a selected element and an element that is mid-drag. The file bar stays on the board.
+The flex wrapper around the two panels ignores pointer events. Only the two panels receive them. A press in the gap, or in the space under the shorter panel, passes through the wrapper.
+
+This trial is not on the canvas, so these panels are not in FloatingPanel. The board places the menu in one FloatingPanel on the dropdown layer and checks it against a selected element and an element that is mid-drag.
 
 ## Project management toolbar
 
-Ticket NB-74. Code `src/ProjectManagementToolbar.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
+Ticket NB-74, NB-78. Code `src/ProjectManagementToolbar.tsx` and `src/App.tsx`. The trial page is `?trial=project-management-toolbar` and `#project-management-toolbar`.
 
 The trial places the project menu under the project toolbar while the logo has the menu open. The title starts as `Project Title`. Typing replaces that text in the field. An empty field stays empty. The menu starts closed. A click on the logo opens it, and the next click closes it and removes the recent panel with it. A pointer down anywhere outside the menu does the same, including a press on the title or the page. A pointer down inside the main menu or the recent panel leaves the menu open. The logo stays the expanded square while the menu is open. View all starts unselected. The click on View all inside the project menu opens the recent panel. The names are `Project name #1` through `Project name #6`. The main menu shows the first three. The recent panel shows all six.
 
@@ -1494,4 +1498,55 @@ Painted: the bar with the menu closed, the menu open, the menu open with the rec
 
 Not painted on this frame: hover, the title fills, and the menu-item states. Those stay on the logo button, the title input, and the menu item.
 
-This trial is not on the canvas, so the bar and the menus are not in FloatingPanel. The later pass that places them on the board uses FloatingPanel, the toolbar layer for the bar and the dropdown layer for the menus, and checks both against a selected element and an element that is mid-drag. The file bar stays on the board.
+### Board
+
+The board replaces the file bar with this toolbar. The upper-right wordmark is gone. The logo is the brand mark.
+
+The bar is a FloatingPanel on the toolbar layer. It sits 16px from the top and the left. The open menu is one FloatingPanel on the dropdown layer. The menu's left edge lines up with the bar, and the gap under the bar is 4px. `data-canvas-chrome` is on the bar, so the open menu does not become the noodle obstacle. Both panels stay above a selected element and an element that is mid-drag.
+
+The title shows the document name. Enter or blur commits the rename. Escape restores the document name and does not rename. An empty name becomes `Untitled`. Typing does not rename on each keystroke. The trial field is separate: it still updates as you type, and an empty field stays empty.
+
+The board's New row has no caption. Open, Save, and Save as keep `Ctrl+O`, `Ctrl+S`, and `Ctrl+Shift+S`. The trial still shows `Ctrl+N` on New.
+
+Recent rows are the board's recents. The open project is selected in the recent panel only. With no recents, the main menu still lists New, Open, Recent, View all, Save, and Save as, and View all opens a panel that reads "No recent boards yet." The trial keeps `Project name #1` through `Project name #6`.
+
+The word Recent is a disabled menu item: label only, no icon, no caption. The label color is `mapped.text.disabled`. The fill is the menu item's disabled fill, `mapped.surface.action` at 0%. It gets no hover fill and no nudge. "No recent boards yet." stays on the previous type, `mapped.text.action` at 12px / 12px.
+
+The flex wrapper around the two panels ignores pointer events, and so does the dropdown FloatingPanel that wraps it. Only the two panels receive them. A press in the gap, or on the canvas under the recent panel, reaches the canvas and closes the menu on that press. A press on either panel leaves the menu open.
+
+The save indicator shows the board's save pulse. The ring is on `::after`, and that pseudo-element does not fire `animationiteration` on the disc, so the three-loop hold follows the ring animation's iteration. The breath does not count. The pulse still clears after three saving iterations, or on the existing fallback. Reduced motion still clears immediately.
+
+| Piece | Token | Value |
+| --- | --- | --- |
+| Inset | `brand.scale.16` | 16px from the top and the left |
+| Gap under the bar | `brand.scale.4` | 4px. The menu's left edge lines up with the bar |
+| Bar layer | toolbar | FloatingPanel, above a selected element and an element that is mid-drag |
+| Menu layer | dropdown | one FloatingPanel wraps the main menu and the recent panel |
+| Chrome | none | `data-canvas-chrome` is on the bar only. The open menu is not the noodle obstacle |
+| Title | none | shows the document name. Enter or blur commits. Escape cancels. An empty name becomes `Untitled` |
+| New caption | none | off. The trial keeps `Ctrl+N` |
+| Open caption | none | `Ctrl+O` |
+| Save caption | none | `Ctrl+S` |
+| Save as caption | none | `Ctrl+Shift+S` |
+| Recent label | `mapped.text.disabled` | disabled menu item, label only. No icon, no caption, no hover fill, no nudge. Fill is `mapped.surface.action` at 0% |
+| Empty recents | `mapped.text.action` | "No recent boards yet." keeps the previous type, 12px / 12px. It is not the disabled row |
+| Menu hit area | none | the wrapper and the dropdown panel ignore pointer events. Only the two panels receive them. A press in the gap or under the recent panel reaches the canvas and closes the menu |
+| Shadow | not a token | the bar and the menus keep their own |
+| Blur | not a token | the bar and the menus keep their own |
+| Dot grid | not a token | excluded from the component |
+| Divider | none | this placement adds no divider |
+
+Properties:
+
+| Property | Kind | Values |
+| --- | --- | --- |
+| documentName | text | the open document. The field shows it until it is focused |
+| saving | boolean | the board's save pulse. The ring plays while it is on |
+| recents | list | the board's recents, newest first. An empty list shows the empty sentence. Unset keeps the trial names |
+| selectedRecentId | id | the recent-panel row for the open project. A new Untitled board has none |
+| showNewCaption | boolean | default on. The board turns it off |
+| placed | boolean | default off. The board turns it on and uses FloatingPanel |
+
+The trial table above stays the trial: specimen names, an empty field that stays empty, and New's `Ctrl+N` caption.
+
+The board bar and the board menu are in FloatingPanel. The trial stays in the page flow.

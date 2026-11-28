@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export type SaveIndicatorSize = "lg" | "md" | "sm";
 export type SaveIndicatorType = "success" | "error";
@@ -8,6 +8,8 @@ type SaveIndicatorProps = {
   type?: SaveIndicatorType;
   /** Success plays the ring while saving. Error stays still. */
   saving?: boolean;
+  /** Ring cycles on `::after` while saving. The breath does not call this. */
+  onSavePulseIteration?: () => void;
 };
 
 const slotClass: Record<SaveIndicatorSize, string> = {
@@ -16,8 +18,43 @@ const slotClass: Record<SaveIndicatorSize, string> = {
   sm: "size-brand-scale-24",
 };
 
-export function SaveIndicator({ size = "lg", type = "success", saving = false }: SaveIndicatorProps) {
+export function SaveIndicator({
+  size = "lg",
+  type = "success",
+  saving = false,
+  onSavePulseIteration,
+}: SaveIndicatorProps) {
+  const discRef = useRef<HTMLSpanElement>(null);
+  const onIterationRef = useRef(onSavePulseIteration);
+  onIterationRef.current = onSavePulseIteration;
   const motion = type === "error" ? "still" : saving ? "saving" : "saved";
+
+  useEffect(() => {
+    if (!saving) return;
+    const disc = discRef.current;
+    if (!disc) return;
+    // The ring runs on ::after. That pseudo-element does not fire animationiteration
+    // on the disc, so the three-loop hold follows the ring's own iteration.
+    let last = -1;
+    let frame = 0;
+    const tick = () => {
+      const ring = disc.getAnimations({ subtree: true }).find((anim) => {
+        const name = (anim as Animation & { animationName?: string }).animationName;
+        return name === "save-indicator-ring";
+      });
+      const iteration = ring?.effect?.getComputedTiming().currentIteration;
+      if (typeof iteration === "number") {
+        if (last >= 0 && iteration > last && onIterationRef.current) {
+          const steps = iteration - last;
+          for (let i = 0; i < steps; i += 1) onIterationRef.current();
+        }
+        last = iteration;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [saving]);
 
   return (
     <span
@@ -28,6 +65,7 @@ export function SaveIndicator({ size = "lg", type = "success", saving = false }:
       className={`inline-flex shrink-0 items-center justify-center overflow-visible ${slotClass[size]}`}
     >
       <span
+        ref={discRef}
         className={`save-indicator-disc relative size-brand-scale-8 shrink-0 rounded-full ${
           type === "error" ? "bg-mapped-icon-error" : "bg-mapped-icon-success-light"
         }`}

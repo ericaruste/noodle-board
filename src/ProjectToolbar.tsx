@@ -6,8 +6,11 @@ type ProjectToolbarProps = {
   title?: string;
   defaultTitle?: string;
   onTitleChange?: (title: string) => void;
+  /** Enter or blur. Unset leaves the field as a draft that updates while typing. */
+  onTitleCommit?: (title: string) => void;
   /** Success plays the ring while saving. */
   saving?: boolean;
+  onSavePulseIteration?: () => void;
   onLogoClick?: () => void;
   logoSelected?: boolean;
 };
@@ -16,7 +19,9 @@ export function ProjectToolbar({
   title,
   defaultTitle = "Project Title",
   onTitleChange,
+  onTitleCommit,
   saving = false,
+  onSavePulseIteration,
   onLogoClick,
   logoSelected,
 }: ProjectToolbarProps) {
@@ -28,8 +33,13 @@ export function ProjectToolbar({
       className="inline-flex items-center gap-brand-scale-8 rounded-alias-border-radius-xl border border-alias-border-width-xsm border-mapped-border-default bg-mapped-surface-default p-brand-scale-4 shadow-lg" // TODO token mismatch: Figma 10px
     >
       <LogoButton onClick={onLogoClick} selected={logoSelected} />
-      <TitleInput value={title} defaultValue={defaultTitle} onValueChange={onTitleChange} />
-      <SaveIndicator size="lg" saving={saving} />
+      <TitleInput
+        value={title}
+        defaultValue={defaultTitle}
+        onValueChange={onTitleChange}
+        onCommit={onTitleCommit}
+      />
+      <SaveIndicator size="lg" saving={saving} onSavePulseIteration={onSavePulseIteration} />
     </div>
   );
 }

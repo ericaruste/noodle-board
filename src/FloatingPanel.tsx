@@ -102,6 +102,7 @@ type FloatingPanelProps = {
   panelRef?: Ref<HTMLDivElement>;
   role?: AriaRole;
   ariaLabel?: string;
+  "data-canvas-chrome"?: string;
   "data-selection-chrome"?: string;
   "data-noodle-toolbar"?: string;
   "data-text-toolbar"?: string;

@@ -50,7 +50,7 @@ import {
   type Placement,
 } from "./placement";
 import { armTextEdit } from "./textEdit";
-import SaveToolbar from "./SaveToolbar";
+import { ProjectManagementToolbar } from "./ProjectManagementToolbar";
 import Toolbar, { type BoardTool } from "./Toolbar";
 import {
   ensureReadWritePermission,
@@ -2372,29 +2372,21 @@ function Board() {
           void addImageAt(file, position);
         }}
       >
-        <div
-          data-canvas-chrome
-          className="pointer-events-none absolute inset-x-4 top-4 flex items-start justify-between gap-3"
-          style={{ zIndex: layers.selection }}
-        >
-          <div className="min-w-0">
-            <SaveToolbar
-              documentName={documentName}
-              saving={savePulse}
-              recents={recents}
-              onNew={() => void newProject()}
-              onOpen={() => void openProject()}
-              onOpenRecent={(id) => void reopenRecent(id)}
-              onRename={renameProject}
-              onSave={() => void saveProject("save")}
-              onSaveAs={() => void saveProject("save-as")}
-              onSavePulseIteration={onSavePulseIteration}
-            />
-          </div>
-          <div className="pointer-events-auto absolute right-0 top-0 rounded-xl border border-white/50 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-700 shadow backdrop-blur-xl min-[800px]:static">
-            Noodle Board
-          </div>
-        </div>
+        <ProjectManagementToolbar
+          placed
+          documentName={documentName}
+          saving={savePulse}
+          recents={recents}
+          selectedRecentId={boundRecentIdRef.current}
+          showNewCaption={false}
+          onNew={() => void newProject()}
+          onOpen={() => void openProject()}
+          onSave={() => void saveProject("save")}
+          onSaveAs={() => void saveProject("save-as")}
+          onOpenRecent={(id) => void reopenRecent(id)}
+          onRename={renameProject}
+          onSavePulseIteration={onSavePulseIteration}
+        />
         {fileError ? (
           <div
             role="alert"

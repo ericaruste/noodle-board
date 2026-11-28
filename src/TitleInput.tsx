@@ -1,4 +1,4 @@
-import { forwardRef, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 export type TitleInputState = "default" | "hover" | "focus";
 
@@ -6,6 +6,8 @@ type TitleInputProps = {
   value?: string;
   defaultValue?: string;
   onValueChange?: (title: string) => void;
+  /** Enter blurs. Blur calls this with the draft. Escape restores `value` and skips it. */
+  onCommit?: (title: string) => void;
   /** Painted variant from the spec. Leave unset to follow real hover and focus. */
   state?: TitleInputState;
   readOnly?: boolean;
@@ -28,7 +30,7 @@ const fieldType =
   "font-alias-font-family-body text-responsive-desktop-body-md-size leading-responsive-desktop-body-md-line-height-tight text-mapped-text-default";
 
 export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function TitleInput(
-  { value, defaultValue = "Title", onValueChange, state, readOnly = false, id },
+  { value, defaultValue = "Title", onValueChange, onCommit, state, readOnly = false, id },
   ref,
 ) {
   const [draft, setDraft] = useState(defaultValue);
@@ -36,7 +38,10 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
   const [focused, setFocused] = useState(false);
   const [truncated, setTruncated] = useState(false);
   const sizerRef = useRef<HTMLSpanElement>(null);
-  const shown = value ?? draft;
+  const draftRef = useRef(defaultValue);
+  const skipCommit = useRef(false);
+  const drafting = onCommit !== undefined;
+  const shown = drafting && focused ? draft : (value ?? draft);
   const locked = readOnly || state !== undefined;
   const visual: TitleInputState = state ?? (focused ? "focus" : hovered ? "hover" : "default");
   const fullTitle = truncated && shown.length > 0 ? shown : undefined;
@@ -52,7 +57,39 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
   }, [shown]);
 
   function onFocus() {
+    skipCommit.current = false;
+    if (drafting) {
+      const next = value ?? draftRef.current;
+      draftRef.current = next;
+      setDraft(next);
+    }
     setFocused(true);
+  }
+
+  function onBlur() {
+    setFocused(false);
+    if (!onCommit) return;
+    if (skipCommit.current) {
+      skipCommit.current = false;
+      return;
+    }
+    onCommit(draftRef.current);
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!onCommit) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.currentTarget.blur();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      skipCommit.current = true;
+      const restored = value ?? defaultValue;
+      draftRef.current = restored;
+      setDraft(restored);
+      event.currentTarget.blur();
+    }
   }
 
   function onFieldMouseDown(event: MouseEvent<HTMLLabelElement>) {
@@ -92,11 +129,15 @@ export const TitleInput = forwardRef<HTMLInputElement, TitleInputProps>(function
           aria-label="Project title"
           onChange={(event) => {
             const next = event.target.value;
-            if (value === undefined) setDraft(next);
+            if (value === undefined || drafting) {
+              draftRef.current = next;
+              setDraft(next);
+            }
             onValueChange?.(next);
           }}
           onFocus={onFocus}
-          onBlur={() => setFocused(false)}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
           className={`col-start-1 row-start-1 m-0 min-w-0 w-full truncate border-0 bg-transparent p-0 outline-none ${fieldType}`}
         />
       </label>

@@ -1,7 +1,7 @@
 ---
 id: NB-78
 title: Project management toolbar on the board
-status: Todo
+status: Done
 priority: 3
 labels: [Feature, UX, Toolbar]
 parent: NB-E6
@@ -46,17 +46,19 @@ The board still uses the file bar and the upper-right wordmark. The project mana
 
 ## Acceptance criteria
 
-- [ ] The board shows the project management toolbar in place of the file bar
-- [ ] The logo opens the project menu. New, Open, Save, Save as, and the recent rows run `newProject`, `openProject`, `saveProject`, and `reopenRecent`. Choosing one of those actions closes the menu
-- [ ] Escape closes the menu. A press outside the menu closes it
-- [ ] The recent rows are the board's recents list. The open project is marked selected in the recent panel. With no recents, the menu still reads correctly
-- [ ] The title shows the document name. Enter or blur applies the rename. Escape cancels. An empty name becomes "Untitled". Typing does not rename on each keystroke
-- [ ] The save indicator shows saving on the board, and the save pulse still ends the way the old save dot ends
-- [ ] New has no Ctrl+N caption. Open, Save, and Save as keep Ctrl+O, Ctrl+S, and Ctrl+Shift+S, and those shortcuts still work
-- [ ] The bar is a FloatingPanel on the toolbar layer and the menus are on the dropdown layer. Both stay above a selected element and an element that is mid-drag. The file error sits clear of the bar
-- [ ] The upper-right "Noodle Board" wordmark is gone. The logo carries the brand
-- [ ] `SaveToolbar` and `RecentMenu` are deleted once nothing imports them
-- [ ] The trial pages stay as they are
+- [x] The board shows the project management toolbar in place of the file bar
+- [x] The logo opens the project menu. New, Open, Save, Save as, and the recent rows run `newProject`, `openProject`, `saveProject`, and `reopenRecent`. Choosing one of those actions closes the menu
+- [x] Escape closes the menu. A press outside the menu closes it
+- [x] The recent rows are the board's recents list. The open project is marked selected in the recent panel. With no recents, the menu still reads correctly
+- [x] The title shows the document name. Enter or blur applies the rename. Escape cancels. An empty name becomes "Untitled". Typing does not rename on each keystroke
+- [x] The save indicator shows saving on the board, and the save pulse still ends the way the old save dot ends
+- [x] New has no Ctrl+N caption. Open, Save, and Save as keep Ctrl+O, Ctrl+S, and Ctrl+Shift+S, and those shortcuts still work
+- [x] The bar is a FloatingPanel on the toolbar layer and the menus are on the dropdown layer. Both stay above a selected element and an element that is mid-drag. The file error sits clear of the bar
+- [x] The upper-right "Noodle Board" wordmark is gone. The logo carries the brand
+- [x] `SaveToolbar` and `RecentMenu` are deleted once nothing imports them
+- [x] The trial pages stay as they are
+- [x] The Recent label is a disabled menu item: label only, no icon, no caption, no hover fill, and no nudge. "No recent boards yet." stays as it is
+- [x] With the recent panel open, a press in the gap between the panels, or on the canvas under the recent panel, closes the menu on that press, and the canvas receives the press
 
 ## Technical notes
 
@@ -64,13 +66,17 @@ Mount [`src/ProjectManagementToolbar.tsx`](../src/ProjectManagementToolbar.tsx) 
 
 Keep the logo toggle. A click opens the menu. The next click closes it and removes the recent panel with it. A pointer down on the logo is not an outside close, so that click can toggle. A pointer down inside the main menu or the recent panel leaves the menu open. A pointer down anywhere else closes it, including a press on the title or the canvas.
 
+The word Recent is a disabled `MenuItem`: label only, left icon off, caption off, chevron off. It uses the disabled text color and gets no hover fill and no nudge. The "No recent boards yet." sentence stays on its own type.
+
+The inline-flex wrapper around the two panels ignores pointer events, and so does the dropdown `FloatingPanel` that wraps it. Only the two panels receive pointer events. A press in the gap, or on the canvas under the shorter panel, reaches the canvas and closes the menu on that press.
+
 Add Escape on the same open menu. Listen on `document` in the bubble phase, the way [`src/RecentMenu.tsx`](../src/RecentMenu.tsx) does. If the event target is the title field, leave the event alone so the field can cancel its draft. Otherwise close the menu and stop the event, so the board's window listener does not also cancel placement or a noodle drag on that key. An Escape after the menu is closed still reaches the board. The trial uses this same control, so Escape closes its menu too. Do not add board actions or real recents to the trial.
 
 Wire the menu actions in [`src/ProjectMenu.tsx`](../src/ProjectMenu.tsx). New calls `newProject`, Open calls `openProject`, Save calls `saveProject("save")`, and Save as calls `saveProject("save-as")`. The three names under View all and every row in the recent panel call `reopenRecent` with that row's id. After any of those actions, close the menu. View all only toggles the recent panel and leaves the menu open. The trial passes no callbacks, so its rows stay inert.
 
 Pass `recents` through when the prop is set, including an empty array. `recents === undefined` keeps the specimen names for the trial. The list is already newest first. The main menu still shows the first three. The recent panel still shows the whole list. Key the rows by id. Two rows can share a name, so a name key would collide. The open project is the row whose id is `boundRecentIdRef.current`. That ref is assigned before the `setState` that paints the bar. Compare ids, and only on the recent panel. The copies under View all stay unselected. A new Untitled board has no bound id, so no row is selected. Keep `selectedProject` for the trial's name match.
 
-When the list is empty, the main menu still shows New, Open, the Recent label, the divider, View all, Save, and Save as, with no project rows and no specimen names. Opening View all shows the recent panel with the sentence the old Recent menu uses: "No recent boards yet." Style that sentence with the Recent label's type so the panel is not a blank frame. The trial always passes six names, so that sentence does not appear there.
+When the list is empty, the main menu still shows New, Open, the Recent label, the divider, View all, Save, and Save as, with no project rows and no specimen names. Opening View all shows the recent panel with the sentence the old Recent menu uses: "No recent boards yet." That sentence keeps the type it already has (`mapped.text.action`, 12px / 12px). It does not become the disabled Recent row. The trial always passes six names, so that sentence does not appear there.
 
 The title shows `documentName` while the field is not focused. New, Open, a recent row, and Save as replace that shown name. While the field is focused, keep a draft. Do not pass `renameProject` as `TitleInput`'s `onValueChange`. Add a commit path on [`src/TitleInput.tsx`](../src/TitleInput.tsx) and thread it through [`src/ProjectToolbar.tsx`](../src/ProjectToolbar.tsx). Enter blurs. Blur calls `renameProject` with the draft. Escape restores `documentName`, skips `renameProject`, and stops the event so the menu does not close on that key. `renameProject` already trims and uses `Untitled` when the trim is empty. The trial does not pass the commit callback. Its field still updates as you type, and an empty field stays empty.
 
